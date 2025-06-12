@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl"> <!-- Added dir="rtl" -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>פיתי - עוזרת אישית</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&display=swap" rel="stylesheet"> <!-- Example Font -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar for Chat List -->
+        <aside class="sidebar">
+            <header class="sidebar-header">
+                <div class="logo-title">
+                     <i class="fas fa-robot bot-icon"></i> <!-- Bot icon -->
+                    <h2>הצ'אטים שלי</h2>
+                 </div>
+                <div class="sidebar-controls">
+                     <button id="new-chat-btn" title="צ'אט חדש" class="control-btn">
+                        <i class="fas fa-plus"></i>
+                     </button>
+                     <button id="dark-mode-toggle" title="מצב כהה/בהיר" class="control-btn">
+                         <i class="fas fa-moon"></i>
+                     </button>
+                 </div>
+            </header>
+            <div class="chat-list-container">
+                <ul id="chat-list">
+                    <!-- Populated by JS -->
+                </ul>
+            </div>
+             <footer class="sidebar-footer">
+                <span id="user-greeting">טוען...</span>
+                <i class="fas fa-user user-icon"></i>
+             </footer>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="main-content">
+            <header class="chat-header">
+                <h1 id="current-chat-title">פיתי</h1>
+                 <!-- Chat specific controls can go here -->
+            </header>
+            <div id="chat-messages" class="chat-messages-container">
+                <!-- Messages will be added here -->
+            </div>
+            <footer class="chat-input-area"> <!-- Changed to footer for semantic meaning -->
+                <textarea id="message-input" placeholder="שאל/י את פיתי..." rows="1"></textarea>
+                <button id="send-button" title="שלח הודעה">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Username Modal (Hidden initially) -->
+    <div id="username-modal" class="modal initial-modal"> <!-- Added initial-modal class -->
+        <div class="modal-content">
+            <i class="fas fa-feather-alt modal-icon"></i>
+            <h2>ברוכים הבאים לפיתי!</h2>
+            <p>כדי שנוכל לשמור את השיחות שלך, איך תרצה/י שפיתי תקרא לך?</p>
+            <input type="text" id="username-input" placeholder="השם שלך..." required>
+            <button id="save-username-btn" class="primary-button">שמור והתחל לשוחח</button>
+        </div>
+    </div>
+
+    <!-- Load JS files -->
+    <script src="apiKeyManager.js"></script>
+    <script src="apiService.js"></script>     <!-- **Now includes INSECURE direct image gen** -->
+    <script src="geminiService.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
