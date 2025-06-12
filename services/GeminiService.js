@@ -1,37 +1,38 @@
-﻿// services/GeminiService.js
+// services/GeminiService.js
 const axios = require('axios');
 const { Buffer } = require('buffer');
-const { apiKeyManager } = require('./ApiKeyManager'); // Import the manager instance
-// const config = require('../config'); // Import if needed for base URLs etc.
+const { apiKeyManager } = require('./ApiKeyManager'); // Assumes ApiKeyManager class is exported and instantiated elsewhere, then passed or required
+const config = require('../config'); // For base URLs and model names
 
-// Base URLs (could also be in config.js)
-const GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models/";
-const GEMINI_UPLOAD_URL_BASE = "https://generativelanguage.googleapis.com/upload/v1beta/";
-
-// --- Model Names ---
-// Use descriptive names, map them to actual model IDs if needed
-const MODEL_FLASH = "gemini-2.5-pro-exp-03-25"; // Or specific preview like "gemini-1.5-flash-001"
-const MODEL_FLASH_EXP = "gemini-2.5-pro-exp-03-25"; // Your experimental model
-const MODEL_PRO = "gemini-2.5-pro-exp-03-25"; // Or "gemini-pro" for the older one
-const MODEL_VISION = "gemini-2.5-pro-exp-03-25"; // Older vision model if needed, 1.5 models handle vision
-const MODEL_UPLOAD = "files"; // Endpoint for uploads
+// Default model names - these can be overridden by config.js if present there
+const DEFAULT_MODEL_FLASH = "gemini-1.5-flash-latest";
+const DEFAULT_MODEL_PRO = "gemini-1.5-pro-latest";
+const DEFAULT_MODEL_VISION = "gemini-pro-vision"; // Or a newer 1.5 vision-capable model like flash/pro
+const DEFAULT_MODEL_IMAGE_GEN = "gemini-2.0-flash-exp-image-generation"; // Placeholder, specific model may vary
+const DEFAULT_MODEL_UPLOAD = "files";
 
 /**
- * Selects a Gemini model based on needs (e.g., media, complexity).
- * @param {boolean} [hasMedia=false] - Does the request include inline media?
- * @param {boolean} [useExperimental=true] - Prefer the experimental model?
+ * Selects a Gemini model. Prefers config values if available.
+ * @param {object} options - Options like { type: 'flash' | 'pro' | 'vision' | 'image_gen' | 'upload', hasMedia: boolean }
  * @returns {string} The selected model name string.
  */
-function selectGeminiModel(hasMedia = false, useExperimental = true) {
-    if (useExperimental) {
-        return MODEL_FLASH_EXP;
+function selectGeminiModel(options = { type: 'flash' }) {
+    switch (options.type) {
+        case 'pro':
+            return config.GEMINI_MODEL_PRO || DEFAULT_MODEL_PRO;
+        case 'vision':
+            // For Gemini 1.5, Flash and Pro are vision-capable.
+            // If a specific older vision model is needed, it should be in config.
+            return config.GEMINI_MODEL_VISION || (options.hasMedia ? (config.GEMINI_MODEL_PRO || DEFAULT_MODEL_PRO) : (config.GEMINI_MODEL_FLASH || DEFAULT_MODEL_FLASH));
+        case 'image_gen':
+             // This is a made-up endpoint for the example, actual image gen is usually separate
+            return config.GEMINI_MODEL_IMAGE_GEN || DEFAULT_MODEL_IMAGE_GEN;
+        case 'upload':
+            return config.GEMINI_MODEL_UPLOAD || DEFAULT_MODEL_UPLOAD;
+        case 'flash':
+        default:
+            return config.GEMINI_MODEL_FLASH || DEFAULT_MODEL_FLASH;
     }
-    if (hasMedia) {
-        // Gemini 1.5 Flash/Pro handle media well
-        return MODEL_FLASH; // Or MODEL_PRO if preferred for vision
-    }
-    // For text-only, Flash is usually fastest/cheapest
-    return MODEL_FLASH;
 }
 
 /**
@@ -40,99 +41,94 @@ function selectGeminiModel(hasMedia = false, useExperimental = true) {
  * @param {string} [action='generateContent'] - The API action.
  * @param {boolean} [isUpload=false] - Is this an upload request?
  * @returns {string} The full API endpoint URL with API key.
+ * @throws {Error} If no valid API key is available.
  */
 function getGeminiUrl(modelName, action = 'generateContent', isUpload = false) {
-    const apiKey = apiKeyManager.getRandomApiKey(); // Get a key for this request
-    const baseUrl = isUpload ? GEMINI_UPLOAD_URL_BASE : GEMINI_BASE_URL;
-    return `${baseUrl}${modelName}:${action}?key=${apiKey}`;
+    const apiKey = apiKeyManager.getRandomApiKey();
+    if (apiKey === "NO_VALID_API_KEYS_CONFIGURED") {
+        console.error("❌ GeminiService: No valid API key available from ApiKeyManager.");
+        throw new Error("GeminiService: API Key configuration error.");
+    }
+    const baseUrl = isUpload ? (config.GEMINI_UPLOAD_URL_BASE || "https://generativelanguage.googleapis.com/upload/v1beta/")
+                           : (config.GEMINI_BASE_URL || "https://generativelanguage.googleapis.com/v1beta/models/");
+    return `${baseUrl}${modelName}${action ? `:${action}` : ''}?key=${apiKey}`;
 }
 
 /**
- * Sends a request to the Gemini generateContent endpoint.
+ * Sends a request to the Gemini API (typically for generateContent).
  * @param {object} payload - The request payload (contents, tools, generationConfig).
- * @param {boolean} [hasMedia=false] - Does the payload contain inline media?
- * @param {boolean} [useExperimental=true] - Prefer experimental model?
- * @returns {Promise<object>} The full Axios response object.
- * @throws {Error} Throws error if the API call fails after retries (handled by caller).
+ * @param {object} modelOptions - Options for model selection (e.g., { type: 'flash', hasMedia: true }).
+ * @returns {Promise<object>} The full Axios response object from Gemini.
  */
-async function generateGeminiContent(payload, hasMedia = false, useExperimental = true) {
-    const model = selectGeminiModel(hasMedia, useExperimental);
-    const url = getGeminiUrl(model, 'generateContent');
-    console.log(`[Gemini Service] Calling generateContent: ${model}`);
-    // The actual axios call with retries should ideally be handled
-    // by the function calling this service (e.g., handleMessage's callApiWithRetry)
-    // or wrapped in a retry mechanism here.
-    // For simplicity now, just make the call.
-    return await axios.post(url, payload);
+async function callGeminiApi(payload, modelOptions = { type: 'flash' }) {
+    const model = selectGeminiModel(modelOptions);
+    const url = getGeminiUrl(model, 'generateContent', false);
+    console.log(`[GeminiService] Calling Gemini (${model}) at ${url.split('?')[0]}`);
+
+    // Axios automatically throws for non-2xx status codes, so specific retry logic
+    // based on status code might be better handled by the caller if complex retries are needed.
+    // This service will just make the attempt.
+    return await axios.post(url, payload, { timeout: config.GEMINI_API_TIMEOUT || 120000 }); // Default 2 min timeout
 }
 
 /**
- * Asks Gemini a question with Google Search grounding enabled.
+ * A specialized function for requests that need Google Search grounding.
  * @param {string} promptText - The user's prompt.
- * @returns {Promise<string>} The generated answer text or an error message.
+ * @returns {Promise<string>} The generated answer text or an error message string.
  */
-async function askGeminiWithSearchGrounding(promptText) {
+async function generateTextWithSearchGrounding(promptText) {
     const payload = {
         contents: [{ parts: [{ text: promptText }] }],
-        tools: [{ googleSearchRetrieval: {} }] // Correct grounding tool
+        tools: [{ googleSearchRetrieval: {} }]
     };
-    // Use a reliable model for grounding, 1.5 Flash is good
-    const url = getGeminiUrl(MODEL_FLASH, 'generateContent');
-    console.log(`[Gemini Service] Calling with Search Grounding: ${MODEL_FLASH}`);
-
     try {
-        const response = await axios.post(url, payload);
-        // Add more robust checking for candidate/content/parts
-        const answer = response.data?.candidates?.[0]?.content?.parts?.[0]?.text || "❌ לא התקבלה תשובה תקינה מ-Gemini.";
-         // Log grounding results if present
-         if (response.data?.candidates?.[0]?.groundingMetadata?.webSearchQueries?.length > 0) {
-            console.log(" -> Grounding Search Queries:", response.data.candidates[0].groundingMetadata.webSearchQueries);
+        const response = await callGeminiApi(payload, { type: 'flash' }); // Grounding typically works well with flash
+        const answer = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (response.data?.candidates?.[0]?.groundingMetadata?.webSearchQueries?.length > 0) {
+            console.log(" -> Gemini Grounding Search Queries:", response.data.candidates[0].groundingMetadata.webSearchQueries);
         }
-        return answer;
+        return answer || "❌ No valid answer from Gemini with search grounding.";
     } catch (error) {
-        console.error("❌ [Gemini Service - Grounding] Error:", error.response?.data || error.message);
-        return `⚠️ שגיאה (${error.response?.status || 'Network Error'}) בבקשה ל-Gemini עם חיפוש.`;
+        console.error("❌ [GeminiService - Grounding] Error:", error.response?.data || error.message);
+        return `⚠️ Error with Gemini (Search Grounding): ${error.response?.status || 'Network/Request Error'}. ${error.message}`;
     }
 }
 
 /**
- * Uploads media data to Gemini for later reference.
- * @param {string} base64Data - Base64 encoded media data (without prefix).
+ * Uploads media data to Gemini.
+ * @param {string} base64Data - Base64 encoded media data (without data: prefix).
  * @param {string} mimeType - The MIME type of the media.
  * @returns {Promise<string|null>} The Gemini file URI (e.g., 'files/...') or null on error.
  */
-async function uploadMediaToGemini(base64Data, mimeType) {
-    const url = getGeminiUrl(MODEL_UPLOAD, '', true); // Action is empty for upload, isUpload=true
+async function uploadMedia(base64Data, mimeType) {
+    const model = selectGeminiModel({ type: 'upload' });
+    const url = getGeminiUrl(model, '', true); // action is empty for file uploads
     const buffer = Buffer.from(base64Data, 'base64');
-    console.log(`[Gemini Service] Uploading media (${mimeType}, size: ${buffer.length})...`);
+    console.log(`[GeminiService] Uploading media (${mimeType}, size: ${buffer.length})...`);
 
     try {
         const response = await axios.post(url, buffer, {
-            headers: {
-                'Content-Type': mimeType, // Correct header for direct upload
-                // 'X-Goog-Upload-Protocol': 'raw' // This might sometimes be needed? Test without first.
-            },
-            timeout: 60000 // 1 minute timeout for upload
+            headers: { 'Content-Type': mimeType },
+            timeout: config.GEMINI_UPLOAD_TIMEOUT || 60000 // 1 minute timeout for upload
         });
-
-        // Gemini upload API returns file info directly in response.data
-        if (response.data?.file?.uri) {
-            console.log(` -> Media uploaded successfully. URI: ${response.data.file.uri}`);
-            return response.data.file.uri; // Return format like "files/abc123xyz"
+        const fileUri = response.data?.file?.uri;
+        if (fileUri) {
+            console.log(` -> Media uploaded successfully. URI: ${fileUri}`);
+            return fileUri;
         } else {
-            console.error("[Gemini Service - Upload] Upload response missing file URI:", response.data);
+            console.error("[GeminiService - Upload] Upload response missing file URI:", response.data);
             return null;
         }
     } catch (error) {
-        console.error("❌ [Gemini Service - Upload] Error:", error.response?.data || error.message);
+        console.error("❌ [GeminiService - Upload] Error:", error.response?.data || error.message);
         return null;
     }
 }
 
 module.exports = {
+    selectGeminiModel,
     getGeminiUrl,
-    generateGeminiContent,
-    askGeminiWithSearchGrounding,
-    uploadMediaToGemini,
-    selectGeminiModel // Export if needed externally
+    callGeminiApi,
+    generateTextWithSearchGrounding,
+    uploadMedia,
 };
