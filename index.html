@@ -35,7 +35,9 @@
             </div>
              <footer class="sidebar-footer">
                 <span id="user-greeting">טוען...</span>
-                <i class="fas fa-user user-icon"></i>
+                <button id="profile-btn" title="פרופיל" class="control-btn">
+                    <i class="fas fa-user-cog"></i> <!-- Icon for profile -->
+                </button>
              </footer>
         </aside>
 
@@ -65,6 +67,28 @@
             <p>כדי שנוכל לשמור את השיחות שלך, איך תרצה/י שפיתי תקרא לך?</p>
             <input type="text" id="username-input" placeholder="השם שלך..." required>
             <button id="save-username-btn" class="primary-button">שמור והתחל לשוחח</button>
+        </div>
+    </div>
+
+    <!-- Profile Modal (Hidden initially) -->
+    <div id="profile-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal-btn" id="close-profile-modal-btn">&times;</span>
+            <h2>פרופיל משתמש</h2>
+
+            <div class="profile-field">
+                <label for="profile-name-input">שם:</label>
+                <input type="text" id="profile-name-input" placeholder="השם שלך">
+            </div>
+
+            <!-- Add more fields as needed, e.g., email (read-only) -->
+            <div class="profile-field">
+                <label for="profile-email-input">אימייל (לקריאה בלבד):</label>
+                <input type="email" id="profile-email-input" placeholder="האימייל שלך" readonly>
+            </div>
+
+            <button id="save-profile-btn" class="primary-button">שמור שינויים</button>
+            <button id="logout-btn-profile-modal" class="secondary-button">התנתק</button>
         </div>
     </div>
 

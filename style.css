@@ -531,6 +531,114 @@ body.dark-mode #send-button:disabled { background-color: #555; }
 }
 .primary-button:active { transform: scale(0.98); box-shadow: 0 1px 3px var(--shadow-light); }
 
+/* Secondary button style (e.g., for Cancel or Logout) */
+.secondary-button {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 12px 25px; /* Slightly less padding than primary */
+    border-radius: var(--border-radius-medium);
+    font-size: 1em; /* Adjusted font size */
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+    box-shadow: 0 2px 4px var(--shadow-light);
+}
+
+.secondary-button:hover {
+    background-color: var(--button-hover-bg);
+    border-color: var(--text-secondary);
+    box-shadow: 0 3px 6px var(--shadow-medium);
+}
+
+.secondary-button:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 2px var(--shadow-light);
+}
+
+/* Specific styles for Profile Modal */
+#profile-modal .modal-content {
+    text-align: right; /* RTL alignment for content */
+    max-width: 500px; /* Slightly wider for more fields potentially */
+}
+
+#profile-modal .modal-content h2 {
+    margin-bottom: 25px; /* More space after title */
+    text-align: center; /* Center the modal title */
+}
+
+.profile-field {
+    margin-bottom: 18px;
+    text-align: right; /* Ensure labels and inputs align right */
+}
+
+.profile-field label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    font-size: 0.95em;
+}
+
+/* Input fields in profile modal will inherit from .modal-content input[type="text"] */
+/* Style for readonly email field */
+#profile-email-input[readonly] {
+    background-color: var(--bg-secondary);
+    color: var(--text-secondary);
+    cursor: not-allowed;
+    border: 1px dashed var(--border-color); /* Dashed border to indicate non-editable */
+}
+
+body.dark-mode #profile-email-input[readonly] {
+    background-color: var(--bg-primary); /* Darker secondary for dark mode */
+}
+
+#profile-modal .modal-icon { /* Assuming a user icon for profile modal */
+    font-size: 2.5em; /* Slightly smaller if needed */
+}
+
+/* Spacing for buttons in profile modal */
+#profile-modal .modal-content .button-group {
+    margin-top: 30px;
+    display: flex;
+    justify-content: space-between; /* Align buttons */
+    gap: 15px; /* Space between buttons */
+}
+
+#profile-modal #save-profile-btn {
+    flex-grow: 1; /* Allow save button to take more space if needed */
+}
+
+#profile-modal #logout-btn-profile-modal {
+    background-color: #dc3545; /* Red for logout/danger */
+    color: white;
+    border-color: #dc3545;
+    flex-grow: 1; /* Allow logout button to take more space if needed */
+}
+
+#profile-modal #logout-btn-profile-modal:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+/* Close button for profile modal (and any other modals) */
+.close-modal-btn {
+    position: absolute;
+    top: 15px;
+    left: 20px; /* RTL positioning */
+    font-size: 1.8em;
+    font-weight: bold;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: color 0.2s ease;
+    line-height: 1; /* Ensure proper vertical alignment */
+}
+
+.close-modal-btn:hover {
+    color: var(--text-primary);
+}
+
+
 /* --- Scrollbar Styling --- */
 ::-webkit-scrollbar { width: 7px; height: 7px; }
 ::-webkit-scrollbar-track { background: transparent; }
