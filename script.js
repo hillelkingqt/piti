@@ -14,16 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const darkModeIcon = darkModeToggle.querySelector('i');
     const appContainer = document.querySelector('.app-container');
 
-    // Profile Modal Elements
-    const profileBtn = document.getElementById('profile-btn');
-    const profileModal = document.getElementById('profile-modal');
-    const closeProfileModalBtn = document.getElementById('close-profile-modal-btn');
-    const profileNameInput = document.getElementById('profile-name-input');
-    const profileEmailInput = document.getElementById('profile-email-input');
-    const saveProfileBtn = document.getElementById('save-profile-btn');
-    const logoutBtnProfileModal = document.getElementById('logout-btn-profile-modal');
-
-
     // --- State (same as before) ---
     let username = localStorage.getItem('pithi_username');
     let chats = [];
@@ -53,82 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
         darkModeToggle.addEventListener('click', toggleDarkMode);
         newChatBtn.addEventListener('click', () => createNewChat(true));
         sendButton.addEventListener('click', handleSendMessage);
-
-        // Profile Modal Listeners
-        if (profileBtn) profileBtn.addEventListener('click', openProfileModal);
-        if (closeProfileModalBtn) closeProfileModalBtn.addEventListener('click', closeProfileModal);
-        if (saveProfileBtn) saveProfileBtn.addEventListener('click', handleSaveProfile);
-        if (logoutBtnProfileModal) logoutBtnProfileModal.addEventListener('click', handleLogout);
     }
-
-    // --- Profile Modal Functions ---
-    function openProfileModal() {
-        if (!username) { // Should not happen if profile button is only shown when logged in
-            promptForUsername();
-            return;
-        }
-        profileNameInput.value = username;
-        // Attempt to retrieve email from localStorage.
-        // This assumes that the email is stored there after authentication.
-        // The GoogleAuthService.js was modified to GET email, but not necessarily store it for frontend.
-        // A more robust solution would involve a dedicated user info service or endpoint.
-        const userEmail = localStorage.getItem('pithi_useremail') || '';
-        profileEmailInput.value = userEmail;
-        profileEmailInput.readOnly = true; // Ensure it's read-only as per requirement
-
-        profileModal.classList.add('show');
-    }
-
-    function closeProfileModal() {
-        profileModal.classList.remove('show');
-    }
-
-    function handleSaveProfile() {
-        const newName = profileNameInput.value.trim();
-        if (newName && newName.length < 50 && newName !== username) {
-            username = newName;
-            localStorage.setItem('pithi_username', username);
-            greetUser(); // Updates the greeting span
-            // Optionally, provide user feedback e.g., a small temporary message
-            console.log("Profile username updated.");
-        } else if (newName === username) {
-            // No change, or just close
-        } else {
-            alert("שם משתמש לא תקין. אנא הכנס/י שם באורך עד 50 תווים.");
-            return; // Don't close modal if input is invalid
-        }
-        closeProfileModal();
-    }
-
-    function handleLogout() {
-        closeProfileModal();
-
-        // Clear user-specific data from localStorage
-        localStorage.removeItem('pithi_username');
-        localStorage.removeItem('pithi_useremail'); // Clear email if stored
-        // Consider clearing other settings that might be user-specific
-        // localStorage.removeItem('pithi_dark_mode'); // Or reset to default
-        // localStorage.removeItem('pithi_current_chat_id'); // Clear last active chat
-        // localStorage.removeItem('pithi_chat_histories'); // This might be large, better managed by apiService on username change
-
-        // Reset global state variables
-        username = null;
-        chats = [];
-        currentChatId = null;
-        chatHistories = {};
-
-        // Update UI
-        renderChatList(); // Clears and shows "create new chat" message
-        userGreetingSpan.textContent = 'שלום, אורח!'; // Reset greeting
-        currentChatTitle.textContent = 'פיתי'; // Reset chat title
-        chatMessagesContainer.innerHTML = '<div class="system-message">התנתקת בהצלחה.</div>'; // Clear messages and show logout confirmation
-        messageInput.disabled = true; // Disable input as no active chat/user
-
-        // Show the initial username prompt modal
-        promptForUsername();
-        console.log("User logged out.");
-    }
-
 
     function setupDarkMode() { /* ... same as before ... */
         const prefersDark = localStorage.getItem('pithi_dark_mode') === 'true';
