@@ -1,7 +1,7 @@
 ﻿
 const { Client, LocalAuth, MessageMedia, Contact, Poll } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
-const axios = require('axios'); // Kept for other potential uses (e.g., DuckDuckGo, Gradio, etc.)
+const axios = require('axios');
 const { exec } = require('child_process');
 const uploadedMediaMap = new Map();
 const cheerio = require('cheerio');
@@ -13,14 +13,6 @@ const { Buffer } = require('buffer');
 const { spawn } = require('child_process');
 
 const { apiKeyManager } = require('./services/ApiKeyManager');
-const CloudflareService = require('./services/CloudflareService');
-const GeminiService = require('./services/GeminiService');
-const ElevenLabsService = require('./services/ElevenLabsService');
-const PixabayService = require('./services/PixabayService');
-const GmailService = require('./services/GmailService'); // Added GmailService
-const YouTubeService = require('./services/YouTubeService'); // Added YouTubeService
-const { getGoogleAuthClient } = require('./services/GoogleAuthService'); // For direct use if GmailService is problematic
-// const play = require('play-dl'); // Removed as it's now only in YouTubeService.js
 const writtenMessageIds = new Set();
 const fs = require('fs');
 const path = require('path');
@@ -33,12 +25,12 @@ const puppeteer = require('puppeteer-core');
 
 
 
-// Cloudflare constants are now in config.js and used by CloudflareService
-// const CLOUDFLARE_ACCOUNT_ID = "38a8437a72c997b85a542a6b64a699e2"; // REMOVED
-// const CLOUDFLARE_API_TOKEN = "jCnlim7diZ_oSCKIkSUxRJGRS972sHEHfgGTmDWK"; // REMOVED
-// const BASE_IMAGE_GENERATION_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/`; // REMOVED
-// const CLOUDFLARE_VISION_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/unum/uform-gen2-qwen-500m`; // REMOVED - Will be used via CloudflareService if needed
-// const CLOUDFLARE_WHISPER_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/openai/whisper-large-v3-turbo`; // REMOVED
+const CLOUDFLARE_ACCOUNT_ID = "38a8437a72c997b85a542a6b64a699e2";
+const CLOUDFLARE_API_TOKEN = "jCnlim7diZ_oSCKIkSUxRJGRS972sHEHfgGTmDWK";
+const BASE_IMAGE_GENERATION_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/`;
+const CLOUDFLARE_VISION_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/unum/uform-gen2-qwen-500m`;
+const CLOUDFLARE_WHISPER_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/openai/whisper-large-v3-turbo`; // <-- הוסף שורה זו
+
 
 const myId = "972532752474@c.us";
 let replyToAllPrivates = false;
@@ -53,13 +45,12 @@ const botMessageIds = new Set();
 const repliableMessageIds = new Set();
 let botStartTime = Date.now();
 
-// IMAGE_MODEL_ENDPOINTS is now managed by config.js and used by CloudflareService.js
-// const IMAGE_MODEL_ENDPOINTS = {
-//     'stable-diffusion-xl-lighting': '@cf/bytedance/stable-diffusion-xl-lightning',
-//     'stable-diffusion-xl-base-1.0': '@cf/stabilityai/stable-diffusion-xl-base-1.0',
-//     'dreamshaper-8-lcm': '@cf/lykon/dreamshaper-8-lcm',
-//     'flux-1-schnell': '@cf/black-forest-labs/flux-1-schnell'
-// };
+const IMAGE_MODEL_ENDPOINTS = {
+    'stable-diffusion-xl-lighting': '@cf/bytedance/stable-diffusion-xl-lightning',
+    'stable-diffusion-xl-base-1.0': '@cf/stabilityai/stable-diffusion-xl-base-1.0',
+    'dreamshaper-8-lcm': '@cf/lykon/dreamshaper-8-lcm',
+    'flux-1-schnell': '@cf/black-forest-labs/flux-1-schnell'
+};
 
 const silentModeChats = new Map();
 const messageQueue = new Map();
@@ -92,13 +83,13 @@ const shoppingLists = new Map();
 const TOKEN_PATH = path.join(__dirname, 'token.json');
 const CREDENTIALS_PATH = path.join(__dirname, 'client_secret_170964452340-4a28usprg4v3ga2mua7rlgf3uvp3u8ns.apps.googleusercontent.com.json');
 
-// REMOVED: Global Gmail and oAuth2Client initialization. This will be handled by GmailService or dynamically in handleSendEmailAction.
-// const credentials = JSON.parse(fs.readFileSync(CREDENTIALS_PATH));
-// const { client_secret, client_id, redirect_uris } = credentials.installed;
-// const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
-// const token = JSON.parse(fs.readFileSync(TOKEN_PATH));
-// oAuth2Client.setCredentials(token);
-// const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
+const credentials = JSON.parse(fs.readFileSync(CREDENTIALS_PATH));
+const { client_secret, client_id, redirect_uris } = credentials.installed;
+const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
+const token = JSON.parse(fs.readFileSync(TOKEN_PATH));
+oAuth2Client.setCredentials(token);
+
+const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
 
 const habitTracking = new Map();
 const STOPPED_CHATS_PATH = path.join(__dirname, 'stoppedChats.json');
@@ -121,8 +112,14 @@ function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// Removed getRandomGeminiEndpoint - functionality moved to GeminiService.getGeminiUrl / GeminiService.generateContent
-
+function getRandomGeminiEndpoint(hasMedia = false) {
+    const baseUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-thinking-exp:generateContent";
+    const apiKey = apiKeyManager.getRandomApiKey();
+    if (hasMedia) {
+        return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-thinking-exp:generateContent?key=${apiKey}`;
+    }
+    return `${baseUrl}?key=${apiKey}`;
+}
 async function generateBarcode(text) {
     const filePath = './barcode.png';
     await QRCode.toFile(filePath, text, {
@@ -133,15 +130,167 @@ async function generateBarcode(text) {
     return filePath;
 }
 // הוסף את מפתח ה-API שלך כאן, או טען אותו ממשתנה סביבה
-// const PIXABAY_API_KEY = '50212858-c6a0623d5989990f7c6f1dc00'; // REMOVED - Moved to config.js and used by PixabayService
+const PIXABAY_API_KEY = '50212858-c6a0623d5989990f7c6f1dc00';
 
-// Removed searchAndDownloadWebImages - functionality moved to PixabayService.searchAndDownloadWebImages
+async function searchAndDownloadWebImages(query, maxImagesToDownload, filenamePrefix, saveDir, chatMsgForFeedback) {
+    console.log(`🖼️ [PixabaySearch] Searching for "${query}", max: ${maxImagesToDownload}, prefix: ${filenamePrefix}`);
+    const downloadedImagesInfo = [];
+    fs.mkdirSync(saveDir, { recursive: true });
 
-// Removed getRandomGeminiEndpoints - functionality moved to GeminiService.getGeminiUrl / GeminiService.generateContent
-// Removed askGeminiWithSearchGrounding - functionality moved to GeminiService.generateTextWithSearchGrounding
-// Removed uploadMediaToGemini - functionality moved to GeminiService.uploadMedia
+    if (!PIXABAY_API_KEY || PIXABAY_API_KEY === 'המפתח_API_שלך_מפיקסביי') {
+        console.error("❌ PIXABAY_API_KEY is not set. Please obtain an API key from pixabay.com/api/docs/ and add it to the script.");
+        if (chatMsgForFeedback) {
+            await chatMsgForFeedback.reply("פיתי\n\n⚠️ שירות חיפוש התמונות ברשת אינו מוגדר כראוי (חסר מפתח API). לא ניתן להוריד תמונות מהרשת.");
+        }
+        return [];
+    }
 
-// const GEMINI_API_KEY = "AIzaSyDfqo_60y39EG_ZW5Fn3EeB6BoZMru5V_k"; // המפתח שלך - MOVED TO CONFIG
+    try {
+        // אחרי:
+        const response = await axios.get('https://pixabay.com/api/', {
+            params: {
+                key: PIXABAY_API_KEY,
+                q: query,
+                image_type: 'photo',
+                per_page: 3,        // עכשיו בטווח התקין
+                safesearch: true,
+                page: 1
+            }
+        });
+
+
+        if (response.data && response.data.hits && response.data.hits.length > 0) {
+            const imagesToProcess = response.data.hits.slice(0, maxImagesToDownload); // קח רק את הכמות שביקשנו
+            console.log(`[PixabaySearch] Found ${response.data.hits.length} images, processing up to ${imagesToProcess.length}.`);
+
+            for (let i = 0; i < imagesToProcess.length; i++) {
+                const hit = imagesToProcess[i];
+                // נשתמש ב-webformatURL או largeImageURL. largeImageURL בדרך כלל באיכות גבוהה יותר.
+                const imageUrl = hit.largeImageURL || hit.webformatURL;
+                if (!imageUrl) continue;
+
+                let extension = 'jpg'; // Pixabay לרוב מחזירים JPG או PNG
+                const urlParts = new URL(imageUrl);
+                const extFromUrl = path.extname(urlParts.pathname).toLowerCase();
+                if (['.jpg', '.jpeg', '.png'].includes(extFromUrl)) {
+                    extension = extFromUrl.substring(1);
+                } else {
+                    // נסה לנחש מה-Content-Type אם אין סיומת ברורה
+                    try {
+                        const headResponse = await axios.head(imageUrl, { timeout: 5000 });
+                        const contentType = headResponse.headers['content-type'];
+                        if (contentType) {
+                            extension = mime.extension(contentType) || 'jpg';
+                        }
+                    } catch (headError) {
+                        console.warn(`  Could not get HEAD for ${imageUrl}, defaulting to jpg. Error: ${headError.message}`);
+                    }
+                }
+
+
+                try {
+                    const imageResponse = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 15000 });
+                    const imageBuffer = Buffer.from(imageResponse.data, 'binary');
+
+                    if (imageBuffer && imageBuffer.length > 1000) { // Basic size check
+                        const filename = `${filenamePrefix}${i + 1}.${extension}`;
+                        const localPath = path.join(saveDir, filename);
+                        fs.writeFileSync(localPath, imageBuffer);
+                        downloadedImagesInfo.push({
+                            localPath: localPath,
+                            latexPath: `files/${filename.replace(/\\/g, '/')}`, // נתיב יחסי ל-LaTeX
+                            sourceUrl: hit.pageURL, // קישור לדף התמונה בפיקסביי
+                            originalImageUrl: imageUrl
+                        });
+                        console.log(`  Downloaded and saved: ${filename} (from Pixabay: ${hit.pageURL})`);
+                    } else {
+                        console.warn(`  Skipped small/invalid image from Pixabay URL: ${imageUrl}`);
+                    }
+                } catch (downloadError) {
+                    console.error(`  Error downloading image from Pixabay URL ${imageUrl}: ${downloadError.message}`);
+                }
+                if (downloadedImagesInfo.length >= maxImagesToDownload) break;
+            }
+
+            if (chatMsgForFeedback && downloadedImagesInfo.length > 0) {
+            } else if (chatMsgForFeedback && response.data.hits.length > 0 && downloadedImagesInfo.length === 0) {
+            }
+
+        } else {
+            console.warn(`[PixabaySearch] No images found on Pixabay for query: "${query}"`);
+            if (chatMsgForFeedback) {
+                await chatMsgForFeedback.reply(`פיתי\n\nלא מצאתי תמונות מתאימות ב-Pixabay עבור החיפוש: "${query}".`);
+            }
+        }
+    } catch (error) {
+        console.error(`❌ [PixabaySearch] API or general error for "${query}":`, error.response?.data || error.message);
+        if (chatMsgForFeedback) {
+            let errMsg = "שגיאה בחיפוש תמונות ב-Pixabay.";
+            if (error.response?.status === 401 || error.response?.status === 403) {
+                errMsg = "שגיאת גישה ל-Pixabay. בדוק את מפתח ה-API.";
+            } else if (error.response?.status === 400) {
+                errMsg = "בקשה לא תקינה ל-Pixabay (ייתכן שהשאילתה מורכבת מדי).";
+            }
+            await chatMsgForFeedback.reply(`פיתי\n\n${errMsg}`);
+        }
+    }
+    return downloadedImagesInfo;
+}
+function getRandomGeminiEndpoints() {
+    const apiKey = apiKeyManager.getRandomApiKey();
+    return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+}
+
+
+async function askGeminiWithSearchGrounding(promptText) {
+    try {
+        const endpoint = getRandomGeminiEndpoints(); // השתמש בפונקציה הקיימת שלך לקבלת URL+Key
+        const response = await axios.post(endpoint, {
+            contents: [
+                {
+                    parts: [{ text: promptText }]
+                }
+            ],
+            // ------------------- שורה שגויה -------------------
+            // tools: [{ type: "google_search" }] // <-- שורה זו שגויה
+            // ---------------------------------------------------
+
+            // ------------------- שורה מתוקנת ------------------
+            tools: [{ googleSearchRetrieval: {} }] // <-- זה הפורמט הנכון
+            // ---------------------------------------------------
+        });
+        const answer = response.data?.candidates?.[0]?.content?.parts?.[0]?.text || "❌ לא התקבלה תשובה.";
+        return answer;
+    } catch (error) {
+        // הדפס את השגיאה המלאה כדי שנוכל לראות אם היא משתנה
+        console.error("❌ [askGeminiWithSearchGrounding] שגיאה:", error.response?.data || error.message || error);
+        // שקול להחזיר הודעת שגיאה שונה או לזרוק את השגיאה הלאה
+        return "⚠️ הייתה שגיאה בזמן הבקשה ל-Gemini עם Grounding.";
+    }
+}
+
+
+async function uploadMediaToGemini(base64Data, mimeType) {
+    const apiKey = apiKeyManager.getRandomApiKey();
+    const GEMINI_UPLOAD_URL = `https://generativelanguage.googleapis.com/upload/v1beta/files?key=${apiKey}`;
+    const buffer = Buffer.from(base64Data, 'base64');
+    try {
+        const response = await axios.post(GEMINI_UPLOAD_URL, buffer, {
+            headers: {
+                'Content-Type': mimeType,
+            },
+        });
+        if (response.data && response.data.file && response.data.file.uri) {
+            return response.data.file.uri;
+        }
+        return null;
+    } catch (error) {
+        console.error("Gemini media upload error:", error?.response?.data || error);
+        throw error;
+    }
+}
+
+const GEMINI_API_KEY = "AIzaSyDfqo_60y39EG_ZW5Fn3EeB6BoZMru5V_k"; // המפתח שלך
 const pdf = require('pdf-parse'); // If using PDF parsing
 const mammoth = require("mammoth"); // If using DOCX parsing
 const { Blob } = require("buffer");
@@ -150,8 +299,10 @@ const { Blob } = require("buffer");
 
 // Helper to pick a random API key and build the Gemini endpoint URL
 // ---------- Helper: בוחר מפתח API אקראי ובונה את ה-URL ----------
-// Removed getRandomGeminiImageEndpoint - functionality moved to GeminiService.getGeminiUrl / GeminiService.generateImageFromContent
-
+function getRandomGeminiImageEndpoint() {
+    const apiKey = apiKeyManager.getRandomApiKey();             // מנגנון המפתחות הקיים שלך
+    return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent?key=${apiKey}`;
+}
 async function handleGenerateGraphAction(plotData, targetMsg, chatPaths) {
     const targetChatId = targetMsg.id.remote;
     const replyToId = plotData.replyTo || targetMsg.id._serialized;
@@ -365,31 +516,37 @@ async function handleImageEditAction(editData, targetMsg, chatPaths) {
     await targetMsg.reply(loadingMessage, undefined, { quotedMessageId: replyTo });
 
     /* --- 3. בניית ה-payload ושליחת קריאה ל-Gemini --- */
-    const contents = [{
-        parts: [
-            { inline_data: { mime_type: media.mimetype, data: media.data } },
-            { text: editPrompt }
-        ]
-    }];
-    const generationConfig = { responseModalities: ["TEXT", "IMAGE"] }; // Specify TEXT too if Gemini returns textual feedback
+    const endpoint = getRandomGeminiImageEndpoint();
+    const payload = {
+        contents: [{
+            parts: [
+                {                               // חלק 1 – התמונה
+                    inline_data: {
+                        mime_type: media.mimetype,
+                        data: media.data
+                    }
+                },
+                { text: editPrompt }            // חלק 2 – הוראת העריכה
+            ]
+        }],
+        generationConfig: {                 // camelCase-JSON כנדרש
+            responseModalities: ["TEXT", "IMAGE"]
+        }
+    };
 
-    let responseData;
+    let response;
     try {
-        // Using GeminiService.generateImageFromContent
-        responseData = await GeminiService.generateImageFromContent(
-            contents,
-            { type: 'image_gen' }, // Or specific model if 'gemini-2.0-flash-exp-image-generation' has a direct map
-            generationConfig
-        );
+        response = await axios.post(endpoint, payload, {
+            headers: { "Content-Type": "application/json" }
+        });
     } catch (err) {
-        console.error("❌ Error calling Gemini Image API via Service:", err.response?.data || err.message || err);
-        await targetMsg.reply("❌ הייתה שגיאה בשליחת הבקשה לעריכת תמונה דרך השירות.", undefined, { quotedMessageId: replyTo });
+        console.error("❌ Error calling Gemini Image API:", err.response?.data || err.message);
+        await targetMsg.reply("❌ הייתה שגיאה בשליחת הבקשה ל-Gemini.", undefined, { quotedMessageId: replyTo });
         return;
     }
 
     /* --- 4. חילוץ התמונה (inlineData או fileUri) --- */
-    // responseData from GeminiService is already the .data part of the axios response
-    const parts = responseData?.candidates?.[0]?.content?.parts || [];
+    const parts = response.data.candidates?.[0]?.content?.parts || [];
     let imageBuffer = null;
 
     for (const p of parts) {
@@ -851,12 +1008,11 @@ User request for time range: "${timeRangeDesc}"
 Current time: ${new Date().toISOString()}
 Respond ONLY with a JSON object like this: {"start_time": "YYYY-MM-DDTHH:MM:SSZ", "end_time": "YYYY-MM-DDTHH:MM:SSZ"}
 If the range is unclear, provide the last 24 hours.`;
-        // Using GeminiService.generateContent
-        const timeResponseData = await GeminiService.generateContent(
-            [{ parts: [{ text: timePrompt }] }],
-            { type: 'flash' } // Assuming flash model is suitable for this
-        );
-        let timeJson = timeResponseData?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "{}";
+        const timeEndpoint = getRandomGeminiEndpoint(false);
+        const timeResponse = await axios.post(timeEndpoint, {
+            contents: [{ parts: [{ text: timePrompt }] }]
+        });
+        let timeJson = timeResponse.data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "{}";
         timeJson = timeJson.replace(/^```json\s*|\s*```$/g, "").trim();
 
         let startTime, endTime;
@@ -922,12 +1078,11 @@ Chat History:
 ${relevantHistory}
 תסכם באריכות, אל תעז לקצר כלום, תסכם כל פרט ופרט.
 Summary:`;
-        // Using GeminiService.generateContent
-        const summaryResponseData = await GeminiService.generateContent(
-            [{ parts: [{ text: summarizePrompt }] }],
-            { type: 'flash' } // Assuming flash model is suitable for this
-        );
-        const summary = summaryResponseData?.candidates?.[0]?.content?.parts?.[0]?.text || "לא הצלחתי לסכם את ההיסטוריה.";
+        const summaryEndpoint = getRandomGeminiEndpoint(false);
+        const summaryResponse = await axios.post(summaryEndpoint, {
+            contents: [{ parts: [{ text: summarizePrompt }] }]
+        });
+        const summary = summaryResponse.data?.candidates?.[0]?.content?.parts?.[0]?.text || "לא הצלחתי לסכם את ההיסטוריה.";
 
         await targetMsg.reply(`פיתי\n\n📜 *סיכום השיחה (${timeRangeDesc || 'טווח לא ברור'}):*\n${summary}`, undefined, { quotedMessageId: replyToId });
 
@@ -937,7 +1092,64 @@ Summary:`;
     }
 }
 
-// Removed handleVoiceMessage - functionality moved to CloudflareService.transcribeAudio
+
+async function handleVoiceMessage(msg) {
+    console.log(`🎤 [handleVoiceMessage] Processing voice message ${msg.id._serialized}`);
+    if (!msg.hasMedia || (msg.type !== 'audio' && msg.type !== 'ptt')) {
+        console.warn(`[handleVoiceMessage] Message ${msg.id._serialized} is not a valid voice message.`);
+        return null; // לא הודעת קול תקינה
+    }
+
+    try {
+        const media = await msg.downloadMedia();
+        if (!media || !media.data) {
+            console.error(`[handleVoiceMessage] Failed to download media for ${msg.id._serialized}.`);
+            await msg.reply("⚠️ נכשלתי בהורדת ההודעה הקולית.");
+            return null;
+        }
+
+        const audioBase64 = media.data; // Base64 מגיע ישירות מ-downloadMedia
+
+        console.log(`[handleVoiceMessage] Sending audio (size: ${audioBase64.length}) to Cloudflare Whisper...`);
+
+        const response = await axios.post(
+            CLOUDFLARE_WHISPER_API_ENDPOINT,
+            {
+                audio: audioBase64,
+                model_kwargs: { language: "he" }
+            },
+            {
+                headers: {
+                    "Authorization": `Bearer ${CLOUDFLARE_API_TOKEN}`,
+                    "Content-Type": "application/json"
+                }
+            }
+        );
+
+
+        console.log(`[handleVoiceMessage] Received response from Whisper. Status: ${response.status}`);
+
+        if (response.data && response.data.result && response.data.result.text) {
+            const transcribedText = response.data.result.text;
+            console.log(`[handleVoiceMessage] Transcription successful: "${transcribedText}"`);
+            // הדפסת מידע נוסף מהתגובה (אופציונלי)
+            if (response.data.result.transcription_info) {
+                const info = response.data.result.transcription_info;
+                console.log(`  Language: ${info.language} (Prob: ${info.language_probability}), Duration: ${info.duration}s`);
+            }
+            return transcribedText; // החזר את הטקסט המתומלל
+        } else {
+            console.error("[handleVoiceMessage] Whisper response missing expected text result:", response.data);
+            await msg.reply("⚠️ שירות התמלול לא החזיר טקסט.");
+            return null;
+        }
+
+    } catch (error) {
+        console.error("❌ Error processing voice message with Whisper:", error.response?.data || error.message || error);
+        await msg.reply("❌ אירעה שגיאה בעיבוד ההודעה הקולית.");
+        return null;
+    }
+}
 
 // פונקציה חדשה לטיפול בסיכום
 async function handleSummarizeAction(summaryData, targetMsg) {
@@ -957,7 +1169,7 @@ async function handleSummarizeAction(summaryData, targetMsg) {
 
             // קריאה ל-Gemini עם יכולת חיפוש/גישה לרשת (אם אפשרי)
             // נשתמש בפונקציה הקיימת עם Grounding, שכן היא יודעת לגשת לרשת
-            const summary = await GeminiService.generateTextWithSearchGrounding(summarizePrompt); // Using GeminiService
+            const summary = await askGeminiWithSearchGrounding(summarizePrompt);
             await targetMsg.reply(`פיתי\n\n📌 *סיכום מהקישור:*\n${summary}`, undefined, { quotedMessageId: replyToId });
             return;
 
@@ -967,12 +1179,11 @@ async function handleSummarizeAction(summaryData, targetMsg) {
             const summarizePrompt = `Please summarize the following text concisely in Hebrew:\n\n"${textToSummarize}"`;
 
             // קריאה רגילה ל-Gemini (אין צורך ב-Grounding כאן)
-            // Using GeminiService.generateContent
-            const responseData = await GeminiService.generateContent(
-                [{ parts: [{ text: summarizePrompt }] }],
-                { type: 'flash' } // Assuming flash model is suitable
-            );
-            const summary = responseData?.candidates?.[0]?.content?.parts?.[0]?.text || "לא הצלחתי לסכם את הטקסט.";
+            const endpoint = getRandomGeminiEndpoint(false);
+            const response = await axios.post(endpoint, {
+                contents: [{ parts: [{ text: summarizePrompt }] }]
+            });
+            const summary = response.data?.candidates?.[0]?.content?.parts?.[0]?.text || "לא הצלחתי לסכם את הטקסט.";
 
             await targetMsg.reply(`פיתי\n\n📌 *סיכום הטקסט:*\n${summary}`, undefined, { quotedMessageId: replyToId });
             return;
@@ -1210,7 +1421,124 @@ async function handleGroupManagementAction(actionData, targetMsg) {
         await targetMsg.reply(userErrorMessage, undefined, { quotedMessageId: replyTo });
     }
 }
-// Removed handleSendEmailAction - functionality moved to GmailService.prepareAndSendEmail
+// 1. Send Email Action
+async function handleSendEmailAction(replyData, targetMsg, chatPaths) {
+    const targetChatId = targetMsg.id.remote;
+    try {
+        const to = replyData.to;
+        const subject = replyData.subject;
+        const html = replyData.html;
+        let attachmentPath = replyData.attachmentPath;
+        const originalMsgIdForAttachment = replyData.replyToFileMessageId || replyData.replyTo;
+
+        console.log(`[handleSendEmailAction] To: ${to}, Subject: ${subject}, Needs Attachment Check: ${!!originalMsgIdForAttachment}`);
+
+        if (!attachmentPath && originalMsgIdForAttachment) {
+            console.log(`[handleSendEmailAction] Attachment path not provided directly. Trying to find based on ID: ${originalMsgIdForAttachment}`);
+            const mediaInfo = uploadedMediaMap.get(originalMsgIdForAttachment);
+            let potentialExtension = 'unknown';
+            if (mediaInfo && mediaInfo.mimeType) {
+                potentialExtension = mediaInfo.mimeType.split('/')[1]?.split('+')[0] || 'bin'; // Handle cases like 'image/svg+xml'
+            }
+
+            const checkPath = (ext) => path.join(chatPaths.filesDir, `${originalMsgIdForAttachment}.${ext}`);
+
+            if (potentialExtension !== 'unknown') {
+                const potentialPath = checkPath(potentialExtension);
+                if (fs.existsSync(potentialPath)) {
+                    attachmentPath = potentialPath;
+                    console.log(`[handleSendEmailAction] Found potential attachment using known extension: ${attachmentPath}`);
+                } else {
+                    console.warn(`[handleSendEmailAction] Could not find saved media file for ID ${originalMsgIdForAttachment} at expected path: ${potentialPath}`);
+                }
+            }
+
+            if (!attachmentPath) { // If still not found, try common extensions
+                const commonExtensions = ['jpg', 'jpeg', 'png', 'pdf', 'docx', 'txt', 'mp4', 'mp3', 'zip', 'rar', 'gif', 'svg'];
+                for (const ext of commonExtensions) {
+                    const potentialPath = checkPath(ext);
+                    if (fs.existsSync(potentialPath)) {
+                        attachmentPath = potentialPath;
+                        console.log(`[handleSendEmailAction] Found potential attachment by guessing extension: ${attachmentPath}`);
+                        break;
+                    }
+                }
+            }
+            if (!attachmentPath) {
+                console.warn(`[handleSendEmailAction] Could not find saved media file for ID ${originalMsgIdForAttachment} after all checks.`);
+            }
+        }
+
+        let rawEmail = '';
+        const boundary = `boundary_${Date.now()}`; // Unique boundary
+
+        if (attachmentPath && fs.existsSync(attachmentPath)) {
+            console.log(`[handleSendEmailAction] Preparing email with attachment: ${attachmentPath}`);
+            const fileContent = fs.readFileSync(attachmentPath);
+            const base64File = fileContent.toString('base64');
+            const filename = path.basename(attachmentPath);
+            const mimeType = require('mime-types').lookup(filename) || 'application/octet-stream';
+            console.log(`[handleSendEmailAction] Attachment details - Filename: ${filename}, MimeType: ${mimeType}`);
+
+            rawEmail = [
+                `From: piti-bot@example.com`,
+                `To: ${to}`,
+                `Subject: =?UTF-8?B?${Buffer.from(subject).toString('base64')}?=`,
+                `MIME-Version: 1.0`,
+                `Content-Type: multipart/mixed; boundary="${boundary}"`,
+                '',
+                `--${boundary}`,
+                `Content-Type: text/html; charset="UTF-8"`,
+                `Content-Transfer-Encoding: base64`, // Use base64 for HTML too for safety
+                '',
+                Buffer.from(html).toString('base64'), // Encode HTML as base64
+                '',
+                `--${boundary}`,
+                `Content-Type: ${mimeType}; name="${filename}"`,
+                `Content-Disposition: attachment; filename="${filename}"`,
+                `Content-Transfer-Encoding: base64`,
+                '',
+                base64File,
+                '',
+                `--${boundary}--`
+            ].join('\r\n');
+        } else {
+            console.log(`[handleSendEmailAction] Preparing email without attachment.`);
+            if (replyData.attachmentPath) {
+                console.warn(`[handleSendEmailAction] Attachment path specified (${replyData.attachmentPath}) but file not found or path is invalid.`);
+            }
+            rawEmail = [
+                `From: piti-bot@example.com`,
+                `To: ${to}`,
+                `Subject: =?UTF-8?B?${Buffer.from(subject).toString('base64')}?=`,
+                `MIME-Version: 1.0`,
+                `Content-Type: text/html; charset="UTF-8"`,
+                `Content-Transfer-Encoding: base64`, // Use base64 for HTML
+                '',
+                Buffer.from(html).toString('base64') // Encode HTML as base64
+            ].join('\r\n');
+        }
+
+        const encodedMessage = Buffer.from(rawEmail)
+            .toString('base64')
+            .replace(/\+/g, '-')
+            .replace(/\//g, '_')
+            .replace(/=+$/, '');
+
+        console.log("[handleSendEmailAction] Sending email via Gmail API...");
+        await gmail.users.messages.send({
+            userId: 'me',
+            requestBody: { raw: encodedMessage },
+        });
+        console.log("[handleSendEmailAction] Email sent successfully via Gmail API.");
+
+        await targetMsg.reply(replyData.message || "✅ נשלח אימייל בהצלחה.");
+
+    } catch (err) {
+        console.error("❌ שגיאה בשליחת האימייל (מתוך handleSendEmailAction):", err.response?.data || err.message || err);
+        await targetMsg.reply("⚠️ הייתה שגיאה בשליחת האימייל.");
+    }
+}
 // Wrap raw PCM in a WAV header
 // (פונקציה זו הועתקה והותאמה מהקובץ nefv.html שסיפקת)
 function pcmToWav(pcm, sampleRate, channels, bits) {
@@ -1296,47 +1624,44 @@ async function handleTTSAction(replyData, targetMsg) {
     const tempWavPath = path.join(__dirname, `gemini_tts_output_${Date.now()}.wav`);
 
     try {
-        // Using GeminiService.generateTextToSpeech
-        // Note: The GeminiService's generateTextToSpeech is designed for Google Cloud TTS API,
-        // which has a different payload structure than direct Gemini model calls for TTS.
-        // The original code was calling a Gemini model endpoint that returned audio in inlineData.
-        // The new GeminiService.generateTextToSpeech expects a standard Google Cloud TTS payload.
-        // We need to adapt this. If GeminiService.generateTextToSpeech is strictly for Cloud TTS,
-        // we might need a different service method or adapt the existing one if the Gemini model
-        // used here (`gemini-2.5-flash-preview-tts`) is actually a specific endpoint for this.
+        const apiKey = apiKeyManager.getRandomApiKey();
+        const ttsEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_ID}:generateContent?key=${apiKey}`;
 
-        // For now, let's assume the Gemini model `gemini-2.5-flash-preview-tts` (MODEL_ID)
-        // can be called via a generic generateContent-like structure if the service supports it,
-        // or we use the dedicated TTS function if it's truly Google Cloud TTS.
-        // Given the original endpoint, it's a Gemini model, not the standard Cloud TTS API.
-        // So, we should use GeminiService.generateContent with appropriate modelOptions.
-
-        const modelOptions = { modelName: MODEL_ID }; // MODEL_ID is "gemini-2.5-flash-preview-tts"
-        const contents = [{ parts: [{ text: textToSpeak }] }];
-        const generationConfig = {
-            responseModalities: ["AUDIO"], // This was specific to the older Gemini model call
-            speechConfig: { // This was specific to the older Gemini model call
-                voiceConfig: {
-                    prebuiltVoiceConfig: { voiceName: VOICE }
+        const requestBody = {
+            model: MODEL_ID,
+            contents: [{ parts: [{ text: textToSpeak }] }],
+            generationConfig: {
+                responseModalities: ["AUDIO"],
+                speechConfig: {
+                    voiceConfig: {
+                        prebuiltVoiceConfig: { voiceName: VOICE }
+                    }
                 }
             }
         };
 
-        console.log(`[handleTTSAction Gemini Service] Requesting TTS from ${MODEL_ID} for voice: ${VOICE} with text: "${textToSpeak.substring(0,30)}..."`);
+        console.log(`[handleTTSAction Gemini] Sending request to ${ttsEndpoint} for voice: ${VOICE} with text: "${textToSpeak.substring(0,30)}..."`); // Log text
+        const axiosOpts = {
+            headers: {
+                "Content-Type": "application/json",
+                "Accept-Encoding": "identity"
+            },
+            decompress: false,
+            responseType: "json"
+        };
+        const res = await axios.post(ttsEndpoint, requestBody, axiosOpts);
 
-        // This call might need adjustment in GeminiService if it doesn't support responseModalities/speechConfig directly
-        // For now, we assume generateContent can pass these through or they are implicit with the model.
-        const responseData = await GeminiService.generateContent(contents, modelOptions, generationConfig);
+        // הדפס את כל התגובה מה-API של Gemini TTS לצורך דיבוג
+        console.log("[handleTTSAction Gemini] Full API Response:", JSON.stringify(res.data, null, 2));
 
-        console.log("[handleTTSAction Gemini Service] Full API Response:", JSON.stringify(responseData, null, 2));
-
-        if (!responseData?.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data) {
-            const finishReason = responseData?.candidates?.[0]?.finishReason;
-            console.error(`[handleTTSAction Gemini Service] No audio data returned. Finish Reason: ${finishReason}`, responseData);
-            throw new Error(`Gemini API (via Service) לא החזיר נתוני אודיו. סיבת סיום: ${finishReason || 'לא ידוע'}`);
+        if (!res.data || !res.data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data) {
+            const finishReason = res.data?.candidates?.[0]?.finishReason;
+            console.error(`[handleTTSAction Gemini] No audio data returned from Gemini API. Finish Reason: ${finishReason}`, res.data);
+            throw new Error(`Gemini API לא החזיר נתוני אודיו. סיבת סיום: ${finishReason || 'לא ידוע'}`);
         }
 
-        const b64AudioData = responseData.candidates[0].content.parts[0].inlineData.data;
+        const b64AudioData = res.data.candidates[0].content.parts[0].inlineData.data;
+
         const pcmBytes = Buffer.from(b64AudioData, 'base64');
         if (pcmBytes.length === 0) {
             throw new Error("נתוני ה-PCM שהתקבלו מ-Gemini ריקים.");
@@ -2094,9 +2419,38 @@ async function handlePollAction(replyData, targetMsg) {
         await targetMsg.reply("אירעה שגיאה בשליחת הסקר.");
     }
 }
-// Removed handleYoutubeSearchAction - logic moved to main handleMessage switch
-// Removed handleYoutubeDownloadAction - logic moved to main handleMessage switch
+// 13. YouTube Search Action
+async function handleYoutubeSearchAction(replyData, targetMsg) {
+    const targetChatId = targetMsg.id.remote;
+    try {
+        const query = replyData.query;
+        if (!query) {
+            await targetMsg.reply("⚠️ לא ניתן לחפש ביוטיוב, חסרה שאילתה.");
+            return;
+        }
 
+        // Send initial message if provided
+        if (Array.isArray(replyData.messages) && replyData.messages[0]) {
+            await targetMsg.reply(replyData.messages[0]);
+        }
+
+        const videoLinks = await searchYouTube(query); // Use existing helper
+
+        if (videoLinks && videoLinks.length > 0) {
+            const linksText = videoLinks.join('\n');
+            const finalMessage = (replyData.messages && replyData.messages[1])
+                ? `${replyData.messages[1]}\n${linksText}`
+                : `📺 הנה סרטונים שמצאתי:\n${linksText}`;
+            await targetMsg.reply(finalMessage);
+            console.log(`[handleYoutubeSearchAction] Found YouTube videos for "${query}"`);
+        } else {
+            await targetMsg.reply(`😕 לא הצלחתי למצוא סרטונים ביוטיוב עבור: "${query}"`);
+        }
+    } catch (err) {
+        console.error("❌ [handleYoutubeSearchAction] Error:", err);
+        await targetMsg.reply("🚫 הייתה שגיאה בזמן חיפוש הסרטון.");
+    }
+}
 // Function to load pending actions
 function loadPendingActions() {
     if (fs.existsSync(PENDING_ACTIONS_PATH)) {
@@ -2475,32 +2829,8 @@ case "generate_graph":
                 break;
             case "send_email":
                 if (actionData.to && actionData.subject && actionData.html) {
-                    const attachments = [];
-                    if (actionData.attachmentPath && fs.existsSync(actionData.attachmentPath)) {
-                        const fileContent = fs.readFileSync(actionData.attachmentPath);
-                        const filename = path.basename(actionData.attachmentPath);
-                        const mimeType = require('mime-types').lookup(filename) || 'application/octet-stream';
-                        attachments.push({
-                            filename: filename,
-                            mimetype: mimeType,
-                            data: fileContent.toString('base64')
-                        });
-                    } else if (actionData.replyToFileMessageId) { // Try to find attachment from replied message
-                         const mediaInfo = uploadedMediaMap.get(actionData.replyToFileMessageId);
-                         if (mediaInfo && mediaInfo.base64) {
-                            attachments.push({
-                                filename: `attachment_${actionData.replyToFileMessageId}`, // Generic name
-                                mimetype: mediaInfo.mimeType,
-                                data: mediaInfo.base64
-                            });
-                         }
-                    }
-                    const emailResult = await GmailService.prepareAndSendEmail(actionData.to, actionData.subject, actionData.html, attachments);
-                    if (emailResult.success) {
-                        await mockMsgForReply.reply(actionData.message || "✅ נשלח אימייל בהצלחה.");
-                    } else {
-                        await mockMsgForReply.reply(`⚠️ הייתה שגיאה בשליחת האימייל: ${emailResult.error}`);
-                    }
+                    // handleSendEmailAction needs action data, the msg obj, and paths
+                    await handleSendEmailAction(actionData, mockMsgForReply, chatPaths);
                 }
                 break;
             case "tts":
@@ -2542,39 +2872,12 @@ case "generate_graph":
                 break;
             case "youtube_search":
                 if (actionData.query) {
-                    console.log(`[DelayedExec youtube_search] Query: ${actionData.query}`);
-                    await mockMsgForReply.reply(actionData.messages?.[0] || `פיתי\n\n🔎 מחפשת סרטונים ביוטיוב על: "${actionData.query}"...`);
-                    const searchResult = await YouTubeService.searchYouTube(actionData.query, 5);
-                    if (searchResult.success && searchResult.videos && searchResult.videos.length > 0) {
-                        const linksText = searchResult.videos.map(video => `${video.title}\n${video.url}`).join('\n\n');
-                        const finalMessage = actionData.messages?.[1] ? `${actionData.messages[1]}\n${linksText}` : `📺 הנה סרטונים שמצאתי:\n${linksText}`;
-                        await mockMsgForReply.reply(`פיתי\n\n${finalMessage}`);
-                    } else if (searchResult.success) {
-                        await mockMsgForReply.reply(`פיתי\n\n😕 לא מצאתי סרטונים ביוטיוב עבור: "${actionData.query}"`);
-                    } else {
-                        await mockMsgForReply.reply(`פיתי\n\n🚫 שגיאה בחיפוש יוטיוב (מתוזמן): ${searchResult.error}`);
-                    }
-                } else {
-                     await mockMsgForReply.reply("פיתי\n\n⚠️ חסרה שאילתת חיפוש עבור פעולת יוטיוב מתוזמנת.");
+                    await handleYoutubeSearchAction(actionData, mockMsgForReply);
                 }
                 break;
             case "download_youtube_video":
                 if (actionData.video_url) {
-                    console.log(`[DelayedExec download_youtube_video] URL: ${actionData.video_url}`);
-                    await mockMsgForReply.reply(actionData.message || `פיתי\n\n⬇️ מורידה סרטון מיוטיוב (פעולה מתוזמנת): ${actionData.video_url}...`);
-                    const downloadResult = await YouTubeService.downloadVideoAndGetBuffer(actionData.video_url);
-                    if (downloadResult.success && downloadResult.buffer) {
-                        const videoTitle = downloadResult.title || 'video';
-                        const safeFilename = videoTitle.replace(/[^a-zA-Z0-9א-ת\s\-]/g, '_').substring(0, 50) + '.mp4';
-                        const videoMedia = new MessageMedia(downloadResult.mimeType || 'video/mp4', downloadResult.buffer.toString('base64'), safeFilename);
-                        // mockMsgForReply.reply will send to the correct chat.
-                        // The client.sendMessage was not necessary as reply handles it.
-                        await mockMsgForReply.reply(videoMedia, undefined, { caption: `🎬 הנה הסרטון המתוזמן: ${videoTitle}` });
-                    } else {
-                        await mockMsgForReply.reply(`פיתי\n\n❌ שגיאה בהורדת סרטון יוטיוב (מתוזמן): ${downloadResult.error}`);
-                    }
-                } else {
-                    await mockMsgForReply.reply("פיתי\n\n⚠️ חסר קישור לסרטון עבור פעולת הורדה מיוטיוב מתוזמנת.");
+                    await handleYoutubeDownloadAction(actionData, mockMsgForReply);
                 }
                 break;
             case "poll":
@@ -2660,7 +2963,7 @@ client.on('ready', () => {
     setInterval(checkTimers, 10000);
 });
 // 14. Site Search Action
-async function handleSiteSearchAction(replyData, targetMsg) { //TODO: Consider moving to DuckDuckGoService.js or a generic SearchService.js
+async function handleSiteSearchAction(replyData, targetMsg) {
     // Note: This follows the complex logic with DuckDuckGo and potentially Gemini selection
     const targetChatId = targetMsg.id.remote;
     try {
@@ -2705,12 +3008,10 @@ ${links.map((l, i) => `${i + 1}. ${l}`).join('\n')}
 בחר את הקישור שהכי מתאים לבקשה של המשתמש בלבד.
 פורמט תגובה: { "chosenUrl": "https://..." }`; // Keep JSON simple
 
-        // Using GeminiService.generateContent
-        const geminiResponseData1 = await GeminiService.generateContent(
-            [{ parts: [{ text: promptToGemini1 }] }],
-            { type: 'flash' } // Assuming flash is suitable
-        );
-        let chosenUrlJson = geminiResponseData1?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        const geminiResponse1 = await axios.post(getRandomGeminiEndpoint(false), {
+            contents: [{ parts: [{ text: promptToGemini1 }] }]
+        });
+        let chosenUrlJson = geminiResponse1.data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
         chosenUrlJson = chosenUrlJson.replace(/^```json\s*|^```\s*|```$/g, "").trim();
 
         let finalLinkToVisit = '';
@@ -2754,12 +3055,10 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
 בחר את הקישור הכי מדויק למוצר/שירות/תוכן שהמשתמש ביקש.
 פורמט תגובה: { "finalLink": "https://..." }`;
 
-        // Using GeminiService.generateContent
-        const geminiResponseData2 = await GeminiService.generateContent(
-            [{ parts: [{ text: secondPrompt }] }],
-            { type: 'flash' } // Assuming flash is suitable
-        );
-        let finalLinkJson = geminiResponseData2?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        const geminiResponse2 = await axios.post(getRandomGeminiEndpoint(false), {
+            contents: [{ parts: [{ text: secondPrompt }] }]
+        });
+        let finalLinkJson = geminiResponse2.data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
         finalLinkJson = finalLinkJson.replace(/^```json\s*|^```\s*|```$/g, "").trim();
 
         let finalLink = '';
@@ -2783,7 +3082,159 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
         await targetMsg.reply("⚠️ הייתה שגיאה במהלך חיפוש האתר.");
     }
 }
-// Removed generateImageAndGetBuffer - functionality moved to CloudflareService.generateCloudflareImage
+async function generateImageAndGetBuffer(description, imageModel, contextMsg, stickerGenData = null) {
+    const MAX_CLOUDFLARE_RETRIES = 3; // מספר ניסיונות חוזרים לשגיאות Cloudflare
+    const INITIAL_RETRY_DELAY_MS = 2500; // זמן המתנה ראשוני לפני ניסיון חוזר
+
+    const replyToForContext = stickerGenData?.replyTo || contextMsg?.id?._serialized;
+
+    const modelEndpoint = IMAGE_MODEL_ENDPOINTS[imageModel];
+    if (!modelEndpoint) {
+        console.error(`[genImgBuffer] Image model "${imageModel}" not found in IMAGE_MODEL_ENDPOINTS.`);
+        if (contextMsg && contextMsg.reply) { // ודא ש-contextMsg קיים ויש לו מתודת reply
+            await contextMsg.reply(`פיתי\n\nמודל התמונה "${imageModel}" לא זוהה במערכת.`, undefined, { quotedMessageId: replyToForContext });
+        }
+        return { buffer: null, mimeType: null, error: `Image model "${imageModel}" not found.` };
+    }
+
+    let requestBody;
+    // הגדרת גוף הבקשה לפי המודל הנבחר
+    switch (imageModel) {
+        case 'flux-1-schnell':
+            requestBody = { prompt: description, steps: 4, guidance: 0, num_inference_steps: 4, strength: 0.9, width: 512, height: 512 }; // גודל ברירת מחדל לסטיקרים
+            break;
+        case 'dreamshaper-8-lcm':
+            requestBody = { prompt: description, width: 512, height: 512, num_steps: 8, guidance: 2 }; // LCM models need fewer steps and lower guidance
+            break;
+        case 'stable-diffusion-xl-lighting': // Lightning models also need fewer steps
+            requestBody = { prompt: description, width: 512, height: 512, num_steps: 6, guidance: 1.5 };
+            break;
+        case 'stable-diffusion-xl-base-1.0':
+            requestBody = { prompt: description, width: 512, height: 512, num_steps: 20, guidance: 7 }; // ברירת מחדל לגודל סטיקר
+            break;
+        default: // ברירת מחדל אם המודל לא תואם בדיוק (למקרה שנוספים מודלים ולא מעדכנים כאן)
+            console.warn(`[genImgBuffer] Model "${imageModel}" not explicitly handled in switch, using default body for stickers.`);
+            requestBody = { prompt: description, width: 512, height: 512, num_steps: 15, guidance: 7 };
+    }
+
+    // אם זה לא לסטיקר, אולי נרצה גדלים אחרים (אפשר להוסיף לוגיקה כזו בעתיד)
+    if (!stickerGenData) { // אם זה לא יצירת סטיקר, אולי נרצה גדלים אחרים
+        // For general image generation, let's use slightly larger defaults if not flux
+        if (imageModel !== 'flux-1-schnell') {
+            requestBody.width = requestBody.width === 512 ? 768 : requestBody.width; // Example adjustment
+            requestBody.height = requestBody.height === 512 ? 768 : requestBody.height;
+        }
+        // For high quality models, more steps if not overridden
+        if (imageModel === 'stable-diffusion-xl-base-1.0' && requestBody.num_steps === 15) {
+            requestBody.num_steps = 25;
+        }
+    }
+
+
+    console.log(`[genImgBuffer] Requesting image from Cloudflare model "${imageModel}" (${modelEndpoint}) with body:`, JSON.stringify(requestBody));
+
+    for (let attempt = 1; attempt <= MAX_CLOUDFLARE_RETRIES; attempt++) {
+        try {
+            const response = await axios.post(
+                `${BASE_IMAGE_GENERATION_API_ENDPOINT}${modelEndpoint}`,
+                requestBody,
+                {
+                    headers: { "Authorization": `Bearer ${CLOUDFLARE_API_TOKEN}`, "Content-Type": "application/json" },
+                    responseType: 'arraybuffer', // Cloudflare image models usually return image directly or JSON with base64
+                    validateStatus: status => status >= 200 && status < 300
+                }
+            );
+
+            const contentType = response.headers['content-type'];
+            console.log(`[genImgBuffer Attempt ${attempt}] Response Content-Type: ${contentType} from ${imageModel}`);
+
+            let imageBuffer = null;
+            let imageMimeType = 'image/png'; // Default
+
+            if (contentType && contentType.includes('application/json')) {
+                // This case is less common for direct image endpoints but good to handle
+                const jsonString = Buffer.from(response.data).toString('utf8');
+                const responseJson = JSON.parse(jsonString);
+                if (responseJson.success === true && responseJson.result && responseJson.result.image) {
+                    const base64Image = responseJson.result.image;
+                    if (base64Image.startsWith('/9j/')) imageMimeType = 'image/jpeg';
+                    imageBuffer = Buffer.from(base64Image, 'base64');
+                } else {
+                    console.error(`[genImgBuffer Attempt ${attempt}] JSON response from ${imageModel} indicates failure:`, responseJson);
+                    const errorMessage = responseJson?.errors?.[0]?.message || 'פרטים לא זמינים';
+                    if (attempt === MAX_CLOUDFLARE_RETRIES && contextMsg && contextMsg.reply) {
+                        await contextMsg.reply(`פיתי\n\nשגיאה ממודל ${imageModel} (ניסיון ${attempt}): השרת החזיר שגיאת JSON. (${errorMessage})`, undefined, { quotedMessageId: replyToForContext });
+                    }
+                    // Don't immediately return, let retry logic handle it if applicable
+                    throw new Error(`JSON response indicates failure from ${imageModel}: ${errorMessage}`);
+                }
+            } else if (contentType && contentType.startsWith('image/')) {
+                imageBuffer = Buffer.from(response.data, 'binary');
+                imageMimeType = contentType;
+            } else {
+                console.error(`[genImgBuffer Attempt ${attempt}] Unexpected Content-Type: ${contentType} from ${imageModel}`);
+                if (attempt === MAX_CLOUDFLARE_RETRIES && contextMsg && contextMsg.reply) {
+                    await contextMsg.reply(`פיתי\n\nשגיאה: סוג תוכן לא צפוי (${contentType || 'לא ידוע'}) ממודל ${imageModel} (ניסיון ${attempt}).`, undefined, { quotedMessageId: replyToForContext });
+                }
+                throw new Error(`Unexpected Content-Type from ${imageModel}: ${contentType}`);
+            }
+
+            if (!imageBuffer || imageBuffer.length < 1000) { // Increased minimum size
+                console.error(`[genImgBuffer Attempt ${attempt}] Invalid or empty image buffer for ${imageModel}. Size: ${imageBuffer?.length}`);
+                if (attempt === MAX_CLOUDFLARE_RETRIES && contextMsg && contextMsg.reply) {
+                    await contextMsg.reply(`פיתי\n\nשגיאה: קובץ התמונה שהתקבל עבור ${imageModel} (ניסיון ${attempt}) ריק או לא תקין.`, undefined, { quotedMessageId: replyToForContext });
+                }
+                throw new Error(`Invalid or empty image buffer from ${imageModel}`);
+            }
+
+            console.log(`[genImgBuffer Attempt ${attempt}] Image buffer successfully obtained for ${imageModel}. Mime: ${imageMimeType}, Size: ${imageBuffer.length}`);
+            return { buffer: imageBuffer, mimeType: imageMimeType, error: null };
+
+        } catch (error) {
+            console.error(`[genImgBuffer Attempt ${attempt}] Error for ${imageModel}:`, error.message);
+            if (error.response) {
+                console.error(`  Status: ${error.response.status}`);
+                try {
+                    const errorDataText = Buffer.from(error.response.data).toString('utf8');
+                    console.error(`  Data: ${errorDataText.substring(0, 500)}`);
+                } catch (e) { /* ignore if cannot read data */ }
+            }
+
+            if (attempt < MAX_CLOUDFLARE_RETRIES && error.response && (error.response.status === 429 || error.response.status === 503 || error.response.status === 500 || error.response.status === 504)) {
+                const delayTime = INITIAL_RETRY_DELAY_MS * Math.pow(2, attempt - 1); // Exponential backoff
+                console.warn(`[genImgBuffer] Received ${error.response.status} for ${imageModel}. Retrying attempt ${attempt + 1}/${MAX_CLOUDFLARE_RETRIES} in ${delayTime / 1000}s...`);
+                if (contextMsg && contextMsg.reply) { // Inform user only on first retry for a specific error type
+                    // if (attempt === 1) { // Or more sophisticated logic
+                    await contextMsg.reply(`פיתי\n\nשרת התמונות (${imageModel}) עמוס או החזיר שגיאה זמנית (${error.response.status}). מנסה שוב... (ניסיון ${attempt}/${MAX_CLOUDFLARE_RETRIES})`, undefined, { quotedMessageId: replyToForContext });
+                    // }
+                }
+                await delay(delayTime);
+            } else {
+                // Final attempt failed or non-retryable error
+                let userErrorMessage = `שגיאה ביצירת תמונה עם מודל ${imageModel}.`;
+                if (error.response) {
+                    userErrorMessage += ` (קוד: ${error.response.status})`;
+                    try {
+                        const errorData = JSON.parse(Buffer.from(error.response.data).toString('utf8'));
+                        if (errorData.errors && errorData.errors[0] && errorData.errors[0].message) {
+                            userErrorMessage += `: ${errorData.errors[0].message.substring(0, 100)}`;
+                        }
+                    } catch (e) { /* ignore parsing error */ }
+                } else {
+                    userErrorMessage += `: ${error.message.substring(0, 100)}`;
+                }
+
+                if (contextMsg && contextMsg.reply) {
+                    await contextMsg.reply(`פיתי\n\n${userErrorMessage}`, undefined, { quotedMessageId: replyToForContext });
+                }
+                return { buffer: null, mimeType: null, error: error.message };
+            }
+        }
+    }
+    // Should not be reached if MAX_RETRIES > 0, but as a fallback:
+    console.error(`[genImgBuffer] Failed all ${MAX_CLOUDFLARE_RETRIES} retries for ${imageModel}.`);
+    return { buffer: null, mimeType: null, error: `Failed all ${MAX_CLOUDFLARE_RETRIES} retries for ${imageModel}.` };
+}
 
 const STICKER_DIMENSION = 512;
 
@@ -2920,15 +3371,13 @@ async function handleCreateStickerAction(stickerData, targetMsg, chatPaths) {
                 await targetMsg.reply("⚠️ ליצירת סטיקר עם תמונת AI, יש לספק תיאור לתמונה.", undefined, { quotedMessageId: replyTo });
                 return;
             }
-            const model = stickerSource.imageModel || 'flux-1-schnell'; // Default model for stickers
+            const model = stickerSource.imageModel || 'flux-1-schnell';
             console.log(`[handleCreateStickerAction] Generating AI image. Prompt: "${stickerSource.imagePrompt}", Model: ${model}`);
-            // Use CloudflareService for image generation
-            const generatedImageData = await CloudflareService.generateCloudflareImage(stickerSource.imagePrompt, model, { isSticker: true });
-            if (!generatedImageData.success || !generatedImageData.data) {
-                await targetMsg.reply(generatedImageData.error || "⚠️ שגיאה ביצירת תמונת AI לסטיקר.", undefined, { quotedMessageId: replyTo });
-                return;
+            const generatedImageData = await generateImageAndGetBuffer(stickerSource.imagePrompt, model, targetMsg, stickerData);
+            if (!generatedImageData || !generatedImageData.buffer) {
+                return; // שגיאה כבר נשלחה
             }
-            imageBufferForSticker = generatedImageData.data;
+            imageBufferForSticker = generatedImageData.buffer;
             console.log(`[handleCreateStickerAction] AI image buffer loaded, size: ${imageBufferForSticker.length}`);
         }
 
@@ -3027,7 +3476,55 @@ async function handleCreateStickerAction(stickerData, targetMsg, chatPaths) {
         await targetMsg.reply("פיתי\n\n❌ אירעה שגיאה ביצירת הסטיקר.", undefined, { quotedMessageId: replyTo });
     }
 }
-// Removed handleYoutubeDownloadAction (15. YouTube Download Action) - Functionality moved to main handleMessage switch
+// 15. YouTube Download Action
+async function handleYoutubeDownloadAction(replyData, targetMsg) {
+    const targetChatId = targetMsg.id.remote;
+    const play = require('play-dl'); // Ensure play-dl is required at the top
+    try {
+        const videoUrl = replyData.video_url;
+        if (!videoUrl || !play.yt_validate(videoUrl)) { // Basic validation
+            await targetMsg.reply("⚠️ קישור היוטיוב לא תקין או חסר.");
+            return;
+        }
+
+        const loadingMessage = replyData.message || "⬇️ מוריד סרטון מיוטיוב...";
+        await targetMsg.reply(loadingMessage);
+
+        console.log(`[handleYoutubeDownloadAction] Attempting download for: ${videoUrl}`);
+        // Validate and get info first (optional but good practice)
+        let videoInfo = await play.video_info(videoUrl);
+        let stream = await play.stream(videoUrl); // Quality can be specified here if needed
+
+        console.log(`[handleYoutubeDownloadAction] Stream obtained. Type: ${stream.type}. Downloading...`);
+        const chunks = [];
+        for await (const chunk of stream.stream) {
+            chunks.push(chunk);
+        }
+        const videoBuffer = Buffer.concat(chunks);
+        console.log(`[handleYoutubeDownloadAction] Download complete. Buffer size: ${videoBuffer.length}`);
+
+        if (videoBuffer.length < 10000) { // Arbitrary small size check
+            throw new Error("Downloaded video buffer seems too small.");
+        }
+
+        const videoTitle = videoInfo.video_details.title || 'video';
+        // Sanitize title for filename
+        const safeFilename = videoTitle.replace(/[^a-zA-Z0-9א-ת\s\-]/g, '_').substring(0, 50) + '.mp4';
+
+        const videoMedia = new MessageMedia(stream.type || 'video/mp4', videoBuffer.toString('base64'), safeFilename);
+
+        // Send as a new message, quoting the target
+        await client.sendMessage(targetChatId, videoMedia, {
+            caption: `🎬 הנה הסרטון: ${videoTitle}`,
+            quotedMessageId: targetMsg.id._serialized
+        });
+        console.log(`[handleYoutubeDownloadAction] Video sent successfully for ${videoUrl}`);
+
+    } catch (error) {
+        console.error("❌ [handleYoutubeDownloadAction] Error:", error);
+        await targetMsg.reply("❌ אירעה שגיאה בהורדת הסרטון מיוטיוב.");
+    }
+}
 
 // =============================================
 // End of Helper Functions
@@ -3070,22 +3567,28 @@ async function handleMediaContent(msg) {
     }
 
     // 3. build the Gemini payload inline
-    const contents = [{
-        parts: [
-            { inline_data: { mime_type: media.mimetype, data: media.data } },
-            { text: prompt }
-        ]
-    }];
+        const endpoint = getRandomGeminiEndpoint(true);  // hasMedia = true
+        const payload = {
+ contents: [{
+            parts: [
+                        {                               // part #1 – המדיה עצמה
+ inline_data: {
+ mime_type: media.mimetype,
+                                data: media.data
+                           }
+               },
+               { text: prompt }               // part #2 – ההוראה
+                ]
+        }]
+    };
 
-    // 4. call Gemini using GeminiService
+    // 4. call Gemini
     let description = "";
     try {
-        // Using GeminiService.generateContent, modelOptions should indicate vision capability
-        const responseData = await GeminiService.generateContent(
-            contents,
-            { type: 'vision', hasMedia: true } // Or a specific model like 'gemini-pro-vision' if needed
-        );
-        description = responseData?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+        const res = await axios.post(endpoint, payload, {
+            headers: { "Content-Type": "application/json" }
+        });
+        description = res.data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
     } catch (e) {
         console.error("⚠️ handleMediaContent error:", e.response?.data || e.message);
         return;
@@ -4971,16 +5474,16 @@ ${incoming}
                                 try {
                                     const model = shape.image_model || 'flux-1-schnell'; // Default model
                                     console.log(`  🎨 Generating AI image for PPT: "${shape.ai_prompt}" using ${model}`);
-                                    const imageResult = await CloudflareService.generateCloudflareImage(shape.ai_prompt, model);
-                                    if (imageResult.success && imageResult.data) {
-                                        const ext = mime.extension(imageResult.mimeType) || 'png';
+                                    const imageData = await generateImageAndGetBuffer(shape.ai_prompt, model, targetMsg);
+                                    if (imageData && imageData.buffer) {
+                                        const ext = mime.extension(imageData.mimeType) || 'png';
                                         const imgFilename = `${shape.filename_hint || 'ppt_ai_img'}_${Date.now()}.${ext}`;
                                         const savePath = path.join(chatPaths.filesDir, imgFilename); // Save in chat's files dir
-                                        fs.writeFileSync(savePath, imageResult.data);
+                                        fs.writeFileSync(savePath, imageData.buffer);
                                         imagePathForPython = savePath;
                                         console.log(`    ✅ AI Image for PPT saved to: ${savePath}`);
                                     } else {
-                                        console.warn(`    ⚠️ Failed to generate AI image for PPT prompt: ${shape.ai_prompt}. Error: ${imageResult.error}`);
+                                        console.warn(`    ⚠️ Failed to generate AI image for PPT prompt: ${shape.ai_prompt}`);
                                     }
                                 } catch (aiImgErr) {
                                     console.error(`    ❌ Error generating AI image for PPT: ${aiImgErr}`);
@@ -4988,7 +5491,7 @@ ${incoming}
                             } else if (shape.image_source === "web_search" && shape.web_query) {
                                 try {
                                     console.log(`  🌐 Searching web image for PPT: "${shape.web_query}"`);
-                        const downloadedImages = await PixabayService.searchAndDownloadWebImages( // Using PixabayService
+                                    const downloadedImages = await searchAndDownloadWebImages(
                                         shape.web_query,
                                         1, // Download only one image for now
                                         shape.filename_hint || 'ppt_web_img',
@@ -5021,16 +5524,14 @@ ${incoming}
                     try {
                         const model = slide.background.image_model || 'flux-1-schnell';
                         console.log(`  🎨 Generating AI background image for PPT slide: "${slide.background.ai_prompt}"`);
-                        const bgImageResult = await CloudflareService.generateCloudflareImage(slide.background.ai_prompt, model);
-                        if (bgImageResult.success && bgImageResult.data) {
-                            const ext = mime.extension(bgImageResult.mimeType) || 'png';
+                        const bgImageData = await generateImageAndGetBuffer(slide.background.ai_prompt, model, targetMsg);
+                        if (bgImageData && bgImageData.buffer) {
+                            const ext = mime.extension(bgImageData.mimeType) || 'png';
                             const bgFilename = `ppt_bg_slide_${modifiedSlidesData.length + 1}_${Date.now()}.${ext}`;
                             const bgSavePath = path.join(chatPaths.filesDir, bgFilename);
-                            fs.writeFileSync(bgSavePath, bgImageResult.data);
+                            fs.writeFileSync(bgSavePath, bgImageData.buffer);
                             modifiedSlide.background = { ...slide.background, image_path: bgSavePath };
                             console.log(`    ✅ AI Background Image for PPT saved to: ${bgSavePath}`);
-                        } else {
-                             console.warn(`    ⚠️ Failed to generate AI background for PPT prompt: ${slide.background.ai_prompt}. Error: ${bgImageResult.error}`);
                         }
                     } catch (bgErr) { console.error(`    ❌ Error generating AI background for PPT: ${bgErr}`); }
                 }
@@ -5621,23 +6122,11 @@ allprojects {
     async function callApiWithRetry() {
         while (retryCount < maxRetries) {
             try {
-                // Using GeminiService.generateContent
-                // payload is requestPayload, model selection depends on geminiMediaParts
-                console.log(`📞 Attempt ${retryCount + 1}/${maxRetries} Calling GeminiService.generateContent`);
-                const modelOptions = geminiMediaParts.length > 0 ? { type: 'vision', hasMedia: true } : { type: 'flash' };
-                // requestPayload already contains 'contents'. We might not need to pass tools or generationConfig here
-                // unless they are part of the original requestPayload structure.
-                // Assuming requestPayload is structured as { contents: [...], tools: ..., generationConfig: ... }
-                const responseData = await GeminiService.generateContent(
-                    requestPayload.contents, // Pass only contents
-                    modelOptions,
-                    requestPayload.generationConfig, // Pass existing generationConfig if any
-                    requestPayload.tools             // Pass existing tools if any
-                );
-                // The GeminiService.generateContent returns response.data, so we wrap it to mimic an axios response structure if needed by subsequent code
-                response = { data: responseData, status: 200 }; // Simulate axios response structure
-                console.log(`✅ GeminiService.generateContent call successful (attempt ${retryCount + 1}).`);
-                return response; // Return the simulated axios response
+                const endpoint = getRandomGeminiEndpoint(geminiMediaParts.length > 0);
+                console.log(`📞 Attempt ${retryCount + 1}/${maxRetries} Calling Gemini API: ${endpoint}`);
+                response = await axios.post(endpoint, requestPayload);
+                console.log(`✅ Gemini API call successful (attempt ${retryCount + 1}). Status: ${response.status}`);
+                return response;
             } catch (apiError) {
                 retryCount++;
                 console.error(`❌ Gemini API error (attempt ${retryCount}/${maxRetries}):`, apiError.response?.data || apiError.message || apiError);
@@ -6224,66 +6713,101 @@ await msg.reply(infoMessage.trim(), undefined, { quotedMessageId: msg.id._serial
 
 
         if (jsonResponse.action === "send_email") {
-            const to = jsonResponse.to;
-            const subject = jsonResponse.subject;
-            const html = jsonResponse.html;
-            const attachments = [];
-            let attachmentPath = jsonResponse.attachmentPath; // Path provided by Gemini
-            const originalMsgIdForAttachment = jsonResponse.replyToFileMessageId || jsonResponse.replyTo; // Message ID for context
+            try {
+                const to = jsonResponse.to;
+                const subject = jsonResponse.subject;
+                const html = jsonResponse.html;
+                let attachmentPath = jsonResponse.attachmentPath;
+                const replyToMsgId = jsonResponse.replyTo;
 
-            console.log(`[handleMessage send_email] To: ${to}, Subject: ${subject}. AttachmentPath: ${attachmentPath}, OriginalMsgIdForAttachment: ${originalMsgIdForAttachment}`);
 
-            // 1. If Gemini provided a direct attachmentPath
-            if (attachmentPath && fs.existsSync(attachmentPath)) {
-                console.log(`  Using direct attachmentPath: ${attachmentPath}`);
-                const fileContent = fs.readFileSync(attachmentPath);
-                const filename = path.basename(attachmentPath);
-                const mimeType = require('mime-types').lookup(filename) || 'application/octet-stream';
-                attachments.push({
-                    filename: filename,
-                    mimetype: mimeType,
-                    data: fileContent.toString('base64')
-                });
-            }
-            // 2. If no direct path, but there's a originalMsgIdForAttachment (e.g., user quoted a media message)
-            else if (originalMsgIdForAttachment) {
-                console.log(`  AttachmentPath not direct or invalid. Checking originalMsgIdForAttachment: ${originalMsgIdForAttachment}`);
-                const mediaInfoFromMap = uploadedMediaMap.get(originalMsgIdForAttachment); // Check if media was uploaded/processed earlier
-
-                if (mediaInfoFromMap && mediaInfoFromMap.base64) {
-                     console.log(`  Found media in uploadedMediaMap for ${originalMsgIdForAttachment}`);
-                     attachments.push({
-                        filename: `attachment_from_${originalMsgIdForAttachment.substring(0,10)}.dat`, // Generic filename
-                        mimetype: mediaInfoFromMap.mimeType || 'application/octet-stream',
-                        data: mediaInfoFromMap.base64
-                    });
-                } else {
-                    // Attempt to find the attachment in chat history files (fallback)
-                    console.log(`  Media not in uploadedMediaMap. Checking chat history files for ${originalMsgIdForAttachment}...`);
-                    // chatPaths should be defined in the scope of handleMessage
-                    const potentialMediaFilePath = path.join(chatPaths.filesDir, `${originalMsgIdForAttachment}.${mediaInfoFromMap?.mimeType?.split('/')[1] || 'bin'}`); // Construct potential path
-                     if (fs.existsSync(potentialMediaFilePath)) {
-                        console.log(`  Found media in chat files: ${potentialMediaFilePath}`);
-                        const fileContent = fs.readFileSync(potentialMediaFilePath);
-                        const filename = path.basename(potentialMediaFilePath);
-                        const mimeType = require('mime-types').lookup(filename) || 'application/octet-stream';
-                        attachments.push({
-                            filename: filename,
-                            mimetype: mimeType,
-                            data: fileContent.toString('base64')
-                        });
+                if (!attachmentPath && replyToMsgId) {
+                    const savedMediaPath = path.join(chatPaths.filesDir, `${replyToMsgId}.${uploadedMediaMap.get(replyToMsgId)?.mimeType?.split('/')[1] || 'unknown'}`);
+                    if (fs.existsSync(savedMediaPath)) {
+                        attachmentPath = savedMediaPath;
                     } else {
-                        console.warn(`  Could not find attachment for ${originalMsgIdForAttachment} in map or files.`);
+                        console.warn("⚠️ קובץ מצורף לא נמצא בנתיב השמירה:", savedMediaPath);
+                        attachmentPath = null;
                     }
                 }
+
+
+                const emailLines = [
+                    `From: piti-bot@example.com`,
+                    `To: ${to}`,
+                    'Content-Type: text/html; charset=utf-8',
+                    'MIME-Version: 1.0',
+                    `Subject: =?UTF-8?B?${Buffer.from(subject).toString('base64')}?=`,
+                    '',
+                    html
+                ];
+
+                let attachmentsPart = '';
+                let rawEmail = '';
+
+                if (attachmentPath && fs.existsSync(attachmentPath)) {
+                    const fileContent = fs.readFileSync(attachmentPath);
+                    const base64File = fileContent.toString('base64');
+                    const filename = path.basename(attachmentPath);
+                    const mimeType = uploadedMediaMap.get(replyToMsgId)?.mimeType || 'application/octet-stream';
+
+                    rawEmail = [
+                        `From: piti-bot@example.com`,
+                        `To: ${to}`,
+                        `Subject: =?UTF-8?B?${Buffer.from(subject).toString('base64')}?=`,
+                        `MIME-Version: 1.0`,
+                        `Content-Type: multipart/mixed; boundary="boundary-example"`,
+                        '',
+                        `--boundary-example`,
+                        `Content-Type: text/html; charset="UTF-8"`,
+                        `Content-Transfer-Encoding: 7bit`,
+                        '',
+                        html,
+                        '',
+                        `--boundary-example`,
+                        `Content-Type: ${mimeType}; name="${filename}"`,
+                        `Content-Disposition: attachment; filename="${filename}"`,
+                        `Content-Transfer-Encoding: base64`,
+                        '',
+                        base64File,
+                        '',
+                        `--boundary-example--`
+                    ].join('\r\n');
+                } else {
+                    rawEmail = [
+                        `From: piti-bot@example.com`,
+                        `To: ${to}`,
+                        `Subject: =?UTF-8?B?${Buffer.from(subject).toString('base64')}?=`,
+                        `MIME-Version: 1.0`,
+                        `Content-Type: text/html; charset="UTF-8"`,
+                        `Content-Transfer-Encoding: 7bit`,
+                        '',
+                        html
+                    ].join('\r\n');
+                }
+
+
+                const encodedMessage = Buffer.from(rawEmail)
+                    .toString('base64')
+                    .replace(/\+/g, '-')
+                    .replace(/\//g, '_')
+                    .replace(/=+$/, '');
+
+                await gmail.users.messages.send({
+                    userId: 'me',
+                    requestBody: {
+                        raw: encodedMessage,
+                    },
+                });
+
+
+                await msg.reply("✅ נשלח אימייל בהצלחה.");
+
+            } catch (err) {
+                console.error("❌ שגיאה בשליחת האימייל:", err);
+                await msg.reply("⚠️ הייתה שגיאה בשליחת האימייל.");
             }
 
-            const emailResult = await GmailService.prepareAndSendEmail(to, subject, html, attachments);
-            if (emailResult.success) {
-                await msg.reply(jsonResponse.message || "✅ נשלח אימייל בהצלחה.");
-            } else {
-                await msg.reply(`⚠️ הייתה שגיאה בשליחת האימייל: ${emailResult.error}`);
-            }
             return;
         }
 
@@ -6786,57 +7310,77 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
 
 
         if (jsonResponse.action === "youtube_search" && jsonResponse.query) {
-            console.log(`[handleMessage youtube_search] Query: ${jsonResponse.query}`);
-            // Send initial message if provided by Gemini
-            if (Array.isArray(jsonResponse.messages) && jsonResponse.messages[0]) {
-                await msg.reply(`פיתי\n\n${jsonResponse.messages[0]}`);
-            } else {
-                await msg.reply(`פיתי\n\n🔎 מחפשת סרטונים ביוטיוב על: "${jsonResponse.query}"...`);
-            }
-            const searchResult = await YouTubeService.searchYouTube(jsonResponse.query, 5); // Get top 5
+            console.log("🎯 בקשת YouTube:", jsonResponse.query);
 
-            if (searchResult.success && searchResult.videos && searchResult.videos.length > 0) {
-                const linksText = searchResult.videos.map(video => `${video.title}\n${video.url}`).join('\n\n');
-                const finalMessage = (jsonResponse.messages && jsonResponse.messages[1])
-                    ? `${jsonResponse.messages[1]}\n${linksText}`
-                    : `📺 הנה סרטונים שמצאתי:\n${linksText}`;
-                await msg.reply(`פיתי\n\n${finalMessage}`);
-            } else if (searchResult.success) {
-                await msg.reply(`פיתי\n\n😕 לא מצאתי סרטונים ביוטיוב עבור: "${jsonResponse.query}"`);
-            } else {
-                console.error("❌ [handleMessage youtube_search] Error from YouTubeService:", searchResult.error);
-                await msg.reply(`פיתי\n\n🚫 שגיאה בחיפוש יוטיוב: ${searchResult.error}`);
+            try {
+                if (Array.isArray(jsonResponse.messages) && jsonResponse.messages[0]) {
+                    await msg.reply(jsonResponse.messages[0]);
+                }
+
+                const videoLinks = await searchYouTube(jsonResponse.query);
+                console.log("🔗 קישורי יוטיוב שנמצאו:", videoLinks);
+
+                if (videoLinks && videoLinks.length > 0) {
+                    const finalMessage = (jsonResponse.messages && jsonResponse.messages[1])
+                        ? `${jsonResponse.messages[1]}\n${videoLinks.join('\n')}`
+                        : `📺 הנה סרטונים שמצאתי:\n${videoLinks.join('\n')}`;
+                    await msg.reply(finalMessage);
+                } else {
+                    await msg.reply("😕 לא הצלחתי למצוא סרטונים ביוטיוב.");
+                }
+            } catch (err) {
+                console.error("❌ שגיאה בחיפוש ביוטיוב:", err);
+                await msg.reply("🚫 הייתה שגיאה בזמן חיפוש הסרטון.");
             }
+
             return;
         }
 
-        // const play = require('play-dl'); // play-dl is now only in YouTubeService.js
+        const play = require('play-dl');
 
     if (jsonResponse.action === "download_youtube_video" && jsonResponse.video_url) {
         const videoUrl = jsonResponse.video_url;
-        const loadingMessage = jsonResponse.message || `פיתי\n\n⬇️ מורידה סרטון מיוטיוב: ${videoUrl}...`;
+        const loadingMessage = jsonResponse.message || "⬇️ מוריד סרטון מיוטיוב...";
         await msg.reply(loadingMessage);
-        const targetChatId = msg.id.remote; // Get target chat for sending the video
 
-        console.log(`[handleMessage download_youtube_video] URL: ${videoUrl}`);
-        const downloadResult = await YouTubeService.downloadVideoAndGetBuffer(videoUrl);
+        try {
+            const stream = await play.stream(videoUrl);
+            const chunks = [];
 
-        if (downloadResult.success && downloadResult.buffer) {
-            const videoTitle = downloadResult.title || 'video';
-            const safeFilename = videoTitle.replace(/[^a-zA-Z0-9א-ת\s\-]/g, '_').substring(0, 50) + '.mp4';
-            const videoMedia = new MessageMedia(downloadResult.mimeType || 'video/mp4', downloadResult.buffer.toString('base64'), safeFilename);
-
-            // Use client.sendMessage to send to the correct chat ID, quoting the original message
-            await client.sendMessage(targetChatId, videoMedia, {
-                caption: `🎬 הנה הסרטון: ${videoTitle}`,
-                quotedMessageId: msg.id._serialized // Quote the user's request message
+            stream.stream.on('data', (chunk) => {
+                chunks.push(chunk);
             });
-            console.log(`[handleMessage download_youtube_video] Video sent to ${targetChatId}`);
-        } else {
-            console.error("❌ [handleMessage download_youtube_video] Error from YouTubeService:", downloadResult.error);
-            await msg.reply(`פיתי\n\n❌ שגיאה בהורדת סרטון יוטיוב: ${downloadResult.error}`);
+
+            stream.stream.on('end', async () => {
+                try { // Added try-catch for safety inside async callback
+                    const videoBuffer = Buffer.concat(chunks);
+                    if (videoBuffer.length < 1000) { // Basic validation
+                        console.error("❌ הורדת יוטיוב הסתיימה אך הקובץ קטן מדי.");
+                        await msg.reply("⚠️ הורדת הסרטון מיוטיוב הסתיימה אך נראה שהקובץ פגום.");
+                        return;
+                    }
+                    const videoMedia = new MessageMedia(stream.type || 'video/mp4', videoBuffer.toString('base64'), 'video.mp4');
+                    await msg.reply(videoMedia, undefined, { caption: "🎬 הנה הסרטון שהורדתי." });
+                    console.log(`✅ הסרטון ${videoUrl} הורד ונשלח.`);
+                } catch (endError) {
+                    console.error("❌ שגיאה בתוך stream.on('end'):", endError);
+                    await msg.reply("❌ אירעה שגיאה בעיבוד הסרטון לאחר ההורדה.");
+                }
+            });
+
+            stream.stream.on('error', (err) => {
+                console.error("❌ שגיאה בהורדת הסרטון (stream error):", err);
+                // Avoid replying inside the stream error if possible, might cause issues
+                // Consider logging or notifying owner instead
+                // msg.reply("❌ אירעה שגיאה בהורדת הסרטון.");
+            });
+
+        } catch (error) {
+            console.error("❌ שגיאה כללית בהורדת יוטיוב (play.stream):", error);
+            await msg.reply("❌ אירעה שגיאה בניסיון להתחיל את הורדת הסרטון מיוטיוב.");
         }
-        return;
+
+        return; // Return after handling youtube download
     }
 
 
@@ -7035,59 +7579,49 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
 
     if (jsonResponse.action === "image") {
         const loadingMessageText = jsonResponse.message || `פיתי\n\nיוצר תמונה...`;
-        // Optional: Send loading message if not handled by the image generation function itself
+        // הודעת טעינה תישלח אוטומטית על ידי פונקציית יצירת התמונה
+        // או שאתה יכול לשלוח אותה כאן אם אתה מעדיף:
         // await msg.reply(loadingMessageText);
 
         if (jsonResponse.imageModelType === "gradio" && jsonResponse.gradioModelName && jsonResponse.gradioModelParams) {
             console.log(`[handleMessage] Calling Gradio image generator for: ${jsonResponse.gradioModelName}`);
+            // קריאה לפונקציה החדשה של Gradio
+            // הפונקציה generateImageWithGradio כבר שולחת את ההודעה והתמונה למשתמש
+            // היא גם מטפלת בשמירה ובאינדוקס
             await generateImageWithGradio(jsonResponse.gradioModelParams, jsonResponse.gradioModelName, msg);
         } else if (jsonResponse.imagePrompt && jsonResponse.imageModel) {
-            // This block now calls CloudflareService.generateCloudflareImage
-            console.log(`[handleMessage] Calling CloudflareService.generateCloudflareImage for model: ${jsonResponse.imageModel}`);
-            const imageResult = await CloudflareService.generateCloudflareImage(jsonResponse.imagePrompt, jsonResponse.imageModel);
-
-            if (imageResult.success && imageResult.data) {
-                const media = new MessageMedia(imageResult.mimeType, imageResult.data.toString('base64'), `cf_image_${jsonResponse.imageModel}.${imageResult.mimeType.split('/')[1] || 'png'}`);
-                await msg.reply(media, undefined, { caption: `פיתי\n\nהנה התמונה שביקשת (${jsonResponse.imageModel}):\n${jsonResponse.imagePrompt}${imageResult.seed ? `\nSeed: ${imageResult.seed}` : ''}` });
-
-                // Save and index the file
-                const chat = await msg.getChat();
-                const safeName = await getSafeNameForChat(chat); // Ensure safeName is available
-                const chatPaths = getChatPaths(msg.id.remote, safeName); // Ensure chatPaths is available
-                fs.mkdirSync(chatPaths.filesDir, { recursive: true });
-                const finalFilename = `cf_image_${jsonResponse.imageModel}_${Date.now()}.${imageResult.mimeType.split('/')[1] || 'png'}`;
-                const fullPath = path.join(chatPaths.filesDir, finalFilename);
-                fs.writeFileSync(fullPath, imageResult.data);
-
-                let indexData = [];
-                if (fs.existsSync(chatPaths.generatedFilesIndex)) {
-                    try { indexData = JSON.parse(fs.readFileSync(chatPaths.generatedFilesIndex, 'utf8')); } catch (e) { console.warn("Error parsing generatedFilesIndex:", e); indexData = []; }
-                }
-                indexData.push({
-                    timestamp: new Date().toISOString(),
-                    originalMessageId: msg.id._serialized,
-                    generatedFilePath: fullPath,
-                    filename: finalFilename,
-                    description: jsonResponse.imagePrompt,
-                    type: imageResult.mimeType,
-                    modelUsed: jsonResponse.imageModel, // Using the key from IMAGE_MODEL_ENDPOINTS
-                    seedUsed: imageResult.seed
-                });
-                fs.writeFileSync(chatPaths.generatedFilesIndex, JSON.stringify(indexData, null, 2), 'utf8');
-                console.log(`  📁 Cloudflare image (via Service) saved and indexed: ${fullPath}`);
-            } else {
-                await msg.reply(`פיתי\n\nשגיאה ביצירת התמונה עם Cloudflare: ${imageResult.error || 'שגיאה לא ידועה'}`);
-            }
+            console.log(`[handleMessage] Calling Cloudflare image generator for: ${jsonResponse.imageModel}`);
+            // קריאה לפונקציה הקיימת של Cloudflare (דרך generateImage)
+            // הפונקציה generateImage כבר שולחת את ההודעה והתמונה למשתמש
+            await generateImage(jsonResponse.imagePrompt, jsonResponse.imageModel, msg);
         } else {
-            await msg.reply("פיתי\n\nשגיאה: פרטים חסרים לבקשת יצירת תמונה. אנא ודא שסופק תיאור ומודל (Cloudflare או Gradio).");
+            await msg.reply("פיתי\n\nשגיאה: פרטים חסרים לבקשת יצירת תמונה. אנא ודא שסופק תיאור ומודל (רגיל או Gradio).");
         }
         return;
     }
 
-    // The second block for jsonResponse.action === "image" seems redundant if the first one handles all cases.
-    // If it was meant for a different logic path, that needs clarification.
-    // For now, assuming the first block is the primary one to be refactored for CloudflareService.
-    // The previous `generateImage` call was removed/commented.
+    if (jsonResponse.action === "image") {
+        const loadingMessageText = jsonResponse.message || `פיתי\n\nיוצר תמונה...`;
+        // הודעת טעינה תישלח אוטומטית על ידי פונקציית יצירת התמונה
+        // או שאתה יכול לשלוח אותה כאן אם אתה מעדיף:
+        // await msg.reply(loadingMessageText);
+
+        if (jsonResponse.imageModelType === "gradio" && jsonResponse.gradioModelName && jsonResponse.gradioModelParams) {
+            console.log(`[handleMessage] Calling Gradio image generator for: ${jsonResponse.gradioModelName}`);
+            // קריאה לפונקציה החדשה של Gradio
+            // הפונקציה generateImageWithGradio כבר שולחת את ההודעה והתמונה למשתמש
+            // היא גם מטפלת בשמירה ובאינדוקס
+            await generateImageWithGradio(jsonResponse.gradioModelParams, jsonResponse.gradioModelName, msg);
+        } else if (jsonResponse.imagePrompt && jsonResponse.imageModel) {
+            console.log(`[handleMessage] Calling Cloudflare image generator for: ${jsonResponse.imageModel}`);
+            // קריאה לפונקציה הקיימת של Cloudflare (דרך generateImage)
+            // הפונקציה generateImage כבר שולחת את ההודעה והתמונה למשתמש
+            await generateImage(jsonResponse.imagePrompt, jsonResponse.imageModel, msg);
+        } else {
+            await msg.reply("פיתי\n\nשגיאה: פרטים חסרים לבקשת יצירת תמונה. אנא ודא שסופק תיאור ומודל (רגיל או Gradio).");
+        }
+        return;
+    }
 
 
     // Inside the handleMessage function, replace the existing multi-reply block with this:
@@ -7362,31 +7896,14 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
                         break;
 
                     case "send_email":
+                        // Encapsulate email logic if not already done, or call it here
                         console.log(`[Multi-Reply EMAIL] Attempting to send email for ${replyToId}`);
                         if (reply.to && reply.subject && reply.html) {
-                            const attachments = [];
-                            // Simplified attachment logic for multi-reply, assuming direct path or map for now
-                            if (reply.attachmentPath && fs.existsSync(reply.attachmentPath)) {
-                                const fileContent = fs.readFileSync(reply.attachmentPath);
-                                const filename = path.basename(reply.attachmentPath);
-                                const mimeType = require('mime-types').lookup(filename) || 'application/octet-stream';
-                                attachments.push({ filename, mimetype: mimeType, data: fileContent.toString('base64')});
-                            } else if (reply.replyToFileMessageId) {
-                                const mediaInfo = uploadedMediaMap.get(reply.replyToFileMessageId);
-                                if (mediaInfo && mediaInfo.base64) {
-                                    attachments.push({ filename: `attachment_${reply.replyToFileMessageId.substring(0,10)}.dat`, mimetype: mediaInfo.mimeType, data: mediaInfo.base64 });
-                                }
-                            }
-                            const emailResult = await GmailService.prepareAndSendEmail(reply.to, reply.subject, reply.html, attachments);
-                            if (emailResult.success) {
-                                await targetMsg.reply(reply.message || "✅ נשלח אימייל בהצלחה (מרובה).");
-                            } else {
-                                await targetMsg.reply(`⚠️ שגיאה בשליחת אימייל (מרובה): ${emailResult.error}`);
-                            }
+                            await handleSendEmailAction(reply, targetMsg, chatPaths); // Pass reply data, targetMsg, and chatPaths
                             repliesSentCount++;
                         } else {
                             console.warn(`[Multi-Reply EMAIL] Missing required fields (to, subject, html) for ${replyToId}`);
-                            await targetMsg.reply("פיתי\n\n⚠️ לא ניתן לשלוח אימייל (מרובה), חסרים פרטים.");
+                            await targetMsg.reply("פיתי\n\n⚠️ לא ניתן לשלוח אימייל, חסרים פרטים (נמען, נושא, תוכן).");
                         }
                         break;
 
@@ -8017,13 +8534,12 @@ ${finalHtmlPrompt}
 `;
 
         console.log("📄 [handleGenerateHtmlAction] Sending request to Gemini for HTML code generation...");
-        // Using GeminiService.generateContent
-        const htmlGenResponseData = await GeminiService.generateContent(
-            [{ parts: [{ text: geminiHtmlGenPrompt }] }],
-            { modelName: 'gemini-2.0-pro-exp' } // Explicitly use this model or its mapped equivalent
-        );
+        const htmlGenEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-pro-exp:generateContent?key=${apiKeyManager.getRandomApiKey()}`;
+        const htmlGenResponse = await axios.post(htmlGenEndpoint, {
+            contents: [{ parts: [{ text: geminiHtmlGenPrompt }] }]
+        });
 
-        let generatedHtmlCode = htmlGenResponseData?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+        let generatedHtmlCode = htmlGenResponse.data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
 
         // Clean up potential markdown fences (just in case Gemini ignores instructions)
         generatedHtmlCode = generatedHtmlCode.replace(/^```(?:html)?\s*|\s*```$/g, "").trim();
@@ -8245,63 +8761,298 @@ async function generateImageWithGradio(gradioModelParams, gradioModelName, msg, 
     console.error(`[generateImageWithGradio] Failed all ${MAX_GRADIO_RETRIES} retries for ${gradioModelName}.`);
     return { buffer: null, mimeType: null, error: `Failed all ${MAX_GRADIO_RETRIES} retries for Gradio model ${gradioModelName}.`, seed: null };
 }
-// Removed generateImage function - its calls will be replaced by CloudflareService.generateCloudflareImage
+async function generateImage(description, imageModel, msg, retryCount = 0) {
+    const modelEndpoint = IMAGE_MODEL_ENDPOINTS[imageModel];
+    if (!modelEndpoint) {
+        console.error(`Image model "${imageModel}" not found in available models.`);
+        await msg.reply(`פיתי\n\nמודל התמונה "${imageModel}" לא נמצא.`);
+        return;
+    }
 
-// const play = require('play-dl'); // play-dl is now used by YouTubeService
+    let requestBody;
+    switch (imageModel) {
+        case 'flux-1-schnell':
+            requestBody = {
+                prompt: description,
+                steps: 4  // לדוגמה, בין 1 ל-8
+            };
+            break;
+        case 'dreamshaper-8-lcm':
+            requestBody = {
+                prompt: description,
+                width: 1024,
+                height: 1024,
+                num_steps: 20,
+                guidance: 7.5
+            };
+            break;
+        case 'stable-diffusion-xl-lighting':
+            requestBody = {
+                prompt: description,
+                width: 1024,
+                height: 1024,
+                num_steps: 20,
+                guidance: 7.5
+            };
+            break;
+        case 'stable-diffusion-xl-base-1.0':
+            requestBody = {
+                prompt: description,
+                width: 1024,
+                height: 1024,
+                num_steps: 20,
+                guidance: 7.5
+            };
+            break;
+        default:
+            requestBody = {
+                prompt: description,
+                width: 1024,
+                height: 1024,
+                num_steps: 20,
+                guidance: 7.5
+            };
+    }
 
-// פונקציה לסיכום וידאו באמצעות YouTubeService ו-GeminiService
+    let response;
+    let base64Image;
+
+    console.log(`[generateImage Debug] Requesting image from ${modelEndpoint} with body:`, requestBody);
+
+    try {
+        const response = await axios.post(
+            `${BASE_IMAGE_GENERATION_API_ENDPOINT}${modelEndpoint}`,
+            requestBody,
+            {
+                headers: {
+                    "Authorization": `Bearer ${CLOUDFLARE_API_TOKEN}`,
+                    "Content-Type": "application/json"
+                },
+                // Expect JSON for Flux, ArrayBuffer for others might need adjustment
+                // Let's try keeping arraybuffer and parsing JSON manually if content-type is json
+                responseType: 'arraybuffer',
+                validateStatus: status => status >= 200 && status < 300
+            }
+        );
+
+        console.log(`[generateImage Debug] Received response. Status: ${response.status}`);
+        const contentType = response.headers['content-type'];
+        console.log(`[generateImage Debug] Response Content-Type: ${contentType}`);
+
+        let imageBuffer = null;
+        let base64Image = null;
+        let imageMimeType = 'image/png'; // Default
+
+        // ----- PROCESS RESPONSE BASED ON CONTENT TYPE -----
+        if (contentType && contentType.includes('application/json')) {
+            console.log(`[generateImage Debug] Processing JSON response for ${imageModel}...`);
+            let responseJson;
+            try {
+                // Convert ArrayBuffer to string, then parse JSON
+                const jsonString = Buffer.from(response.data).toString('utf8');
+                responseJson = JSON.parse(jsonString);
+                console.log(`[generateImage Debug] Parsed JSON successfully.`);
+
+                // Check if JSON contains the image data
+                if (responseJson.success === true && responseJson.result && responseJson.result.image) {
+                    console.log(`[generateImage Debug] Found image data in JSON result.`);
+                    base64Image = responseJson.result.image; // This is already base64
+                    // Try to infer mime type (often JPEG for base64 starting with /9j/)
+                    if (base64Image.startsWith('/9j/')) {
+                        imageMimeType = 'image/jpeg';
+                    }
+                    // Create buffer from the base64 string
+                    imageBuffer = Buffer.from(base64Image, 'base64');
+                    console.log(`[generateImage Debug] Created buffer from JSON base64. Length: ${imageBuffer.length}`);
+                } else {
+                    // JSON response, but no success/image data - treat as error
+                    console.error(`[generateImage Error] JSON response for ${imageModel} indicates failure or missing image data:`, responseJson);
+                    const errorMessage = responseJson?.errors?.[0]?.message || 'פרטים לא זמינים';
+                    await msg.reply(`פיתי\n\nשגיאה ממודל ${imageModel}: השרת החזיר JSON המצביע על כשלון. (${errorMessage})`);
+                    return;
+                }
+            } catch (parseError) {
+                console.error(`[generateImage Error] Failed to parse JSON response for ${imageModel}:`, parseError);
+                console.error(`[generateImage Error] Raw JSON String: ${Buffer.from(response.data).toString('utf8')}`);
+                await msg.reply(`פיתי\n\nשגיאה בפענוח התשובה (JSON) שהתקבלה ממודל ${imageModel}.`);
+                return;
+            }
+        } else if (contentType && contentType.startsWith('image/')) {
+            // Process direct image response (for other models)
+            console.log(`[generateImage Debug] Processing direct image response (${contentType})...`);
+            imageBuffer = Buffer.from(response.data, 'binary'); // Use binary for arraybuffer
+            base64Image = imageBuffer.toString('base64');
+            imageMimeType = contentType; // Use the actual content type
+            console.log(`[generateImage Debug] Created buffer from direct image response. Length: ${imageBuffer.length}`);
+        } else {
+            // Unexpected content type
+            console.error(`[generateImage Error] Unexpected Content-Type received from Cloudflare for ${imageModel}: ${contentType}`);
+            await msg.reply(`פיתי\n\nשגיאה: קבלתי תשובה מסוג לא צפוי (${contentType || 'לא ידוע'}) ממודל ${imageModel}.`);
+            return;
+        }
+        // ----- END PROCESS RESPONSE -----
+
+
+        // ----- VALIDATE AND SEND -----
+        if (!imageBuffer || imageBuffer.length < 100) {
+            console.error(`[generateImage Error] Invalid or empty image buffer obtained for ${imageModel}.`);
+            await msg.reply(`פיתי\n\nשגיאה: קובץ התמונה שהתקבל עבור ${imageModel} ריק או לא תקין.`);
+            return;
+        }
+
+        console.log(`[generateImage Debug] Proceeding to create MessageMedia. MimeType: ${imageMimeType}, Base64 Length: ${base64Image.length}`);
+
+        let media;
+        try {
+            const filename = `generated_image.${imageMimeType.split('/')[1] || 'png'}`;
+            media = new MessageMedia(imageMimeType, base64Image, filename);
+            console.log('[generateImage Debug] MessageMedia object created successfully.');
+        } catch (mediaError) {
+            console.error('[generateImage Error] Error creating MessageMedia:', mediaError);
+            await msg.reply(`פיתי\n\nשגיאה ביצירת אובייקט המדיה לשליחה.`);
+            return;
+        }
+
+        // Try sending
+        try {
+            console.log(`[generateImage Debug] Attempting msg.reply with media for ${imageModel}...`);
+            await msg.reply(media, undefined, { caption: `פיתי\n\nהנה התמונה שביקשת (${imageModel}):\n${description}` });
+            console.log(`[generateImage Debug] msg.reply apparently succeeded for ${imageModel}.`);
+        } catch (sendError) {
+            console.error(`[generateImage FATAL ERROR] Error during msg.reply for ${imageModel}:`, sendError);
+            await msg.reply(`פיתי\n\nאירעה שגיאה קריטית בניסיון לשלוח את התמונה שנוצרה עם ${imageModel}. ייתכן שהקובץ נשמר בכל זאת.`);
+            // Decide if you want to continue to save or stop
+            // return; // Uncomment to stop if sending fails
+        }
+        // ----- END VALIDATE AND SEND -----
+
+
+        // ----- SAVE FILE -----
+        const chat = await msg.getChat();
+        const safeName = await getSafeNameForChat(chat);
+        const chatPaths = getChatPaths(chat.id._serialized, safeName);
+        fs.mkdirSync(chatPaths.filesDir, { recursive: true });
+
+        const finalFilename = `image_${imageModel}_${Date.now()}.${imageMimeType.split('/')[1] || 'png'}`;
+        const fullPath = path.join(chatPaths.filesDir, finalFilename);
+        try {
+            fs.writeFileSync(fullPath, imageBuffer); // Save the buffer
+
+            // Update index only after successful save
+            let indexData = [];
+            const indexFilePath = chatPaths.generatedFilesIndex;
+            if (fs.existsSync(indexFilePath)) {
+                try {
+                    indexData = JSON.parse(fs.readFileSync(indexFilePath, 'utf8'));
+                } catch (parseErr) {
+                    console.error(`Error parsing generated_files.json for chat ${safeName}:`, parseErr);
+                    indexData = [];
+                }
+            }
+            indexData.push({
+                timestamp: new Date().toISOString(),
+                originalMessageId: msg.id._serialized,
+                generatedFilePath: fullPath,
+                filename: finalFilename,
+                description: description,
+                type: imageMimeType, // Use the determined mime type
+                modelUsed: imageModel
+            });
+            fs.writeFileSync(indexFilePath, JSON.stringify(indexData, null, 2), 'utf8');
+            console.log(`📁 התווספה תמונה לרשימת generated_files (מודל: ${imageModel})`);
+
+        } catch (saveError) {
+            console.error(`[generateImage Error] Failed to save final image to ${fullPath}:`, saveError);
+        }
+        // ----- END SAVE FILE -----
+
+    } catch (error) {
+        // Catch errors from the axios request itself (network issues, 4xx/5xx status codes)
+        if (error.response) {
+            console.error(`[generateImage Axios Error] Status: ${error.response.status}, Model: ${imageModel}`);
+            let errorDataText = '[Could not read error response data]';
+            try {
+                errorDataText = Buffer.from(error.response.data).toString('utf8');
+                console.error(`[generateImage Axios Error] Data: ${errorDataText}`);
+            } catch (e) { console.error('[generateImage Axios Error] Failed to read error response data buffer.'); }
+            await msg.reply(`פיתי\n\nשגיאה ${error.response.status} בתקשורת עם שרת התמונות (${imageModel}). ${errorDataText.slice(0, 100)}`);
+        } else if (error.request) {
+            console.error(`[generateImage Network Error] No response received for ${imageModel}:`, error.message);
+            await msg.reply(`פיתי\n\nשגיאת רשת: לא התקבלה תשובה משרת התמונות (${imageModel}).`);
+        } else {
+            console.error(`[generateImage Setup Error] Error setting up request for ${imageModel}:`, error.message);
+            await msg.reply(`פיתי\n\nשגיאה בהכנת הבקשה לשרת התמונות (${imageModel}).`);
+        }
+    }
+}
+
+const play = require('play-dl'); // ודא שזה מיובא בתחילת הקובץ
+
+// פונקציה (בסיסית) לסיכום וידאו - דורשת שיפור/בדיקה של תמלול
 async function handleSummarizeVideoAction(videoData, targetMsg) {
     const targetChatId = targetMsg.id.remote;
     const replyToId = videoData.replyTo || targetMsg.id._serialized;
     const videoUrl = videoData.video_url;
 
-    if (!videoUrl || (!videoUrl.includes("youtube.com/") && !videoUrl.includes("youtu.be/"))) {
-        await targetMsg.reply("⚠️ קישור היוטיוב לסיכום אינו תקין או חסר.", undefined, { quotedMessageId: replyToId });
+    if (!videoUrl || !play.yt_validate(videoUrl)) {
+        await targetMsg.reply("⚠️ קישור היוטיוב לסיכום לא תקין או חסר.", undefined, { quotedMessageId: replyToId });
         return;
     }
 
-    await targetMsg.reply(videoData.message || "🎬 מנסה להשיג תמלול ולסכם את הסרטון...", undefined, { quotedMessageId: replyToId });
+    // שלח הודעת "מעבד..."
+    await targetMsg.reply(videoData.message || "🎬 מנסה לסכם את הסרטון...", undefined, { quotedMessageId: replyToId });
 
     try {
-        console.log(`[handleSummarizeVideoAction] Getting captions for: ${videoUrl} via YouTubeService.`);
+        console.log(`[handleSummarizeVideoAction] Attempting to get info/transcript for: ${videoUrl}`);
 
-        // 1. Get captions using YouTubeService (tries Hebrew then English)
-        let captionResult = await YouTubeService.getYouTubeVideoCaptions(videoUrl, 'he');
-        if (!captionResult.success || !captionResult.transcript) { // Check for transcript
-            console.warn(`[handleSummarizeVideoAction] Hebrew captions failed for ${videoUrl}. Error: ${captionResult.error}. Trying English...`);
-            captionResult = await YouTubeService.getYouTubeVideoCaptions(videoUrl, 'en');
+        // שלב 1: נסה להשיג כתוביות אוטומטיות (אם קיימות)
+        let captions;
+        try {
+            // נסה להשיג כתוביות באנגלית או עברית
+            // הערה: play.captions עשוי לא תמיד לעבוד או להחזיר כתוביות אוטומטיות.
+            captions = await play.captions(videoUrl, { lang: 'en' }) || await play.captions(videoUrl, { lang: 'he' });
+            if (!captions) {
+                // נסה לחפש כתוביות אוטומטיות (a.en, a.he)
+                const info = await play.video_info(videoUrl);
+                const autoCaps = info.format.find(f => f.language === 'a.en' || f.language === 'a.he');
+                if (autoCaps) {
+                    console.log(`[handleSummarizeVideoAction] Found potential auto-captions: ${autoCaps.language}`);
+                    // ייתכן שנצטרך לוגיקה נוספת להורדת קובץ הכתוביות ופענוחו
+                    // כרגע נסמן שלא מצאנו כתוביות ש-play-dl מחזיר ישירות
+                    captions = null; // עד למימוש הורדה ופענוח
+                }
+            }
+
+        } catch (captionError) {
+            console.warn(`[handleSummarizeVideoAction] Could not fetch captions directly via play-dl for ${videoUrl}: ${captionError.message}`);
+            captions = null;
         }
 
-        if (!captionResult.success || !captionResult.transcript) {
-            console.error(`[handleSummarizeVideoAction] Failed to get transcript for ${videoUrl}. Error: ${captionResult.error}`);
-            await targetMsg.reply(captionResult.error || "⚠️ לא הצלחתי למצוא תמלול עבור הסרטון.", undefined, { quotedMessageId: replyToId });
-            return;
-        }
 
-        const transcriptToSummarize = captionResult.transcript;
-        const transcriptLang = captionResult.lang || 'השפה המקורית'; // Fallback language description
-        console.log(`[handleSummarizeVideoAction] Transcript obtained (lang: ${transcriptLang}, length: ${transcriptToSummarize.length}). Summarizing with GeminiService...`);
+        if (captions) {
+            // אם נמצאו כתוביות, חבר אותן לטקסט אחד
+            const transcript = captions.map(cap => cap.text).join(' ');
+            console.log(`[handleSummarizeVideoAction] Transcript generated from captions (length: ${transcript.length}). Summarizing...`);
 
-        // 2. Summarize with GeminiService
-        const summarizePrompt = `Please summarize the following video transcript concisely in Hebrew. The transcript is in ${transcriptLang}:\n\n"${transcriptToSummarize}"\n\nתסכם באריכות, אל תעז לקצר כלום, תסכם כל פרט ופרט. Summary:`;
+            // שלח ל-Gemini לסיכום
+            const summarizePrompt = `Please summarize the following video transcript concisely in Hebrew:\n\n"${transcript}"`;
+            const summaryEndpoint = getRandomGeminiEndpoint(false);
+            const summaryResponse = await axios.post(summaryEndpoint, {
+                contents: [{ parts: [{ text: summarizePrompt }] }]
+            });
+            const summary = summaryResponse.data?.candidates?.[0]?.content?.parts?.[0]?.text || "לא הצלחתי לסכם את התמלול.";
 
-        const summaryResponseData = await GeminiService.generateContent(
-            [{ parts: [{ text: summarizePrompt }] }],
-            { type: 'flash' } // Or another suitable model
-        );
+            await targetMsg.reply(`פיתי\n\n🎬 *סיכום הסרטון (מבוסס תמלול):*\n${summary}`, undefined, { quotedMessageId: replyToId });
 
-        const summary = summaryResponseData?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-        if (summary) {
-            await targetMsg.reply(`פיתי\n\n🎬 *סיכום הסרטון (מבוסס תמלול בשפת ${transcriptLang}):*\n${summary}`, undefined, { quotedMessageId: replyToId });
         } else {
-            console.error("[handleSummarizeVideoAction] GeminiService did not produce a summary.");
-            await targetMsg.reply("⚠️ לא הצלחתי לסכם את התמלול מהסרטון.", undefined, { quotedMessageId: replyToId });
+            // אם אין תמלול זמין
+            console.warn(`[handleSummarizeVideoAction] No suitable transcript found for ${videoUrl}. Cannot summarize.`);
+            await targetMsg.reply("⚠️ מצטערת, לא הצלחתי למצוא תמלול אוטומטי עבור הסרטון הזה כדי לסכם אותו.", undefined, { quotedMessageId: replyToId });
         }
 
     } catch (error) {
-        console.error("❌ Error in handleSummarizeVideoAction:", error.response?.data || error.message || error);
-        await targetMsg.reply("❌ אירעה שגיאה כללית בניסיון לסכם את הסרטון.", undefined, { quotedMessageId: replyToId });
+        console.error("❌ Error during video summarization attempt:", error.response?.data || error.message || error);
+        await targetMsg.reply("❌ אירעה שגיאה בניסיון לסכם את הסרטון.", undefined, { quotedMessageId: replyToId });
     }
 }
 
@@ -8372,24 +9123,24 @@ async function generateDocument({
                         continue;
                     }
                     try {
-                        const imageResult = await CloudflareService.generateCloudflareImage(req.prompt, req.imageModel || 'flux-1-schnell');
+                        const { buffer: imgBuffer, mimeType: genImgMimeType } = await generateImageAndGetBuffer(req.prompt, req.imageModel || 'flux-1-schnell', triggeringMsg);
 
-                        if (imageResult.success && imageResult.data) {
+                        if (imgBuffer && genImgMimeType) {
                             let filenameWithExt = req.intendedFilename;
                             if (!path.extname(filenameWithExt)) {
-                                filenameWithExt += `.${mime.extension(imageResult.mimeType) || 'png'}`;
+                                filenameWithExt += `.${mime.extension(genImgMimeType) || 'png'}`;
                             }
                             const savePath = path.join(filesDirForOutputAndImages, filenameWithExt);
-                            fs.writeFileSync(savePath, imageResult.data);
+                            fs.writeFileSync(savePath, imgBuffer);
 
                             imagePlacementInfoForLatex.push({
-                                latexPath: `files/${filenameWithExt.replace(/\\/g, '/')}`, // Relative path for LaTeX
+                                latexPath: `files/${filenameWithExt.replace(/\\/g, '/')}`,
                                 placementContext: req.placementContext || imageIntegration.placementHintGlobal || "Integrate appropriately",
                                 sourceDescription: `AI Generated: "${req.prompt.substring(0, 40)}..." (Model: ${req.imageModel || 'flux-1-schnell'})`
                             });
                             console.log(`  AI Image "${filenameWithExt}" saved for LaTeX at ${savePath}.`);
                         } else {
-                            console.warn(`  Failed to generate AI image for prompt: ${req.prompt}. Error: ${imageResult.error}`);
+                            console.warn(`  Failed to generate AI image buffer for prompt: ${req.prompt}`);
                         }
                     } catch (aiImgError) {
                         console.error(`  Error generating or saving AI image for prompt "${req.prompt}": ${aiImgError.message}`);
@@ -8403,7 +9154,7 @@ async function generateDocument({
                         continue;
                     }
                     // searchAndDownloadWebImages saves images directly into `filesDirForOutputAndImages`
-                    const downloaded = await PixabayService.searchAndDownloadWebImages( // Using PixabayService
+                    const downloaded = await searchAndDownloadWebImages(
                         req.query,
                         req.maxImagesToConsider || 3,
                         req.intendedFilenamePrefix,
@@ -8732,13 +9483,9 @@ If an image is purely illustrative and small, you might place it with \\begin{ce
         };
 
         console.log("📄 [generateDocument V2] Sending request to Gemini for LaTeX code generation...");
-        // Using GeminiService.generateContent
-        const responseData = await GeminiService.generateContent(
-            requestPayloadForDoc.contents,
-            { modelName: 'gemini-2.0-flash-thinking-exp' }, // Explicitly use this model or its mapped equivalent
-            requestPayloadForDoc.safetySettings
-        );
-        let latexCode = responseData?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+        const latexGenEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-thinking-exp:generateContent?key=${apiKeyManager.getRandomApiKey()}`;
+        const response = await axios.post(latexGenEndpoint, requestPayloadForDoc);
+        let latexCode = response.data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
 
         latexCode = latexCode.replace(/^```(?:latex)?\s*|\s*```$/g, '').trim();
 
@@ -9134,12 +9881,9 @@ async function parseReminderTime(timeText) {
             contents: [{ parts: [{ text: prompt }] }]
         };
 
-        // Using GeminiService.generateContent
-        const responseData = await GeminiService.generateContent(
-            requestPayload.contents,
-            { modelName: 'gemini-2.0-flash-thinking-exp' } // Explicitly use this model or mapped equivalent
-        );
-        const rawText = responseData?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-thinking-exp:generateContent?key=${apiKeyManager.getRandomApiKey()}`;
+        const response = await axios.post(geminiUrl, requestPayload);
+        const rawText = response.data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
 
         if (!rawText) return null;
 
@@ -9233,7 +9977,51 @@ async function searchWebsite(query) {
     }
 }
 
-// Local searchYouTube function removed. Will use YouTubeService.searchYouTube.
+async function searchYouTube(query) {
+    const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+    const results = [];
+
+    try {
+        const { data } = await axios.get(searchUrl, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0'
+            }
+        });
+
+        const $ = cheerio.load(data);
+        const initialDataScript = $('script')
+            .toArray()
+            .map(el => $(el).html())
+            .find(txt => txt.includes('var ytInitialData'));
+
+        if (!initialDataScript) return null;
+
+        const jsonStr = initialDataScript.match(/var ytInitialData = ({.*});/s)?.[1];
+        if (!jsonStr) return null;
+
+        const json = JSON.parse(jsonStr);
+
+        const contents =
+            json.contents?.twoColumnSearchResultsRenderer?.primaryContents?.sectionListRenderer?.contents;
+
+        const videos =
+            contents?.flatMap(section =>
+                section.itemSectionRenderer?.contents?.filter(item => item.videoRenderer)
+            );
+
+        for (let i = 0; i < Math.min(videos?.length || 0, 2); i++) {
+            const video = videos[i]?.videoRenderer;
+            if (video) {
+                const videoId = video.videoId;
+                results.push(`https://www.youtube.com/watch?v=${videoId}`);
+            }
+        }
+        return results;
+    } catch (err) {
+        console.error("❌ שגיאה במהלך חיפוש ביוטיוב:", err);
+        return null;
+    }
+}
 
 
 client.on('message', async (msg) => {
@@ -9842,54 +10630,29 @@ case "generate_graph":
 
     // --- הוסף את הבלוק הזה ---
     // SECTION 7.5: Voice Message Transcription
+    // SECTION 7.5: Voice Message Transcription
     if (!msg.fromMe && (msg.type === 'audio' || msg.type === 'ptt')) {
         console.log(`[message_create VOICE DETECTED] Msg ${msg.id._serialized} is a voice message. Attempting transcription...`);
-        let transcribedText = null;
-        try {
-            const media = await msg.downloadMedia();
-            if (media && media.data) {
-                const transcriptionResult = await CloudflareService.transcribeAudio(media.data); // Using 'he' by default
-                if (transcriptionResult.success) {
-                    transcribedText = transcriptionResult.text;
-                } else {
-                    console.error(`[VOICE DETECTED] Transcription failed: ${transcriptionResult.error}`);
-                    await msg.reply(`⚠️ שירות התמלול נכשל: ${transcriptionResult.error}`);
-                }
-            } else {
-                await msg.reply("⚠️ נכשלתי בהורדת ההודעה הקולית לתמלול.");
-            }
-        } catch (transcriptionError) {
-            console.error("❌ Error during voice message processing:", transcriptionError);
-            await msg.reply("❌ אירעה שגיאה בעיבוד ההודעה הקולית.");
-        }
-
+        const transcribedText = await handleVoiceMessage(msg);
         if (transcribedText && transcribedText.trim() !== '') {
-            console.log(`[message_create VOICE PROCESSED] Transcription successful for ${msg.id._serialized}. Using transcribed text: "${transcribedText}"`);
-            incoming = transcribedText; // Update incoming with the transcribed text
+            console.log(`[message_create VOICE PROCESSED] Transcription successful for ${msg.id._serialized}. Using transcribed text.`);
+            incoming = transcribedText;
 
             // שולחים את התמלול ישירות לפונקציית העיבוד (AI) וחוזרים
-            await handleMessage( // Call handleMessage with the new incoming text
+            await handleMessage(
                 msg,
                 incoming,
-                null, // quotedMedia
-                [],   // contextMediaArray
-                null, // quotedText
-                null, // quotedId
-                false, // isSilentMode
-                null  // finalDocumentFileUri
+                null,
+                [],
+                null,
+                null,
+                false,
+                null
             );
-            return; // Important: return after handling the voice message
+            return;
         } else {
-            console.log(`[message_create VOICE FAILED] Transcription resulted in empty text or failed for ${msg.id._serialized}. Cannot process further if no original text.`);
-            // If originalIncoming was also empty (e.g., just a voice note with no caption), then 'incoming' will be empty.
-            // If there was an original text (caption), it will be used.
-            // No explicit 'return' here if transcription fails but there was other content.
-            // If only voice and transcription failed, 'incoming' will be empty, and it might be ignored later or handled by Gemini.
-            if (!originalIncoming) { // If there was no original text caption
-                 incoming = ''; // Ensure incoming is empty if only voice and transcription failed
-            } else {
-                incoming = originalIncoming; // Revert to original caption if transcription failed
-            }
+            console.log(`[message_create VOICE FAILED] Transcription failed or empty for ${msg.id._serialized}. Cannot process further.`);
+            incoming = '';
         }
     }
 
@@ -10246,11 +11009,15 @@ module.exports = {
     // Client and other core components if needed by helpers, but primarily:
     generateDocument,
     compileLatexDocument, // compileLatexDocument is called by generateDocument
+    generateImageAndGetBuffer, // Needed by generateDocument
+    searchAndDownloadWebImages, // Needed by generateDocument
     getChatPaths,           // Helper needed by generateDocument
     getSafeNameForChat,     // Helper needed by generateDocument
     client,                 // The main client instance, might be needed if helpers use it
     apiKeyManager,          // If helpers use it directly
-    IMAGE_MODEL_ENDPOINTS  // Constants - Kept for now, may be used by non-Cloudflare image functions
+    IMAGE_MODEL_ENDPOINTS,  // Constants
+    CLOUDFLARE_API_TOKEN,
+    BASE_IMAGE_GENERATION_API_ENDPOINT
     // Add any other functions/variables that generateDocument or its children might depend on
     // For example, if generateImageAndGetBuffer uses client.sendMessage for errors, client is needed.
 };
