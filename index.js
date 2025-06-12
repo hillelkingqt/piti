@@ -5,6 +5,9 @@ const fs = require('fs');
 const path = require('path');
 const mime = require('mime-types');
 const moment = require('moment-timezone'); // *** ADDED for date/time handling ***
+const express = require('express'); // ADD THIS
+const adminApiRoutes = require('./adminApiRoutes'); // ADD THIS
+const cors = require('cors'); // Will be installed
 
 // --- Configuration ---
 const TELEGRAM_BOT_TOKEN = '7876061979:AAF4qdcalkpseJq6buMrEMTJQsobYVUIH-4';
@@ -1957,9 +1960,46 @@ function splitMessage(text, maxLength = 4096) {
 
 
 // --- Start the Bot ---
-initialize().catch(err => {
+// initialize().catch(err => {
+//     console.error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+//     console.error("!!! BOT FAILED TO INITIALIZE !!!", err);
+//     console.error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+//     process.exit(1);
+// });
+
+// --- HTTP Server Setup (ADD THIS SECTION) ---
+function setupHttpServer() {
+    const app = express();
+    const PORT = process.env.PORT || 3000;
+
+    app.use(cors()); // Enable CORS for all routes - good for local dev
+    app.use(express.json()); // Middleware to parse JSON bodies
+
+    // Mount the admin API routes
+    app.use('/api/admins', adminApiRoutes);
+
+    app.get('/', (req, res) => {
+        res.send('Telegram Bot and Admin API are running.');
+    });
+
+    app.listen(PORT, () => {
+        console.log(`🚀 HTTP Admin API server running on port ${PORT}`);
+    });
+
+    return app; // Return app if needed elsewhere, though not strictly for this setup
+}
+
+// --- Modify how initialize is called ---
+// Original: initialize().catch(...)
+// New:
+async function startApp() {
+    await initialize(); // Initialize the bot
+    setupHttpServer(); // Setup and start the HTTP server
+}
+
+startApp().catch(err => {
     console.error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-    console.error("!!! BOT FAILED TO INITIALIZE !!!", err);
+    console.error("!!! APP FAILED TO START (BOT OR HTTP SERVER) !!!", err);
     console.error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     process.exit(1);
 });

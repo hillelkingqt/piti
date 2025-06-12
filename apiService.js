@@ -78,6 +78,78 @@ async function generateTtsOnServer(textToSpeak) {
      return { success: false, audioUrl: null, error: "TTS requires server-side implementation for key security." }; // Simulate failure requiring backend
 }
 
+// --- Admin API Functions ---
+async function addSiteAdmin(adminData, currentUserEmail) {
+    console.log('[API Service] addSiteAdmin called with:', adminData, 'by user:', currentUserEmail);
+    try {
+        const response = await fetch('/api/admins/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...adminData, currentUserEmail })
+        });
+        const result = await response.json(); // Always parse JSON, even for errors
+        if (!response.ok) {
+            throw new Error(result.error || `Server error ${response.status}`);
+        }
+        return { success: true, data: result.admin, message: result.message };
+    } catch (error) {
+        console.error('Error in addSiteAdmin API call:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+async function removeSiteAdmin(emailToRemove, currentUserEmail) {
+    console.log('[API Service] removeSiteAdmin called for:', emailToRemove, 'by user:', currentUserEmail);
+    try {
+        const response = await fetch('/api/admins/remove', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ emailToRemove, currentUserEmail })
+        });
+        const result = await response.json();
+        if (!response.ok) {
+            throw new Error(result.error || `Server error ${response.status}`);
+        }
+        return { success: true, data: result.admin, message: result.message };
+    } catch (error) {
+        console.error('Error in removeSiteAdmin API call:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+async function listSiteAdmins(currentUserEmail) {
+    console.log('[API Service] listSiteAdmins called by user:', currentUserEmail);
+    try {
+        const response = await fetch(`/api/admins/list?currentUserEmail=${encodeURIComponent(currentUserEmail)}`);
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.error || `Server error ${response.status}`);
+        }
+        return { success: true, data };
+    } catch (error) {
+        console.error('Error in listSiteAdmins API call:', error);
+        return { success: false, error: error.message, data: [] };
+    }
+}
+
+async function checkAdminStatus(email) {
+    console.log('[API Service] checkAdminStatus called for email:', email);
+    if (!email) {
+        console.warn('[API Service] checkAdminStatus called without email.');
+        return { success: false, error: 'Email is required for checkAdminStatus', data: { isAdmin: false, isMainAdmin: false } };
+    }
+    try {
+        const response = await fetch(`/api/admins/check/${encodeURIComponent(email)}`);
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.error || `Server error ${response.status}`);
+        }
+        return { success: true, data };
+    } catch (error) {
+        console.error('Error in checkAdminStatus API call for email ' + email + ':', error);
+        return { success: false, error: error.message, data: { isAdmin: false, isMainAdmin: false } };
+    }
+}
 
 // --- Export Service Object ---
 const apiService = {
@@ -87,8 +159,13 @@ const apiService = {
     saveChatHistory,
     renameChatOnServer,
     // Direct (insecure) frontend functions
-    generateImageCloudflareFrontend,
+    generateImageCloudflareFrontend, // Assuming this function exists elsewhere or was missed in the read_files output
     // Placeholders that *require* a backend
     sendEmailOnServer,
-    generateTtsOnServer
+    generateTtsOnServer,
+    // Admin functions
+    addSiteAdmin,
+    removeSiteAdmin,
+    listSiteAdmins,
+    checkAdminStatus
 };

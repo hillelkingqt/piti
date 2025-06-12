@@ -50,6 +50,10 @@ const GRADLE_VERSION = '8.12.1';
 const APK_BUILD_BASE_DIR = path.join(__dirname, 'apk_builds');
 const ANDROID_SDK_PATH = 'C:\\Users\\hillel1\\Desktop\\Android\\Sdk'; // Note: escaped backslashes
 
+// Supabase Configuration (NEW - User needs to fill these)
+const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE'; // e.g., 'https://your-project-ref.supabase.co'
+const SUPABASE_SERVICE_ROLE_KEY = 'YOUR_SUPABASE_SERVICE_ROLE_KEY_HERE';
+
 module.exports = {
     MY_ID,
     BASE_CHAT_DIR,
@@ -79,4 +83,6 @@ module.exports = {
     GRADLE_VERSION,
     APK_BUILD_BASE_DIR,
     ANDROID_SDK_PATH,
+    SUPABASE_URL,
+    SUPABASE_SERVICE_ROLE_KEY,
 };
