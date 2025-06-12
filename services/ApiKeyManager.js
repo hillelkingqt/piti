@@ -83,4 +83,18 @@ class ApiKeyManager {
 // For now, this file only defines the class.
 // The instantiation and export will be handled in a central service loader or the main bot file.
 
-module.exports = ApiKeyManager; // Export the class itself
+// Instantiate a default manager using keys from environment variables or config
+// Environment variable GEMINI_API_KEYS can contain a comma-separated list
+const config = require('../config');
+
+const envKeys = process.env.GEMINI_API_KEYS
+    ? process.env.GEMINI_API_KEYS.split(',').map(k => k.trim()).filter(Boolean)
+    : [];
+
+const defaultKey = process.env.GEMINI_API_KEY || config.GEMINI_API_KEY_DEFAULT;
+const initialKeys = [...envKeys];
+if (defaultKey) initialKeys.push(defaultKey);
+
+const apiKeyManager = new ApiKeyManager(initialKeys);
+
+module.exports = { ApiKeyManager, apiKeyManager };
