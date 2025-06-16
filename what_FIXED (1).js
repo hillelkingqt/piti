@@ -10672,7 +10672,7 @@ case "generate_graph":
                 const normQuotedId = normalizeMsgId(quotedMsgIdRaw);
 
                 // תגובה להודעת בוט
-                if (repliableMessageIds.has(normQuotedId)) {
+                if (repliableMessageIds.has(normQuotedId) || botMessageIds.has(normQuotedId)) {
                     isReplyToBot = true;
                     console.log(`[DECISION] Reply to BOT msg ${normQuotedId}`);
                 }
@@ -10775,7 +10775,8 @@ case "generate_graph":
     if (msg.hasQuotedMsg) {
         try {
             const quotedMsg = await msg.getQuotedMessage();
-            if (quotedMsg && repliableMessageIds.has(quotedMsg.id._serialized)) {
+            if (quotedMsg && (repliableMessageIds.has(quotedMsg.id._serialized) ||
+                              botMessageIds.has(normalizeMsgId(quotedMsg.id._serialized)))) {
                 // isReplyToBot כבר צריך להיות true מהלוגיקה הקודמת אם הגענו לכאן והתנאי הזה מתקיים,
                 // אבל אין נזק להגדיר אותו שוב.
                 isReplyToBot = true;
