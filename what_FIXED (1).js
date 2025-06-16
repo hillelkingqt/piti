@@ -419,6 +419,26 @@ async function handleGenerateGraphAction(plotData, targetMsg, chatPaths) {
                 quotedMessageId: replyToId
             });
             console.log(`   ✅ Media sent successfully with quote. Message ID: ${sentMediaMsg.id._serialized}`);
+            if (sentMediaMsg && sentMediaMsg.id && sentMediaMsg.id._serialized) {
+                const normalizedSentMsgId = normalizeMsgId(sentMediaMsg.id._serialized);
+                // Add to botMessageIds and repliableMessageIds
+                botMessageIds.add(normalizedSentMsgId);
+                repliableMessageIds.add(normalizedSentMsgId);
+                // Also ensure it's marked in writtenMessageIds if not already handled by other logging for this specific message
+                if (!writtenMessageIds.has(normalizedSentMsgId)) {
+                    writtenMessageIds.add(normalizedSentMsgId);
+                    // Optional: If direct client.sendMessage bypasses your standard history logging, add it here.
+                    // const chat = await client.getChatById(targetChatId); // Requires targetChatId to be available
+                    // const safeName = await getSafeNameForChat(chat); // Requires getSafeNameForChat
+                    // const chatPaths = getChatPaths(targetChatId, safeName); // Requires getChatPaths
+                    // const localTimestamp = getLocalTimestamp(); // Requires getLocalTimestamp
+                    // const mediaTypeForLog = media && media.mimetype ? media.mimetype : 'generated graph';
+                    // const logLine = `${localTimestamp} [ID: ${normalizedSentMsgId}] פיתי: [Media: ${mediaTypeForLog}]
+`;
+                    // fs.appendFileSync(chatPaths.historyFile, logLine, 'utf8');
+                }
+                console.log(`[handleGenerateGraphAction] Manually tracked bot message ${normalizedSentMsgId}`);
+            }
         } catch (quoteError) {
             console.warn(`   ⚠️ Failed to send media with quote to ${replyToId}. Error: ${quoteError.message}. Attempting to send without quote...`);
             try {
@@ -426,6 +446,26 @@ async function handleGenerateGraphAction(plotData, targetMsg, chatPaths) {
                     caption: captionText
                 });
                 console.log(`   ✅ Media sent successfully WITHOUT quote. Message ID: ${sentMediaMsg.id._serialized}`);
+                if (sentMediaMsg && sentMediaMsg.id && sentMediaMsg.id._serialized) {
+                    const normalizedSentMsgId = normalizeMsgId(sentMediaMsg.id._serialized);
+                    // Add to botMessageIds and repliableMessageIds
+                    botMessageIds.add(normalizedSentMsgId);
+                    repliableMessageIds.add(normalizedSentMsgId);
+                    // Also ensure it's marked in writtenMessageIds if not already handled by other logging for this specific message
+                    if (!writtenMessageIds.has(normalizedSentMsgId)) {
+                        writtenMessageIds.add(normalizedSentMsgId);
+                        // Optional: If direct client.sendMessage bypasses your standard history logging, add it here.
+                        // const chat = await client.getChatById(targetChatId); // Requires targetChatId to be available
+                        // const safeName = await getSafeNameForChat(chat); // Requires getSafeNameForChat
+                        // const chatPaths = getChatPaths(targetChatId, safeName); // Requires getChatPaths
+                        // const localTimestamp = getLocalTimestamp(); // Requires getLocalTimestamp
+                        // const mediaTypeForLog = media && media.mimetype ? media.mimetype : 'generated graph';
+                        // const logLine = `${localTimestamp} [ID: ${normalizedSentMsgId}] פיתי: [Media: ${mediaTypeForLog}]
+`;
+                        // fs.appendFileSync(chatPaths.historyFile, logLine, 'utf8');
+                    }
+                    console.log(`[handleGenerateGraphAction] Manually tracked bot message ${normalizedSentMsgId}`);
+                }
             } catch (sendError) {
                 console.error(`   ❌❌ Failed to send media even without quote. Error: ${sendError.message}`);
                 throw sendError; // זרוק את שגיאת השליחה כדי שה-catch הראשי יתפוס אותה
@@ -2014,8 +2054,9 @@ async function handleCreateFileAction(replyData, targetMsg, chatPaths) {
             const line = `[ID: ${sentMediaMsg.id._serialized}] פיתי: [מדיה: ${media.mimetype || 'unknown type'}]\n`;
             fs.appendFileSync(chatPaths.historyFile, line, 'utf8');
             writtenMessageIds.add(sentMediaMsg.id._serialized);
-            botMessageIds.add(sentMediaMsg.id._serialized);
-            repliableMessageIds.add(sentMediaMsg.id._serialized);
+            const normalizedSentMsgId = normalizeMsgId(sentMediaMsg.id._serialized);
+            botMessageIds.add(normalizedSentMsgId);
+            repliableMessageIds.add(normalizedSentMsgId);
             console.log(`[handleCreateFileAction] Manually logged sent media message ${sentMediaMsg.id._serialized}`);
         }
 
@@ -5614,9 +5655,65 @@ ${incoming}
                     caption: captionText,
                     quotedMessageId: replyToId
                 });
+                // Ensure 'sentMediaMsg' below is replaced with the actual variable name of the sent message object in each context.
+                if (sentMediaMsg && sentMediaMsg.id && sentMediaMsg.id._serialized) {
+                    const normalizedSentMsgId = normalizeMsgId(sentMediaMsg.id._serialized);
+
+                    // Add to botMessageIds and repliableMessageIds
+                    botMessageIds.add(normalizedSentMsgId);
+                    repliableMessageIds.add(normalizedSentMsgId);
+
+                    // Also ensure it's marked in writtenMessageIds if not already handled by other logging for this specific message
+                    // This check is important to avoid re-processing if another mechanism already added it.
+                    if (!writtenMessageIds.has(normalizedSentMsgId)) {
+                        writtenMessageIds.add(normalizedSentMsgId);
+                        // Optional: If direct client.sendMessage bypasses your standard history logging, consider adding it here.
+                        // This part is commented out as the primary goal is ID tracking for replies.
+                        // const targetChatId = sentMediaMsg.id.remote; // Or however targetChatId is available
+                        // const chat = await client.getChatById(targetChatId);
+                        // const safeName = await getSafeNameForChat(chat);
+                        // const chatPaths = getChatPaths(targetChatId, safeName);
+                        // const localTimestamp = getLocalTimestamp();
+                        // const media = sentMediaMsg.mediaKey ? new MessageMedia(sentMediaMsg.type, sentMediaMsg.body, sentMediaMsg.filename) : null; // Reconstruct media if possible for logging type
+                        // const mediaTypeForLog = media && media.mimetype ? media.mimetype : 'generated file';
+                        // const logLine = `${localTimestamp} [ID: ${normalizedSentMsgId}] פיתי: [Media: ${mediaTypeForLog}]
+`;
+                        // fs.appendFileSync(chatPaths.historyFile, logLine, 'utf8');
+                    }
+                    // Use the actual function name in the log message
+                    console.log(`[handleGeneratePowerPointAction] Manually tracked bot message ${normalizedSentMsgId}`);
+                }
             } catch (quoteError) {
                 console.warn(`   ⚠️ Failed to send PPT media with quote. Error: ${quoteError.message}. Retrying without quote...`);
                 sentMediaMsg = await client.sendMessage(targetChatId, media, { caption: captionText });
+                // Ensure 'sentMediaMsg' below is replaced with the actual variable name of the sent message object in each context.
+                if (sentMediaMsg && sentMediaMsg.id && sentMediaMsg.id._serialized) {
+                    const normalizedSentMsgId = normalizeMsgId(sentMediaMsg.id._serialized);
+
+                    // Add to botMessageIds and repliableMessageIds
+                    botMessageIds.add(normalizedSentMsgId);
+                    repliableMessageIds.add(normalizedSentMsgId);
+
+                    // Also ensure it's marked in writtenMessageIds if not already handled by other logging for this specific message
+                    // This check is important to avoid re-processing if another mechanism already added it.
+                    if (!writtenMessageIds.has(normalizedSentMsgId)) {
+                        writtenMessageIds.add(normalizedSentMsgId);
+                        // Optional: If direct client.sendMessage bypasses your standard history logging, consider adding it here.
+                        // This part is commented out as the primary goal is ID tracking for replies.
+                        // const targetChatId = sentMediaMsg.id.remote; // Or however targetChatId is available
+                        // const chat = await client.getChatById(targetChatId);
+                        // const safeName = await getSafeNameForChat(chat);
+                        // const chatPaths = getChatPaths(targetChatId, safeName);
+                        // const localTimestamp = getLocalTimestamp();
+                        // const media = sentMediaMsg.mediaKey ? new MessageMedia(sentMediaMsg.type, sentMediaMsg.body, sentMediaMsg.filename) : null; // Reconstruct media if possible for logging type
+                        // const mediaTypeForLog = media && media.mimetype ? media.mimetype : 'generated file';
+                        // const logLine = `${localTimestamp} [ID: ${normalizedSentMsgId}] פיתי: [Media: ${mediaTypeForLog}]
+`;
+                        // fs.appendFileSync(chatPaths.historyFile, logLine, 'utf8');
+                    }
+                    // Use the actual function name in the log message
+                    console.log(`[handleGeneratePowerPointAction] Manually tracked bot message ${normalizedSentMsgId}`);
+                }
             }
             console.log(`   ✅ PPT media sent successfully. Message ID: ${sentMediaMsg.id._serialized}`);
 
@@ -5743,6 +5840,34 @@ ${incoming}
                     quotedMessageId: replyToId
                 });
                 console.log(`   ✅ ${docType} media sent successfully with quote. Message ID: ${sentMediaMsg.id._serialized}`);
+                // Ensure 'sentMediaMsg' below is replaced with the actual variable name of the sent message object in each context.
+                if (sentMediaMsg && sentMediaMsg.id && sentMediaMsg.id._serialized) {
+                    const normalizedSentMsgId = normalizeMsgId(sentMediaMsg.id._serialized);
+
+                    // Add to botMessageIds and repliableMessageIds
+                    botMessageIds.add(normalizedSentMsgId);
+                    repliableMessageIds.add(normalizedSentMsgId);
+
+                    // Also ensure it's marked in writtenMessageIds if not already handled by other logging for this specific message
+                    // This check is important to avoid re-processing if another mechanism already added it.
+                    if (!writtenMessageIds.has(normalizedSentMsgId)) {
+                        writtenMessageIds.add(normalizedSentMsgId);
+                        // Optional: If direct client.sendMessage bypasses your standard history logging, consider adding it here.
+                        // This part is commented out as the primary goal is ID tracking for replies.
+                        // const targetChatId = sentMediaMsg.id.remote; // Or however targetChatId is available
+                        // const chat = await client.getChatById(targetChatId);
+                        // const safeName = await getSafeNameForChat(chat);
+                        // const chatPaths = getChatPaths(targetChatId, safeName);
+                        // const localTimestamp = getLocalTimestamp();
+                        // const media = sentMediaMsg.mediaKey ? new MessageMedia(sentMediaMsg.type, sentMediaMsg.body, sentMediaMsg.filename) : null; // Reconstruct media if possible for logging type
+                        // const mediaTypeForLog = media && media.mimetype ? media.mimetype : 'generated file';
+                        // const logLine = `${localTimestamp} [ID: ${normalizedSentMsgId}] פיתי: [Media: ${mediaTypeForLog}]
+`;
+                        // fs.appendFileSync(chatPaths.historyFile, logLine, 'utf8');
+                    }
+                    // Use the actual function name in the log message
+                    console.log(`[handleGenerateOfficeDocAction] Manually tracked bot message ${normalizedSentMsgId}`);
+                }
             } catch (quoteError) {
                 console.warn(`   ⚠️ Failed to send ${docType} media with quote to ${replyToId}. Error: ${quoteError.message}. Attempting to send without quote...`);
                 try {
@@ -5750,6 +5875,34 @@ ${incoming}
                         caption: captionText
                     });
                     console.log(`   ✅ ${docType} media sent successfully WITHOUT quote. Message ID: ${sentMediaMsg.id._serialized}`);
+                    // Ensure 'sentMediaMsg' below is replaced with the actual variable name of the sent message object in each context.
+                    if (sentMediaMsg && sentMediaMsg.id && sentMediaMsg.id._serialized) {
+                        const normalizedSentMsgId = normalizeMsgId(sentMediaMsg.id._serialized);
+
+                        // Add to botMessageIds and repliableMessageIds
+                        botMessageIds.add(normalizedSentMsgId);
+                        repliableMessageIds.add(normalizedSentMsgId);
+
+                        // Also ensure it's marked in writtenMessageIds if not already handled by other logging for this specific message
+                        // This check is important to avoid re-processing if another mechanism already added it.
+                        if (!writtenMessageIds.has(normalizedSentMsgId)) {
+                            writtenMessageIds.add(normalizedSentMsgId);
+                            // Optional: If direct client.sendMessage bypasses your standard history logging, consider adding it here.
+                            // This part is commented out as the primary goal is ID tracking for replies.
+                            // const targetChatId = sentMediaMsg.id.remote; // Or however targetChatId is available
+                            // const chat = await client.getChatById(targetChatId);
+                            // const safeName = await getSafeNameForChat(chat);
+                            // const chatPaths = getChatPaths(targetChatId, safeName);
+                            // const localTimestamp = getLocalTimestamp();
+                            // const media = sentMediaMsg.mediaKey ? new MessageMedia(sentMediaMsg.type, sentMediaMsg.body, sentMediaMsg.filename) : null; // Reconstruct media if possible for logging type
+                            // const mediaTypeForLog = media && media.mimetype ? media.mimetype : 'generated file';
+                            // const logLine = `${localTimestamp} [ID: ${normalizedSentMsgId}] פיתי: [Media: ${mediaTypeForLog}]
+`;
+                            // fs.appendFileSync(chatPaths.historyFile, logLine, 'utf8');
+                        }
+                        // Use the actual function name in the log message
+                        console.log(`[handleGenerateOfficeDocAction] Manually tracked bot message ${normalizedSentMsgId}`);
+                    }
                 } catch (sendError) {
                     console.error(`   ❌❌ Failed to send ${docType} media even without quote. Error: ${sendError.message}`);
                     throw sendError;
@@ -8362,6 +8515,34 @@ async function handleGenerateHtmlPdfAction(htmlPdfData, targetMsg, chatPaths) {
                 quotedMessageId: replyToId
             });
             console.log(`   ✅ PDF (from HTML) sent successfully with quote. Message ID: ${sentMediaMsg.id._serialized}`);
+            // Ensure 'sentMediaMsg' below is replaced with the actual variable name of the sent message object in each context.
+            if (sentMediaMsg && sentMediaMsg.id && sentMediaMsg.id._serialized) {
+                const normalizedSentMsgId = normalizeMsgId(sentMediaMsg.id._serialized);
+
+                // Add to botMessageIds and repliableMessageIds
+                botMessageIds.add(normalizedSentMsgId);
+                repliableMessageIds.add(normalizedSentMsgId);
+
+                // Also ensure it's marked in writtenMessageIds if not already handled by other logging for this specific message
+                // This check is important to avoid re-processing if another mechanism already added it.
+                if (!writtenMessageIds.has(normalizedSentMsgId)) {
+                    writtenMessageIds.add(normalizedSentMsgId);
+                    // Optional: If direct client.sendMessage bypasses your standard history logging, consider adding it here.
+                    // This part is commented out as the primary goal is ID tracking for replies.
+                    // const targetChatId = sentMediaMsg.id.remote; // Or however targetChatId is available
+                    // const chat = await client.getChatById(targetChatId);
+                    // const safeName = await getSafeNameForChat(chat);
+                    // const chatPaths = getChatPaths(targetChatId, safeName);
+                    // const localTimestamp = getLocalTimestamp();
+                    // const media = sentMediaMsg.mediaKey ? new MessageMedia(sentMediaMsg.type, sentMediaMsg.body, sentMediaMsg.filename) : null; // Reconstruct media if possible for logging type
+                    // const mediaTypeForLog = media && media.mimetype ? media.mimetype : 'generated file';
+                    // const logLine = `${localTimestamp} [ID: ${normalizedSentMsgId}] פיתי: [Media: ${mediaTypeForLog}]
+`;
+                    // fs.appendFileSync(chatPaths.historyFile, logLine, 'utf8');
+                }
+                // Use the actual function name in the log message
+                console.log(`[handleGenerateHtmlPdfAction] Manually tracked bot message ${normalizedSentMsgId}`);
+            }
         } catch (quoteError) {
             console.warn(`   ⚠️ Failed to send PDF (from HTML) with quote to ${replyToId}. Error: ${quoteError.message}. Attempting to send without quote...`);
             try {
@@ -8369,6 +8550,34 @@ async function handleGenerateHtmlPdfAction(htmlPdfData, targetMsg, chatPaths) {
                     caption: captionText
                 });
                 console.log(`   ✅ PDF (from HTML) sent successfully WITHOUT quote. Message ID: ${sentMediaMsg.id._serialized}`);
+                // Ensure 'sentMediaMsg' below is replaced with the actual variable name of the sent message object in each context.
+                if (sentMediaMsg && sentMediaMsg.id && sentMediaMsg.id._serialized) {
+                    const normalizedSentMsgId = normalizeMsgId(sentMediaMsg.id._serialized);
+
+                    // Add to botMessageIds and repliableMessageIds
+                    botMessageIds.add(normalizedSentMsgId);
+                    repliableMessageIds.add(normalizedSentMsgId);
+
+                    // Also ensure it's marked in writtenMessageIds if not already handled by other logging for this specific message
+                    // This check is important to avoid re-processing if another mechanism already added it.
+                    if (!writtenMessageIds.has(normalizedSentMsgId)) {
+                        writtenMessageIds.add(normalizedSentMsgId);
+                        // Optional: If direct client.sendMessage bypasses your standard history logging, consider adding it here.
+                        // This part is commented out as the primary goal is ID tracking for replies.
+                        // const targetChatId = sentMediaMsg.id.remote; // Or however targetChatId is available
+                        // const chat = await client.getChatById(targetChatId);
+                        // const safeName = await getSafeNameForChat(chat);
+                        // const chatPaths = getChatPaths(targetChatId, safeName);
+                        // const localTimestamp = getLocalTimestamp();
+                        // const media = sentMediaMsg.mediaKey ? new MessageMedia(sentMediaMsg.type, sentMediaMsg.body, sentMediaMsg.filename) : null; // Reconstruct media if possible for logging type
+                        // const mediaTypeForLog = media && media.mimetype ? media.mimetype : 'generated file';
+                        // const logLine = `${localTimestamp} [ID: ${normalizedSentMsgId}] פיתי: [Media: ${mediaTypeForLog}]
+`;
+                        // fs.appendFileSync(chatPaths.historyFile, logLine, 'utf8');
+                    }
+                    // Use the actual function name in the log message
+                    console.log(`[handleGenerateHtmlPdfAction] Manually tracked bot message ${normalizedSentMsgId}`);
+                }
             } catch (sendError) {
                 console.error(`   ❌❌ Failed to send PDF (from HTML) even without quote. Error: ${sendError.message}`);
                 throw sendError;
