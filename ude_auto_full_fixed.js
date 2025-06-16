@@ -24,6 +24,13 @@ const botMessageIds = new Set();
 const repliableMessageIds = new Set();
 let botStartTime = Date.now();
 
+// Normalize WhatsApp message IDs to avoid prefix differences
+function normalizeId(id) {
+  return typeof id === 'string'
+    ? id.replace(/^true_/, '').replace(/^false_/, '').split('_').pop()
+    : id;
+}
+
 // מודלים ליצירת תמונה ונקודות הקצה שלהם ב-Cloudflare
 const IMAGE_MODEL_ENDPOINTS = {
   'stable-diffusion-xl-lighting': '@cf/bytedance/stable-diffusion-xl-lightning',
@@ -637,8 +644,8 @@ try {
   if (targetMsg) {
     console.log("✅ Found the message to reply to.");
     const sentMsg = await targetMsg.reply(`AI\n\n${jsonResponse.message}`);
-    botMessageIds.add(sentMsg.id._serialized);
-    repliableMessageIds.add(sentMsg.id._serialized);
+    botMessageIds.add(normalizeId(sentMsg.id._serialized));
+    repliableMessageIds.add(normalizeId(sentMsg.id._serialized));
     return;
   } else {
     // fallback — מגיב עם תיוג אמיתי
@@ -655,8 +662,8 @@ try {
         mentions: [mentionContact]
       });
 
-      botMessageIds.add(sentMsg.id._serialized);
-      repliableMessageIds.add(sentMsg.id._serialized);
+      botMessageIds.add(normalizeId(sentMsg.id._serialized));
+      repliableMessageIds.add(normalizeId(sentMsg.id._serialized));
       return;
     } else {
       console.log("⚠️ לא נמצא איש קשר לתיוג — מגיב בלי mention.");
@@ -665,21 +672,21 @@ try {
 } catch (error) {
   console.error("❌ Error handling replyTo logic:", error);
   const sentMsg = await msg.reply("AI\n\nאירעה שגיאה בזמן ניסיון התגובה.");
-  botMessageIds.add(sentMsg.id._serialized);
+  botMessageIds.add(normalizeId(sentMsg.id._serialized));
 }
 
 
     // ברירת מחדל: מגיב להודעה הנוכחית (טקסט רגיל)
     const sentMsg = await msg.reply(`AI\n\n${jsonResponse.message}`);
-    botMessageIds.add(sentMsg.id._serialized);
-    repliableMessageIds.add(sentMsg.id._serialized);
+    botMessageIds.add(normalizeId(sentMsg.id._serialized));
+    repliableMessageIds.add(normalizeId(sentMsg.id._serialized));
 fs.appendFileSync(chatFilePath, `[ID: ${sentMsg.id._serialized}] פיתי: ${jsonResponse.message}\n`);
 
 
   } catch (error) {
     console.error("Gemini API error:", error);
     const sentMsg = await msg.reply("AI\n\nמשהו השתבש בתקשורת עם ה-AI.");
-    botMessageIds.add(sentMsg.id._serialized);
+    botMessageIds.add(normalizeId(sentMsg.id._serialized));
   }
 }
 
@@ -853,7 +860,7 @@ if (typeof msg.body === 'string' && msg.body.startsWith("AI\n\n")) return;
 
   const timestamp = msg.timestamp * 1000;
   if (timestamp < botStartTime) return;
-  if (botMessageIds.has(msg.id._serialized)) return;
+  if (botMessageIds.has(normalizeId(msg.id._serialized))) return;
 
   const incoming = typeof msg.body === 'string' ? msg.body.trim() : '';
   if (!incoming && !msg.hasMedia) return;
@@ -866,7 +873,7 @@ if (typeof msg.body === 'string' && msg.body.startsWith("AI\n\n")) return;
 if (msg.hasQuotedMsg) {
   try {
     const quotedMsg = await msg.getQuotedMessage();
-    if (quotedMsg && repliableMessageIds.has(quotedMsg.id._serialized)) {
+    if (quotedMsg && repliableMessageIds.has(normalizeId(quotedMsg.id._serialized))) {
       isReplyToBot = true;
     }
   } catch (err) {
@@ -880,13 +887,13 @@ if (msg.hasQuotedMsg) {
   if (isFromMe && incoming === "/start") {
     replyToAllPrivates = true;
     const m = await msg.reply("AI\n\nActivated. Now replying to all private messages.");
-    botMessageIds.add(m.id._serialized);
+    botMessageIds.add(normalizeId(m.id._serialized));
     return;
   }
   if (isFromMe && incoming === "/stop") {
     replyToAllPrivates = false;
     const m = await msg.reply("AI\n\nDeactivated. Now only replying to messages starting with /// or פיתי.");
-    botMessageIds.add(m.id._serialized);
+    botMessageIds.add(normalizeId(m.id._serialized));
     return;
   }
 
