@@ -1,4 +1,4 @@
-﻿
+
 const { Client, LocalAuth, MessageMedia, Contact, Poll } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const axios = require('axios');
@@ -2014,8 +2014,9 @@ async function handleCreateFileAction(replyData, targetMsg, chatPaths) {
             const line = `[ID: ${sentMediaMsg.id._serialized}] פיתי: [מדיה: ${media.mimetype || 'unknown type'}]\n`;
             fs.appendFileSync(chatPaths.historyFile, line, 'utf8');
             writtenMessageIds.add(sentMediaMsg.id._serialized);
-            botMessageIds.add(sentMediaMsg.id._serialized);
-            repliableMessageIds.add(sentMediaMsg.id._serialized);
+            const normId = normalizeMsgId(sentMediaMsg.id._serialized);
+            botMessageIds.add(normId);
+            repliableMessageIds.add(normId);
             console.log(`[handleCreateFileAction] Manually logged sent media message ${sentMediaMsg.id._serialized}`);
         }
 
@@ -3995,37 +3996,6 @@ ${triggersTextForPrompt} // triggersTextForPrompt יצטרך להציג את t.a
 }
 \`\`\`
 
-// Inside bigTextPrompt, add this along with other action formats:
-
-**אם המשתמש מבקש ליצור אפליקציית אנדרואיד (קובץ APK)...**
-*   זוהי פעולה **נסיונית מאוד** ומועדת לשגיאות, במיוחד עבור אפליקציות מורכבות.
-*   עליך לספק את המבנה והתוכן של קבצי הפרויקט המרכזיים.
-*   החזר JSON בפורמט הבא:
-\`\`\`json
-{
-  "replyTo": "MESSAGE_ID_של_הבקשה",
-  "action": "generate_apk",
-  "appDescription": "תיאור קצר של האפליקציה שהמשתמש ביקש",
-  "appName": "שם_אפליקציה_מוצע_באנגלית_ללא_רווחים", // לדוגמה: SimpleCalculator, NoteTaker
-  "fileContents": {
-    // אובייקט שמכיל נתיבים יחסיים כ-key ותוכן קובץ כ-value
-    // חובה לכלול לפחות: AndroidManifest, קובץ Activity ראשי, קובץ Layout ראשי, build.gradle (app)
-    "app/src/main/AndroidManifest.xml": "<תוכן קובץ המניפסט המלא...>",
-    "app/src/main/java/com/example/generatedapp/MainActivity.java": "// קוד Java/Kotlin של ה-Activity הראשי...",
-    "app/src/main/res/layout/activity_main.xml": "<תוכן קובץ ה-Layout הראשי ב-XML...>",
-    "app/src/main/res/values/strings.xml": "<resources>\\n  <string name=\\\"app_name\\\">[כאן_שם_האפליקציה_שהצעת_למעלה]</string>\\n  <!-- עוד מחרוזות... -->\\n</resources>",
-    "app/build.gradle.kts": "// תוכן קובץ ה-build.gradle של המודול app (Kotlin DSL או Groovy)\n// ודא שאתה כולל תלויות הכרחיות (dependencies)",
-    "build.gradle.kts": "// (אופציונלי) תוכן קובץ ה-build.gradle הראשי (ברמת הפרויקט)",
-    "settings.gradle.kts": "// (אופציונלי) תוכן קובץ settings.gradle"
-    // אפשר להוסיף עוד קבצים לפי הצורך (קבצי layout נוספים, קבצי values, קלסים אחרים...)
-    // "app/src/main/res/values/colors.xml": "<resources> ... </resources>",
-    // "app/src/main/java/com/example/generatedapp/Utils.java": "// קוד של קלאס עזר..."
-  },
-  "message": "הודעת טעינה/אישור למשתמש (לדוגמה: 'מתחיל ביצירת האפליקציה, זה עלול לקחת זמן...')",
-  "wait": false // יצירת אפליקציה היא תמיד מיידית
-}
-\`\`\`
-*   **חשוב מאוד:** ספק נתיבים *מדויקים* ותוכן *שלם ותקין* עבור הקבצים. שגיאות קטנות יגרמו לכשלון הבנייה. ודא ששם החבילה (package name) עקבי (לדוגמה \`com.example.generatedapp\`). השתמש בגרסאות עדכניות של Gradle ו-Android SDK אם אפשר. הגדר \`minSdk\`, \`targetSdk\`, \`compileSdk\` בקובץ ה-build.gradle.
 
 **אם המשתמש מבקש ליצור מסמך או PDF (בכל שפה שהיא), ענה בפורמט JSON הבא:**
 *   אתה תחליט אם יש צורך בתמונות במסמך. לדוגמה, מסמך על אירוע היסטורי כמו מלחמת העולם השנייה עשוי להרוויח מתמונות. מסמך מתמטי טהור אולי פחות.
@@ -7051,8 +7021,9 @@ await msg.reply(infoMessage.trim(), undefined, { quotedMessageId: msg.id._serial
                     const line = `[ID: ${sentMediaMsg.id._serialized}] פיתי: [מדיה: ${media.mimetype || 'unknown type'}]\n`;
                     fs.appendFileSync(chatPaths.historyFile, line, 'utf8');
                     writtenMessageIds.add(sentMediaMsg.id._serialized);
-                    botMessageIds.add(sentMediaMsg.id._serialized);
-                    repliableMessageIds.add(sentMediaMsg.id._serialized);
+                    const normId = normalizeMsgId(sentMediaMsg.id._serialized);
+                    botMessageIds.add(normId);
+                    repliableMessageIds.add(normId);
                     console.log(`[create_file] Manually logged sent media message ${sentMediaMsg.id._serialized}`);
                 }
                 // ---------------------------------------------------------------
@@ -7487,8 +7458,9 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
             try {
                 // השתמש ב-targetMsg שמצאנו (או ב-msg כברירת מחדל) כדי לשלוח את התגובה
                 const sentReply = await targetMsg.reply(`פיתי\n\n${messageToSend}`); // השתמש בפונקציית ה-reply העטופה שלנו
-                botMessageIds.add(sentReply.id._serialized); // הוסף למזהי הבוט
-                repliableMessageIds.add(sentReply.id._serialized); // הוסף למזהים שניתן להגיב להם
+                const normId = normalizeMsgId(sentReply.id._serialized);
+                botMessageIds.add(normId); // הוסף למזהי הבוט
+                repliableMessageIds.add(normId); // הוסף למזהים שניתן להגיב להם
                 console.log(`[Action MANY] Sent message ${i + 1}/${effectiveCount} (ID: ${sentReply.id._serialized})`);
 
                 // המתן לפני שליחת ההודעה הבאה (אם זו לא ההודעה האחרונה)
@@ -7670,8 +7642,9 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
                         if (reply.message && reply.respond !== false) {
                             await delay(250); // Keep delay between replies
                             const sentReplyMsg = await targetMsg.reply(`פיתי\n\n${reply.message}`); // Reply to the *target* message
-                            botMessageIds.add(sentReplyMsg.id._serialized);
-                            repliableMessageIds.add(sentReplyMsg.id._serialized);
+                            const normId = normalizeMsgId(sentReplyMsg.id._serialized);
+                            botMessageIds.add(normId);
+                            repliableMessageIds.add(normId);
                             // Logging of this bot message happens via the message_create listener
                             repliesSentCount++;
                         } else {
@@ -8575,8 +8548,9 @@ ${finalHtmlPrompt}
             try {
                 fs.appendFileSync(chatPaths.historyFile, logLine, 'utf8');
                 writtenMessageIds.add(sentMediaMsg.id._serialized);
-                botMessageIds.add(sentMediaMsg.id._serialized);
-                repliableMessageIds.add(sentMediaMsg.id._serialized);
+                const normId = normalizeMsgId(sentMediaMsg.id._serialized);
+                botMessageIds.add(normId);
+                repliableMessageIds.add(normId);
                 console.log(`[handleGenerateHtmlAction LOG] Logged sent HTML file message ${sentMediaMsg.id._serialized}`);
             } catch (logErr) {
                 console.error(`[handleGenerateHtmlAction LOG] Error logging sent HTML message ${sentMediaMsg.id._serialized}:`, logErr);
