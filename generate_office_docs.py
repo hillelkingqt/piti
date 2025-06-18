@@ -42,9 +42,10 @@ try:
     import docx
     from docx import Document
     from docx.shared import Pt, Inches, RGBColor
-    from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_BREAK
+    from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_BREAK, WD_HIGHLIGHT_COLOR_INDEX
     from docx.enum.style import WD_STYLE_TYPE
-    from docx.oxml import OxmlElement
+    from docx.oxml import OxmlElement as OxmlElement_oxml # Avoid collision if user imports from shared
+    from docx.oxml.shared import OxmlElement
     from docx.oxml.ns import qn, nsdecls
     from docx.table import _Cell as DocxCellType 
     from docx.text.paragraph import Paragraph as DocxParagraphType 
@@ -53,9 +54,9 @@ except ModuleNotFoundError:
     docx = None # type: ignore
     Document = None # type: ignore
     Pt = Inches = RGBColor = None # type: ignore
-    WD_ALIGN_PARAGRAPH = WD_BREAK = None # type: ignore
+    WD_ALIGN_PARAGRAPH = WD_BREAK = WD_HIGHLIGHT_COLOR_INDEX = None # type: ignore
     WD_STYLE_TYPE = None # type: ignore
-    OxmlElement = None # type: ignore
+    OxmlElement = OxmlElement_oxml = None # type: ignore
     qn = nsdecls = None # type: ignore
     DocxCellType = None # type: ignore
     DocxParagraphType = None # type: ignore
@@ -134,6 +135,39 @@ def _parse_color(color_str: Optional[str]) -> Optional[RGBColor]:
     logging.warning(f"Invalid color string: {color_str}. Using default.")
     return None
 
+HIGHLIGHT_COLOR_MAP = {
+    "yellow": WD_HIGHLIGHT_COLOR_INDEX.YELLOW if WD_HIGHLIGHT_COLOR_INDEX else None,
+    "green": WD_HIGHLIGHT_COLOR_INDEX.GREEN if WD_HIGHLIGHT_COLOR_INDEX else None,
+    "cyan": WD_HIGHLIGHT_COLOR_INDEX.CYAN if WD_HIGHLIGHT_COLOR_INDEX else None,
+    "magenta": WD_HIGHLIGHT_COLOR_INDEX.MAGENTA if WD_HIGHLIGHT_COLOR_INDEX else None,
+    "blue": WD_HIGHLIGHT_COLOR_INDEX.BLUE if WD_HIGHLIGHT_COLOR_INDEX else None,
+    "red": WD_HIGHLIGHT_COLOR_INDEX.RED if WD_HIGHLIGHT_COLOR_INDEX else None,
+    "dark_blue": WD_HIGHLIGHT_COLOR_INDEX.DARK_BLUE if WD_HIGHLIGHT_COLOR_INDEX else None,
+    "dark_cyan": WD_HIGHLIGHT_COLOR_INDEX.DARK_CYAN if WD_HIGHLIGHT_COLOR_INDEX else None,
+    "dark_green": WD_HIGHLIGHT_COLOR_INDEX.DARK_GREEN if WD_HIGHLIGHT_COLOR_INDEX else None,
+    "dark_magenta": WD_HIGHLIGHT_COLOR_INDEX.DARK_MAGENTA if WD_HIGHLIGHT_COLOR_INDEX else None,
+    "dark_red": WD_HIGHLIGHT_COLOR_INDEX.DARK_RED if WD_HIGHLIGHT_COLOR_INDEX else None,
+    "dark_yellow": WD_HIGHLIGHT_COLOR_INDEX.DARK_YELLOW if WD_HIGHLIGHT_COLOR_INDEX else None,
+    "gray_25": WD_HIGHLIGHT_COLOR_INDEX.GRAY_25 if WD_HIGHLIGHT_COLOR_INDEX else None,
+    "gray_50": WD_HIGHLIGHT_COLOR_INDEX.GRAY_50 if WD_HIGHLIGHT_COLOR_INDEX else None,
+    "black": WD_HIGHLIGHT_COLOR_INDEX.BLACK if WD_HIGHLIGHT_COLOR_INDEX else None,
+    "white": WD_HIGHLIGHT_COLOR_INDEX.WHITE if WD_HIGHLIGHT_COLOR_INDEX else None,
+    "none": WD_HIGHLIGHT_COLOR_INDEX.NONE if WD_HIGHLIGHT_COLOR_INDEX else None,
+    "teal": WD_HIGHLIGHT_COLOR_INDEX.TEAL if WD_HIGHLIGHT_COLOR_INDEX else None,
+    "pink": WD_HIGHLIGHT_COLOR_INDEX.PINK if WD_HIGHLIGHT_COLOR_INDEX else None,
+    "bright_green": WD_HIGHLIGHT_COLOR_INDEX.BRIGHT_GREEN if WD_HIGHLIGHT_COLOR_INDEX else None,
+    "violet": WD_HIGHLIGHT_COLOR_INDEX.VIOLET if WD_HIGHLIGHT_COLOR_INDEX else None,
+    "turquoise": WD_HIGHLIGHT_COLOR_INDEX.TURQUOISE if WD_HIGHLIGHT_COLOR_INDEX else None,
+}
+# Filter out None values if WD_HIGHLIGHT_COLOR_INDEX was not available
+HIGHLIGHT_COLOR_MAP = {k: v for k, v in HIGHLIGHT_COLOR_MAP.items() if v is not None}
+
+
+def _rgb_to_hex(rgb_color_obj: Optional[RGBColor]) -> Optional[str]:
+    if rgb_color_obj is None:
+        return None
+    return f"{rgb_color_obj.r:02X}{rgb_color_obj.g:02X}{rgb_color_obj.b:02X}"
+
 # ────────────────────────── Word: Style Helpers ───────────────────────────────
 # _get_font_family, _apply_run_formatting, _apply_paragraph_formatting, _set_default_hebrew_styles
 # remain largely the same as v2.0.3, with minor refinements for clarity or default handling.
@@ -158,6 +192,35 @@ def _apply_run_formatting(run: DocxRunType, el_data: Dict[str, Any], global_data
     if el_data.get("underline"): font.underline = True
     if el_data.get("strike"): font.strike = True
     if (color_val := _parse_color(el_data.get("font_color"))): font.color.rgb = color_val
+
+    if (highlight_color_str := el_data.get("font_highlight_color")) and isinstance(highlight_color_str, str) and HIGHLIGHT_COLOR_MAP:
+        highlight_color_val = HIGHLIGHT_COLOR_MAP.get(highlight_color_str.lower().replace(" ", "_"))
+        if highlight_color_val is not None:
+            try:
+                run.font.highlight_color = highlight_color_val
+            except Exception as e: # Catch potential errors if value is somehow invalid
+                logging.warning(f"Could not apply highlight color '{highlight_color_str}': {e}")
+        else:
+            logging.warning(f"Unknown highlight color: '{highlight_color_str}'. Available: {', '.join(HIGHLIGHT_COLOR_MAP.keys())}")
+
+    if "font_superscript" in el_data:
+        try:
+            run.font.superscript = bool(el_data["font_superscript"])
+        except Exception as e:
+            logging.warning(f"Could not apply font_superscript '{el_data['font_superscript']}': {e}")
+
+    if "font_subscript" in el_data:
+        try:
+            run.font.subscript = bool(el_data["font_subscript"])
+        except Exception as e:
+            logging.warning(f"Could not apply font_subscript '{el_data['font_subscript']}': {e}")
+
+    if "all_caps" in el_data:
+        try:
+            run.font.all_caps = bool(el_data["all_caps"])
+        except Exception as e:
+            logging.warning(f"Could not apply all_caps '{el_data['all_caps']}': {e}")
+
 
 def _apply_paragraph_formatting(
     paragraph: "DocxParagraphType",
@@ -201,6 +264,40 @@ def _apply_paragraph_formatting(
             p_pr.attrib.pop(qn("w:bidi"))
         if p_pr.get(qn("w:mirrorIndents")):
             p_pr.attrib.pop(qn("w:mirrorIndents"))
+
+    # -- Line spacing --
+    if (line_spacing_val := el_data.get("line_spacing")):
+        try:
+            paragraph.paragraph_format.line_spacing = float(line_spacing_val)
+        except ValueError:
+            logging.warning(f"Invalid line_spacing value: '{line_spacing_val}'. Must be a float.")
+
+    # -- First line indent --
+    if (first_line_indent_val := el_data.get("first_line_indent_inches")):
+        try:
+            if Inches:
+                paragraph.paragraph_format.first_line_indent = Inches(float(first_line_indent_val))
+            else:
+                logging.warning("Inches not available for first_line_indent_inches.")
+        except ValueError:
+            logging.warning(f"Invalid first_line_indent_inches value: '{first_line_indent_val}'. Must be a float.")
+
+    # -- Text shading (paragraph background) --
+    if (shading_color_str := el_data.get("text_shading")):
+        parsed_color = _parse_color(shading_color_str)
+        hex_color_val = _rgb_to_hex(parsed_color)
+        if hex_color_val and OxmlElement and qn:
+            try:
+                pPr = paragraph._p.get_or_add_pPr()
+                shd = OxmlElement('w:shd')
+                shd.set(qn('w:val'), 'clear')
+                shd.set(qn('w:color'), 'auto') # Keep text color, only change background
+                shd.set(qn('w:fill'), hex_color_val)
+                pPr.append(shd)
+            except Exception as e:
+                logging.warning(f"Could not apply text_shading '{shading_color_str}' (parsed as {hex_color_val}): {e}")
+        elif shading_color_str.lower() not in ["none", "auto"]: # don't warn for explicit "none"
+            logging.warning(f"Invalid or unparsable text_shading color: '{shading_color_str}'")
 
 
 def _set_default_hebrew_styles(doc: Document) -> None:
