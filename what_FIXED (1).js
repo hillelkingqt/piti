@@ -10,12 +10,13 @@ const QRCode = require('qrcode');
 const sharp = require('sharp');
 const readlineSync = require('readline-sync');
 const { Buffer } = require('buffer');
-const { spawn } = require('child_process');
+const { spawn, spawnSync } = require('child_process');
 
 const { apiKeyManager } = require('./services/ApiKeyManager');
 const writtenMessageIds = new Set();
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const messageMap = new Map();
 const mime = require('mime-types');
 const COGVIDEO_GRADIO_SPACE = "THUDM/CogVideoX-5B-Space"; // CogVideoX Space URL
@@ -73,6 +74,13 @@ function getBaseId(fullId) {
 }
 function normalizeMsgId(id) {
     return id ? id.replace(/^true_/, '').replace(/^false_/, '') : id;
+}
+
+function containsTriggerWord(text) {
+    if (!text) return false;
+    const triggers = ["פיתי","פיטי","פיטע","פיתיי","piti","פיטא","פיםי","פתי","תיתי","טיטי","טיתי","פיתוש","פטי","פטוש","פיטו","פיטוש","פיתיא","פטושקה","פייטי","פיתיא","פיטיי","פיתושקה"];
+    if (text.startsWith("///")) return true;
+    return triggers.some(t => text.includes(t));
 }
 
 
@@ -888,6 +896,7 @@ async function safelyAppendMessage(msg, senderName) {
                     const mediaPath = path.join(chatPaths.filesDir, mediaFilename);
 
                     fs.writeFileSync(mediaPath, Buffer.from(media.data, 'base64'));
+                    uploadedMediaMap.set(msgId, { mimeType: media.mimetype, base64: media.data, filePath: mediaPath });
 
                     let generatedFilesIndex = [];
                     const indexFilePath = chatPaths.generatedFilesIndex;
@@ -915,7 +924,7 @@ async function safelyAppendMessage(msg, senderName) {
             } catch (error) {
                 console.error(`[safelyAppendMessage] Error saving media for message ${msgId}:`, error);
             }
-            await handleMediaContent(msg);
+            await handleMediaContent(msg, mediaPath);
 
         }
         if (autoReactEmoji && msg.type !== 'revoked' && msg.type !== 'reaction') {
@@ -3552,10 +3561,46 @@ async function downloadMediaPart(msgItem) {
  * Download any media, send it to Gemini with the right prompt,
  * get back the description/OCR, and append it to chat history.
  */
-async function handleMediaContent(msg) {
+async function handleMediaContent(msg, savedPath = null) {
     // 1. download the media
     const media = await msg.downloadMedia();
     if (!media?.data) return;
+
+    const isDocx = media.mimetype && media.mimetype.includes('officedocument.wordprocessingml.document');
+    if (isDocx) {
+        const chat = await msg.getChat();
+        const safeName = await getSafeNameForChat(chat);
+        const { historyFile } = getChatPaths(chat.id._serialized, safeName);
+        const timestamp = getLocalTimestamp();
+        const docxFilePath = savedPath || path.join(os.tmpdir(), `${msg.id._serialized}.docx`);
+        if (!savedPath) {
+            fs.writeFileSync(docxFilePath, Buffer.from(media.data, 'base64'));
+        }
+        const includeImages = containsTriggerWord(msg.body || '');
+        const imageDir = path.join(path.dirname(docxFilePath), `${path.basename(docxFilePath, '.docx')}_images`);
+        try {
+            const extractor = path.join(__dirname, 'docx_extractor.py');
+            const args = [extractor, docxFilePath, imageDir];
+            if (!includeImages) args.push('--no-images');
+            const result = spawnSync('python3', args, { encoding: 'utf8' });
+            const extracted = result.stdout ? result.stdout.trim() : '';
+            if (extracted) {
+                fs.appendFileSync(historyFile, `${timestamp} [ID: ${msg.id._serialized}] פיתי (DOCX): ${extracted}\n`, 'utf8');
+                const entry = uploadedMediaMap.get(msg.id._serialized) || {};
+                entry.docxText = extracted;
+                if (includeImages) {
+                    try {
+                        const images = fs.readdirSync(imageDir).map(f => path.join(imageDir, f));
+                        entry.imagePaths = images;
+                    } catch { entry.imagePaths = []; }
+                }
+                uploadedMediaMap.set(msg.id._serialized, entry);
+            }
+        } catch (e) {
+            console.error('[handleMediaContent] DOCX extraction failed:', e);
+        }
+        return; // skip generic Gemini flow for DOCX
+    }
 
     // 2. pick your prompt based on type
     let prompt;
@@ -3682,18 +3727,41 @@ async function handleMessage(msg, incoming, quotedMedia = null, contextMediaArra
 
     const messageMedia = await downloadMediaPart(msg);
     if (messageMedia) {
-        uploadedMediaMap.set(msg.id._serialized, {
-            mimeType: messageMedia.mimeType,
-            base64: messageMedia.base64,
-        });
-        geminiMediaParts.push({
-            inlineData: {
-                data: messageMedia.base64,
-                mimeType: messageMedia.mimeType
-            }
-        });
+        const isDocx = messageMedia.mimeType && messageMedia.mimeType.includes('officedocument.wordprocessingml.document');
+        const existing = uploadedMediaMap.get(msg.id._serialized) || {};
+        existing.mimeType = messageMedia.mimeType;
+        if (!isDocx) {
+            existing.base64 = messageMedia.base64;
+            geminiMediaParts.push({
+                inlineData: {
+                    data: messageMedia.base64,
+                    mimeType: messageMedia.mimeType
+                }
+            });
+        }
+        uploadedMediaMap.set(msg.id._serialized, existing);
         if (messageMedia.caption) {
             incoming += `\nMedia caption: ${messageMedia.caption}`;
+        }
+    }
+
+    const docxInfo = uploadedMediaMap.get(msg.id._serialized);
+    if (docxInfo && docxInfo.docxText) {
+        if (containsTriggerWord(incoming)) {
+            incoming += `\n${docxInfo.docxText}`;
+            if (Array.isArray(docxInfo.imagePaths)) {
+                for (const imgPath of docxInfo.imagePaths) {
+                    try {
+                        const imgData = fs.readFileSync(imgPath, { encoding: 'base64' });
+                        geminiMediaParts.push({
+                            inlineData: {
+                                data: imgData,
+                                mimeType: mime.lookup(imgPath) || 'image/png'
+                            }
+                        });
+                    } catch (e) { console.error('Error reading image', imgPath, e); }
+                }
+            }
         }
     }
 
