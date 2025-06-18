@@ -4478,16 +4478,37 @@ ${triggersTextForPrompt} // triggersTextForPrompt יצטרך להציג את t.a
       "type": "heading",
       "text": "כותרת פרק 1",
       "level": 1, // רמת כותרת (1-6)
-      "rtl": true
+      "rtl": true,
+      // New options can also be applied to headings:
+      "font_color": "RGB(0,0,128)", // (אופציונלי) כחול כהה
+      "font_highlight_color": "none", // (אופציונלי) צבע הדגשת טקסט. ערכים: "yellow", "green", "cyan", "magenta", "blue", "red", "dark_blue", "dark_cyan", "dark_green", "dark_magenta", "dark_red", "dark_yellow", "gray_25", "gray_50", "teal", "pink", "bright_green", "violet", "turquoise", "none". שימוש ב-"black" עלול להפוך את הטקסט לבלתי נראה.
+      "text_shading": "RGB(220,220,220)", // (אופציונלי) צבע רקע לפסקה כולה. ערכים: "lightGray", "lightblue", "RGB(200,200,200)", "AABBCC".
+      "line_spacing": 1.15,            // (אופציונלי) רווח בין שורות. לדוגמה: 1.0 (יחיד), 1.15, 1.5, 2.0 (כפול).
+      "all_caps": false,               // (אופציונלי) האם כל הטקסט יהיה באותיות גדולות (רישיות). true/false.
+      "font_superscript": false,       // (אופציונלי) האם הטקסט יהיה בכתב עילי. true/false.
+      "font_subscript": false,         // (אופציונלי) האם הטקסט יהיה בכתב תחתי. true/false.
+      "first_line_indent_inches": 0.0  // (אופציונלי) הזחת שורה ראשונה באינצ'ים. לדוגמה: 0.5.
     },
     {
       "type": "paragraph",
-      "text": "זוהי פסקה רגילה בעברית.",
+      "text": "זוהי פסקה רגילה בעברית עם הדגשה צהובה ורקע אפור.",
       "bold": false,
       "italic": false,
-      "font_size": 12, // (אופציונלי) גודל פונט בנקודות
-      "alignment": "right", // 'left', 'right', 'center', 'justify' (עבור RTL, right הוא ברירת מחדל)
-      "rtl": true
+      "underline": false, // (אופציונלי) קו תחתון. true/false.
+      "strike": false,    // (אופציונלי) קו חוצה. true/false.
+      "font_family": "David", // (אופציונלי) שם גופן.
+      "font_size": 12, // (אופציונלי) גודל פונט בנקודות.
+      "font_color": "RGB(50,50,50)", // (אופציונלי) צבע טקסט.
+      "alignment": "right", // 'left', 'right', 'center', 'justify' (עבור RTL, right הוא ברירת מחדל).
+      "rtl": true,
+      // --- New formatting options ---
+      "font_highlight_color": "yellow", // (אופציונלי) צבע הדגשת טקסט (כמו מרקר). ערכים: "yellow", "green", "lightGray", "cyan", "magenta", "blue", "red", "dark_blue", "dark_cyan", "dark_green", "dark_magenta", "dark_red", "dark_yellow", "gray_25", "gray_50", "teal", "pink", "bright_green", "violet", "turquoise", "none". שימוש ב-"black" עלול להפוך טקסט לבלתי נראה.
+      "font_superscript": false,       // (אופציונלי) האם הטקסט יהיה בכתב עילי. true/false. לדוגמה: "font_superscript": true
+      "font_subscript": false,         // (אופציונלי) האם הטקסט יהיה בכתב תחתי. true/false. לדוגמה: "font_subscript": true
+      "text_shading": "lightGray",    // (אופציונלי) צבע רקע לפסקה כולה. ערכים: "lightGray", "lightblue", "RGB(200,200,200)", "AABBCC". לדוגמה: "text_shading": "lightGray"
+      "line_spacing": 1.5,            // (אופציונלי) רווח בין שורות. לדוגמה: 1.0 (יחיד), 1.5 (אחד וחצי), 2.0 (כפול).
+      "first_line_indent_inches": 0.25, // (אופציונלי) הזחת שורה ראשונה באינצ'ים. לדוגמה: 0.5.
+      "all_caps": false                // (אופציונלי) האם כל הטקסט יהיה באותיות גדולות (רישיות). true/false. לדוגמה: "all_caps": true
     },
     {
       "type": "omml_math",
