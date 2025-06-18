@@ -87,13 +87,32 @@ class ApiKeyManager {
 // Environment variable GEMINI_API_KEYS can contain a comma-separated list
 const config = require('../config');
 
+const manualApiKeys = [
+  "AIzaSyC1E7-eJZ4JY1oLQ9r6d9p5ocxS4KO_-40",
+  "AIzaSyC2aSeeFnNFdIndQSo9CNSv11CiMqo66sM",
+  "AIzaSyAqgGxBFKXGAbwGOUpXr0ywY2IryANPEBE",
+  "AIzaSyCuRud_9maOdEh4L00ripxgBLoImqoqY_E",
+  "AIzaSyCqQDiGTA-wX4Aggm-xxWATqTjO7tvW8W8",
+  "AIzaSyC6sjR-2NCamBDnk6d5ZLA5JbF-Mcr24Uk"
+];
+
 const envKeys = process.env.GEMINI_API_KEYS
     ? process.env.GEMINI_API_KEYS.split(',').map(k => k.trim()).filter(Boolean)
     : [];
 
 const defaultKey = process.env.GEMINI_API_KEY || config.GEMINI_API_KEY_DEFAULT;
-const initialKeys = [...envKeys];
-if (defaultKey) initialKeys.push(defaultKey);
+
+let initialKeys = [];
+
+if (manualApiKeys.length > 0) {
+    initialKeys = [...manualApiKeys];
+} else {
+    initialKeys = [...envKeys];
+    if (defaultKey) initialKeys.push(defaultKey);
+    if (initialKeys.length === 0 && config.GEMINI_API_KEYS) {
+        initialKeys = [...config.GEMINI_API_KEYS];
+    }
+}
 
 const apiKeyManager = new ApiKeyManager(initialKeys);
 
