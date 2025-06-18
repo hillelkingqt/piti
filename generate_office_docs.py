@@ -42,25 +42,35 @@ try:
     import docx
     from docx import Document
     from docx.shared import Pt, Inches, RGBColor
-    from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_BREAK, WD_HIGHLIGHT_COLOR_INDEX
+    from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_BREAK # WD_HIGHLIGHT_COLOR_INDEX removed from here
     from docx.enum.style import WD_STYLE_TYPE
-    from docx.oxml import OxmlElement as OxmlElement_oxml # Avoid collision if user imports from shared
+    from docx.oxml import OxmlElement as OxmlElement_oxml 
     from docx.oxml.shared import OxmlElement
     from docx.oxml.ns import qn, nsdecls
     from docx.table import _Cell as DocxCellType 
     from docx.text.paragraph import Paragraph as DocxParagraphType 
     from docx.text.run import Run as DocxRunType 
+
+    # Attempt to import WD_HIGHLIGHT_COLOR_INDEX separately
+    try:
+        from docx.enum.text import WD_HIGHLIGHT_COLOR_INDEX
+    except ImportError:
+        WD_HIGHLIGHT_COLOR_INDEX = None # Define as None if import fails
+        logging.warning("Could not import WD_HIGHLIGHT_COLOR_INDEX. Text highlighting will be disabled.")
+
 except ModuleNotFoundError:
     docx = None # type: ignore
     Document = None # type: ignore
     Pt = Inches = RGBColor = None # type: ignore
-    WD_ALIGN_PARAGRAPH = WD_BREAK = WD_HIGHLIGHT_COLOR_INDEX = None # type: ignore
+    WD_ALIGN_PARAGRAPH = WD_BREAK = None # type: ignore 
+    WD_HIGHLIGHT_COLOR_INDEX = None # Ensure it's None here too
     WD_STYLE_TYPE = None # type: ignore
     OxmlElement = OxmlElement_oxml = None # type: ignore
     qn = nsdecls = None # type: ignore
     DocxCellType = None # type: ignore
     DocxParagraphType = None # type: ignore
     DocxRunType = None # type: ignore
+    logging.warning("Module 'docx' or its core components not found. DOCX generation will be severely limited.")
 
 
 try:
