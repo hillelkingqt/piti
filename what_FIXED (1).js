@@ -882,6 +882,7 @@ async function safelyAppendMessage(msg, senderName) {
 
         fs.appendFileSync(chatFilePath, lineToAppend, 'utf8'); 
         if (msg.hasMedia) {
+            let mediaPath; // ensure mediaPath is defined for later use
             try {
                 const media = await msg.downloadMedia();
                 if (media && media.data) {
@@ -893,7 +894,7 @@ async function safelyAppendMessage(msg, senderName) {
                         }
                     }
                     const mediaFilename = `${msgId}.${fileExtension}`;
-                    const mediaPath = path.join(chatPaths.filesDir, mediaFilename);
+                    mediaPath = path.join(chatPaths.filesDir, mediaFilename);
 
                     fs.writeFileSync(mediaPath, Buffer.from(media.data, 'base64'));
                     uploadedMediaMap.set(msgId, { mimeType: media.mimetype, base64: media.data, filePath: mediaPath });
@@ -10767,10 +10768,17 @@ case "generate_graph":
         incoming.includes("פיתיי") ||
         incoming.includes("piti") ||
         incoming.includes("פיטא") ||
+        incoming.includes("אלוהים") ||
         incoming.includes("פיםי") ||
         incoming.includes("פתי") ||
         incoming.includes("תיתי") ||
         incoming.includes("טיטי") ||
+        incoming.includes("ביבי") ||
+        incoming.includes("לפיד") ||
+        incoming.includes("אחמד") ||
+        incoming.includes("ימין") ||
+        incoming.includes("יהודי") ||
+        incoming.includes("שמאל") ||
         incoming.includes("טיתי") ||
         incoming.includes("פיתוש") ||
         incoming.includes("פטי") ||
@@ -10780,9 +10788,6 @@ case "generate_graph":
         incoming.includes("פיתיא") ||
         incoming.includes("פטושקה") ||
         incoming.includes("פייטי") ||
-        incoming.includes("פיתיא") ||
-        incoming.includes("פיטיי") ||
-        incoming.includes("פיתושקה");
 
     const botTriggeredByWordOrReplyToBot = isTriggerWord || isReplyToBot;
 
