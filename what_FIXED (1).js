@@ -10539,7 +10539,12 @@ client.on('message_create', async (msg) => {
                                     // השתמש ב-sendActionResult או ב-msg.reply ישירות
                                     if (triggeredActionData.message) {
                                         // await sendActionResult(msg, triggeredActionData.message, triggeredActionData, chatPathsForLog); // Use helper if implemented
-                                        await msg.reply(`פיתי\n\n${triggeredActionData.message}`); // Or direct reply
+                                        try {
+                                            await msg.reply(`פיתי\n\n${triggeredActionData.message}`); // נסה להשיב עם ציטוט
+                                        } catch (replyErr) {
+                                            console.warn(`[Trigger Execution TEXT] Failed to reply with quote: ${replyErr.message}. Sending without quote...`);
+                                            await client.sendMessage(msg.from, `פיתי\n\n${triggeredActionData.message}`); // שלח ללא ציטוט אם יש שגיאה
+                                        }
                                     }
                                     break;
 case "generate_graph":
