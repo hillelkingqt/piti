@@ -2,7 +2,6 @@
 const { Client, LocalAuth, MessageMedia, Contact, Poll } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const axios = require('axios');
-const pikudHaoref = require('pikud-haoref-api');
 const { exec } = require('child_process');
 const uploadedMediaMap = new Map();
 const cheerio = require('cheerio');
@@ -287,69 +286,6 @@ async function askGeminiWithSearchGrounding(promptText) {
         console.error("❌ [askGeminiWithSearchGrounding] שגיאה:", error.response?.data || error.message || error);
         // שקול להחזיר הודעת שגיאה שונה או לזרוק את השגיאה הלאה
         return "⚠️ הייתה שגיאה בזמן הבקשה ל-Gemini עם Grounding.";
-    }
-}
-
-// New function for WhatsApp bot
-async function sendPikudAlertToWhatsapp(triggeringMsg) {
-    const chatId = triggeringMsg.fromMe ? triggeringMsg.to : triggeringMsg.from;
-    console.log(`[PikudHaoref] Received /alert command in chat ${chatId}`);
-    try {
-        await triggeringMsg.reply("מחפש התרעות מפיקוד העורף...");
-
-        const alertData = await new Promise((resolve, reject) => {
-            pikudHaoref.getActiveAlert((err, alert) => {
-                if (err) {
-                    return reject(err);
-                }
-                resolve(alert);
-            });
-        });
-
-        if (alertData && Array.isArray(alertData.cities) && alertData.cities.length > 0) {
-            const messageParts = [];
-            messageParts.push(`🚨 *התראת פיקוד העורף פעילה* 🚨`);
-            if (alertData.title) {
-                 messageParts.push(`*כותרת:* ${alertData.title}`);
-            }
-            let citiesToList = alertData.cities;
-            if (alertData.data && Array.isArray(alertData.data) && alertData.data.length > 0) {
-                const cityNamesFromData = alertData.data.map(c => c.trim()).filter(c => c.length > 0);
-                if (cityNamesFromData.length > 0) {
-                    citiesToList = cityNamesFromData;
-                }
-            }
-
-            messageParts.push(`*ערים/אזורים:* ${citiesToList.join(', ')}`);
-
-            if (alertData.instructions) {
-                messageParts.push(`*הוראות:* ${alertData.instructions}`);
-            }
-
-            let alertTypeDescription = alertData.type;
-            if (!alertTypeDescription && alertData.data && Array.isArray(alertData.data) && alertData.data[0] && typeof alertData.data[0] === 'string' && alertData.data[0].includes('ירי רקטות וטילים')) {
-                alertTypeDescription = 'ירי רקטות וטילים';
-            }
-
-            if (alertTypeDescription) {
-                 messageParts.push(`*סוג התראה:* ${alertTypeDescription}`);
-            }
-
-            const finalMessage = messageParts.join('\n');
-            await triggeringMsg.reply(finalMessage);
-            console.log(`[PikudHaoref] Sent active alert to ${chatId}: Cities: ${citiesToList.join(', ')}`);
-        } else {
-            await triggeringMsg.reply("✅ אין כרגע התרעות פעילות מפיקוד העורף.");
-            console.log(`[PikudHaoref] No active alerts found. Notified chat ${chatId}.`);
-        }
-
-    } catch (error) {
-        console.error("❌ [PikudHaoref] Error getting or sending alert:", error);
-        try {
-            await triggeringMsg.reply(`⚠️ שגיאה בקבלת נתוני פיקוד העורף: ${error.message}`);
-        } catch (replyError) {
-            console.error("❌ [PikudHaoref] Failed to send error message to user:", replyError);
-        }
     }
 }
 
@@ -10337,21 +10273,13 @@ client.on('message_create', async (msg) => {
         console.error(`❌ [message_create LOGGING ERROR] Failed during logging setup or execution for msg ${msg.id._serialized}. Error:`, logSetupError);
     }
 
-    // Check for /alert command BEFORE owner-specific commands or general AI processing
-    if (incoming.toLowerCase() === '/alert') {
-        console.log(`[COMMAND /alert] Detected /alert command in chat ${chatId} from ${senderNameForLog}`);
-        await sendPikudAlertToWhatsapp(msg); // Pass the full msg object
-        commandHandled = true; // Mark as handled so it doesn't fall through
-    }
-
     // ==============================================================
     // SECTION 5: Owner Command Handling
-    // (This existing section will only run if commandHandled is still false)
     // ==============================================================
 
 
     // --- Check if the message sender IS the owner ---
-    if (!commandHandled && messageSenderBaseId && ownerBaseId && messageSenderBaseId === ownerBaseId) {
+    if (messageSenderBaseId && ownerBaseId && messageSenderBaseId === ownerBaseId) {
         const isCommand = incoming.startsWith('/'); // Basic check if it looks like a command
 
         if (isCommand) {
@@ -10595,8 +10523,8 @@ client.on('message_create', async (msg) => {
 
     // ==============================================================
     // SECTION 5.5: Automatic Trigger Check (REVISED)
-    // (This existing section will also only run if commandHandled is still false)
     // ==============================================================
+
     if (!commandHandled) {
         const incomingLower = incoming.toLowerCase();
         if (chatPathsForLog && chatPathsForLog.triggersFile) {
