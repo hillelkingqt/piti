@@ -15,7 +15,6 @@ const { spawn, spawnSync } = require('child_process');
 const { apiKeyManager } = require('./services/ApiKeyManager');
 const writtenMessageIds = new Set();
 const fs = require('fs');
-const fsPromises = fs.promises;
 const path = require('path');
 const os = require('os');
 const messageMap = new Map();
@@ -821,9 +820,9 @@ async function appendMessageToChat(chatId, sender, message) {
     const safeName = await getSafeNameForChat(chat);
     const chatPaths = getChatPaths(chatId, safeName);
     const filePath = chatPaths.historyFile;
-    await fsPromises.mkdir(chatPaths.chatDir, { recursive: true });
+    fs.mkdirSync(chatPaths.chatDir, { recursive: true });
     const line = `[${sender}] ${message}\n`;
-    await fsPromises.appendFile(filePath, line, 'utf8');
+    fs.appendFileSync(filePath, line, 'utf8');
 }
 
 function getLocalTimestamp() {
@@ -837,9 +836,9 @@ function getLocalTimestamp() {
 async function sendAndLogMessage(chat, messageText, safeName) {
     const chatPaths = getChatPaths(chat.id._serialized, safeName);
     const filePath = chatPaths.historyFile;
-    await fsPromises.mkdir(chatPaths.chatDir, { recursive: true });
+    fs.mkdirSync(chatPaths.chatDir, { recursive: true });
     const line = `[ID: auto_generated] פיתי: ${messageText}\n`;
-    await fsPromises.appendFile(filePath, line, 'utf8');
+    fs.appendFileSync(filePath, line, 'utf8');
     return await chat.sendAndLogMessage(messageText);
 }
 
@@ -863,8 +862,8 @@ async function safelyAppendMessage(msg, senderName) {
         chatFilePath = chatPaths.historyFile;
 
         // Ensure directories exist FIRST
-        await fsPromises.mkdir(chatPaths.chatDir, { recursive: true });
-        await fsPromises.mkdir(chatPaths.filesDir, { recursive: true });
+        fs.mkdirSync(chatPaths.chatDir, { recursive: true });
+        fs.mkdirSync(chatPaths.filesDir, { recursive: true });
 
         let replySnippet = '';
         if (msg.hasQuotedMsg) {
@@ -892,7 +891,7 @@ async function safelyAppendMessage(msg, senderName) {
             lineToAppend = `${localTimestamp} [ID: ${msgId}] ${senderName}: ${fullBody}\n`; // Use localTimestamp here too
         }
 
-        await fsPromises.appendFile(chatFilePath, lineToAppend, 'utf8');
+        fs.appendFileSync(chatFilePath, lineToAppend, 'utf8'); 
         if (msg.hasMedia) {
             let mediaPath; // ensure mediaPath is defined for later use
             try {
@@ -908,15 +907,14 @@ async function safelyAppendMessage(msg, senderName) {
                     const mediaFilename = `${msgId}.${fileExtension}`;
                     mediaPath = path.join(chatPaths.filesDir, mediaFilename);
 
-                    await fsPromises.writeFile(mediaPath, Buffer.from(media.data, 'base64'));
+                    fs.writeFileSync(mediaPath, Buffer.from(media.data, 'base64'));
                     uploadedMediaMap.set(msgId, { mimeType: media.mimetype, base64: media.data, filePath: mediaPath });
 
                     let generatedFilesIndex = [];
                     const indexFilePath = chatPaths.generatedFilesIndex;
                     if (fs.existsSync(indexFilePath)) {
                         try {
-                            const indexContent = await fsPromises.readFile(indexFilePath, 'utf8');
-                            generatedFilesIndex = JSON.parse(indexContent);
+                            generatedFilesIndex = JSON.parse(fs.readFileSync(indexFilePath, 'utf8'));
                         } catch (parseErr) {
                             console.error(`[safelyAppendMessage] Error parsing ${indexFilePath}, initializing new index. Error:`, parseErr);
                             generatedFilesIndex = [];
@@ -930,7 +928,7 @@ async function safelyAppendMessage(msg, senderName) {
                         description: `קובץ מדיה שהתקבל מהמשתמש (${senderName})`,
                         type: media.mimetype || 'unknown/unknown'
                     });
-                    await fsPromises.writeFile(indexFilePath, JSON.stringify(generatedFilesIndex, null, 2), 'utf8');
+                    fs.writeFileSync(indexFilePath, JSON.stringify(generatedFilesIndex, null, 2), 'utf8');
 
                 } else {
                     console.warn(`[safelyAppendMessage] Failed to download media data for message ${msgId}.`);
@@ -1235,13 +1233,13 @@ client.on('message_create', async (msg) => {
             chatPaths = getChatPaths(chat.id._serialized, safeName);
             chatFilePath = chatPaths.historyFile;
 
-            await fsPromises.mkdir(chatPaths.chatDir, { recursive: true }); // ודא שהתיקייה קיימת
+            fs.mkdirSync(chatPaths.chatDir, { recursive: true }); // ודא שהתיקייה קיימת
             console.log(`[message_create fromMe POST-MKDIR] Ensured directory: ${chatPaths.chatDir}`);
 
             const timestampISO = new Date().toISOString(); // קבל חותמת זמן
             const messageBodyForLog = typeof msg.body === 'string' ? msg.body : (msg.type === 'sticker' ? '[סטיקר]' : '[מדיה או אובייקט]');
             const line = `[${timestampISO}] [ID: ${msg.id._serialized}] פיתי: ${messageBodyForLog}\n`; // <-- הוסף חותמת זמן
-            await fsPromises.appendFile(chatFilePath, line, 'utf8'); // כתוב לקובץ
+            fs.appendFileSync(chatFilePath, line, 'utf8'); // כתוב לקובץ
             console.log(`[message_create fromMe POST-APPEND] Appended outgoing msg to: '${chatFilePath}'`);
 
         } catch (err) {
@@ -2035,7 +2033,7 @@ async function handleCreateFileAction(replyData, targetMsg, chatPaths) {
         // Example manual log:
         if (sentMediaMsg && sentMediaMsg.id && !writtenMessageIds.has(sentMediaMsg.id._serialized)) {
             const line = `[ID: ${sentMediaMsg.id._serialized}] פיתי: [מדיה: ${media.mimetype || 'unknown type'}]\n`;
-            await fsPromises.appendFile(chatPaths.historyFile, line, 'utf8');
+            fs.appendFileSync(chatPaths.historyFile, line, 'utf8');
             writtenMessageIds.add(sentMediaMsg.id._serialized);
             const normId = normalizeMsgId(sentMediaMsg.id._serialized);
             botMessageIds.add(normId);
@@ -2672,7 +2670,7 @@ async function executeDelayedAction(task) {
                 const messageContentLog = typeof content === 'string' ? content : (content instanceof MessageMedia ? `[מדיה: ${content.mimetype || 'unknown type'}]` : '[אובייקט]');
                 const logLine = `${localTimestamp} [ID: ${sentMsg.id._serialized}] פיתי: ${messageContentLog}\n`;
                 try {
-                    await fsPromises.appendFile(chatPaths.historyFile, logLine, 'utf8');
+                    fs.appendFileSync(chatPaths.historyFile, logLine, 'utf8');
                     writtenMessageIds.add(sentMsg.id._serialized); // Prevent re-logging
                     const normId = normalizeMsgId(sentMsg.id._serialized);
                     botMessageIds.add(normId);
@@ -3611,7 +3609,7 @@ async function handleMediaContent(msg, savedPath = null) {
             const result = spawnSync('python3', args, { encoding: 'utf8' });
             const extracted = result.stdout ? result.stdout.trim() : '';
             if (extracted) {
-                await fsPromises.appendFile(historyFile, `${timestamp} [ID: ${msg.id._serialized}] פיתי (DOCX): ${extracted}\n`, 'utf8');
+                fs.appendFileSync(historyFile, `${timestamp} [ID: ${msg.id._serialized}] פיתי (DOCX): ${extracted}\n`, 'utf8');
                 const entry = uploadedMediaMap.get(msg.id._serialized) || {};
                 entry.docxText = extracted;
                 if (includeImages) {
@@ -3674,7 +3672,7 @@ async function handleMediaContent(msg, savedPath = null) {
     const { historyFile } = getChatPaths(chat.id._serialized, safeName);
     const timestamp = getLocalTimestamp();
     const entry = `${timestamp} [ID: ${msg.id._serialized}] פיתי (media content): ${description}\n`;
-    await fsPromises.appendFile(historyFile, entry, "utf8");
+    fs.appendFileSync(historyFile, entry, "utf8");
 }
 
 
@@ -7134,7 +7132,7 @@ await msg.reply(infoMessage.trim(), undefined, { quotedMessageId: msg.id._serial
                 // (אם ה-wrapper של msg.reply לא עושה את זה אוטומטית עבור מדיה)
                 if (sentMediaMsg && sentMediaMsg.id && !writtenMessageIds.has(sentMediaMsg.id._serialized)) {
                     const line = `[ID: ${sentMediaMsg.id._serialized}] פיתי: [מדיה: ${media.mimetype || 'unknown type'}]\n`;
-                    await fsPromises.appendFile(chatPaths.historyFile, line, 'utf8');
+                    fs.appendFileSync(chatPaths.historyFile, line, 'utf8');
                     writtenMessageIds.add(sentMediaMsg.id._serialized);
                     const normId = normalizeMsgId(sentMediaMsg.id._serialized);
                     botMessageIds.add(normId);
@@ -8654,7 +8652,7 @@ ${finalHtmlPrompt}
             const localTimestamp = getLocalTimestamp();
             const logLine = `${localTimestamp} [ID: ${sentMediaMsg.id._serialized}] פיתי: [מדיה: ${media.mimetype || 'text/html'}]\n`;
             try {
-                await fsPromises.appendFile(chatPaths.historyFile, logLine, 'utf8');
+                fs.appendFileSync(chatPaths.historyFile, logLine, 'utf8');
                 writtenMessageIds.add(sentMediaMsg.id._serialized);
                 const normId = normalizeMsgId(sentMediaMsg.id._serialized);
                 botMessageIds.add(normId);
@@ -9937,7 +9935,7 @@ async function sendInfoMenu(msg) {
             const chatPaths = getChatPaths(chat.id._serialized, safeName);
             const localTimestamp = getLocalTimestamp();
             const line = `${localTimestamp} [ID: ${normalizedId}] פיתי: [תפריט מידע]\n`; // או חלק מהטקסט
-            await fsPromises.appendFile(chatPaths.historyFile, line, 'utf8');
+            fs.appendFileSync(chatPaths.historyFile, line, 'utf8');
         } catch (logErr) {
             console.error("[sendInfoMenu] Error manually logging info menu message:", logErr);
         }
@@ -10146,10 +10144,10 @@ client.on('message', async (msg) => {
             // Construct the log line using the ID of the message *actually sent* by the bot
             const localTimestamp = getLocalTimestamp();
             const line = `${localTimestamp} [ID: ${sentMsgIdForLog}] פיתי: ${messageContent}\n`;
-            console.log(`[msg.reply Phase 3] Attempting appendFile to: '${historyFilePathForLog}' with bot msg ID ${sentMsgIdForLog}`);
-            await fsPromises.appendFile(historyFilePathForLog, line, 'utf8');
+            console.log(`[msg.reply Phase 3] Attempting appendFileSync to: '${historyFilePathForLog}' with bot msg ID ${sentMsgIdForLog}`);
+            fs.appendFileSync(historyFilePathForLog, line, 'utf8');
             // *** התיקון כאן ***
-            console.log(`[msg.reply Phase 3] appendFile successful for: '${historyFilePathForLog}'`);
+            console.log(`[msg.reply Phase 3] appendFileSync successful for: '${historyFilePathForLog}'`);
 
         } catch (err) {
             // Log error with ALL the context we gathered
