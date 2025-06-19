@@ -72,6 +72,17 @@ function getBaseId(fullId) {
     const userPart = parts[0].split(':')[0];
     return `${userPart}@${parts[1]}`;
 }
+
+// Helper specifically for comparing user IDs (owner checks). This normalizes the
+// domain to `c.us` so that WhatsApp's different linked-device suffixes (like
+// `@lid`) don't interfere with equality checks.
+function getBaseIdForOwnerCheck(fullId) {
+    if (!fullId) return null;
+    const parts = fullId.split('@');
+    if (parts.length < 2) return null;
+    const userPart = parts[0].split(':')[0];
+    return `${userPart}@c.us`;
+}
 function normalizeMsgId(id) {
     return id ? id.replace(/^true_/, '').replace(/^false_/, '') : id;
 }
@@ -7489,15 +7500,8 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
         const replyToId = jsonResponse.replyTo || msg.id._serialized;
 
         // --- בדיקת בעלות והגבלת כמות ---
-        const getBaseId = (fullId) => { // פונקציית עזר לזיהוי בסיס המספר
-            if (!fullId) return null;
-            const parts = fullId.split('@');
-            if (parts.length < 2) return null;
-            const userPart = parts[0].split(':')[0];
-            return `${userPart}@c.us`;
-        };
-        const messageSenderBaseId = getBaseId(msg.author || msg.from);
-        const ownerBaseId = getBaseId(myId);
+        const messageSenderBaseId = getBaseIdForOwnerCheck(msg.author || msg.from);
+        const ownerBaseId = getBaseIdForOwnerCheck(myId);
         const isOwnerRequest = messageSenderBaseId === ownerBaseId;
 
         // הגבלת ברירת מחדל (ניתן לשנות אם רוצים)
@@ -10210,8 +10214,8 @@ client.on('message_create', async (msg) => {
     const authorId = msg.author || msg.from;
 
     // הוסיפו מיד לאחר הגדרת authorId:
-    const messageSenderBaseId = getBaseId(authorId);
-    const ownerBaseId = getBaseId(myId);
+    const messageSenderBaseId = getBaseIdForOwnerCheck(authorId);
+    const ownerBaseId = getBaseIdForOwnerCheck(myId);
     const contactNumber = (authorId || '').split('@')[0].split(':')[0];
     const isGroup = chatId.includes('@g.us');
 
@@ -10431,7 +10435,7 @@ client.on('message_create', async (msg) => {
                                 try {
                                     const quotedMsg = await msg.getQuotedMessage();
                                     const quotedAuthorId = quotedMsg.author || quotedMsg.from;
-                                    const quotedBaseId = getBaseId(quotedAuthorId);
+                                    const quotedBaseId = getBaseIdForOwnerCheck(quotedAuthorId);
                                     if (quotedBaseId) {
                                         if (quotedBaseId === ownerBaseId) {
                                             await msg.reply("פיתי\n\nלא ניתן לחסום את הבעלים של הבוט.");
@@ -10748,7 +10752,7 @@ case "generate_graph":
 
                 // תגובה לבעלים
                 const quotedAuthor = quotedMsg.author || quotedMsg.from;
-                const authorBaseId = getBaseId(quotedAuthor);
+                const authorBaseId = getBaseIdForOwnerCheck(quotedAuthor);
 
                 if (quotedMsg.fromMe &&
                     authorBaseId === ownerBaseId &&
@@ -10792,7 +10796,7 @@ case "generate_graph":
         incoming.includes("פיטוש") ||
         incoming.includes("פיתיא") ||
         incoming.includes("פטושקה") ||
-        incoming.includes("פייטי") ||
+        incoming.includes("פייטי");
 
     const botTriggeredByWordOrReplyToBot = isTriggerWord || isReplyToBot;
 
@@ -10927,14 +10931,7 @@ case "generate_graph":
                 try {
                     // Attempt to get sender name for the message in the chain
                     if (quotedMsg.fromMe) {
-                        // Similar logic as main handler for owner check
-                        const getBaseIdForOwnerCheck = (fullId) => {
-                            if (!fullId) return null;
-                            const parts = fullId.split('@');
-                            if (parts.length < 2) return null;
-                            const userPart = parts[0].split(':')[0];
-                            return `${userPart}@c.us`;
-                        };
+                        // Normalize IDs to compare with owner
                         const actualSenderBaseId = getBaseIdForOwnerCheck(quotedMsg.author || quotedMsg.from);
                         const ownerBaseIdForCheck = getBaseIdForOwnerCheck(myId);
                         quotedSenderName = (actualSenderBaseId && ownerBaseIdForCheck && actualSenderBaseId === ownerBaseIdForCheck) ? "הלל (Owner)" : "פיתי";
