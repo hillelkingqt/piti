@@ -3463,13 +3463,25 @@ async function handleCreateStickerAction(stickerData, targetMsg, chatPaths) {
         const stickerFilename = `sticker_${Date.now()}.webp`;
         const media = new MessageMedia('image/webp', stickerBase64, stickerFilename);
 
-        const sentStickerMsg = await client.sendMessage(targetChatId, media, {
-            sendMediaAsSticker: true,
-            stickerName: "פיתי סטיקר",
-            stickerAuthor: "PitiBot",
-            quotedMessageId: replyTo
-        });
-        console.log(`[handleCreateStickerAction] Sticker sent. ID: ${sentStickerMsg.id._serialized}`);
+        let sentStickerMsg;
+        try {
+            console.log(`[handleCreateStickerAction] Attempting to send sticker with quote to: ${replyTo} in chat ${targetChatId}`);
+            sentStickerMsg = await client.sendMessage(targetChatId, media, {
+                sendMediaAsSticker: true,
+                stickerName: "פיתי סטיקר",
+                stickerAuthor: "PitiBot",
+                quotedMessageId: replyTo
+            });
+            console.log(`[handleCreateStickerAction] Sticker sent with quote. ID: ${sentStickerMsg.id._serialized}`);
+        } catch (quoteError) {
+            console.warn(`[handleCreateStickerAction] Failed to send sticker with quote to ${replyTo}. Error: ${quoteError.message}. Attempting without quote...`);
+            sentStickerMsg = await client.sendMessage(targetChatId, media, {
+                sendMediaAsSticker: true,
+                stickerName: "פיתי סטיקר",
+                stickerAuthor: "PitiBot"
+            });
+            console.log(`[handleCreateStickerAction] Sticker sent WITHOUT quote. ID: ${sentStickerMsg.id._serialized}`);
+        }
 
         // ... (לוגיקה של שמירת קובץ ועדכון אינדקס כמו קודם) ...
         const filesDir = chatPaths.filesDir;
