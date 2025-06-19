@@ -11,6 +11,7 @@ const sharp = require('sharp');
 const readlineSync = require('readline-sync');
 const { Buffer } = require('buffer');
 const { spawn, spawnSync } = require('child_process');
+const pikudHaoref = require('pikud-haoref-api');
 
 const { apiKeyManager } = require('./services/ApiKeyManager');
 const writtenMessageIds = new Set();
@@ -147,6 +148,23 @@ async function generateBarcode(text) {
         color: { dark: '#000', light: '#FFF' }
     });
     return filePath;
+}
+
+async function sendPikudAlertMessage(targetMsg) {
+    return new Promise(resolve => {
+        pikudHaoref.getActiveAlert((err, alert) => {
+            if (err) {
+                targetMsg.reply(`⚠️ שגיאה בקבלת נתוני פיקוד העורף: ${err.message}`).then(resolve);
+                return;
+            }
+            if (alert && Array.isArray(alert.cities) && alert.cities.length > 0) {
+                const alertMsg = `🚨 התראת פיקוד העורף${alert.type ? ` (${alert.type})` : ''}:\nערים/יישובים: ${alert.cities.join(', ')}${alert.instructions ? `\nהוראות: ${alert.instructions}` : ''}`;
+                targetMsg.reply(alertMsg).then(resolve);
+            } else {
+                targetMsg.reply('אין כרגע התרעות פעילות מפיקוד העורף.').then(resolve);
+            }
+        });
+    });
 }
 // הוסף את מפתח ה-API שלך כאן, או טען אותו ממשתנה סביבה
 const PIXABAY_API_KEY = '50212858-c6a0623d5989990f7c6f1dc00';
@@ -10895,6 +10913,12 @@ case "generate_graph":
         return; // *** חשוב: צא מה-Handler אחרי טיפול בפקודת /s ***
     }
 
+    const isAlertCommand = incoming === '/alret';
+    if (isAlertCommand) {
+        await sendPikudAlertMessage(msg);
+        return;
+    }
+
 
     // ==============================================================
     // SECTION 9: Prepare for and Call handleMessage
@@ -11070,6 +11094,11 @@ client.on("message", async (msg) => {
         } else {
             await msg.reply("ℹ️ הבוט כבר פעיל בצ'אט הזה.");
         }
+        return;
+    }
+
+    if (command === "/alret") {
+        await sendPikudAlertMessage(msg);
         return;
     }
 
