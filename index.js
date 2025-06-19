@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const mime = require('mime-types');
 const moment = require('moment-timezone'); // *** ADDED for date/time handling ***
+const pikudHaoref = require('pikud-haoref-api');
 
 // --- Configuration ---
 const TELEGRAM_BOT_TOKEN = '7876061979:AAF4qdcalkpseJq6buMrEMTJQsobYVUIH-4';
@@ -252,6 +253,24 @@ async function sendMessageAndLog(chatId, text, options = {}) {
     }
 }
 
+// --- Pikud Haoref Alert Helper ---
+async function sendPikudAlert(chatId) {
+    return new Promise(resolve => {
+        pikudHaoref.getActiveAlert((err, alert) => {
+            if (err) {
+                sendMessageAndLog(chatId, `⚠️ שגיאה בקבלת נתוני פיקוד העורף: ${err.message}`).then(resolve);
+                return;
+            }
+            if (alert && Array.isArray(alert.cities) && alert.cities.length > 0) {
+                const msg = `🚨 התראת פיקוד העורף${alert.type ? ` (${alert.type})` : ''}:\nערים/יישובים: ${alert.cities.join(', ')}${alert.instructions ? `\nהוראות: ${alert.instructions}` : ''}`;
+                sendMessageAndLog(chatId, msg).then(resolve);
+            } else {
+                sendMessageAndLog(chatId, 'אין כרגע התרעות פעילות מפיקוד העורף.').then(resolve);
+            }
+        });
+    });
+}
+
 
 // --- Gmail Fetching Logic (Same as before, handles token refresh) ---
 async function checkNewEmails() {
@@ -458,6 +477,11 @@ function setupTelegramListeners() {
         addToHistory(chatId, msg);
         // --- Clear previous search results for this chat when user sends a new message ---
         delete recentSearchResults[chatId];
+
+        if (msg.text && msg.text.trim() === '/alret') {
+            await sendPikudAlert(chatId);
+            return;
+        }
 
         // --- Handle File Uploads ---
         let fileInfoForPrompt = null;
