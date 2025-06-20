@@ -1,5 +1,4 @@
 // whatsapp_modules/apiServiceIntegrations.js
-const config = require('../config.js');
 
 const axios = require('axios');
 const fs = require('fs');
@@ -7,6 +6,15 @@ const path = require('path');
 const mime = require('mime-types'); // For functions like searchAndDownloadWebImages
 const { apiKeyManager } = require('../services/ApiKeyManager.js'); // Adjusted path
 const { generateCloudflareImage, transcribeAudioCF } = require('../services/CloudflareService.js');
+
+// --- Cloudflare API Constants ---
+// Moved from what_FIXED (1).js
+const CLOUDFLARE_ACCOUNT_ID = "38a8437a72c997b85a542a6b64a699e2";
+const CLOUDFLARE_API_TOKEN = "jCnlim7diZ_oSCKIkSUxRJGRS972sHEHfgGTmDWK";
+const BASE_IMAGE_GENERATION_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/`;
+// const CLOUDFLARE_VISION_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/unum/uform-gen2-qwen-500m`; // Not currently used
+const CLOUDFLARE_WHISPER_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/openai/whisper-large-v3-turbo`;
+// --- End Cloudflare API Constants ---
 
 
 // Constants that might be moved or defined here
@@ -24,21 +32,21 @@ const { generateCloudflareImage, transcribeAudioCF } = require('../services/Clou
 function getRandomGeminiEndpoint(hasMedia = false) {
     const apiKey = apiKeyManager.getRandomApiKey();
     if (hasMedia) {
-        return `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=${apiKey}`;
+        return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-thinking-exp:generateContent?key=${apiKey}`;
     }
-    return `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
+    return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-thinking-exp:generateContent?key=${apiKey}`;
 }
 
 function getRandomGeminiImageEndpoint() {
     const apiKey = apiKeyManager.getRandomApiKey();
-    return `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=${apiKey}`;
+    return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-thinking-exp:generateContent?key=${apiKey}`;
 }
 
 function getRandomGeminiEndpoints(hasMedia = false, modelVersion = "v1beta") {
     const apiKey = apiKeyManager.getRandomApiKey();
-    let modelName = "gemini-pro";
+    let modelName = "gemini-2.0-flash-thinking-exp";
     if (hasMedia) {
-        modelName = "gemini-pro-vision";
+        modelName = "gemini-2.0-flash-thinking-exp";
     }
     return `https://generativelanguage.googleapis.com/${modelVersion}/models/${modelName}:generateContent?key=${apiKey}`;
 }

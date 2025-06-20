@@ -1,4 +1,4 @@
-﻿
+﻿﻿
 const { Client, LocalAuth, MessageMedia, Contact, Poll } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const axios = require('axios');
@@ -29,7 +29,7 @@ const {
 } = require('./whatsapp_modules/utilityHelpers');
 const {
     getChatPaths,
-    // safelyAppendMessage, // Will be handled separately due to parameter changes
+    // safelyAppendMessage, // Definition is now local in what_FIXED (1).js
     loadMemories,
     saveMemories,
     loadTriggers,
@@ -866,6 +866,115 @@ async function sendAndLogMessage(chat, messageText, safeName) {
     const line = `[ID: auto_generated] פיתי: ${messageText}\n`;
     fs.appendFileSync(filePath, line, 'utf8');
     return await chat.sendAndLogMessage(messageText);
+}
+
+async function safelyAppendMessage(msg, senderName) {
+    try {
+        const chat = await msg.getChat();
+        const safeName = await getSafeNameForChat(client, chat); // client is the whatsapp-web.js client instance
+        const chatPaths = getChatPaths(chat.id._serialized, safeName);
+
+        fs.mkdirSync(chatPaths.chatDir, { recursive: true });
+
+        const localTimestamp = getLocalTimestamp();
+        const normalizedMsgId = normalizeMsgId(msg.id._serialized);
+
+        if (writtenMessageIds.has(normalizedMsgId)) {
+            console.log(`[safelyAppendMessage] Message ${normalizedMsgId} already written. Skipping.`);
+            return;
+        }
+
+        let messageBodyForLog;
+        if (typeof msg.body === 'string' && msg.body.trim() !== "") {
+            messageBodyForLog = msg.body;
+        } else if (msg.type === 'sticker') {
+            messageBodyForLog = '[סטיקר]';
+        } else if (msg.hasMedia) {
+            // Try to get a filename or a generic media type
+            const media = uploadedMediaMap.get(msg.id._serialized); // Check if we have info from a previous download
+            if (media && media.path) {
+                messageBodyForLog = `[מדיה: ${path.basename(media.path)}]`;
+            } else if (msg.type) {
+                messageBodyForLog = `[מדיה: ${msg.type}]`;
+            } else {
+                messageBodyForLog = '[מדיה]';
+            }
+        } else {
+            messageBodyForLog = '[הודעה ריקה או לא נתמכת ללוג]';
+        }
+        
+        // Ensure messageBodyForLog is a string
+        if (typeof messageBodyForLog !== 'string') {
+            messageBodyForLog = String(messageBodyForLog);
+        }
+
+
+        const line = `${localTimestamp} [ID: ${msg.id._serialized}] [${senderName}]: ${messageBodyForLog}\n`;
+        fs.appendFileSync(chatPaths.historyFile, line, 'utf8');
+        writtenMessageIds.add(normalizedMsgId);
+
+        if (senderName === "פיתי") { // Assuming "פיתי" is the bot's name for logging its own messages
+            botMessageIds.add(normalizedMsgId);
+            repliableMessageIds.add(normalizedMsgId);
+        }
+        console.log(`[safelyAppendMessage] Logged message ${normalizedMsgId} from "${senderName}" to ${chatPaths.historyFile}`);
+
+        if (msg.hasMedia && msg.type !== 'sticker') {
+            console.log(`[safelyAppendMessage] Message ${normalizedMsgId} has media. Downloading...`);
+            const mediaData = await msg.downloadMedia();
+            if (mediaData) {
+                const filesDir = chatPaths.filesDir;
+                fs.mkdirSync(filesDir, { recursive: true });
+                
+                // Try to determine a more accurate extension
+                let extension = mime.extension(mediaData.mimetype) || 'bin'; // Default to .bin if mime type unknown
+                // Correct common extensions that mime.extension might miss or give alternatives for
+                if (mediaData.mimetype === 'image/jpeg') extension = 'jpg';
+                if (mediaData.mimetype === 'audio/ogg; codecs=opus' || mediaData.mimetype === 'audio/ogg') extension = 'ogg';
+
+                const mediaFilename = `${normalizedMsgId}.${extension}`;
+                const savedMediaPath = path.join(filesDir, mediaFilename);
+                
+                fs.writeFileSync(savedMediaPath, Buffer.from(mediaData.data, 'base64'));
+                console.log(`[safelyAppendMessage] Media for ${normalizedMsgId} saved to ${savedMediaPath}`);
+
+                uploadedMediaMap.set(msg.id._serialized, {
+                    path: savedMediaPath,
+                    type: mediaData.mimetype,
+                    downloaded: true,
+                    caption: msg.body || "" 
+                });
+
+                // Call handleMediaContent for non-DOCX files or if DOCX should also go to Gemini
+                const isDocx = mediaData.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+                // Example: if you want to send DOCX to Gemini in some cases, modify this condition
+                const shouldSendToGemini = !isDocx; // Modify if DOCX should sometimes go to Gemini
+
+                if (shouldSendToGemini) {
+                    await handleMediaContent(msg, savedMediaPath); // Pass the saved path
+                } else if (isDocx) {
+                    // If it's DOCX and you have specific DOCX handling (like python script) in handleMediaContent:
+                    await handleMediaContent(msg, savedMediaPath); // It will be handled by the DOCX logic there
+                }
+            } else {
+                console.warn(`[safelyAppendMessage] Failed to download media for ${normalizedMsgId}.`);
+            }
+        }
+
+        if (autoReactEmoji && senderName !== "פיתי" && msg.from !== myId) {
+            try {
+                await msg.react(autoReactEmoji);
+                console.log(`[safelyAppendMessage] Auto-reacted with ${autoReactEmoji} to message ${normalizedMsgId}`);
+            } catch (reactError) {
+                console.error(`[safelyAppendMessage] Failed to auto-react to message ${normalizedMsgId}:`, reactError);
+            }
+        }
+
+    } catch (error) {
+        console.error(`❌❌ CRITICAL ERROR in safelyAppendMessage for msg ${msg.id?._serialized}:`, error);
+        // Avoid replying from here as it might cause loops if msg.reply itself calls this.
+        // Consider a different notification method for critical errors if needed.
+    }
 }
 // פונקציה חדשה לסיכום היסטוריה
 async function handleSummarizeHistoryAction(historyData, targetMsg, chatPaths) {
@@ -3351,8 +3460,8 @@ async function handleMessage(msg, incoming, quotedMedia = null, contextMediaArra
 
     const senderName = await getSenderName(msg);
     // ראשית, מבצעים לוג להודעה הנכנסת
-    // Pass necessary global-like variables to the imported safelyAppendMessage
-    await require('./whatsapp_modules/fileSystemHelpers.js').safelyAppendMessage(msg, senderName, client, writtenMessageIds, uploadedMediaMap, autoReactEmoji, handleMediaContent);
+    // The new safelyAppendMessage is defined globally in this file and called in message_create
+    // await require('./whatsapp_modules/fileSystemHelpers.js').safelyAppendMessage(msg, senderName, client, writtenMessageIds, uploadedMediaMap, autoReactEmoji, handleMediaContent); // This call is now handled by the direct call in client.on('message_create')
 
     // ---> חשב את הנתיבים *כאן* פעם אחת עבור כל הפונקציה <---
     let chatPaths;
@@ -9865,8 +9974,8 @@ client.on('message_create', async (msg) => {
             safeName = await getSafeNameForChat(client, chat);
             chatPaths = getChatPaths(chat.id._serialized, safeName);
             chatFilePath = chatPaths.historyFile;
-            // Pass necessary global-like variables to the imported safelyAppendMessage
-            await require('./whatsapp_modules/fileSystemHelpers.js').safelyAppendMessage(msg, "פיתי", client, writtenMessageIds, uploadedMediaMap, autoReactEmoji, handleMediaContent); // Log as "פיתי"
+            // Log AI replies using the direct safelyAppendMessage call now expected to be handled by the main logic or if this specific logging is still needed, it should call the global function directly
+            // await require('./whatsapp_modules/fileSystemHelpers.js').safelyAppendMessage(msg, "פיתי", client, writtenMessageIds, uploadedMediaMap, autoReactEmoji, handleMediaContent); // This call is now handled by the direct call in client.on('message_create')
         } catch (logErr) {
             console.error(`[message_create FILTER 1] Error logging AI reply ${msg.id._serialized} for safeName='${safeName}', targetPath='${chatFilePath}':`, logErr);
         }
