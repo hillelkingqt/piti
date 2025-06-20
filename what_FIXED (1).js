@@ -7965,14 +7965,13 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
         if (targetMsg) {
             console.log("✅ נמצאה ההודעה להגיב אליה.");
             if (jsonResponse.respond !== false) {
-                const sentMsg = await targetMsg.reply(`פיתי\n\n${jsonResponse.message}`);
+                const sentMsg = await client.sendMessage(targetMsg.id.remote, `פיתי\n\n${jsonResponse.message}`, {
+                    quotedMessageId: targetMsg.id._serialized
+                });
                 const normId = normalizeMsgId(sentMsg.id._serialized);
                 botMessageIds.add(normId);
                 repliableMessageIds.add(normId);
 
-                return;
-            } else {
-                console.log("Gemini בחר לא להגיב במצב שקט (single reply path, should not happen).");
                 return;
             }
         } else {
