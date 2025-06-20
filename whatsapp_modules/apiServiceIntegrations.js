@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const mime = require('mime-types'); // For functions like searchAndDownloadWebImages
 const { apiKeyManager } = require('../services/ApiKeyManager.js'); // Adjusted path
+const { generateCloudflareImage } = require('../services/CloudflareService.js');
 
 // --- Cloudflare API Constants ---
 // Moved from what_FIXED (1).js
@@ -96,7 +97,7 @@ module.exports = {
     getRandomGeminiImageEndpoint,
     getRandomGeminiEndpoints,
     uploadMediaToGemini,
-    callCloudflareImageGen,
+    callCloudflareImageGen: generateCloudflareImage,
     callCloudflareWhisper,
     // Other functions will be added here
 };
