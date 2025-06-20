@@ -1,4 +1,4 @@
-﻿﻿
+﻿﻿﻿
 const { Client, LocalAuth, MessageMedia, Contact, Poll } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const axios = require('axios');
@@ -1097,23 +1097,29 @@ async function handleVoiceMessage(msg) {
         console.log(`[handleVoiceMessage] Sending audio (size: ${audioBase64.length}) to Cloudflare Whisper...`);
 
         // Use the new helper function from apiServiceIntegrations.js
-        // The helper function returns response.data directly
-        const whisperResponseData = await callCloudflareWhisper(audioBase64); // Pass optional model_kwargs if they become dynamic
+        const whisperResponseData = await callCloudflareWhisper(audioBase64); 
 
-        // console.log(`[handleVoiceMessage] Received response data from Whisper helper.`); // Status from direct response not available here
-
-        if (whisperResponseData && whisperResponseData.result && whisperResponseData.result.text) {
-            const transcribedText = whisperResponseData.result.text;
+        // Check if the transcription was successful and the text exists
+        if (whisperResponseData && whisperResponseData.success === true && typeof whisperResponseData.text === 'string') {
+            const transcribedText = whisperResponseData.text; // Directly access the text property
             console.log(`[handleVoiceMessage] Transcription successful: "${transcribedText}"`);
 
-            if (whisperResponseData.result.transcription_info) {
-                const info = whisperResponseData.result.transcription_info;
-                console.log(`  Language: ${info.language} (Prob: ${info.language_probability}), Duration: ${info.duration}s`);
-            }
+            // Optional: If you still expect transcription_info from somewhere, 
+            // you might need to adjust how it's accessed or if it's still relevant.
+            // For now, let's assume transcription_info is not directly available in this new structure
+            // or is not essential for the fix. If it IS available under whisperResponseData.result (e.g. if callCloudflareWhisper was changed to return it),
+            // then that part can be added back. Based on current analysis of transcribeAudioCF, it's not.
+
+            // Example of how you might log additional details if they were part of whisperResponseData
+            // if (whisperResponseData.details) { 
+            //     console.log(`  Details: ${whisperResponseData.details}`);
+            // }
+
             return transcribedText;
         } else {
-            console.error("[handleVoiceMessage] Whisper response data missing expected text result:", whisperResponseData);
-            await msg.reply("⚠️ שירות התמלול לא החזיר טקסט.");
+            // Log the actual response for better debugging if it's not successful
+            console.error("[handleVoiceMessage] Whisper transcription failed or text is missing. Response:", whisperResponseData);
+            await msg.reply("⚠️ שירות התמלול לא החזיר טקסט תקין."); // Modified error message for clarity
             return null;
         }
 
