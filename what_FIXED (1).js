@@ -7955,85 +7955,106 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
     } // End if jsonResponse.replies
 
 
-    try {
-        const chat = await msg.getChat();
-        const messages = await chat.fetchMessages({ limit: 50 });
+try {
+  const chat = await msg.getChat();
+  const messages = await chat.fetchMessages({ limit: 50 });
 
-        const normalize = id => id?.replace(/^true_/, "").replace(/^false_/, "");
-        const targetMsg = messages.find(m => normalize(m.id._serialized) === normalize(jsonResponse.replyTo));
+  /**
+   * Utility: strip WA "true_/false_" prefixes (and handle null/undefined).
+   */
+  const normaliseId = (id) => (id ?? "").replace(/^true_/, "").replace(/^false_/, "");
 
-        if (targetMsg) {
-            console.log("✅ נמצאה ההודעה להגיב אליה.");
-            if (jsonResponse.respond !== false) {
-                const sentMsg = await client.sendMessage(targetMsg.id.remote, `פיתי\n\n${jsonResponse.message}`, {
-                    quotedMessageId: targetMsg.id._serialized
-                });
-                const normId = normalizeMsgId(sentMsg.id._serialized);
-                botMessageIds.add(normId);
-                repliableMessageIds.add(normId);
+  /**
+   * Alias for the project‑wide ID normaliser (if it exists) *or* a local shim.
+   */
+  const normaliseMsgId =
+    typeof normalizeMsgId === "function"
+      ? normalizeMsgId
+      : (id) => normaliseId(id);
 
-                return;
-            }
-        } else {
-            if (!jsonResponse || Object.keys(jsonResponse).length === 0) {
-                console.log("⚠️ Gemini החזיר תגובה ריקה, לא נבצע כלום.");
-                return; // פשוט לא לעשות כלום
-            }
+  // 1️⃣ Identify the message we should quote.
+  const targetMsg = messages.find(
+    (m) => normaliseId(m.id._serialized) === normaliseId(jsonResponse.replyTo)
+  );
 
-            // המשך כרגיל
-            const fallbackId = jsonResponse.replyTo;
-            const userId = typeof fallbackId === 'string'
-                ? fallbackId.split("_")[1]?.split("@")[0] || 'unknown_user'
-                : 'unknown_user';
-            const contacts = await client.getContacts();
-            const contact = contacts.find(c => c.id.user === userId);
+  /**
+   * Helper to send a message and register its ID in bookkeeping Sets.
+   */
+  const sendAndTrack = async (destChatId, text, opts = {}) => {
+    const sent = await client.sendMessage(destChatId, text, opts);
+    const nId = normaliseMsgId(sent.id._serialized);
+    botMessageIds.add(nId);
+    repliableMessageIds.add(nId);
+    return sent;
+  };
 
-            if (contact) {
-                const mentionContact = await client.getContactById(contact.id._serialized);
-                const name = mentionContact.name || mentionContact.pushname || userId;
+  // 2️⃣ Respect Gemini's explicit instruction not to respond.
+  if (jsonResponse.respond === false) {
+    console.log("[Gemini] respond=false → skipping reply");
+    return;
+  }
 
-                if (jsonResponse.respond !== false) {
-                    const sentMsg = await msg.reply(`פיתי\n\n@${name}\n${jsonResponse.message}`, undefined, {
-                        mentions: [mentionContact]
-                    });
+  /* ------------------------------------------------------------------ */
+  /*  Case A – Exact quoted reply                                       */
+  /* ------------------------------------------------------------------ */
+  if (targetMsg) {
+    console.log("✅ Found message to reply to (quoted reply)");
+    await sendAndTrack(targetMsg.id.remote, `פיתי\n\n${jsonResponse.message}`, {
+      quotedMessageId: targetMsg.id._serialized,
+    });
+    return;
+  }
 
-                    const normId = normalizeMsgId(sentMsg.id._serialized);
-                    botMessageIds.add(normId);
-                    repliableMessageIds.add(normId);
+  /* ------------------------------------------------------------------ */
+  /*  Case B – Cannot quote, try @‑mention fallback                     */
+  /* ------------------------------------------------------------------ */
+  if (jsonResponse.replyTo) {
+    const userNumber = jsonResponse.replyTo
+      .split("@")[0]
+      .replace(/^(true_|false_)/, "")
+      .replace(/[^0-9]/g, "");
 
-                    return;
-                } else {
-                    console.log("Gemini בחר לא להגיב במצב שקט (single reply mention fallback, should not happen).");
-                    return;
-                }
-            } else {
-                console.log("⚠️ לא נמצא איש קשר לתיוג — מגיב בלי mention.");
-            }
-        }
-    } catch (error) {
-        console.error("❌ שגיאה בטיפול בלוגיקת replyTo:", error);
+    if (userNumber) {
+      const contacts = await client.getContacts();
+      const contact = contacts.find((c) => c.id.user === userNumber);
 
-        // שליחת הודעת שגיאה למשתמש
-        const sentMsg = await msg.reply("פיתי\n\nאירעה שגיאה בזמן ניסיון התגובה.");
+      if (contact) {
+        const mentionContact = await client.getContactById(contact.id._serialized);
+        const displayName =
+          mentionContact.name || mentionContact.pushname || userNumber;
 
-        // נרמול ה-ID (מסיר ‎true_/false_‎ אם קיימים)
-        const normId = normalizeMsgId(sentMsg.id._serialized);
-
-        // שמירה במבני-הנתונים הנכונים
-        botMessageIds.add(normId);
-        repliableMessageIds.add(normId);
+        console.log(`ℹ️ Mention fallback → @${displayName}`);
+        await sendAndTrack(
+          msg.id.remote,
+          `פיתי\n\n@${displayName}\n${jsonResponse.message}`,
+          {
+            mentions: [mentionContact],
+            quotedMessageId: msg.id._serialized,
+          }
+        );
+        return;
+      }
     }
+    console.warn("⚠️ Could not resolve contact for mention. Falling back to plain reply.");
+  }
 
+  /* ------------------------------------------------------------------ */
+  /*  Case C – Plain reply (no quote / mention)                         */
+  /* ------------------------------------------------------------------ */
+  await sendAndTrack(msg.id.remote, `פיתי\n\n${jsonResponse.message}`, {
+    quotedMessageId: msg.id._serialized,
+  });
+} catch (err) {
+  console.error("❌ Error in reply‑handler:", err);
+  const sent = await msg.reply("פיתי\n\nאירעה שגיאה בזמן ניסיון התגובה.");
+  const nId =
+    typeof normalizeMsgId === "function"
+      ? normalizeMsgId(sent.id._serialized)
+      : sent.id._serialized.replace(/^true_/, "").replace(/^false_/, "");
+  botMessageIds.add(nId);
+  repliableMessageIds.add(nId);
+}
 
-    if (jsonResponse.respond !== false) {
-        const sentMsg = await msg.reply(`פיתי\n\n${jsonResponse.message}`);
-        const normId = normalizeMsgId(sentMsg.id._serialized);
-        botMessageIds.add(normId);
-        repliableMessageIds.add(normId);
-
-    } else {
-        console.log("Gemini בחר לא להגיב במקרה ברירת מחדל (silent mode, single reply default, should not happen).");
-    }
 }
 
 async function handleExtractEntitiesAction(nerData, targetMsg) {
