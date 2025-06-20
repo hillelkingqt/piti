@@ -1,4 +1,4 @@
-
+﻿
 const { Client, LocalAuth, MessageMedia, Contact, Poll } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const axios = require('axios');
@@ -864,6 +864,8 @@ async function sendAndLogMessage(chat, messageText, safeName) {
     fs.mkdirSync(chatPaths.chatDir, { recursive: true });
     const line = `[ID: auto_generated] פיתי: ${messageText}\n`;
     fs.appendFileSync(filePath, line, 'utf8');
+    return await chat.sendAndLogMessage(messageText);
+}
 // פונקציה חדשה לסיכום היסטוריה
 async function handleSummarizeHistoryAction(historyData, targetMsg, chatPaths) {
     const targetChatId = targetMsg.id.remote;
@@ -10009,7 +10011,7 @@ client.on('message_create', async (msg) => {
                             break;
                         }
 
-                        console.log(`   Attempting to spawn: ${pythonExecutable} ${restartScriptPath} ${nodeScriptToRun}`);
+                        console.log(`Attempting to spawn: ${pythonExecutable} ${restartScriptPath} ${nodeScriptToRun}`);
 
                         try {
                             const child = spawn(pythonExecutable, [restartScriptPath, nodeScriptToRun], {
