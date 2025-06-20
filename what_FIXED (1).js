@@ -11,43 +11,6 @@ const sharp = require('sharp');
 const readlineSync = require('readline-sync');
 const { Buffer } = require('buffer');
 const { spawn, spawnSync } = require('child_process');
-// const utilityHelpers = require('./whatsapp_modules/utilityHelpers'); // Comment out the old require
-const {
-    delay,
-    normalizeMsgId,
-    getBaseId,
-    getBaseIdForOwnerCheck,
-    getLocalTimestamp,
-    pcmToWav,
-    streamToString,
-    formatDateKey,
-    formatDateForDisplay,
-    formatTimeForDisplay,
-    getWeeklyHabitStatus,
-    generateBarcode,
-    getSafeNameForChat // Ensure this is included if it was moved
-} = require('./whatsapp_modules/utilityHelpers');
-const {
-    getChatPaths,
-    // safelyAppendMessage, // Will be handled separately due to parameter changes
-    loadMemories,
-    saveMemories,
-    loadTriggers,
-    saveTriggers,
-    loadPendingActions,
-    savePendingActions,
-    loadLatexErrors,
-    saveLatexError
-} = require('./whatsapp_modules/fileSystemHelpers.js');
-const {
-    askGeminiWithSearchGrounding,
-    getRandomGeminiEndpoint,
-    getRandomGeminiImageEndpoint,
-    getRandomGeminiEndpoints,
-    uploadMediaToGemini,
-    callCloudflareImageGen, // Added
-    callCloudflareWhisper // Added
-} = require('./whatsapp_modules/apiServiceIntegrations.js');
 
 const { apiKeyManager } = require('./services/ApiKeyManager');
 const writtenMessageIds = new Set();
@@ -60,12 +23,14 @@ const COGVIDEO_GRADIO_SPACE = "THUDM/CogVideoX-5B-Space"; // CogVideoX Space URL
 // בתחילת הקובץ, ליד שאר הקבועים של Cloudflare
 const puppeteer = require('puppeteer-core');
 
-// Cloudflare constants moved to whatsapp_modules/apiServiceIntegrations.js
-// const CLOUDFLARE_ACCOUNT_ID = "38a8437a72c997b85a542a6b64a699e2";
-// const CLOUDFLARE_API_TOKEN = "jCnlim7diZ_oSCKIkSUxRJGRS972sHEHfgGTmDWK";
-// const BASE_IMAGE_GENERATION_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/`;
-// const CLOUDFLARE_VISION_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/unum/uform-gen2-qwen-500m`;
-// const CLOUDFLARE_WHISPER_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/openai/whisper-large-v3-turbo`;
+
+
+
+const CLOUDFLARE_ACCOUNT_ID = "38a8437a72c997b85a542a6b64a699e2";
+const CLOUDFLARE_API_TOKEN = "jCnlim7diZ_oSCKIkSUxRJGRS972sHEHfgGTmDWK";
+const BASE_IMAGE_GENERATION_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/`;
+const CLOUDFLARE_VISION_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/unum/uform-gen2-qwen-500m`;
+const CLOUDFLARE_WHISPER_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/openai/whisper-large-v3-turbo`; // <-- הוסף שורה זו
 
 
 const myId = "972532752474@c.us";
@@ -98,18 +63,29 @@ let timerCounter = 0;
 const { google } = require('googleapis');
 const PENDING_ACTIONS_PATH = path.join(__dirname, 'pending_actions.json');
 
-// function getChatPaths(chatId, safeName) { // Definition removed, using helper
-//     const chatDir = path.join(CHAT_DIR_BASE, safeName);
-//     return {
-//         chatDir: chatDir,
-//         historyFile: path.join(chatDir, 'chat_history.txt'),
-//         memoryFile: path.join(chatDir, 'memories.json'),
-//         generatedFilesIndex: path.join(chatDir, 'generated_files.json'),
-//         filesDir: path.join(chatDir, 'files'),
-//         triggersFile: path.join(chatDir, 'triggers.json'),
-//         latexErrorsFile: path.join(chatDir, 'latex_errors.json')
-//     };
-// }
+// Helper function to get base ID (e.g., 1234567890@c.us)
+function getBaseId(fullId) {
+    if (!fullId) return null;
+    const parts = fullId.split('@');
+    if (parts.length < 2) return null;
+    // Handle cases like "123:456@g.us" or "123@c.us"
+    const userPart = parts[0].split(':')[0];
+    return `${userPart}@${parts[1]}`;
+}
+
+// Helper specifically for comparing user IDs (owner checks). This normalizes the
+// domain to `c.us` so that WhatsApp's different linked-device suffixes (like
+// `@lid`) don't interfere with equality checks.
+function getBaseIdForOwnerCheck(fullId) {
+    if (!fullId) return null;
+    const parts = fullId.split('@');
+    if (parts.length < 2) return null;
+    const userPart = parts[0].split(':')[0];
+    return `${userPart}@c.us`;
+}
+function normalizeMsgId(id) {
+    return id ? id.replace(/^true_/, '').replace(/^false_/, '') : id;
+}
 
 function containsTriggerWord(text) {
     if (!text) return false;
@@ -151,6 +127,27 @@ function saveStoppedChats() {
     fs.writeFileSync(STOPPED_CHATS_PATH, JSON.stringify([...stoppedChats], null, 2));
 }
 
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function getRandomGeminiEndpoint(hasMedia = false) {
+    const baseUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-thinking-exp:generateContent";
+    const apiKey = apiKeyManager.getRandomApiKey();
+    if (hasMedia) {
+        return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-thinking-exp:generateContent?key=${apiKey}`;
+    }
+    return `${baseUrl}?key=${apiKey}`;
+}
+async function generateBarcode(text) {
+    const filePath = './barcode.png';
+    await QRCode.toFile(filePath, text, {
+        width: 400,
+        margin: 2,
+        color: { dark: '#000', light: '#FFF' }
+    });
+    return filePath;
+}
 // הוסף את מפתח ה-API שלך כאן, או טען אותו ממשתנה סביבה
 const PIXABAY_API_KEY = '50212858-c6a0623d5989990f7c6f1dc00';
 
@@ -258,57 +255,73 @@ async function searchAndDownloadWebImages(query, maxImagesToDownload, filenamePr
     }
     return downloadedImagesInfo;
 }
+function getRandomGeminiEndpoints() {
+    const apiKey = apiKeyManager.getRandomApiKey();
+    return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+}
 
-// async function askGeminiWithSearchGrounding(promptText) { // MOVED to apiServiceIntegrations.js
-//     try {
-//         const endpoint = getRandomGeminiEndpoints();
-//         const response = await axios.post(endpoint, {
-//             contents: [
-//                 {
-//                     parts: [{ text: promptText }]
-//                 }
-//             ],
-//             tools: [{ googleSearchRetrieval: {} }]
-//         });
-//         const answer = response.data?.candidates?.[0]?.content?.parts?.[0]?.text || "❌ לא התקבלה תשובה.";
-//         return answer;
-//     } catch (error) {
-//         console.error("❌ [askGeminiWithSearchGrounding] שגיאה:", error.response?.data || error.message || error);
-//         return "⚠️ הייתה שגיאה בזמן הבקשה ל-Gemini עם Grounding.";
-//     }
-// }
 
-// MOVED to apiServiceIntegrations.js
-// async function uploadMediaToGemini(base64Data, mimeType) {
-//     const apiKey = apiKeyManager.getRandomApiKey();
-//     const GEMINI_UPLOAD_URL = `https://generativelanguage.googleapis.com/upload/v1beta/files?key=${apiKey}`;
-//     const buffer = Buffer.from(base64Data, 'base64');
-//     try {
-//         const response = await axios.post(GEMINI_UPLOAD_URL, buffer, {
-//             headers: {
-//                 'Content-Type': mimeType,
-//             },
-//         });
-//         if (response.data && response.data.file && response.data.file.uri) {
-//             return response.data.file.uri;
-//         }
-//         return null;
-//     } catch (error) {
-//         console.error("Gemini media upload error:", error?.response?.data || error);
-//         throw error;
-//     }
-// }
+async function askGeminiWithSearchGrounding(promptText) {
+    try {
+        const endpoint = getRandomGeminiEndpoints(); // השתמש בפונקציה הקיימת שלך לקבלת URL+Key
+        const response = await axios.post(endpoint, {
+            contents: [
+                {
+                    parts: [{ text: promptText }]
+                }
+            ],
+            // ------------------- שורה שגויה -------------------
+            // tools: [{ type: "google_search" }] // <-- שורה זו שגויה
+            // ---------------------------------------------------
+
+            // ------------------- שורה מתוקנת ------------------
+            tools: [{ googleSearchRetrieval: {} }] // <-- זה הפורמט הנכון
+            // ---------------------------------------------------
+        });
+        const answer = response.data?.candidates?.[0]?.content?.parts?.[0]?.text || "❌ לא התקבלה תשובה.";
+        return answer;
+    } catch (error) {
+        // הדפס את השגיאה המלאה כדי שנוכל לראות אם היא משתנה
+        console.error("❌ [askGeminiWithSearchGrounding] שגיאה:", error.response?.data || error.message || error);
+        // שקול להחזיר הודעת שגיאה שונה או לזרוק את השגיאה הלאה
+        return "⚠️ הייתה שגיאה בזמן הבקשה ל-Gemini עם Grounding.";
+    }
+}
+
+
+async function uploadMediaToGemini(base64Data, mimeType) {
+    const apiKey = apiKeyManager.getRandomApiKey();
+    const GEMINI_UPLOAD_URL = `https://generativelanguage.googleapis.com/upload/v1beta/files?key=${apiKey}`;
+    const buffer = Buffer.from(base64Data, 'base64');
+    try {
+        const response = await axios.post(GEMINI_UPLOAD_URL, buffer, {
+            headers: {
+                'Content-Type': mimeType,
+            },
+        });
+        if (response.data && response.data.file && response.data.file.uri) {
+            return response.data.file.uri;
+        }
+        return null;
+    } catch (error) {
+        console.error("Gemini media upload error:", error?.response?.data || error);
+        throw error;
+    }
+}
 
 const GEMINI_API_KEY = "AIzaSyDfqo_60y39EG_ZW5Fn3EeB6BoZMru5V_k"; // המפתח שלך
 const pdf = require('pdf-parse'); // If using PDF parsing
 const mammoth = require("mammoth"); // If using DOCX parsing
 const { Blob } = require("buffer");
 // ליד שאר פונקציות ה-getRandomGeminiEndpoint, הוסף:
-// Definitions for getRandomGeminiEndpoint, getRandomGeminiImageEndpoint, getRandomGeminiEndpoints
-// were moved to whatsapp_modules/apiServiceIntegrations.js
+
 
 // Helper to pick a random API key and build the Gemini endpoint URL
 // ---------- Helper: בוחר מפתח API אקראי ובונה את ה-URL ----------
+function getRandomGeminiImageEndpoint() {
+    const apiKey = apiKeyManager.getRandomApiKey();             // מנגנון המפתחות הקיים שלך
+    return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent?key=${apiKey}`;
+}
 async function handleGenerateGraphAction(plotData, targetMsg, chatPaths) {
     const targetChatId = targetMsg.id.remote;
     const replyToId = plotData.replyTo || targetMsg.id._serialized;
@@ -745,110 +758,66 @@ async function getSenderName(msgItem) {
     }
 }
 
+const BASE_CHAT_DIR = "C:\\Users\\hillel1\\Desktop\\WHAT\\chats";
+
+function getChatPaths(chatId, safeName) {
+    const chatDir = path.join(BASE_CHAT_DIR, safeName);
+    return {
+        chatDir: chatDir,
+        historyFile: path.join(chatDir, 'chat_history.txt'),
+        memoryFile: path.join(chatDir, 'memories.json'),
+        generatedFilesIndex: path.join(chatDir, 'generated_files.json'),
+        filesDir: path.join(chatDir, 'files'),
+        triggersFile: path.join(chatDir, 'triggers.json') // ✅ הוספה חשובה!
+    };
+}
 // Near other helper functions like loadMemories, saveMemories
 
-// const MAX_LATEX_ERRORS_TO_KEEP = 5; // Definition removed, using helper
-// function loadLatexErrors(chatPaths) { // Definition removed, using helper
-//     const errorFilePath = path.join(chatPaths.chatDir, 'latex_errors.json');
-//     if (fs.existsSync(errorFilePath)) {
-//         try {
-//             const data = fs.readFileSync(errorFilePath, 'utf8');
-//             const errors = JSON.parse(data);
-//             if (Array.isArray(errors)) {
-//                 return errors;
-//             }
-//         } catch (e) {
-//             console.error(`❌ Error reading or parsing ${errorFilePath}:`, e);
-//         }
-//     }
-//     return [];
-// }
+const MAX_LATEX_ERRORS_TO_KEEP = 5; // כמה שגיאות אחרונות לשמור
 
-// function saveLatexError(chatPaths, newErrorLog) { // Definition removed, using helper
-//     const errorFilePath = path.join(chatPaths.chatDir, 'latex_errors.json');
-//     let errors = loadLatexErrors(chatPaths); // This would now call the helper if not careful
-//     errors.unshift({
-//         timestamp: new Date().toISOString(),
-//         errorLog: newErrorLog.substring(0, 1500)
-//     });
-//     if (errors.length > MAX_LATEX_ERRORS_TO_KEEP) {
-//         errors = errors.slice(0, MAX_LATEX_ERRORS_TO_KEEP);
-//     }
-//     try {
-//         fs.mkdirSync(chatPaths.chatDir, { recursive: true });
-//         fs.writeFileSync(errorFilePath, JSON.stringify(errors, null, 2), 'utf8');
-//     } catch (e) {
-//         console.error(`❌ Error writing LaTeX error log to ${errorFilePath}:`, e);
-//     }
-// }
+function loadLatexErrors(chatPaths) {
+    const errorFilePath = path.join(chatPaths.chatDir, 'latex_errors.json');
+    if (fs.existsSync(errorFilePath)) {
+        try {
+            const data = fs.readFileSync(errorFilePath, 'utf8');
+            const errors = JSON.parse(data);
+            if (Array.isArray(errors)) {
+                return errors; // Errors are already sorted by recency (newest first) when saved
+            }
+        } catch (e) {
+            console.error(`❌ Error reading or parsing ${errorFilePath}:`, e);
+        }
+    }
+    return [];
+}
 
-// function loadMemories(chatPaths) { // Definition removed, using helper
-//     const memoryFilePath = chatPaths.memoryFile;
-//     if (fs.existsSync(memoryFilePath)) {
-//         try {
-//             const data = fs.readFileSync(memoryFilePath, 'utf8');
-//             const memories = JSON.parse(data);
-//             if (Array.isArray(memories)) {
-//                 return memories.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-//             }
-//             return [];
-//         } catch (e) {
-//             console.error(`❌ Error reading or parsing ${memoryFilePath}:`, e);
-//             return [];
-//         }
-//     }
-//     return [];
-// }
+function saveLatexError(chatPaths, newErrorLog) {
+    const errorFilePath = path.join(chatPaths.chatDir, 'latex_errors.json');
+    let errors = loadLatexErrors(chatPaths);
 
-// function saveMemories(chatPaths, memories) { // Definition removed, using helper
-//     const memoryFilePath = chatPaths.memoryFile;
-//     try {
-//         if (!Array.isArray(memories)) {
-//             console.error(`❌ Attempted to save non-array data to ${memoryFilePath}. Aborting save.`);
-//             return;
-//         }
-//         fs.mkdirSync(chatPaths.chatDir, { recursive: true });
-//         fs.writeFileSync(memoryFilePath, JSON.stringify(memories, null, 2), 'utf8');
-//     } catch (e) {
-//         console.error(`❌ Error writing to ${memoryFilePath}:`, e);
-//     }
-// }
+    // Add new error to the beginning of the array
+    errors.unshift({
+        timestamp: new Date().toISOString(),
+        errorLog: newErrorLog.substring(0, 1500) // Keep error log concise
+    });
 
-// function loadTriggers(chatPaths) { // Definition removed, using helper
-//     const triggersFilePath = chatPaths.triggersFile;
-//     if (fs.existsSync(triggersFilePath)) {
-//         try {
-//             const data = fs.readFileSync(triggersFilePath, 'utf8');
-//             const triggers = JSON.parse(data);
-//             if (Array.isArray(triggers)) {
-//                 return triggers.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-//             }
-//             return [];
-//         } catch (e) {
-//             console.error(`❌ Error reading or parsing ${triggersFilePath}:`, e);
-//             return [];
-//         }
-//     }
-//     return [];
-// }
+    // Keep only the last MAX_LATEX_ERRORS_TO_KEEP errors
+    if (errors.length > MAX_LATEX_ERRORS_TO_KEEP) {
+        errors = errors.slice(0, MAX_LATEX_ERRORS_TO_KEEP);
+    }
 
-// function saveTriggers(chatPaths, triggers) { // Definition removed, using helper
-//     const triggersFilePath = chatPaths.triggersFile;
-//     try {
-//         if (!Array.isArray(triggers)) {
-//             console.error(`❌ Attempted to save non-array data to ${triggersFilePath}. Aborting save.`);
-//             return;
-//         }
-//         fs.mkdirSync(chatPaths.chatDir, { recursive: true });
-//         fs.writeFileSync(triggersFilePath, JSON.stringify(triggers, null, 2), 'utf8');
-//     } catch (e) {
-//         console.error(`❌ Error writing to ${triggersFilePath}:`, e);
-//     }
-// }
+    try {
+        fs.mkdirSync(chatPaths.chatDir, { recursive: true });
+        fs.writeFileSync(errorFilePath, JSON.stringify(errors, null, 2), 'utf8');
+        console.log(`💾 Saved LaTeX error log to ${errorFilePath}`);
+    } catch (e) {
+        console.error(`❌ Error writing LaTeX error log to ${errorFilePath}:`, e);
+    }
+}
 
 async function appendMessageToChat(chatId, sender, message) {
     const chat = await client.getChatById(chatId);
-    const safeName = await getSafeNameForChat(client, chat);
+    const safeName = await getSafeNameForChat(chat);
     const chatPaths = getChatPaths(chatId, safeName);
     const filePath = chatPaths.historyFile;
     fs.mkdirSync(chatPaths.chatDir, { recursive: true });
@@ -856,7 +825,13 @@ async function appendMessageToChat(chatId, sender, message) {
     fs.appendFileSync(filePath, line, 'utf8');
 }
 
-// Commented out function getLocalTimestamp removed
+function getLocalTimestamp() {
+    const now = new Date();
+    // Example format: [2023-10-27 17:55:30] - Adjust 'sv-SE' for YYYY-MM-DD if needed elsewhere
+    const datePart = now.toLocaleDateString('sv-SE'); // YYYY-MM-DD format
+    const timePart = now.toLocaleTimeString('he-IL', { hour12: false }); // HH:MM:SS format (Israeli locale)
+    return `[${datePart} ${timePart}]`;
+}
 
 async function sendAndLogMessage(chat, messageText, safeName) {
     const chatPaths = getChatPaths(chat.id._serialized, safeName);
@@ -864,6 +839,180 @@ async function sendAndLogMessage(chat, messageText, safeName) {
     fs.mkdirSync(chatPaths.chatDir, { recursive: true });
     const line = `[ID: auto_generated] פיתי: ${messageText}\n`;
     fs.appendFileSync(filePath, line, 'utf8');
+    return await chat.sendAndLogMessage(messageText);
+}
+
+
+async function safelyAppendMessage(msg, senderName) {
+    const msgId = msg.id._serialized;
+    if (writtenMessageIds.has(msgId)) return;
+    writtenMessageIds.add(msgId);
+    // const timestampISO = new Date().toISOString(); // REMOVE THIS LINE
+    const localTimestamp = getLocalTimestamp(); // <<< CHANGE HERE
+
+    let chat;
+    let safeName = 'error_path_safelyAppend'; // Default
+    let chatPaths;
+    let chatFilePath = 'error_path_safelyAppend/history.txt'; // Default
+
+    try {
+        chat = await msg.getChat();
+        safeName = await getSafeNameForChat(chat);
+        chatPaths = getChatPaths(chat.id._serialized, safeName);
+        chatFilePath = chatPaths.historyFile;
+
+        // Ensure directories exist FIRST
+        fs.mkdirSync(chatPaths.chatDir, { recursive: true });
+        fs.mkdirSync(chatPaths.filesDir, { recursive: true });
+
+        let replySnippet = '';
+        if (msg.hasQuotedMsg) {
+            try {
+                const quoted = await msg.getQuotedMessage();
+                const quotedId = quoted.id._serialized;
+                const quotedBodyShort = quoted.body?.slice(0, 25).replace(/\n/g, ' ') || '[מדיה]';
+                replySnippet = `(↩️ ל-ID:${quotedId} "${quotedBodyShort}...")\n`;
+            } catch (err) {
+                console.error(`[safelyAppendMessage] Error getting quoted message for ${msgId}:`, err);
+                replySnippet = '(↩️ לשגיאה בקריאת ציטוט)\n';
+            }
+        }
+
+        const fullBody = `${replySnippet}${msg.body || '[מדיה]'}`;
+        let lineToAppend; // Declare lineToAppend outside the if/else
+
+        if (fullBody.length > 1500) {
+            console.warn(`[safelyAppendMessage] Message ${msgId} too long (${fullBody.length}), logging truncated body.`);
+            // *** FIX HERE: Define shortBody *before* constructing lineToAppend ***
+            const shortBody = `${replySnippet}${msg.body?.slice(0, 100) || '[מדיה]'}${msg.body?.length > 100 ? '...' : ''}`;
+            lineToAppend = `${localTimestamp} [ID: ${msgId}] ${senderName}: [הודעה ארוכה, התוכן קוצץ]\n${shortBody}\n`; // Use localTimestamp
+            // ********************************************************************
+        } else {
+            lineToAppend = `${localTimestamp} [ID: ${msgId}] ${senderName}: ${fullBody}\n`; // Use localTimestamp here too
+        }
+
+        fs.appendFileSync(chatFilePath, lineToAppend, 'utf8'); 
+        if (msg.hasMedia) {
+            let mediaPath; // ensure mediaPath is defined for later use
+            try {
+                const media = await msg.downloadMedia();
+                if (media && media.data) {
+                    let fileExtension = 'dat';
+                    if (media.mimetype) {
+                        const parts = media.mimetype.split('/');
+                        if (parts.length > 1 && parts[1]) {
+                            fileExtension = parts[1].split('+')[0].replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                        }
+                    }
+                    const mediaFilename = `${msgId}.${fileExtension}`;
+                    mediaPath = path.join(chatPaths.filesDir, mediaFilename);
+
+                    fs.writeFileSync(mediaPath, Buffer.from(media.data, 'base64'));
+                    uploadedMediaMap.set(msgId, { mimeType: media.mimetype, base64: media.data, filePath: mediaPath });
+
+                    let generatedFilesIndex = [];
+                    const indexFilePath = chatPaths.generatedFilesIndex;
+                    if (fs.existsSync(indexFilePath)) {
+                        try {
+                            generatedFilesIndex = JSON.parse(fs.readFileSync(indexFilePath, 'utf8'));
+                        } catch (parseErr) {
+                            console.error(`[safelyAppendMessage] Error parsing ${indexFilePath}, initializing new index. Error:`, parseErr);
+                            generatedFilesIndex = [];
+                        }
+                    }
+                    generatedFilesIndex.push({
+                        timestamp: new Date().toISOString(),
+                        originalMessageId: msgId,
+                        generatedFilePath: mediaPath,
+                        filename: mediaFilename,
+                        description: `קובץ מדיה שהתקבל מהמשתמש (${senderName})`,
+                        type: media.mimetype || 'unknown/unknown'
+                    });
+                    fs.writeFileSync(indexFilePath, JSON.stringify(generatedFilesIndex, null, 2), 'utf8');
+
+                } else {
+                    console.warn(`[safelyAppendMessage] Failed to download media data for message ${msgId}.`);
+                }
+            } catch (error) {
+                console.error(`[safelyAppendMessage] Error saving media for message ${msgId}:`, error);
+            }
+            await handleMediaContent(msg, mediaPath);
+
+        }
+        if (autoReactEmoji && msg.type !== 'revoked' && msg.type !== 'reaction') {
+            // הודעות של "פיתי" (תגובות AI) לא צריכות לקבל ריאקט אוטומטי מעצמן
+            // ההודעות שלך (הבעלים) כן צריכות, לפי הבקשה
+            // msg.fromMe יכול להיות גם תגובה של הבוט, אז נבדוק אם ה-senderName אינו "פיתי"
+            // או אם זה אתה (הבעלים) שולח הודעה.
+            // באופן כללי, נגיב לכל מה שנרשם בלוג, אלא אם כן זו תגובה של הAI שהיא לא פקודה.
+            // senderName יכול להיות "הלל (Owner)" או שם אחר.
+            const isBotAIReplySimpleText = senderName === "פיתי" && !msg.hasMedia && !msg.isStatus;
+
+            if (!isBotAIReplySimpleText) { // אל תגיב אוטומטית לתגובות טקסט פשוטות של הבוט עצמו
+                try {
+                    console.log(`[Auto-React from safelyAppendMessage] Reacting with ${autoReactEmoji} to message ${msgId} from ${senderName}`);
+                    await msg.react(autoReactEmoji);
+                } catch (reactError) {
+                    // יכול לקרות אם מנסים להגיב להודעה שכבר נמחקה או הודעת מערכת
+                    console.error(`[Auto-React from safelyAppendMessage] Error reacting to ${msgId}: ${reactError.message}`);
+                }
+            }
+        }
+
+    } catch (err) {
+        console.error(`❌ Error in safelyAppendMessage main try block for msg ${msgId}, derived safeName='${safeName}', targetPath='${chatFilePath}':`, err);
+    }
+}
+// Helper function for consistent safe name generation
+async function getSafeNameForChat(chat) {
+    try {
+        const contact = await chat.getContact();
+        const chatIdUserPart = chat.id?.user || (chat.id?._serialized ? chat.id._serialized.split('@')[0] : null);
+        const number = contact?.number || chatIdUserPart || 'unknown_number'; // More robust fallback for number
+
+        let name;
+        if (chat.isGroup) {
+            // For groups, prioritize the group name, then other fallbacks
+            name = chat.name || contact?.pushname || contact?.name || number || "UnknownGroup";
+        } else {
+            // For private chats, prioritize pushname (WhatsApp profile name), then saved contact name
+            name = contact?.pushname || contact?.name || number || "UnknownUser";
+        }
+
+        // Aggressive sanitization function
+        const sanitizeForPath = (str) => (str || 'unknown') // Ensure not null/undefined
+            .toString() // Ensure it's a string
+            .trim()
+            .replace(/[\x00-\x1F\x7F-\x9F]/g, '') // Remove control characters
+            // Replace specific invalid/problematic path chars more broadly, including '#' which might cause issues
+            .replace(/[\\/:*?"<>|#%&{}+`']/g, '_')
+            .replace(/\s+/g, '_') // Replace whitespace
+            .replace(/\.+/g, '.') // Avoid multiple consecutive dots
+            .replace(/_{2,}/g, '_') // Replace multiple underscores with single
+            .replace(/^\.+|\.+$/g, '') // Trim leading/trailing dots
+            .replace(/^_|_$/g, '') // Trim leading/trailing underscores
+            .substring(0, 150); // Limit length to prevent overly long paths
+
+
+        let safeNumberPart = sanitizeForPath(number);
+        let safeNamePart = sanitizeForPath(name);
+
+        // Ensure parts are not empty after sanitization
+        if (!safeNumberPart) safeNumberPart = 'no_id';
+        if (!safeNamePart) safeNamePart = 'no_name';
+
+        // Construct safeName, ensuring structure and avoiding empty parts
+        let safeName = `${safeNumberPart}_${safeNamePart}`;
+
+        return safeName;
+
+    } catch (err) {
+        console.error(`Error in getSafeNameForChat for chat ${chat?.id?._serialized || 'UNKNOWN_ID'}:`, err);
+        // Fallback safe name using sanitized chat ID
+        const safeChatId = (chat?.id?._serialized || 'unknown_chat_id').replace(/[@.-]/g, '_').replace(/[\\/:*?"<>|]/g, '_');
+        return `${safeChatId}_error_fetching_name`; // More descriptive error name
+    }
+}
 // פונקציה חדשה לסיכום היסטוריה
 async function handleSummarizeHistoryAction(historyData, targetMsg, chatPaths) {
     const targetChatId = targetMsg.id.remote;
@@ -984,31 +1133,40 @@ async function handleVoiceMessage(msg) {
 
         console.log(`[handleVoiceMessage] Sending audio (size: ${audioBase64.length}) to Cloudflare Whisper...`);
 
-        // Use the new helper function from apiServiceIntegrations.js
-        // The helper function returns response.data directly
-        const whisperResponseData = await callCloudflareWhisper(audioBase64); // Pass optional model_kwargs if they become dynamic
+        const response = await axios.post(
+            CLOUDFLARE_WHISPER_API_ENDPOINT,
+            {
+                audio: audioBase64,
+                model_kwargs: { language: "he" }
+            },
+            {
+                headers: {
+                    "Authorization": `Bearer ${CLOUDFLARE_API_TOKEN}`,
+                    "Content-Type": "application/json"
+                }
+            }
+        );
 
-        // console.log(`[handleVoiceMessage] Received response data from Whisper helper.`); // Status from direct response not available here
 
-        if (whisperResponseData && whisperResponseData.result && whisperResponseData.result.text) {
-            const transcribedText = whisperResponseData.result.text;
+        console.log(`[handleVoiceMessage] Received response from Whisper. Status: ${response.status}`);
+
+        if (response.data && response.data.result && response.data.result.text) {
+            const transcribedText = response.data.result.text;
             console.log(`[handleVoiceMessage] Transcription successful: "${transcribedText}"`);
-
-            if (whisperResponseData.result.transcription_info) {
-                const info = whisperResponseData.result.transcription_info;
+            // הדפסת מידע נוסף מהתגובה (אופציונלי)
+            if (response.data.result.transcription_info) {
+                const info = response.data.result.transcription_info;
                 console.log(`  Language: ${info.language} (Prob: ${info.language_probability}), Duration: ${info.duration}s`);
             }
-            return transcribedText;
+            return transcribedText; // החזר את הטקסט המתומלל
         } else {
-            console.error("[handleVoiceMessage] Whisper response data missing expected text result:", whisperResponseData);
+            console.error("[handleVoiceMessage] Whisper response missing expected text result:", response.data);
             await msg.reply("⚠️ שירות התמלול לא החזיר טקסט.");
             return null;
         }
 
     } catch (error) {
-        // The helper function callCloudflareWhisper already logs its specific error.
-        // This catch block handles errors from the call to the helper or other errors within handleVoiceMessage.
-        console.error("❌ Error processing voice message with Whisper (caught in handleVoiceMessage):", error.message);
+        console.error("❌ Error processing voice message with Whisper:", error.response?.data || error.message || error);
         await msg.reply("❌ אירעה שגיאה בעיבוד ההודעה הקולית.");
         return null;
     }
@@ -1071,7 +1229,7 @@ client.on('message_create', async (msg) => {
         let chatFilePath = 'error_path_fromMe/history.txt';
         try {
             chat = await msg.getChat();
-            safeName = await getSafeNameForChat(client, chat); // שימוש בפונקציית העזר
+            safeName = await getSafeNameForChat(chat); // שימוש בפונקציית העזר
             chatPaths = getChatPaths(chat.id._serialized, safeName);
             chatFilePath = chatPaths.historyFile;
 
@@ -1402,8 +1560,41 @@ async function handleSendEmailAction(replyData, targetMsg, chatPaths) {
         await targetMsg.reply("⚠️ הייתה שגיאה בשליחת האימייל.");
     }
 }
-// Commented out function pcmToWav removed
+// Wrap raw PCM in a WAV header
+// (פונקציה זו הועתקה והותאמה מהקובץ nefv.html שסיפקת)
+function pcmToWav(pcm, sampleRate, channels, bits) {
+    const blockAlign = channels * (bits / 8);
+    const byteRate = sampleRate * blockAlign;
+    // pcm הוא Buffer ב-Node.js, אז pcm.length הוא byteLength
+    const buffer = new ArrayBuffer(44 + pcm.length);
+    const view = new DataView(buffer);
+    let p = 0;
+    const writeU16 = n => (view.setUint16(p, n, true), p += 2);
+    const writeU32 = n => (view.setUint32(p, n, true), p += 4);
+    const writeStr = s => {
+        for (let i = 0; i < s.length; i++) {
+            view.setUint8(p++, s.charCodeAt(i));
+        }
+    };
 
+    writeStr("RIFF");
+    writeU32(buffer.byteLength - 8);
+    writeStr("WAVE");
+    writeStr("fmt ");
+    writeU32(16); // Subchunk1Size
+    writeU16(1); // PCM format
+    writeU16(channels);
+    writeU32(sampleRate);
+    writeU32(byteRate);
+    writeU16(blockAlign);
+    writeU16(bits);
+    writeStr("data");
+    writeU32(pcm.length); // pcm.length כאן הוא byteLength של ה-Buffer
+    new Uint8Array(buffer, 44).set(pcm); // העתקת נתוני ה-Buffer לתוך ה-ArrayBuffer
+    return Buffer.from(buffer); // החזר Buffer של Node.js
+}
+
+// 2. Text-to-Speech Action
 // 2. Text-to-Speech Action
 async function handleTTSAction(replyData, targetMsg) {
     const textToSpeak = replyData.text;
@@ -1557,8 +1748,58 @@ async function handleTTSAction(replyData, targetMsg) {
         }
     }
 }
-// Commented out function streamToString removed
-// Commented out generateBarcode removed (it was likely part of a larger comment block for generateBarcode related functions if it was there)
+// Helper function to read a stream to a string
+async function streamToString(stream) {
+    const chunks = [];
+    return new Promise((resolve, reject) => {
+        stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
+        stream.on('error', (err) => reject(err));
+        stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+    })
+}
+// 3. Generate Barcode Action
+async function handleGenerateBarcodeAction(replyData, targetMsg) {
+    const textToEncode = replyData.text;
+    const caption = replyData.message || "📦 הנה הברקוד שביקשת:";
+    const targetChatId = targetMsg.id.remote;
+
+    if (!textToEncode) {
+        console.warn("[handleGenerateBarcodeAction] No text provided for barcode.");
+        await targetMsg.reply("⚠️ לא ניתן ליצור ברקוד, חסר טקסט.");
+        return;
+    }
+
+    const barcodePath = path.join(__dirname, `barcode_${Date.now()}.png`); // Use __dirname or a dedicated temp folder
+
+    try {
+        await QRCode.toFile(barcodePath, textToEncode, {
+            width: 400,
+            margin: 2,
+            color: { dark: '#000', light: '#FFF' }
+        });
+        console.log(`[handleGenerateBarcodeAction] Barcode generated: ${barcodePath}`);
+
+        const media = MessageMedia.fromFilePath(barcodePath);
+        // Send as a new message, optionally quoting
+        await client.sendMessage(targetChatId, media, { caption: caption, quotedMessageId: targetMsg.id._serialized });
+        console.log("[handleGenerateBarcodeAction] Barcode sent successfully.");
+
+        // Clean up
+        fs.unlink(barcodePath, (err) => {
+            if (err) console.error(`[handleGenerateBarcodeAction] Error deleting temp barcode file ${barcodePath}:`, err);
+        });
+
+    } catch (err) {
+        console.error("❌ [handleGenerateBarcodeAction] Error:", err);
+        await targetMsg.reply("⚠️ הייתה שגיאה ביצירת הברקוד.");
+        // Attempt cleanup on error
+        if (fs.existsSync(barcodePath)) {
+            fs.unlink(barcodePath, (unlinkErr) => {
+                if (unlinkErr) console.error(`[handleGenerateBarcodeAction] Error deleting temp barcode file on error ${barcodePath}:`, unlinkErr);
+            });
+        }
+    }
+}
 
 // 4. Reminder Action
 async function handleReminderAction(replyData, targetMsg) {
@@ -2232,6 +2473,74 @@ async function handleYoutubeSearchAction(replyData, targetMsg) {
         await targetMsg.reply("🚫 הייתה שגיאה בזמן חיפוש הסרטון.");
     }
 }
+// Function to load pending actions
+function loadPendingActions() {
+    if (fs.existsSync(PENDING_ACTIONS_PATH)) {
+        try {
+            const data = fs.readFileSync(PENDING_ACTIONS_PATH, 'utf8');
+            const actions = JSON.parse(data);
+            // Basic validation: ensure it's an array
+            return Array.isArray(actions) ? actions : [];
+        } catch (e) {
+            console.error("❌ Error reading or parsing pending_actions.json:", e);
+            // Consider backup/rename corrupted file here
+            return [];
+        }
+    }
+    return [];
+}
+function loadTriggers(chatPaths) {
+    const triggersFilePath = chatPaths.triggersFile;
+    if (fs.existsSync(triggersFilePath)) {
+        try {
+            const data = fs.readFileSync(triggersFilePath, 'utf8');
+            const triggers = JSON.parse(data);
+            if (Array.isArray(triggers)) {
+                return triggers.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            }
+            console.warn(`[Triggers] triggers.json for ${chatPaths.chatDir} did not contain an array. Returning empty.`);
+            return [];
+        } catch (e) {
+            console.error(`❌ Error reading or parsing ${triggersFilePath}:`, e);
+            return [];
+        }
+    }
+    return [];
+}
+
+// Function to save triggers for a specific chat
+function saveTriggers(chatPaths, triggers) {
+    const triggersFilePath = chatPaths.triggersFile;
+    try {
+        if (!Array.isArray(triggers)) {
+            console.error(`❌ Attempted to save non-array data to ${triggersFilePath}. Aborting save.`);
+            return;
+        }
+        fs.mkdirSync(chatPaths.chatDir, { recursive: true });
+        fs.writeFileSync(triggersFilePath, JSON.stringify(triggers, null, 2), 'utf8');
+        console.log(`💾 Successfully saved ${triggers.length} triggers to ${triggersFilePath}`);
+    } catch (e) {
+        console.error(`❌ Error writing to ${triggersFilePath}:`, e);
+        client.sendMessage(myId, `🚨 CRITICAL: Failed to write to ${triggersFilePath}! Error: ${e.message}`);
+    }
+}
+
+// Function to save pending actions
+function savePendingActions(actions) {
+    try {
+        // Basic validation before saving
+        if (!Array.isArray(actions)) {
+            console.error("❌ Attempted to save non-array data to pending_actions.json. Aborting save.");
+            return;
+        }
+        fs.writeFileSync(PENDING_ACTIONS_PATH, JSON.stringify(actions, null, 2), 'utf8');
+        // ---> ADD THIS LOG <---
+    } catch (e) {
+        console.error(`❌ Error writing to pending_actions.json:`, e);
+        // Optionally notify owner about save failure
+        client.sendMessage(myId, `🚨 CRITICAL: Failed to write to pending_actions.json! Error: ${e.message}`);
+    }
+}
 
 // Function to check and execute due actions
 async function checkPendingActions() {
@@ -2624,6 +2933,46 @@ case "generate_graph":
     }
 }
 
+// Function to load memories for a specific chat, sorted newest first
+function loadMemories(chatPaths) {
+    const memoryFilePath = chatPaths.memoryFile;
+    if (fs.existsSync(memoryFilePath)) {
+        try {
+            const data = fs.readFileSync(memoryFilePath, 'utf8');
+            const memories = JSON.parse(data);
+            // Ensure it's an array and sort by timestamp descending
+            if (Array.isArray(memories)) {
+                // Sort by timestamp (which should also be the ID in new memories)
+                return memories.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            }
+            console.warn(`[Memories] ${memoryFilePath} did not contain an array. Returning empty.`);
+            return [];
+        } catch (e) {
+            console.error(`❌ Error reading or parsing ${memoryFilePath}:`, e);
+            return [];
+        }
+    }
+    return [];
+}
+
+// Function to save memories for a specific chat
+function saveMemories(chatPaths, memories) {
+    const memoryFilePath = chatPaths.memoryFile;
+    try {
+        if (!Array.isArray(memories)) {
+            console.error(`❌ Attempted to save non-array data to ${memoryFilePath}. Aborting save.`);
+            return;
+        }
+        // Ensure directory exists
+        fs.mkdirSync(chatPaths.chatDir, { recursive: true });
+        fs.writeFileSync(memoryFilePath, JSON.stringify(memories, null, 2), 'utf8');
+        console.log(`💾 Successfully saved ${memories.length} memories to ${memoryFilePath}`);
+    } catch (e) {
+        console.error(`❌ Error writing to ${memoryFilePath}:`, e);
+        client.sendMessage(myId, `🚨 CRITICAL: Failed to write to ${memoryFilePath}! Error: ${e.message}`);
+    }
+}
+
 client.on('ready', () => {
     botStartTime = Date.now();
     console.log('✅ Bot is running and ready.');
@@ -2808,8 +3157,15 @@ async function generateImageAndGetBuffer(description, imageModel, contextMsg, st
 
     for (let attempt = 1; attempt <= MAX_CLOUDFLARE_RETRIES; attempt++) {
         try {
-            // Use the new helper function from apiServiceIntegrations.js
-            const response = await callCloudflareImageGen(modelEndpoint, requestBody);
+            const response = await axios.post(
+                `${BASE_IMAGE_GENERATION_API_ENDPOINT}${modelEndpoint}`,
+                requestBody,
+                {
+                    headers: { "Authorization": `Bearer ${CLOUDFLARE_API_TOKEN}`, "Content-Type": "application/json" },
+                    responseType: 'arraybuffer', // Cloudflare image models usually return image directly or JSON with base64
+                    validateStatus: status => status >= 200 && status < 300
+                }
+            );
 
             const contentType = response.headers['content-type'];
             console.log(`[genImgBuffer Attempt ${attempt}] Response Content-Type: ${contentType} from ${imageModel}`);
@@ -3331,8 +3687,7 @@ async function handleMessage(msg, incoming, quotedMedia = null, contextMediaArra
 
     const senderName = await getSenderName(msg);
     // ראשית, מבצעים לוג להודעה הנכנסת
-    // Pass necessary global-like variables to the imported safelyAppendMessage
-    await require('./whatsapp_modules/fileSystemHelpers.js').safelyAppendMessage(msg, senderName, client, writtenMessageIds, uploadedMediaMap, autoReactEmoji, handleMediaContent);
+    await safelyAppendMessage(msg, senderName); // safelyAppendMessage יחשב נתיבים פנימית ללוג הזה
 
     // ---> חשב את הנתיבים *כאן* פעם אחת עבור כל הפונקציה <---
     let chatPaths;
@@ -3346,7 +3701,7 @@ async function handleMessage(msg, incoming, quotedMedia = null, contextMediaArra
 
     try {
         const chatData = await msg.getChat();
-        safeName = await getSafeNameForChat(client, chatData); // מחשבים safeName
+        safeName = await getSafeNameForChat(chatData); // מחשבים safeName
         chatPaths = getChatPaths(chatId, safeName); // מחשבים chatPaths
         chatDir = chatPaths.chatDir; // שומרים את chatDir
         chatFilePath = chatPaths.historyFile; // שומרים נתיבים נוספים
@@ -3378,8 +3733,7 @@ async function handleMessage(msg, incoming, quotedMedia = null, contextMediaArra
         return; // חובה לצאת אם ההכנה נכשלה
     }
 
-    // Redundant call removed as safelyAppendMessage is called at the beginning of handleMessage now using the helper.
-    // await require('./whatsapp_modules/fileSystemHelpers.js').safelyAppendMessage(msg, senderName, client, writtenMessageIds, uploadedMediaMap, autoReactEmoji, handleMediaContent);
+    safelyAppendMessage(msg, senderName);
 
     let geminiMediaParts = [];
 
@@ -6196,7 +6550,7 @@ if (jsonResponse.action === "generate_graph") {
         const normalize = id => id?.replace(/^true_/, "").replace(/^false_/, "");
         const targetReplyMsg = messages.find(m => normalize(m.id._serialized) === normalize(jsonResponse.replyTo)) || msg;
 
-        const currentSafeName = await getSafeNameForChat(client, chat); // safeName כבר צריך להיות מחושב למעלה
+        const currentSafeName = await getSafeNameForChat(chat); // safeName כבר צריך להיות מחושב למעלה
         const currentChatPaths = getChatPaths(chat.id._serialized, currentSafeName); // chatPaths כבר צריך להיות מחושב למעלה
 
         await handleCreateStickerAction(jsonResponse, targetReplyMsg, currentChatPaths); // העבר את chatPaths
@@ -6251,7 +6605,7 @@ if (jsonResponse.action === "generate_graph") {
         const targetReplyMsg = messages.find(m => normalize(m.id._serialized) === normalize(jsonResponse.replyTo)) || msg;
 
         // Get chatPaths (it should be defined earlier in handleMessage)
-        // const safeName = await getSafeNameForChat(client, chat); // Already calculated
+        // const safeName = await getSafeNameForChat(chat); // Already calculated
         // const chatPaths = getChatPaths(chat.id._serialized, safeName); // Already calculated
 
         // Call the new handler
@@ -8160,7 +8514,7 @@ async function handleGenerateHtmlAction({ htmlData, targetMsg, chatPaths }) {
     if (needDocument === true && replyToFileMessageId) {
         console.log(`📄 [handleGenerateHtmlAction] Need document content from message ID: ${replyToFileMessageId}. Fetching...`);
         try {
-            const chat = await targetMsg.getChat(); // This 'chat' is fine
+            const chat = await targetMsg.getChat();
             const messages = await chat.fetchMessages({ limit: 100 }); // Fetch history
             const normalize = id => id?.replace(/^true_/, "").replace(/^false_/, "");
             const sourceMsg = messages.find(m => normalize(m.id._serialized) === normalize(replyToFileMessageId));
@@ -8655,7 +9009,7 @@ async function generateImage(description, imageModel, msg, retryCount = 0) {
 
         // ----- SAVE FILE -----
         const chat = await msg.getChat();
-        const safeName = await getSafeNameForChat(client, chat);
+        const safeName = await getSafeNameForChat(chat);
         const chatPaths = getChatPaths(chat.id._serialized, safeName);
         fs.mkdirSync(chatPaths.filesDir, { recursive: true });
 
@@ -8795,7 +9149,7 @@ async function generateDocument({
 }) {
     const chatId = triggeringMsg.id.remote;
     const chat = await triggeringMsg.getChat();
-    const safeName = await getSafeNameForChat(client, chat); // Use your helper
+    const safeName = await getSafeNameForChat(chat); // Use your helper
 
     console.log(`📄 [generateDocument V2] Context - ChatID: ${chatId}, SafeName: ${safeName}`);
     if (imageIntegration) {
@@ -9577,7 +9931,7 @@ async function sendInfoMenu(msg) {
         // (בהנחה ש chatPaths ו-safeName זמינים או מחושבים כאן)
         try {
             const chat = await msg.getChat();
-            const safeName = await getSafeNameForChat(client, chat);
+            const safeName = await getSafeNameForChat(chat);
             const chatPaths = getChatPaths(chat.id._serialized, safeName);
             const localTimestamp = getLocalTimestamp();
             const line = `${localTimestamp} [ID: ${normalizedId}] פיתי: [תפריט מידע]\n`; // או חלק מהטקסט
@@ -9630,32 +9984,32 @@ function parseScheduleTime(timeText) {
     return new Date(now.getTime() + 10 * 60 * 1000);
 }
 
-// function formatDateKey(date) { // MOVED TO utilityHelpers.js
-//     return date.toISOString().split('T')[0];
-// }
-//
-// function formatDateForDisplay(date) { // MOVED TO utilityHelpers.js
-//     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-//     return date.toLocaleDateString('he-IL', options);
-// }
-//
-// function formatTimeForDisplay(date) { // MOVED TO utilityHelpers.js
-//     const options = { hour: 'numeric', minute: 'numeric' };
-//     return date.toLocaleTimeString('he-IL', options);
-// }
-//
-// function getWeeklyHabitStatus(habitData) { // MOVED TO utilityHelpers.js
-//     const today = new Date();
-//     const days = [];
-//     for (let i = 0; i < 7; i++) {
-//         const date = new Date(today);
-//         date.setDate(today.getDate() - i);
-//         const dateKey = formatDateKey(date);
-//         const status = habitData[dateKey] || 'לא נרשם';
-//         days.push(`${formatDateForDisplay(date)}: ${status}`);
-//     }
-//     return days.reverse();
-// }
+function formatDateKey(date) {
+    return date.toISOString().split('T')[0];
+}
+
+function formatDateForDisplay(date) {
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    return date.toLocaleDateString('he-IL', options);
+}
+
+function formatTimeForDisplay(date) {
+    const options = { hour: 'numeric', minute: 'numeric' };
+    return date.toLocaleTimeString('he-IL', options);
+}
+
+function getWeeklyHabitStatus(habitData) {
+    const today = new Date();
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() - i);
+        const dateKey = formatDateKey(date);
+        const status = habitData[dateKey] || 'לא נרשם';
+        days.push(`${formatDateForDisplay(date)}: ${status}`);
+    }
+    return days.reverse();
+}
 
 
 function checkTimers() {
@@ -9770,7 +10124,7 @@ client.on('message', async (msg) => {
             chatIdForLog = chat.id._serialized; // Store for logging
 
             // **** USE THE CENTRALIZED HELPER FUNCTION ****
-            safeName = await getSafeNameForChat(client, chat);
+            safeName = await getSafeNameForChat(chat);
             // ******************************************
 
             const chatPaths = getChatPaths(chatIdForLog, safeName);
@@ -9842,11 +10196,10 @@ client.on('message_create', async (msg) => {
         try {
             // Log AI replies using safelyAppendMessage before returning
             chat = await msg.getChat();
-            safeName = await getSafeNameForChat(client, chat);
+            safeName = await getSafeNameForChat(chat);
             chatPaths = getChatPaths(chat.id._serialized, safeName);
             chatFilePath = chatPaths.historyFile;
-            // Pass necessary global-like variables to the imported safelyAppendMessage
-            await require('./whatsapp_modules/fileSystemHelpers.js').safelyAppendMessage(msg, "פיתי", client, writtenMessageIds, uploadedMediaMap, autoReactEmoji, handleMediaContent); // Log as "פיתי"
+            await safelyAppendMessage(msg, "פיתי"); // Log as "פיתי"
         } catch (logErr) {
             console.error(`[message_create FILTER 1] Error logging AI reply ${msg.id._serialized} for safeName='${safeName}', targetPath='${chatFilePath}':`, logErr);
         }
