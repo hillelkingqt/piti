@@ -1,19 +1,12 @@
 // whatsapp_modules/apiServiceIntegrations.js
+const config = require('../config.js');
 
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 const mime = require('mime-types'); // For functions like searchAndDownloadWebImages
 const { apiKeyManager } = require('../services/ApiKeyManager.js'); // Adjusted path
-
-// --- Cloudflare API Constants ---
-// Moved from what_FIXED (1).js
-const CLOUDFLARE_ACCOUNT_ID = "38a8437a72c997b85a542a6b64a699e2";
-const CLOUDFLARE_API_TOKEN = "jCnlim7diZ_oSCKIkSUxRJGRS972sHEHfgGTmDWK";
-const BASE_IMAGE_GENERATION_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/`;
-// const CLOUDFLARE_VISION_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/unum/uform-gen2-qwen-500m`; // Not currently used
-const CLOUDFLARE_WHISPER_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/openai/whisper-large-v3-turbo`;
-// --- End Cloudflare API Constants ---
+const { generateCloudflareImage, transcribeAudioCF } = require('../services/CloudflareService.js');
 
 
 // Constants that might be moved or defined here
@@ -96,7 +89,7 @@ module.exports = {
     getRandomGeminiImageEndpoint,
     getRandomGeminiEndpoints,
     uploadMediaToGemini,
-    callCloudflareImageGen,
-    callCloudflareWhisper,
+    callCloudflareImageGen: generateCloudflareImage,
+    callCloudflareWhisper: transcribeAudioCF,
     // Other functions will be added here
 };
