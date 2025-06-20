@@ -121,6 +121,10 @@ async function generateBarcode(text) {
 }
 
 async function getSafeNameForChat(client, chat) { // Added client as a parameter
+    if (!chat || !chat.id || !chat.id._serialized) {
+        console.warn('[getSafeNameForChat] Chat object or chat.id._serialized is undefined. Returning default name.');
+        return 'unknown_chat_or_user'; // Default name for undefined chat
+    }
     let safeName = '';
     if (chat.isGroup) {
         safeName = chat.name.replace(/[^\w\u0590-\u05FF\s-]/g, "").replace(/\s+/g, "_"); // Allowed hyphens

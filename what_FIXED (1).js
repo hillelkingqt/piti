@@ -1067,28 +1067,45 @@ async function handleSummarizeAction(summaryData, targetMsg) {
 
 client.on('message_create', async (msg) => {
     // 1. לוג הודעות יוצאות של הבוט עצמו (אם fromMe + התחלת פיתי\n\n)
-    if (msg.fromMe && botMessageIds.has(msg.id._serialized)) { 
+    if (msg.fromMe && botMessageIds.has(msg.id._serialized)) {
         let chat;
-        let safeName = 'error_path_fromMe';
+        let safeName; // Initialize safeName
         let chatPaths;
-        let chatFilePath = 'error_path_fromMe/history.txt';
+        let chatFilePath;
         try {
             chat = await msg.getChat();
-            safeName = await getSafeNameForChat(client, chat); // שימוש בפונקציית העזר
-            chatPaths = getChatPaths(chat.id._serialized, safeName);
-            chatFilePath = chatPaths.historyFile;
+            if (!chat || !chat.id || !chat.id._serialized) { // Check if chat or its essential id is undefined
+                console.warn(`[message_create fromMe] Chat object or chat.id._serialized is undefined for msg ${msg.id._serialized}. Using default safeName.`);
+                safeName = 'undefined_chat_log'; // Default safeName
+                // Construct a default path or decide how to handle logging without a valid chat ID
+                const defaultChatDir = path.join(__dirname, 'chats', safeName); // Ensure path module is available
+                chatPaths = { // Define a default chatPaths structure
+                    chatDir: defaultChatDir,
+                    historyFile: path.join(defaultChatDir, 'chat_history.txt'),
+                    // Add other paths if they are used in the try block and need defaults
+                };
+                chatFilePath = chatPaths.historyFile;
+                // Skip getSafeNameForChat and getChatPaths if chat is undefined
+            } else {
+                safeName = await getSafeNameForChat(client, chat);
+                chatPaths = getChatPaths(chat.id._serialized, safeName);
+                chatFilePath = chatPaths.historyFile;
+            }
 
-            fs.mkdirSync(chatPaths.chatDir, { recursive: true }); // ודא שהתיקייה קיימת
+            fs.mkdirSync(chatPaths.chatDir, { recursive: true });
             console.log(`[message_create fromMe POST-MKDIR] Ensured directory: ${chatPaths.chatDir}`);
 
-            const timestampISO = new Date().toISOString(); // קבל חותמת זמן
+            const timestampISO = new Date().toISOString();
             const messageBodyForLog = typeof msg.body === 'string' ? msg.body : (msg.type === 'sticker' ? '[סטיקר]' : '[מדיה או אובייקט]');
-            const line = `[${timestampISO}] [ID: ${msg.id._serialized}] פיתי: ${messageBodyForLog}\n`; // <-- הוסף חותמת זמן
-            fs.appendFileSync(chatFilePath, line, 'utf8'); // כתוב לקובץ
+            const line = `[${timestampISO}] [ID: ${msg.id._serialized}] פיתי: ${messageBodyForLog}\n`;
+            fs.appendFileSync(chatFilePath, line, 'utf8');
             console.log(`[message_create fromMe POST-APPEND] Appended outgoing msg to: '${chatFilePath}'`);
 
         } catch (err) {
-            console.error(`❌ Error logging bot message ${msg.id?._serialized} for safeName='${safeName}', targetPath='${chatFilePath}':`, err);
+            // The safeName used in the catch log should be the one defined above (either from getSafeNameForChat or the default)
+            const finalSafeNameForErrorLog = safeName || 'error_path_fromMe_undefined_chat';
+            const finalChatFilePathForErrorLog = chatFilePath || 'error_path_fromMe_undefined_chat/history.txt';
+            console.error(`❌ Error logging bot message ${msg.id?._serialized} for safeName='${finalSafeNameForErrorLog}', targetPath='${finalChatFilePathForErrorLog}':`, err);
         }
     }
 
