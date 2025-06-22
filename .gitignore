@@ -2,3 +2,5 @@ chats/
 .wwebjs_auth/ 
 session/ 
 node_modules/ 
+
+.wwebjs_cache/
