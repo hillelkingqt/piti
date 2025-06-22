@@ -1,4 +1,4 @@
-﻿﻿﻿
+﻿
 const { Client, LocalAuth, MessageMedia, Contact, Poll } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const axios = require('axios');
@@ -11,47 +11,14 @@ const sharp = require('sharp');
 const readlineSync = require('readline-sync');
 const { Buffer } = require('buffer');
 const { spawn, spawnSync } = require('child_process');
-// const utilityHelpers = require('./whatsapp_modules/utilityHelpers'); // Comment out the old require
-const {
-    delay,
-    normalizeMsgId,
-    getBaseId,
-    getBaseIdForOwnerCheck,
-    getLocalTimestamp,
-    pcmToWav,
-    streamToString,
-    formatDateKey,
-    formatDateForDisplay,
-    formatTimeForDisplay,
-    getWeeklyHabitStatus,
-    generateBarcode,
-    getSafeNameForChat // Ensure this is included if it was moved
-} = require('./whatsapp_modules/utilityHelpers');
-const {
-    getChatPaths,
-    // safelyAppendMessage, // Definition is now local in what_FIXED (1).js
-    loadMemories,
-    saveMemories,
-    loadTriggers,
-    saveTriggers,
-    loadPendingActions,
-    savePendingActions,
-    loadLatexErrors,
-    saveLatexError
-} = require('./whatsapp_modules/fileSystemHelpers.js');
-const {
-    askGeminiWithSearchGrounding,
-    getRandomGeminiEndpoint,
-    getRandomGeminiImageEndpoint,
-    getRandomGeminiEndpoints,
-    uploadMediaToGemini,
-    callCloudflareImageGen, // Added
-    callCloudflareWhisper // Added
-} = require('./whatsapp_modules/apiServiceIntegrations.js');
 
 const { apiKeyManager } = require('./services/ApiKeyManager');
 const writtenMessageIds = new Set();
-const fs = require('fs');
+const fs = require('fs'); // For synchronous checks like existsSync
+const fsp = fs.promises; // For asynchronous file operations
+const contactCache = new Map();
+const CACHE_TTL = 1000 * 60 * 60 * 24; // 24 שעות באלפיות שנייה
+
 const path = require('path');
 const os = require('os');
 const messageMap = new Map();
@@ -60,14 +27,15 @@ const COGVIDEO_GRADIO_SPACE = "THUDM/CogVideoX-5B-Space"; // CogVideoX Space URL
 // בתחילת הקובץ, ליד שאר הקבועים של Cloudflare
 const puppeteer = require('puppeteer-core');
 
-// --- Cloudflare API Constants ---
-// Moved from what_FIXED (1).js
+
+
+
 const CLOUDFLARE_ACCOUNT_ID = "38a8437a72c997b85a542a6b64a699e2";
 const CLOUDFLARE_API_TOKEN = "jCnlim7diZ_oSCKIkSUxRJGRS972sHEHfgGTmDWK";
 const BASE_IMAGE_GENERATION_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/`;
-// const CLOUDFLARE_VISION_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/unum/uform-gen2-qwen-500m`; // Not currently used
-const CLOUDFLARE_WHISPER_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/openai/whisper-large-v3-turbo`;
-// --- End Cloudflare API Constants ---
+const CLOUDFLARE_VISION_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/unum/uform-gen2-qwen-500m`;
+const CLOUDFLARE_WHISPER_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/openai/whisper-large-v3-turbo`; // <-- הוסף שורה זו
+
 
 const myId = "972532752474@c.us";
 let replyToAllPrivates = false;
@@ -99,22 +67,33 @@ let timerCounter = 0;
 const { google } = require('googleapis');
 const PENDING_ACTIONS_PATH = path.join(__dirname, 'pending_actions.json');
 
-// function getChatPaths(chatId, safeName) { // Definition removed, using helper
-//     const chatDir = path.join(CHAT_DIR_BASE, safeName);
-//     return {
-//         chatDir: chatDir,
-//         historyFile: path.join(chatDir, 'chat_history.txt'),
-//         memoryFile: path.join(chatDir, 'memories.json'),
-//         generatedFilesIndex: path.join(chatDir, 'generated_files.json'),
-//         filesDir: path.join(chatDir, 'files'),
-//         triggersFile: path.join(chatDir, 'triggers.json'),
-//         latexErrorsFile: path.join(chatDir, 'latex_errors.json')
-//     };
-// }
+// Helper function to get base ID (e.g., 1234567890@c.us)
+function getBaseId(fullId) {
+    if (!fullId) return null;
+    const parts = fullId.split('@');
+    if (parts.length < 2) return null;
+    // Handle cases like "123:456@g.us" or "123@c.us"
+    const userPart = parts[0].split(':')[0];
+    return `${userPart}@${parts[1]}`;
+}
+
+// Helper specifically for comparing user IDs (owner checks). This normalizes the
+// domain to `c.us` so that WhatsApp's different linked-device suffixes (like
+// `@lid`) don't interfere with equality checks.
+function getBaseIdForOwnerCheck(fullId) {
+    if (!fullId) return null;
+    const parts = fullId.split('@');
+    if (parts.length < 2) return null;
+    const userPart = parts[0].split(':')[0];
+    return `${userPart}@c.us`;
+}
+function normalizeMsgId(id) {
+    return id ? id.replace(/^true_/, '').replace(/^false_/, '') : id;
+}
 
 function containsTriggerWord(text) {
     if (!text) return false;
-    const triggers = ["פיתי","פיטי","פיטע","פיתיי","piti","פיטא","פיםי","פתי","תיתי","טיטי","טיתי","פיתוש","פטי","פטוש","פיטו","פיטוש","פיתיא","פטושקה","פייטי","פיתיא","פיטיי","פיתושקה"];
+    const triggers = ["פיתי", "פיטי", "פיטע", "פיתיי", "piti", "פיטא", "פיםי", "פתי", "תיתי", "טיטי", "טיתי", "פיתוש", "פטי", "פטוש", "פיטו", "פיטוש", "פיתיא", "פטושקה", "פייטי", "פיתיא", "פיטיי", "פיתושקה"];
     if (text.startsWith("///")) return true;
     return triggers.some(t => text.includes(t));
 }
@@ -152,6 +131,27 @@ function saveStoppedChats() {
     fs.writeFileSync(STOPPED_CHATS_PATH, JSON.stringify([...stoppedChats], null, 2));
 }
 
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function getRandomGeminiEndpoint(hasMedia = false) {
+    const baseUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-04-17-thinking:generateContent";
+    const apiKey = apiKeyManager.getRandomApiKey();
+    if (hasMedia) {
+        return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-04-17-thinking:generateContent?key=${apiKey}`;
+    }
+    return `${baseUrl}?key=${apiKey}`;
+}
+async function generateBarcode(text) {
+    const filePath = './barcode.png';
+    await QRCode.toFile(filePath, text, {
+        width: 400,
+        margin: 2,
+        color: { dark: '#000', light: '#FFF' }
+    });
+    return filePath;
+}
 // הוסף את מפתח ה-API שלך כאן, או טען אותו ממשתנה סביבה
 const PIXABAY_API_KEY = '50212858-c6a0623d5989990f7c6f1dc00';
 
@@ -259,57 +259,73 @@ async function searchAndDownloadWebImages(query, maxImagesToDownload, filenamePr
     }
     return downloadedImagesInfo;
 }
+function getRandomGeminiEndpoints() {
+    const apiKey = apiKeyManager.getRandomApiKey();
+    return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+}
 
-// async function askGeminiWithSearchGrounding(promptText) { // MOVED to apiServiceIntegrations.js
-//     try {
-//         const endpoint = getRandomGeminiEndpoints();
-//         const response = await axios.post(endpoint, {
-//             contents: [
-//                 {
-//                     parts: [{ text: promptText }]
-//                 }
-//             ],
-//             tools: [{ googleSearchRetrieval: {} }]
-//         });
-//         const answer = response.data?.candidates?.[0]?.content?.parts?.[0]?.text || "❌ לא התקבלה תשובה.";
-//         return answer;
-//     } catch (error) {
-//         console.error("❌ [askGeminiWithSearchGrounding] שגיאה:", error.response?.data || error.message || error);
-//         return "⚠️ הייתה שגיאה בזמן הבקשה ל-Gemini עם Grounding.";
-//     }
-// }
 
-// MOVED to apiServiceIntegrations.js
-// async function uploadMediaToGemini(base64Data, mimeType) {
-//     const apiKey = apiKeyManager.getRandomApiKey();
-//     const GEMINI_UPLOAD_URL = `https://generativelanguage.googleapis.com/upload/v1beta/files?key=${apiKey}`;
-//     const buffer = Buffer.from(base64Data, 'base64');
-//     try {
-//         const response = await axios.post(GEMINI_UPLOAD_URL, buffer, {
-//             headers: {
-//                 'Content-Type': mimeType,
-//             },
-//         });
-//         if (response.data && response.data.file && response.data.file.uri) {
-//             return response.data.file.uri;
-//         }
-//         return null;
-//     } catch (error) {
-//         console.error("Gemini media upload error:", error?.response?.data || error);
-//         throw error;
-//     }
-// }
+async function askGeminiWithSearchGrounding(promptText) {
+    try {
+        const endpoint = getRandomGeminiEndpoints(); // השתמש בפונקציה הקיימת שלך לקבלת URL+Key
+        const response = await axios.post(endpoint, {
+            contents: [
+                {
+                    parts: [{ text: promptText }]
+                }
+            ],
+            // ------------------- שורה שגויה -------------------
+            // tools: [{ type: "google_search" }] // <-- שורה זו שגויה
+            // ---------------------------------------------------
+
+            // ------------------- שורה מתוקנת ------------------
+            tools: [{ googleSearchRetrieval: {} }] // <-- זה הפורמט הנכון
+            // ---------------------------------------------------
+        });
+        const answer = response.data?.candidates?.[0]?.content?.parts?.[0]?.text || "❌ לא התקבלה תשובה.";
+        return answer;
+    } catch (error) {
+        // הדפס את השגיאה המלאה כדי שנוכל לראות אם היא משתנה
+        console.error("❌ [askGeminiWithSearchGrounding] שגיאה:", error.response?.data || error.message || error);
+        // שקול להחזיר הודעת שגיאה שונה או לזרוק את השגיאה הלאה
+        return "⚠️ הייתה שגיאה בזמן הבקשה ל-Gemini עם Grounding.";
+    }
+}
+
+
+async function uploadMediaToGemini(base64Data, mimeType) {
+    const apiKey = apiKeyManager.getRandomApiKey();
+    const GEMINI_UPLOAD_URL = `https://generativelanguage.googleapis.com/upload/v1beta/files?key=${apiKey}`;
+    const buffer = Buffer.from(base64Data, 'base64');
+    try {
+        const response = await axios.post(GEMINI_UPLOAD_URL, buffer, {
+            headers: {
+                'Content-Type': mimeType,
+            },
+        });
+        if (response.data && response.data.file && response.data.file.uri) {
+            return response.data.file.uri;
+        }
+        return null;
+    } catch (error) {
+        console.error("Gemini media upload error:", error?.response?.data || error);
+        throw error;
+    }
+}
 
 const GEMINI_API_KEY = "AIzaSyDfqo_60y39EG_ZW5Fn3EeB6BoZMru5V_k"; // המפתח שלך
 const pdf = require('pdf-parse'); // If using PDF parsing
 const mammoth = require("mammoth"); // If using DOCX parsing
 const { Blob } = require("buffer");
 // ליד שאר פונקציות ה-getRandomGeminiEndpoint, הוסף:
-// Definitions for getRandomGeminiEndpoint, getRandomGeminiImageEndpoint, getRandomGeminiEndpoints
-// were moved to whatsapp_modules/apiServiceIntegrations.js
+
 
 // Helper to pick a random API key and build the Gemini endpoint URL
 // ---------- Helper: בוחר מפתח API אקראי ובונה את ה-URL ----------
+function getRandomGeminiImageEndpoint() {
+    const apiKey = apiKeyManager.getRandomApiKey();             // מנגנון המפתחות הקיים שלך
+    return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent?key=${apiKey}`;
+}
 async function handleGenerateGraphAction(plotData, targetMsg, chatPaths) {
     const targetChatId = targetMsg.id.remote;
     const replyToId = plotData.replyTo || targetMsg.id._serialized;
@@ -698,11 +714,15 @@ const client = new Client({
             '--no-zygote',
             '--log-level=3',
             '--disable-logging',
+            '--disable-extensions', // Reduces memory and CPU by not loading extensions.
+            '--disable-background-networking', // Disables various background network services.
+            '--disable-sync', // Disables Google account sync.
+            '--disable-translate', // Disables the built-in translation service.
+            '--disable-popup-blocking', // Can sometimes improve performance by reducing checks.
+            '--metrics-recording-only', // Disables reporting metrics.
+            '--disable-component-extensions-with-background-pages',
+            
         ],
-    },
-    webVersionCache: {
-        type: 'remote',
-        remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html',
     },
     waitForLogin: true, // ✅ חשוב
 });
@@ -712,6 +732,22 @@ client.on('qr', qr => {
     qrcode.generate(qr, { small: true });
 });
 
+async function getCachedContact(contactId) {
+    const cached = contactCache.get(contactId);
+    if (cached && (Date.now() - cached.timestamp < CACHE_TTL)) {
+        return cached.contact;
+    }
+
+    try {
+        const contact = await client.getContactById(contactId);
+        contactCache.set(contactId, { contact, timestamp: Date.now() });
+        return contact;
+    } catch (error) {
+        console.error(`[Cache] Failed to get contact ${contactId}:`, error);
+        // Don't cache failures
+        return null;
+    }
+}
 
 async function getSenderName(msgItem) {
     try {
@@ -746,118 +782,81 @@ async function getSenderName(msgItem) {
     }
 }
 
+const BASE_CHAT_DIR = "C:\\Users\\hillel1\\Desktop\\WHAT\\chats";
+
+function getChatPaths(chatId, safeName) {
+    const chatDir = path.join(BASE_CHAT_DIR, safeName);
+    return {
+        chatDir: chatDir,
+        historyFile: path.join(chatDir, 'chat_history.txt'),
+        memoryFile: path.join(chatDir, 'memories.json'),
+        generatedFilesIndex: path.join(chatDir, 'generated_files.json'),
+        filesDir: path.join(chatDir, 'files'),
+        triggersFile: path.join(chatDir, 'triggers.json') // ✅ הוספה חשובה!
+    };
+}
 // Near other helper functions like loadMemories, saveMemories
 
-// const MAX_LATEX_ERRORS_TO_KEEP = 5; // Definition removed, using helper
-// function loadLatexErrors(chatPaths) { // Definition removed, using helper
-//     const errorFilePath = path.join(chatPaths.chatDir, 'latex_errors.json');
-//     if (fs.existsSync(errorFilePath)) {
-//         try {
-//             const data = fs.readFileSync(errorFilePath, 'utf8');
-//             const errors = JSON.parse(data);
-//             if (Array.isArray(errors)) {
-//                 return errors;
-//             }
-//         } catch (e) {
-//             console.error(`❌ Error reading or parsing ${errorFilePath}:`, e);
-//         }
-//     }
-//     return [];
-// }
+const MAX_LATEX_ERRORS_TO_KEEP = 5; // כמה שגיאות אחרונות לשמור
 
-// function saveLatexError(chatPaths, newErrorLog) { // Definition removed, using helper
-//     const errorFilePath = path.join(chatPaths.chatDir, 'latex_errors.json');
-//     let errors = loadLatexErrors(chatPaths); // This would now call the helper if not careful
-//     errors.unshift({
-//         timestamp: new Date().toISOString(),
-//         errorLog: newErrorLog.substring(0, 1500)
-//     });
-//     if (errors.length > MAX_LATEX_ERRORS_TO_KEEP) {
-//         errors = errors.slice(0, MAX_LATEX_ERRORS_TO_KEEP);
-//     }
-//     try {
-//         fs.mkdirSync(chatPaths.chatDir, { recursive: true });
-//         fs.writeFileSync(errorFilePath, JSON.stringify(errors, null, 2), 'utf8');
-//     } catch (e) {
-//         console.error(`❌ Error writing LaTeX error log to ${errorFilePath}:`, e);
-//     }
-// }
+function loadLatexErrors(chatPaths) {
+    const errorFilePath = path.join(chatPaths.chatDir, 'latex_errors.json');
+    if (fs.existsSync(errorFilePath)) {
+        try {
+            const data = fs.readFileSync(errorFilePath, 'utf8');
+            const errors = JSON.parse(data);
+            if (Array.isArray(errors)) {
+                return errors; // Errors are already sorted by recency (newest first) when saved
+            }
+        } catch (e) {
+            console.error(`❌ Error reading or parsing ${errorFilePath}:`, e);
+        }
+    }
+    return [];
+}
 
-// function loadMemories(chatPaths) { // Definition removed, using helper
-//     const memoryFilePath = chatPaths.memoryFile;
-//     if (fs.existsSync(memoryFilePath)) {
-//         try {
-//             const data = fs.readFileSync(memoryFilePath, 'utf8');
-//             const memories = JSON.parse(data);
-//             if (Array.isArray(memories)) {
-//                 return memories.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-//             }
-//             return [];
-//         } catch (e) {
-//             console.error(`❌ Error reading or parsing ${memoryFilePath}:`, e);
-//             return [];
-//         }
-//     }
-//     return [];
-// }
+function saveLatexError(chatPaths, newErrorLog) {
+    const errorFilePath = path.join(chatPaths.chatDir, 'latex_errors.json');
+    let errors = loadLatexErrors(chatPaths);
 
-// function saveMemories(chatPaths, memories) { // Definition removed, using helper
-//     const memoryFilePath = chatPaths.memoryFile;
-//     try {
-//         if (!Array.isArray(memories)) {
-//             console.error(`❌ Attempted to save non-array data to ${memoryFilePath}. Aborting save.`);
-//             return;
-//         }
-//         fs.mkdirSync(chatPaths.chatDir, { recursive: true });
-//         fs.writeFileSync(memoryFilePath, JSON.stringify(memories, null, 2), 'utf8');
-//     } catch (e) {
-//         console.error(`❌ Error writing to ${memoryFilePath}:`, e);
-//     }
-// }
+    // Add new error to the beginning of the array
+    errors.unshift({
+        timestamp: new Date().toISOString(),
+        errorLog: newErrorLog.substring(0, 1500) // Keep error log concise
+    });
 
-// function loadTriggers(chatPaths) { // Definition removed, using helper
-//     const triggersFilePath = chatPaths.triggersFile;
-//     if (fs.existsSync(triggersFilePath)) {
-//         try {
-//             const data = fs.readFileSync(triggersFilePath, 'utf8');
-//             const triggers = JSON.parse(data);
-//             if (Array.isArray(triggers)) {
-//                 return triggers.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-//             }
-//             return [];
-//         } catch (e) {
-//             console.error(`❌ Error reading or parsing ${triggersFilePath}:`, e);
-//             return [];
-//         }
-//     }
-//     return [];
-// }
+    // Keep only the last MAX_LATEX_ERRORS_TO_KEEP errors
+    if (errors.length > MAX_LATEX_ERRORS_TO_KEEP) {
+        errors = errors.slice(0, MAX_LATEX_ERRORS_TO_KEEP);
+    }
 
-// function saveTriggers(chatPaths, triggers) { // Definition removed, using helper
-//     const triggersFilePath = chatPaths.triggersFile;
-//     try {
-//         if (!Array.isArray(triggers)) {
-//             console.error(`❌ Attempted to save non-array data to ${triggersFilePath}. Aborting save.`);
-//             return;
-//         }
-//         fs.mkdirSync(chatPaths.chatDir, { recursive: true });
-//         fs.writeFileSync(triggersFilePath, JSON.stringify(triggers, null, 2), 'utf8');
-//     } catch (e) {
-//         console.error(`❌ Error writing to ${triggersFilePath}:`, e);
-//     }
-// }
+    try {
+        fs.mkdirSync(chatPaths.chatDir, { recursive: true });
+        fs.writeFileSync(errorFilePath, JSON.stringify(errors, null, 2), 'utf8');
+        console.log(`💾 Saved LaTeX error log to ${errorFilePath}`);
+    } catch (e) {
+        console.error(`❌ Error writing LaTeX error log to ${errorFilePath}:`, e);
+    }
+}
 
 async function appendMessageToChat(chatId, sender, message) {
     const chat = await client.getChatById(chatId);
-    const safeName = await getSafeNameForChat(client, chat);
+    const safeName = await getSafeNameForChat(chat);
     const chatPaths = getChatPaths(chatId, safeName);
     const filePath = chatPaths.historyFile;
     fs.mkdirSync(chatPaths.chatDir, { recursive: true });
-    const line = `[${sender}] ${message}\n`;
-    fs.appendFileSync(filePath, line, 'utf8');
+    const line = `[${sender}] ${message}\n`; // Note: This is still sync, but less critical than the main logger
+    fs.appendFileSync(filePath, line, 'utf8'); // It's used in few places, can be converted if needed.
+
 }
 
-// Commented out function getLocalTimestamp removed
+function getLocalTimestamp() {
+    const now = new Date();
+    // Example format: [2023-10-27 17:55:30] - Adjust 'sv-SE' for YYYY-MM-DD if needed elsewhere
+    const datePart = now.toLocaleDateString('sv-SE'); // YYYY-MM-DD format
+    const timePart = now.toLocaleTimeString('he-IL', { hour12: false }); // HH:MM:SS format (Israeli locale)
+    return `[${datePart} ${timePart}]`;
+}
 
 async function sendAndLogMessage(chat, messageText, safeName) {
     const chatPaths = getChatPaths(chat.id._serialized, safeName);
@@ -868,112 +867,176 @@ async function sendAndLogMessage(chat, messageText, safeName) {
     return await chat.sendAndLogMessage(messageText);
 }
 
+
 async function safelyAppendMessage(msg, senderName) {
+    const msgId = msg.id._serialized; // This is the raw ID
+    if (writtenMessageIds.has(msgId)) return;
+    writtenMessageIds.add(msgId);
+    // const timestampISO = new Date().toISOString(); // REMOVE THIS LINE
+    const localTimestamp = getLocalTimestamp(); // <<< CHANGE HERE
+
+    let chat;
+    let safeName = 'error_path_safelyAppend'; // Default
+    let chatPaths;
+    let chatFilePath = 'error_path_safelyAppend/history.txt'; // Default
+
     try {
-        const chat = await msg.getChat();
-        const safeName = await getSafeNameForChat(client, chat); // client is the whatsapp-web.js client instance
-        const chatPaths = getChatPaths(chat.id._serialized, safeName);
+        chat = await msg.getChat();
+        safeName = await getSafeNameForChat(chat);
+        chatPaths = getChatPaths(chat.id._serialized, safeName);
+        chatFilePath = chatPaths.historyFile;
 
+        // Ensure directories exist FIRST
         fs.mkdirSync(chatPaths.chatDir, { recursive: true });
+        fs.mkdirSync(chatPaths.filesDir, { recursive: true });
 
-        const localTimestamp = getLocalTimestamp();
-        const normalizedMsgId = normalizeMsgId(msg.id._serialized);
-
-        if (writtenMessageIds.has(normalizedMsgId)) {
-            console.log(`[safelyAppendMessage] Message ${normalizedMsgId} already written. Skipping.`);
-            return;
-        }
-
-        let messageBodyForLog;
-        if (typeof msg.body === 'string' && msg.body.trim() !== "") {
-            messageBodyForLog = msg.body;
-        } else if (msg.type === 'sticker') {
-            messageBodyForLog = '[סטיקר]';
-        } else if (msg.hasMedia) {
-            // Try to get a filename or a generic media type
-            const media = uploadedMediaMap.get(msg.id._serialized); // Check if we have info from a previous download
-            if (media && media.path) {
-                messageBodyForLog = `[מדיה: ${path.basename(media.path)}]`;
-            } else if (msg.type) {
-                messageBodyForLog = `[מדיה: ${msg.type}]`;
-            } else {
-                messageBodyForLog = '[מדיה]';
-            }
-        } else {
-            messageBodyForLog = '[הודעה ריקה או לא נתמכת ללוג]';
-        }
-        
-        // Ensure messageBodyForLog is a string
-        if (typeof messageBodyForLog !== 'string') {
-            messageBodyForLog = String(messageBodyForLog);
-        }
-
-
-        const line = `${localTimestamp} [ID: ${msg.id._serialized}] [${senderName}]: ${messageBodyForLog}\n`;
-        fs.appendFileSync(chatPaths.historyFile, line, 'utf8');
-        writtenMessageIds.add(normalizedMsgId);
-
-        if (senderName === "פיתי") { // Assuming "פיתי" is the bot's name for logging its own messages
-            botMessageIds.add(normalizedMsgId);
-            repliableMessageIds.add(normalizedMsgId);
-        }
-        console.log(`[safelyAppendMessage] Logged message ${normalizedMsgId} from "${senderName}" to ${chatPaths.historyFile}`);
-
-        if (msg.hasMedia && msg.type !== 'sticker') {
-            console.log(`[safelyAppendMessage] Message ${normalizedMsgId} has media. Downloading...`);
-            const mediaData = await msg.downloadMedia();
-            if (mediaData) {
-                const filesDir = chatPaths.filesDir;
-                fs.mkdirSync(filesDir, { recursive: true });
-                
-                // Try to determine a more accurate extension
-                let extension = mime.extension(mediaData.mimetype) || 'bin'; // Default to .bin if mime type unknown
-                // Correct common extensions that mime.extension might miss or give alternatives for
-                if (mediaData.mimetype === 'image/jpeg') extension = 'jpg';
-                if (mediaData.mimetype === 'audio/ogg; codecs=opus' || mediaData.mimetype === 'audio/ogg') extension = 'ogg';
-
-                const mediaFilename = `${normalizedMsgId}.${extension}`;
-                const savedMediaPath = path.join(filesDir, mediaFilename);
-                
-                fs.writeFileSync(savedMediaPath, Buffer.from(mediaData.data, 'base64'));
-                console.log(`[safelyAppendMessage] Media for ${normalizedMsgId} saved to ${savedMediaPath}`);
-
-                uploadedMediaMap.set(msg.id._serialized, {
-                    path: savedMediaPath,
-                    type: mediaData.mimetype,
-                    downloaded: true,
-                    caption: msg.body || "" 
-                });
-
-                // Call handleMediaContent for non-DOCX files or if DOCX should also go to Gemini
-                const isDocx = mediaData.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-                // Example: if you want to send DOCX to Gemini in some cases, modify this condition
-                const shouldSendToGemini = !isDocx; // Modify if DOCX should sometimes go to Gemini
-
-                if (shouldSendToGemini) {
-                    await handleMediaContent(msg, savedMediaPath); // Pass the saved path
-                } else if (isDocx) {
-                    // If it's DOCX and you have specific DOCX handling (like python script) in handleMediaContent:
-                    await handleMediaContent(msg, savedMediaPath); // It will be handled by the DOCX logic there
-                }
-            } else {
-                console.warn(`[safelyAppendMessage] Failed to download media for ${normalizedMsgId}.`);
-            }
-        }
-
-        if (autoReactEmoji && senderName !== "פיתי" && msg.from !== myId) {
+        let replySnippet = '';
+        if (msg.hasQuotedMsg) {
             try {
-                await msg.react(autoReactEmoji);
-                console.log(`[safelyAppendMessage] Auto-reacted with ${autoReactEmoji} to message ${normalizedMsgId}`);
-            } catch (reactError) {
-                console.error(`[safelyAppendMessage] Failed to auto-react to message ${normalizedMsgId}:`, reactError);
+                const quoted = await msg.getQuotedMessage();
+                const quotedId = quoted.id._serialized;
+                const quotedBodyShort = quoted.body?.slice(0, 25).replace(/\n/g, ' ') || '[מדיה]';
+                replySnippet = `(↩️ ל-ID:${quotedId} "${quotedBodyShort}...")\n`;
+            } catch (err) {
+                console.error(`[safelyAppendMessage] Error getting quoted message for ${msgId}:`, err);
+                replySnippet = '(↩️ לשגיאה בקריאת ציטוט)\n';
             }
         }
 
-    } catch (error) {
-        console.error(`❌❌ CRITICAL ERROR in safelyAppendMessage for msg ${msg.id?._serialized}:`, error);
-        // Avoid replying from here as it might cause loops if msg.reply itself calls this.
-        // Consider a different notification method for critical errors if needed.
+        const fullBody = `${replySnippet}${msg.body || '[מדיה]'}`;
+        let lineToAppend; // Declare lineToAppend outside the if/else
+
+        if (fullBody.length > 1500) {
+            console.warn(`[safelyAppendMessage] Message ${msgId} too long (${fullBody.length}), logging truncated body.`);
+            // *** FIX HERE: Define shortBody *before* constructing lineToAppend ***
+            const shortBody = `${replySnippet}${msg.body?.slice(0, 100) || '[מדיה]'}${msg.body?.length > 100 ? '...' : ''}`;
+            lineToAppend = `${localTimestamp} [ID: ${msgId}] ${senderName}: [הודעה ארוכה, התוכן קוצץ]\n${shortBody}\n`; // Use localTimestamp
+            // ********************************************************************
+        } else {
+            lineToAppend = `${localTimestamp} [ID: ${msgId}] ${senderName}: ${fullBody}\n`; // Use localTimestamp here too
+        }
+
+        await fsp.appendFile(chatFilePath, lineToAppend, 'utf8'); // ASYNC
+        if (msg.hasMedia) {
+            let mediaPath; // ensure mediaPath is defined for later use
+            try {
+                const media = await msg.downloadMedia();
+                if (media && media.data) {
+                    let fileExtension = 'dat';
+                    if (media.mimetype) {
+                        const parts = media.mimetype.split('/');
+                        if (parts.length > 1 && parts[1]) {
+                            fileExtension = parts[1].split('+')[0].replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                        }
+                    }
+                    const mediaFilename = `${msgId}.${fileExtension}`;
+                    mediaPath = path.join(chatPaths.filesDir, mediaFilename);
+
+                    await fsp.writeFile(mediaPath, Buffer.from(media.data, 'base64')); // ASYNC
+                    uploadedMediaMap.set(msgId, { mimeType: media.mimetype, base64: media.data, filePath: mediaPath });
+
+                    let generatedFilesIndex = [];
+                    const indexFilePath = chatPaths.generatedFilesIndex;
+                    if (fs.existsSync(indexFilePath)) {
+                        try {
+                            const indexContent = await fsp.readFile(indexFilePath, 'utf8'); // ASYNC
+                            generatedFilesIndex = JSON.parse(indexContent);
+                        } catch (parseErr) {
+                            console.error(`[safelyAppendMessage] Error parsing ${indexFilePath}, initializing new index. Error:`, parseErr);
+                            generatedFilesIndex = [];
+                        }
+                    }
+                    generatedFilesIndex.push({
+                        timestamp: new Date().toISOString(),
+                        originalMessageId: msgId,
+                        generatedFilePath: mediaPath,
+                        filename: mediaFilename,
+                        description: `קובץ מדיה שהתקבל מהמשתמש (${senderName})`,
+                        type: media.mimetype || 'unknown/unknown'
+                    });
+                    await fsp.writeFile(indexFilePath, JSON.stringify(generatedFilesIndex, null, 2), 'utf8'); // ASYNC
+
+                } else {
+                    console.warn(`[safelyAppendMessage] Failed to download media data for message ${msgId}.`);
+                }
+            } catch (error) {
+                console.error(`[safelyAppendMessage] Error saving media for message ${msgId}:`, error);
+            }
+            await handleMediaContent(msg, mediaPath);
+
+        }
+        if (autoReactEmoji && msg.type !== 'revoked' && msg.type !== 'reaction') {
+            // הודעות של "פיתי" (תגובות AI) לא צריכות לקבל ריאקט אוטומטי מעצמן
+            // ההודעות שלך (הבעלים) כן צריכות, לפי הבקשה
+            // msg.fromMe יכול להיות גם תגובה של הבוט, אז נבדוק אם ה-senderName אינו "פיתי"
+            // או אם זה אתה (הבעלים) שולח הודעה.
+            // באופן כללי, נגיב לכל מה שנרשם בלוג, אלא אם כן זו תגובה של הAI שהיא לא פקודה.
+            // senderName יכול להיות "הלל (Owner)" או שם אחר.
+            const isBotAIReplySimpleText = senderName === "פיתי" && !msg.hasMedia && !msg.isStatus;
+
+            if (!isBotAIReplySimpleText) { // אל תגיב אוטומטית לתגובות טקסט פשוטות של הבוט עצמו
+                try {
+                    console.log(`[Auto-React from safelyAppendMessage] Reacting with ${autoReactEmoji} to message ${msgId} from ${senderName}`);
+                    await msg.react(autoReactEmoji);
+                } catch (reactError) {
+                    // יכול לקרות אם מנסים להגיב להודעה שכבר נמחקה או הודעת מערכת
+                    console.error(`[Auto-React from safelyAppendMessage] Error reacting to ${msgId}: ${reactError.message}`);
+                }
+            }
+        }
+
+    } catch (err) {
+        console.error(`❌ Error in safelyAppendMessage main try block for msg ${msgId}, derived safeName='${safeName}', targetPath='${chatFilePath}':`, err);
+    }
+}
+// Helper function for consistent safe name generation
+async function getSafeNameForChat(chat) {
+    try {
+        const contact = await getCachedContact(chat.id._serialized);
+        const chatIdUserPart = chat.id?.user || (chat.id?._serialized ? chat.id._serialized.split('@')[0] : null);
+        const number = contact?.number || chatIdUserPart || 'unknown_number'; // More robust fallback for number
+
+        let name;
+        if (chat.isGroup) {
+            // For groups, prioritize the group name, then other fallbacks
+            name = chat.name || contact?.pushname || contact?.name || number || "UnknownGroup";
+        } else {
+            // For private chats, prioritize pushname (WhatsApp profile name), then saved contact name
+            name = contact?.pushname || contact?.name || number || "UnknownUser";
+        }
+
+        // Aggressive sanitization function
+        const sanitizeForPath = (str) => (str || 'unknown') // Ensure not null/undefined
+            .toString() // Ensure it's a string
+            .trim()
+            .replace(/[\x00-\x1F\x7F-\x9F]/g, '') // Remove control characters
+            // Replace specific invalid/problematic path chars more broadly, including '#' which might cause issues
+            .replace(/[\\/:*?"<>|#%&{}+`']/g, '_')
+            .replace(/\s+/g, '_') // Replace whitespace
+            .replace(/\.+/g, '.') // Avoid multiple consecutive dots
+            .replace(/_{2,}/g, '_') // Replace multiple underscores with single
+            .replace(/^\.+|\.+$/g, '') // Trim leading/trailing dots
+            .replace(/^_|_$/g, '') // Trim leading/trailing underscores
+            .substring(0, 150); // Limit length to prevent overly long paths
+
+
+        let safeNumberPart = sanitizeForPath(number);
+        let safeNamePart = sanitizeForPath(name);
+
+        // Ensure parts are not empty after sanitization
+        if (!safeNumberPart) safeNumberPart = 'no_id';
+        if (!safeNamePart) safeNamePart = 'no_name';
+
+        // Construct safeName, ensuring structure and avoiding empty parts
+        let safeName = `${safeNumberPart}_${safeNamePart}`;
+
+        return safeName;
+
+    } catch (err) {
+        console.error(`Error in getSafeNameForChat for chat ${chat?.id?._serialized || 'UNKNOWN_ID'}:`, err);
+        // Fallback safe name using sanitized chat ID
+        const safeChatId = (chat?.id?._serialized || 'unknown_chat_id').replace(/[@.-]/g, '_').replace(/[\\/:*?"<>|]/g, '_');
+        return `${safeChatId}_error_fetching_name`; // More descriptive error name
     }
 }
 // פונקציה חדשה לסיכום היסטוריה
@@ -1096,37 +1159,40 @@ async function handleVoiceMessage(msg) {
 
         console.log(`[handleVoiceMessage] Sending audio (size: ${audioBase64.length}) to Cloudflare Whisper...`);
 
-        // Use the new helper function from apiServiceIntegrations.js
-        const whisperResponseData = await callCloudflareWhisper(audioBase64); 
+        const response = await axios.post(
+            CLOUDFLARE_WHISPER_API_ENDPOINT,
+            {
+                audio: audioBase64,
+                model_kwargs: { language: "he" }
+            },
+            {
+                headers: {
+                    "Authorization": `Bearer ${CLOUDFLARE_API_TOKEN}`,
+                    "Content-Type": "application/json"
+                }
+            }
+        );
 
-        // Check if the transcription was successful and the text exists
-        if (whisperResponseData && whisperResponseData.success === true && typeof whisperResponseData.text === 'string') {
-            const transcribedText = whisperResponseData.text; // Directly access the text property
+
+        console.log(`[handleVoiceMessage] Received response from Whisper. Status: ${response.status}`);
+
+        if (response.data && response.data.result && response.data.result.text) {
+            const transcribedText = response.data.result.text;
             console.log(`[handleVoiceMessage] Transcription successful: "${transcribedText}"`);
-
-            // Optional: If you still expect transcription_info from somewhere, 
-            // you might need to adjust how it's accessed or if it's still relevant.
-            // For now, let's assume transcription_info is not directly available in this new structure
-            // or is not essential for the fix. If it IS available under whisperResponseData.result (e.g. if callCloudflareWhisper was changed to return it),
-            // then that part can be added back. Based on current analysis of transcribeAudioCF, it's not.
-
-            // Example of how you might log additional details if they were part of whisperResponseData
-            // if (whisperResponseData.details) { 
-            //     console.log(`  Details: ${whisperResponseData.details}`);
-            // }
-
-            return transcribedText;
+            // הדפסת מידע נוסף מהתגובה (אופציונלי)
+            if (response.data.result.transcription_info) {
+                const info = response.data.result.transcription_info;
+                console.log(`  Language: ${info.language} (Prob: ${info.language_probability}), Duration: ${info.duration}s`);
+            }
+            return transcribedText; // החזר את הטקסט המתומלל
         } else {
-            // Log the actual response for better debugging if it's not successful
-            console.error("[handleVoiceMessage] Whisper transcription failed or text is missing. Response:", whisperResponseData);
-            await msg.reply("⚠️ שירות התמלול לא החזיר טקסט תקין."); // Modified error message for clarity
+            console.error("[handleVoiceMessage] Whisper response missing expected text result:", response.data);
+            await msg.reply("⚠️ שירות התמלול לא החזיר טקסט.");
             return null;
         }
 
     } catch (error) {
-        // The helper function callCloudflareWhisper already logs its specific error.
-        // This catch block handles errors from the call to the helper or other errors within handleVoiceMessage.
-        console.error("❌ Error processing voice message with Whisper (caught in handleVoiceMessage):", error.message);
+        console.error("❌ Error processing voice message with Whisper:", error.response?.data || error.message || error);
         await msg.reply("❌ אירעה שגיאה בעיבוד ההודעה הקולית.");
         return null;
     }
@@ -1184,43 +1250,26 @@ client.on('message_create', async (msg) => {
     // 1. לוג הודעות יוצאות של הבוט עצמו (אם fromMe + התחלת פיתי\n\n)
     if (msg.fromMe && botMessageIds.has(msg.id._serialized)) {
         let chat;
-        let safeName; // Initialize safeName
+        let safeName = 'error_path_fromMe';
         let chatPaths;
-        let chatFilePath;
+        let chatFilePath = 'error_path_fromMe/history.txt';
         try {
             chat = await msg.getChat();
-            if (!chat || !chat.id || !chat.id._serialized) { // Check if chat or its essential id is undefined
-                console.warn(`[message_create fromMe] Chat object or chat.id._serialized is undefined for msg ${msg.id._serialized}. Using default safeName.`);
-                safeName = 'undefined_chat_log'; // Default safeName
-                // Construct a default path or decide how to handle logging without a valid chat ID
-                const defaultChatDir = path.join(__dirname, 'chats', safeName); // Ensure path module is available
-                chatPaths = { // Define a default chatPaths structure
-                    chatDir: defaultChatDir,
-                    historyFile: path.join(defaultChatDir, 'chat_history.txt'),
-                    // Add other paths if they are used in the try block and need defaults
-                };
-                chatFilePath = chatPaths.historyFile;
-                // Skip getSafeNameForChat and getChatPaths if chat is undefined
-            } else {
-                safeName = await getSafeNameForChat(client, chat);
-                chatPaths = getChatPaths(chat.id._serialized, safeName);
-                chatFilePath = chatPaths.historyFile;
-            }
+            safeName = await getSafeNameForChat(chat); // שימוש בפונקציית העזר
+            chatPaths = getChatPaths(chat.id._serialized, safeName);
+            chatFilePath = chatPaths.historyFile;
 
-            fs.mkdirSync(chatPaths.chatDir, { recursive: true });
+            fs.mkdirSync(chatPaths.chatDir, { recursive: true }); // ודא שהתיקייה קיימת
             console.log(`[message_create fromMe POST-MKDIR] Ensured directory: ${chatPaths.chatDir}`);
 
-            const timestampISO = new Date().toISOString();
+            const timestampISO = new Date().toISOString(); // קבל חותמת זמן
             const messageBodyForLog = typeof msg.body === 'string' ? msg.body : (msg.type === 'sticker' ? '[סטיקר]' : '[מדיה או אובייקט]');
-            const line = `[${timestampISO}] [ID: ${msg.id._serialized}] פיתי: ${messageBodyForLog}\n`;
-            fs.appendFileSync(chatFilePath, line, 'utf8');
+            const line = `[${timestampISO}] [ID: ${msg.id._serialized}] פיתי: ${messageBodyForLog}\n`; // <-- הוסף חותמת זמן
+            fs.appendFileSync(chatFilePath, line, 'utf8'); // כתוב לקובץ
             console.log(`[message_create fromMe POST-APPEND] Appended outgoing msg to: '${chatFilePath}'`);
 
         } catch (err) {
-            // The safeName used in the catch log should be the one defined above (either from getSafeNameForChat or the default)
-            const finalSafeNameForErrorLog = safeName || 'error_path_fromMe_undefined_chat';
-            const finalChatFilePathForErrorLog = chatFilePath || 'error_path_fromMe_undefined_chat/history.txt';
-            console.error(`❌ Error logging bot message ${msg.id?._serialized} for safeName='${finalSafeNameForErrorLog}', targetPath='${finalChatFilePathForErrorLog}':`, err);
+            console.error(`❌ Error logging bot message ${msg.id?._serialized} for safeName='${safeName}', targetPath='${chatFilePath}':`, err);
         }
     }
 
@@ -1338,7 +1387,7 @@ async function handleGroupManagementAction(actionData, targetMsg) {
                 await chatToManage.removeParticipants(finalParticipantIds);
                 await targetMsg.reply(`✅ המשתתפ(ים) הוסרו בהצלחה מהקבוצה.`, undefined, { quotedMessageId: replyTo });
                 break;
-            case 'add_participant': 
+            case 'add_participant':
                 const addResult = await chatToManage.addParticipants(finalParticipantIds);
                 const replies = [];
 
@@ -1362,7 +1411,7 @@ async function handleGroupManagementAction(actionData, targetMsg) {
 
                 await targetMsg.reply(replies.join('\n'), undefined, { quotedMessageId: replyTo });
                 break;
-            
+
 
             case 'promote_admin':
                 await chatToManage.promoteParticipants(finalParticipantIds);
@@ -1537,8 +1586,41 @@ async function handleSendEmailAction(replyData, targetMsg, chatPaths) {
         await targetMsg.reply("⚠️ הייתה שגיאה בשליחת האימייל.");
     }
 }
-// Commented out function pcmToWav removed
+// Wrap raw PCM in a WAV header
+// (פונקציה זו הועתקה והותאמה מהקובץ nefv.html שסיפקת)
+function pcmToWav(pcm, sampleRate, channels, bits) {
+    const blockAlign = channels * (bits / 8);
+    const byteRate = sampleRate * blockAlign;
+    // pcm הוא Buffer ב-Node.js, אז pcm.length הוא byteLength
+    const buffer = new ArrayBuffer(44 + pcm.length);
+    const view = new DataView(buffer);
+    let p = 0;
+    const writeU16 = n => (view.setUint16(p, n, true), p += 2);
+    const writeU32 = n => (view.setUint32(p, n, true), p += 4);
+    const writeStr = s => {
+        for (let i = 0; i < s.length; i++) {
+            view.setUint8(p++, s.charCodeAt(i));
+        }
+    };
 
+    writeStr("RIFF");
+    writeU32(buffer.byteLength - 8);
+    writeStr("WAVE");
+    writeStr("fmt ");
+    writeU32(16); // Subchunk1Size
+    writeU16(1); // PCM format
+    writeU16(channels);
+    writeU32(sampleRate);
+    writeU32(byteRate);
+    writeU16(blockAlign);
+    writeU16(bits);
+    writeStr("data");
+    writeU32(pcm.length); // pcm.length כאן הוא byteLength של ה-Buffer
+    new Uint8Array(buffer, 44).set(pcm); // העתקת נתוני ה-Buffer לתוך ה-ArrayBuffer
+    return Buffer.from(buffer); // החזר Buffer של Node.js
+}
+
+// 2. Text-to-Speech Action
 // 2. Text-to-Speech Action
 async function handleTTSAction(replyData, targetMsg) {
     const textToSpeak = replyData.text;
@@ -1605,7 +1687,7 @@ async function handleTTSAction(replyData, targetMsg) {
             }
         };
 
-        console.log(`[handleTTSAction Gemini] Sending request to ${ttsEndpoint} for voice: ${VOICE} with text: "${textToSpeak.substring(0,30)}..."`); // Log text
+        console.log(`[handleTTSAction Gemini] Sending request to ${ttsEndpoint} for voice: ${VOICE} with text: "${textToSpeak.substring(0, 30)}..."`); // Log text
         const axiosOpts = {
             headers: {
                 "Content-Type": "application/json",
@@ -1673,7 +1755,7 @@ async function handleTTSAction(replyData, targetMsg) {
         console.error("❌ [handleTTSAction Gemini] Error:", error.response?.data || error.message || error);
         let userErrorMessage = "אירעה שגיאה ביצירת ההודעה הקולית עם Gemini.";
         if (error.message && error.message.includes("סיבת סיום")) { // אם השגיאה כבר כוללת את סיבת הסיום
-             userErrorMessage = error.message;
+            userErrorMessage = error.message;
         } else if (error.response?.data?.error?.message) {
             userErrorMessage += ` פרטים: ${error.response.data.error.message}`;
         } else if (error.message) {
@@ -1692,8 +1774,58 @@ async function handleTTSAction(replyData, targetMsg) {
         }
     }
 }
-// Commented out function streamToString removed
-// Commented out generateBarcode removed (it was likely part of a larger comment block for generateBarcode related functions if it was there)
+// Helper function to read a stream to a string
+async function streamToString(stream) {
+    const chunks = [];
+    return new Promise((resolve, reject) => {
+        stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
+        stream.on('error', (err) => reject(err));
+        stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+    })
+}
+// 3. Generate Barcode Action
+async function handleGenerateBarcodeAction(replyData, targetMsg) {
+    const textToEncode = replyData.text;
+    const caption = replyData.message || "📦 הנה הברקוד שביקשת:";
+    const targetChatId = targetMsg.id.remote;
+
+    if (!textToEncode) {
+        console.warn("[handleGenerateBarcodeAction] No text provided for barcode.");
+        await targetMsg.reply("⚠️ לא ניתן ליצור ברקוד, חסר טקסט.");
+        return;
+    }
+
+    const barcodePath = path.join(__dirname, `barcode_${Date.now()}.png`); // Use __dirname or a dedicated temp folder
+
+    try {
+        await QRCode.toFile(barcodePath, textToEncode, {
+            width: 400,
+            margin: 2,
+            color: { dark: '#000', light: '#FFF' }
+        });
+        console.log(`[handleGenerateBarcodeAction] Barcode generated: ${barcodePath}`);
+
+        const media = MessageMedia.fromFilePath(barcodePath);
+        // Send as a new message, optionally quoting
+        await client.sendMessage(targetChatId, media, { caption: caption, quotedMessageId: targetMsg.id._serialized });
+        console.log("[handleGenerateBarcodeAction] Barcode sent successfully.");
+
+        // Clean up
+        fs.unlink(barcodePath, (err) => {
+            if (err) console.error(`[handleGenerateBarcodeAction] Error deleting temp barcode file ${barcodePath}:`, err);
+        });
+
+    } catch (err) {
+        console.error("❌ [handleGenerateBarcodeAction] Error:", err);
+        await targetMsg.reply("⚠️ הייתה שגיאה ביצירת הברקוד.");
+        // Attempt cleanup on error
+        if (fs.existsSync(barcodePath)) {
+            fs.unlink(barcodePath, (unlinkErr) => {
+                if (unlinkErr) console.error(`[handleGenerateBarcodeAction] Error deleting temp barcode file on error ${barcodePath}:`, unlinkErr);
+            });
+        }
+    }
+}
 
 // 4. Reminder Action
 async function handleReminderAction(replyData, targetMsg) {
@@ -2367,6 +2499,74 @@ async function handleYoutubeSearchAction(replyData, targetMsg) {
         await targetMsg.reply("🚫 הייתה שגיאה בזמן חיפוש הסרטון.");
     }
 }
+// Function to load pending actions
+function loadPendingActions() {
+    if (fs.existsSync(PENDING_ACTIONS_PATH)) {
+        try {
+            const data = fs.readFileSync(PENDING_ACTIONS_PATH, 'utf8');
+            const actions = JSON.parse(data);
+            // Basic validation: ensure it's an array
+            return Array.isArray(actions) ? actions : [];
+        } catch (e) {
+            console.error("❌ Error reading or parsing pending_actions.json:", e);
+            // Consider backup/rename corrupted file here
+            return [];
+        }
+    }
+    return [];
+}
+function loadTriggers(chatPaths) {
+    const triggersFilePath = chatPaths.triggersFile;
+    if (fs.existsSync(triggersFilePath)) {
+        try {
+            const data = fs.readFileSync(triggersFilePath, 'utf8');
+            const triggers = JSON.parse(data);
+            if (Array.isArray(triggers)) {
+                return triggers.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            }
+            console.warn(`[Triggers] triggers.json for ${chatPaths.chatDir} did not contain an array. Returning empty.`);
+            return [];
+        } catch (e) {
+            console.error(`❌ Error reading or parsing ${triggersFilePath}:`, e);
+            return [];
+        }
+    }
+    return [];
+}
+
+// Function to save triggers for a specific chat
+function saveTriggers(chatPaths, triggers) {
+    const triggersFilePath = chatPaths.triggersFile;
+    try {
+        if (!Array.isArray(triggers)) {
+            console.error(`❌ Attempted to save non-array data to ${triggersFilePath}. Aborting save.`);
+            return;
+        }
+        fs.mkdirSync(chatPaths.chatDir, { recursive: true });
+        fs.writeFileSync(triggersFilePath, JSON.stringify(triggers, null, 2), 'utf8');
+        console.log(`💾 Successfully saved ${triggers.length} triggers to ${triggersFilePath}`);
+    } catch (e) {
+        console.error(`❌ Error writing to ${triggersFilePath}:`, e);
+        client.sendMessage(myId, `🚨 CRITICAL: Failed to write to ${triggersFilePath}! Error: ${e.message}`);
+    }
+}
+
+// Function to save pending actions
+function savePendingActions(actions) {
+    try {
+        // Basic validation before saving
+        if (!Array.isArray(actions)) {
+            console.error("❌ Attempted to save non-array data to pending_actions.json. Aborting save.");
+            return;
+        }
+        fs.writeFileSync(PENDING_ACTIONS_PATH, JSON.stringify(actions, null, 2), 'utf8');
+        // ---> ADD THIS LOG <---
+    } catch (e) {
+        console.error(`❌ Error writing to pending_actions.json:`, e);
+        // Optionally notify owner about save failure
+        client.sendMessage(myId, `🚨 CRITICAL: Failed to write to pending_actions.json! Error: ${e.message}`);
+    }
+}
 
 // Function to check and execute due actions
 async function checkPendingActions() {
@@ -2410,7 +2610,7 @@ async function checkPendingActions() {
     // Only save if the list actually changed (i.e., actions became due)
     if (dueActions.length > 0) {
         savePendingActions(remainingActions); // Let savePendingActions log success/failure
-    } 
+    }
 
 
     // Execute due actions
@@ -2557,15 +2757,15 @@ async function executeDelayedAction(task) {
                     await client.sendMessage(chatId, `פיתי\n\n⚠️ לא הצלחתי לבצע את פעולת ניהול הקבוצה המתוזמנת כי חסרה תת-פעולה (subAction).`);
                 }
                 break;
-case "generate_graph":
-    if (actionData.functions && Array.isArray(actionData.functions)) { // בדיקה בסיסית
-        // chatPaths ו-mockMsgForReply כבר מוגדרים בהקשר הזה
-        await handleGenerateGraphAction(actionData, mockMsgForReply, chatPaths);
-    } else {
-        console.warn(`[DelayedExec] Missing or invalid 'functions' data for delayed generate_graph.`);
-        await client.sendMessage(chatId, `פיתי\n\n⚠️ לא הצלחתי ליצור את הגרף המתוזמן כי הגדרת הפונקציות חסרה או לא תקינה.`);
-    }
-    break;
+            case "generate_graph":
+                if (actionData.functions && Array.isArray(actionData.functions)) { // בדיקה בסיסית
+                    // chatPaths ו-mockMsgForReply כבר מוגדרים בהקשר הזה
+                    await handleGenerateGraphAction(actionData, mockMsgForReply, chatPaths);
+                } else {
+                    console.warn(`[DelayedExec] Missing or invalid 'functions' data for delayed generate_graph.`);
+                    await client.sendMessage(chatId, `פיתי\n\n⚠️ לא הצלחתי ליצור את הגרף המתוזמן כי הגדרת הפונקציות חסרה או לא תקינה.`);
+                }
+                break;
             case "react":
                 if (actionData.emoji && typeof actionData.emoji === 'string' && actionData.emoji.trim().length > 0) {
                     try {
@@ -2759,6 +2959,47 @@ case "generate_graph":
     }
 }
 
+// Function to load memories for a specific chat, sorted newest first
+function loadMemories(chatPaths) {
+    const memoryFilePath = chatPaths.memoryFile;
+    if (fs.existsSync(memoryFilePath)) {
+        try {
+            const data = fs.readFileSync(memoryFilePath, 'utf8');
+            const memories = JSON.parse(data);
+            // Ensure it's an array and sort by timestamp descending
+            if (Array.isArray(memories)) {
+                // Sort by timestamp (which should also be the ID in new memories)
+                return memories.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            }
+            console.warn(`[Memories] ${memoryFilePath} did not contain an array. Returning empty.`);
+            return [];
+        } catch (e) {
+            console.error(`❌ Error reading or parsing ${memoryFilePath}:`, e);
+            return [];
+        }
+    }
+    return [];
+}
+
+// Function to save memories for a specific chat
+async function saveMemories(chatPaths, memories) {
+    const memoryFilePath = chatPaths.memoryFile;
+    try {
+        if (!Array.isArray(memories)) {
+            console.error(`❌ Attempted to save non-array data to ${memoryFilePath}. Aborting save.`);
+            return;
+        }
+        // Ensure directories exist FIRST (Async)
+        await fsp.mkdir(chatPaths.chatDir, { recursive: true });
+        await fsp.mkdir(chatPaths.filesDir, { recursive: true });
+
+        console.log(`💾 Successfully saved ${memories.length} memories to ${memoryFilePath}`);
+    } catch (e) {
+        console.error(`❌ Error writing to ${memoryFilePath}:`, e);
+        client.sendMessage(myId, `🚨 CRITICAL: Failed to write to ${memoryFilePath}! Error: ${e.message}`);
+    }
+}
+
 client.on('ready', () => {
     botStartTime = Date.now();
     console.log('✅ Bot is running and ready.');
@@ -2943,8 +3184,15 @@ async function generateImageAndGetBuffer(description, imageModel, contextMsg, st
 
     for (let attempt = 1; attempt <= MAX_CLOUDFLARE_RETRIES; attempt++) {
         try {
-            // Use the new helper function from apiServiceIntegrations.js
-            const response = await callCloudflareImageGen(modelEndpoint, requestBody);
+            const response = await axios.post(
+                `${BASE_IMAGE_GENERATION_API_ENDPOINT}${modelEndpoint}`,
+                requestBody,
+                {
+                    headers: { "Authorization": `Bearer ${CLOUDFLARE_API_TOKEN}`, "Content-Type": "application/json" },
+                    responseType: 'arraybuffer', // Cloudflare image models usually return image directly or JSON with base64
+                    validateStatus: status => status >= 200 && status < 300
+                }
+            );
 
             const contentType = response.headers['content-type'];
             console.log(`[genImgBuffer Attempt ${attempt}] Response Content-Type: ${contentType} from ${imageModel}`);
@@ -3416,18 +3664,18 @@ async function handleMediaContent(msg, savedPath = null) {
     }
 
     // 3. build the Gemini payload inline
-        const endpoint = getRandomGeminiEndpoint(true);  // hasMedia = true
-        const payload = {
- contents: [{
+    const endpoint = getRandomGeminiEndpoint(true);  // hasMedia = true
+    const payload = {
+        contents: [{
             parts: [
-                        {                               // part #1 – המדיה עצמה
- inline_data: {
- mime_type: media.mimetype,
-                                data: media.data
-                           }
-               },
-               { text: prompt }               // part #2 – ההוראה
-                ]
+                {                               // part #1 – המדיה עצמה
+                    inline_data: {
+                        mime_type: media.mimetype,
+                        data: media.data
+                    }
+                },
+                { text: prompt }               // part #2 – ההוראה
+            ]
         }]
     };
 
@@ -3466,8 +3714,7 @@ async function handleMessage(msg, incoming, quotedMedia = null, contextMediaArra
 
     const senderName = await getSenderName(msg);
     // ראשית, מבצעים לוג להודעה הנכנסת
-    // The new safelyAppendMessage is defined globally in this file and called in message_create
-    // await require('./whatsapp_modules/fileSystemHelpers.js').safelyAppendMessage(msg, senderName, client, writtenMessageIds, uploadedMediaMap, autoReactEmoji, handleMediaContent); // This call is now handled by the direct call in client.on('message_create')
+    await safelyAppendMessage(msg, senderName); // safelyAppendMessage יחשב נתיבים פנימית ללוג הזה
 
     // ---> חשב את הנתיבים *כאן* פעם אחת עבור כל הפונקציה <---
     let chatPaths;
@@ -3481,7 +3728,7 @@ async function handleMessage(msg, incoming, quotedMedia = null, contextMediaArra
 
     try {
         const chatData = await msg.getChat();
-        safeName = await getSafeNameForChat(client, chatData); // מחשבים safeName
+        safeName = await getSafeNameForChat(chatData); // מחשבים safeName
         chatPaths = getChatPaths(chatId, safeName); // מחשבים chatPaths
         chatDir = chatPaths.chatDir; // שומרים את chatDir
         chatFilePath = chatPaths.historyFile; // שומרים נתיבים נוספים
@@ -3513,8 +3760,7 @@ async function handleMessage(msg, incoming, quotedMedia = null, contextMediaArra
         return; // חובה לצאת אם ההכנה נכשלה
     }
 
-    // Redundant call removed as safelyAppendMessage is called at the beginning of handleMessage now using the helper.
-    // await require('./whatsapp_modules/fileSystemHelpers.js').safelyAppendMessage(msg, senderName, client, writtenMessageIds, uploadedMediaMap, autoReactEmoji, handleMediaContent);
+    safelyAppendMessage(msg, senderName);
 
     let geminiMediaParts = [];
 
@@ -6303,16 +6549,16 @@ allprojects {
         await handleGenerateGraphAction(jsonResponse, msg, chatPaths); // או handleTableChartAction אם שינית את השם
         return;
     }
-if (jsonResponse.action === "generate_graph") {
-    // ודא ש-chatPaths מוגדר בהיקף הזה (הוא אמור להיות מחושב בתחילת handleMessage)
-    if (!chatPaths) { // בדיקת בטיחות
-        console.error("❌ [generate_graph in handleMessage] chatPaths is undefined!");
-        await msg.reply("פיתי\n\nשגיאה פנימית: נתוני הצ'אט לא הוכנו כראוי ליצירת גרף.");
-        return;
+    if (jsonResponse.action === "generate_graph") {
+        // ודא ש-chatPaths מוגדר בהיקף הזה (הוא אמור להיות מחושב בתחילת handleMessage)
+        if (!chatPaths) { // בדיקת בטיחות
+            console.error("❌ [generate_graph in handleMessage] chatPaths is undefined!");
+            await msg.reply("פיתי\n\nשגיאה פנימית: נתוני הצ'אט לא הוכנו כראוי ליצירת גרף.");
+            return;
+        }
+        await handleGenerateGraphAction(jsonResponse, msg, chatPaths);
+        return; // צא אחרי טיפול ביצירת גרף
     }
-    await handleGenerateGraphAction(jsonResponse, msg, chatPaths);
-    return; // צא אחרי טיפול ביצירת גרף
-}
     if (jsonResponse.action === "generate_apk") {
         // Pass jsonResponse, msg (original message), and chatPaths
         await handleGenerateApkAction(jsonResponse, msg, chatPaths);
@@ -6331,7 +6577,7 @@ if (jsonResponse.action === "generate_graph") {
         const normalize = id => id?.replace(/^true_/, "").replace(/^false_/, "");
         const targetReplyMsg = messages.find(m => normalize(m.id._serialized) === normalize(jsonResponse.replyTo)) || msg;
 
-        const currentSafeName = await getSafeNameForChat(client, chat); // safeName כבר צריך להיות מחושב למעלה
+        const currentSafeName = await getSafeNameForChat(chat); // safeName כבר צריך להיות מחושב למעלה
         const currentChatPaths = getChatPaths(chat.id._serialized, currentSafeName); // chatPaths כבר צריך להיות מחושב למעלה
 
         await handleCreateStickerAction(jsonResponse, targetReplyMsg, currentChatPaths); // העבר את chatPaths
@@ -6386,7 +6632,7 @@ if (jsonResponse.action === "generate_graph") {
         const targetReplyMsg = messages.find(m => normalize(m.id._serialized) === normalize(jsonResponse.replyTo)) || msg;
 
         // Get chatPaths (it should be defined earlier in handleMessage)
-        // const safeName = await getSafeNameForChat(client, chat); // Already calculated
+        // const safeName = await getSafeNameForChat(chat); // Already calculated
         // const chatPaths = getChatPaths(chat.id._serialized, safeName); // Already calculated
 
         // Call the new handler
@@ -6486,9 +6732,9 @@ if (jsonResponse.action === "generate_graph") {
         return; // צא אחרי טיפול בפעולה
     }
 
-        if (jsonResponse.action === "info_menu") {
-            // החלף את המחרוזת הקיימת של infoMessage בזו:
-            const infoMessage = `
+    if (jsonResponse.action === "info_menu") {
+        // החלף את המחרוזת הקיימת של infoMessage בזו:
+        const infoMessage = `
 🤖 *פיתי - העוזרת האישית החכמה שלך בוואטסאפ* 🤖
 
 שלום! אני פיתי, ואני כאן כדי להפוך את היום שלך ליעיל, יצירתי ומאורגן יותר. אני לומדת מהשיחות שלנו, זוכרת פרטים חשובים ומבינה הקשרים מורכבים.
@@ -6570,110 +6816,110 @@ if (jsonResponse.action === "generate_graph") {
 מה תרצה / י לעשות עכשיו ? 😊
 `;
 
-// הדבק את הקוד הזה במקום infoMessage המקורי בפונקציה sendInfoMenu
-await msg.reply(infoMessage.trim(), undefined, { quotedMessageId: msg.id._serialized });
-            return;
-        }
+        // הדבק את הקוד הזה במקום infoMessage המקורי בפונקציה sendInfoMenu
+        await msg.reply(infoMessage.trim(), undefined, { quotedMessageId: msg.id._serialized });
+        return;
+    }
 
 
-        if (jsonResponse.action === "send_email") {
-            try {
-                const to = jsonResponse.to;
-                const subject = jsonResponse.subject;
-                const html = jsonResponse.html;
-                let attachmentPath = jsonResponse.attachmentPath;
-                const replyToMsgId = jsonResponse.replyTo;
+    if (jsonResponse.action === "send_email") {
+        try {
+            const to = jsonResponse.to;
+            const subject = jsonResponse.subject;
+            const html = jsonResponse.html;
+            let attachmentPath = jsonResponse.attachmentPath;
+            const replyToMsgId = jsonResponse.replyTo;
 
 
-                if (!attachmentPath && replyToMsgId) {
-                    const savedMediaPath = path.join(chatPaths.filesDir, `${replyToMsgId}.${uploadedMediaMap.get(replyToMsgId)?.mimeType?.split('/')[1] || 'unknown'}`);
-                    if (fs.existsSync(savedMediaPath)) {
-                        attachmentPath = savedMediaPath;
-                    } else {
-                        console.warn("⚠️ קובץ מצורף לא נמצא בנתיב השמירה:", savedMediaPath);
-                        attachmentPath = null;
-                    }
-                }
-
-
-                const emailLines = [
-                    `From: piti-bot@example.com`,
-                    `To: ${to}`,
-                    'Content-Type: text/html; charset=utf-8',
-                    'MIME-Version: 1.0',
-                    `Subject: =?UTF-8?B?${Buffer.from(subject).toString('base64')}?=`,
-                    '',
-                    html
-                ];
-
-                let attachmentsPart = '';
-                let rawEmail = '';
-
-                if (attachmentPath && fs.existsSync(attachmentPath)) {
-                    const fileContent = fs.readFileSync(attachmentPath);
-                    const base64File = fileContent.toString('base64');
-                    const filename = path.basename(attachmentPath);
-                    const mimeType = uploadedMediaMap.get(replyToMsgId)?.mimeType || 'application/octet-stream';
-
-                    rawEmail = [
-                        `From: piti-bot@example.com`,
-                        `To: ${to}`,
-                        `Subject: =?UTF-8?B?${Buffer.from(subject).toString('base64')}?=`,
-                        `MIME-Version: 1.0`,
-                        `Content-Type: multipart/mixed; boundary="boundary-example"`,
-                        '',
-                        `--boundary-example`,
-                        `Content-Type: text/html; charset="UTF-8"`,
-                        `Content-Transfer-Encoding: 7bit`,
-                        '',
-                        html,
-                        '',
-                        `--boundary-example`,
-                        `Content-Type: ${mimeType}; name="${filename}"`,
-                        `Content-Disposition: attachment; filename="${filename}"`,
-                        `Content-Transfer-Encoding: base64`,
-                        '',
-                        base64File,
-                        '',
-                        `--boundary-example--`
-                    ].join('\r\n');
+            if (!attachmentPath && replyToMsgId) {
+                const savedMediaPath = path.join(chatPaths.filesDir, `${replyToMsgId}.${uploadedMediaMap.get(replyToMsgId)?.mimeType?.split('/')[1] || 'unknown'}`);
+                if (fs.existsSync(savedMediaPath)) {
+                    attachmentPath = savedMediaPath;
                 } else {
-                    rawEmail = [
-                        `From: piti-bot@example.com`,
-                        `To: ${to}`,
-                        `Subject: =?UTF-8?B?${Buffer.from(subject).toString('base64')}?=`,
-                        `MIME-Version: 1.0`,
-                        `Content-Type: text/html; charset="UTF-8"`,
-                        `Content-Transfer-Encoding: 7bit`,
-                        '',
-                        html
-                    ].join('\r\n');
+                    console.warn("⚠️ קובץ מצורף לא נמצא בנתיב השמירה:", savedMediaPath);
+                    attachmentPath = null;
                 }
-
-
-                const encodedMessage = Buffer.from(rawEmail)
-                    .toString('base64')
-                    .replace(/\+/g, '-')
-                    .replace(/\//g, '_')
-                    .replace(/=+$/, '');
-
-                await gmail.users.messages.send({
-                    userId: 'me',
-                    requestBody: {
-                        raw: encodedMessage,
-                    },
-                });
-
-
-                await msg.reply("✅ נשלח אימייל בהצלחה.");
-
-            } catch (err) {
-                console.error("❌ שגיאה בשליחת האימייל:", err);
-                await msg.reply("⚠️ הייתה שגיאה בשליחת האימייל.");
             }
 
-            return;
+
+            const emailLines = [
+                `From: piti-bot@example.com`,
+                `To: ${to}`,
+                'Content-Type: text/html; charset=utf-8',
+                'MIME-Version: 1.0',
+                `Subject: =?UTF-8?B?${Buffer.from(subject).toString('base64')}?=`,
+                '',
+                html
+            ];
+
+            let attachmentsPart = '';
+            let rawEmail = '';
+
+            if (attachmentPath && fs.existsSync(attachmentPath)) {
+                const fileContent = fs.readFileSync(attachmentPath);
+                const base64File = fileContent.toString('base64');
+                const filename = path.basename(attachmentPath);
+                const mimeType = uploadedMediaMap.get(replyToMsgId)?.mimeType || 'application/octet-stream';
+
+                rawEmail = [
+                    `From: piti-bot@example.com`,
+                    `To: ${to}`,
+                    `Subject: =?UTF-8?B?${Buffer.from(subject).toString('base64')}?=`,
+                    `MIME-Version: 1.0`,
+                    `Content-Type: multipart/mixed; boundary="boundary-example"`,
+                    '',
+                    `--boundary-example`,
+                    `Content-Type: text/html; charset="UTF-8"`,
+                    `Content-Transfer-Encoding: 7bit`,
+                    '',
+                    html,
+                    '',
+                    `--boundary-example`,
+                    `Content-Type: ${mimeType}; name="${filename}"`,
+                    `Content-Disposition: attachment; filename="${filename}"`,
+                    `Content-Transfer-Encoding: base64`,
+                    '',
+                    base64File,
+                    '',
+                    `--boundary-example--`
+                ].join('\r\n');
+            } else {
+                rawEmail = [
+                    `From: piti-bot@example.com`,
+                    `To: ${to}`,
+                    `Subject: =?UTF-8?B?${Buffer.from(subject).toString('base64')}?=`,
+                    `MIME-Version: 1.0`,
+                    `Content-Type: text/html; charset="UTF-8"`,
+                    `Content-Transfer-Encoding: 7bit`,
+                    '',
+                    html
+                ].join('\r\n');
+            }
+
+
+            const encodedMessage = Buffer.from(rawEmail)
+                .toString('base64')
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=+$/, '');
+
+            await gmail.users.messages.send({
+                userId: 'me',
+                requestBody: {
+                    raw: encodedMessage,
+                },
+            });
+
+
+            await msg.reply("✅ נשלח אימייל בהצלחה.");
+
+        } catch (err) {
+            console.error("❌ שגיאה בשליחת האימייל:", err);
+            await msg.reply("⚠️ הייתה שגיאה בשליחת האימייל.");
         }
+
+        return;
+    }
 
 
     if (jsonResponse.action === "tts" && jsonResponse.text) {
@@ -6687,20 +6933,20 @@ await msg.reply(infoMessage.trim(), undefined, { quotedMessageId: msg.id._serial
         return; // חשוב לצאת אחרי טיפול בפעולה
     }
 
-        if (jsonResponse.action === "generate_barcode" && jsonResponse.text) {
-            try {
-                const barcodePath = await generateBarcode(jsonResponse.text);
-                const media = MessageMedia.fromFilePath(barcodePath);
-                const targetChat = msg.id.remote;
-                await client.sendMessage(targetChat, media, {
-                    caption: jsonResponse.message || "📦 הנה הברקוד שביקשת:"
-                });
-            } catch (err) {
-                console.error("❌ שגיאה בשליחת ברקוד:", err);
-                await msg.reply("⚠️ הייתה שגיאה ביצירת הברקוד.");
-            }
-            return;
+    if (jsonResponse.action === "generate_barcode" && jsonResponse.text) {
+        try {
+            const barcodePath = await generateBarcode(jsonResponse.text);
+            const media = MessageMedia.fromFilePath(barcodePath);
+            const targetChat = msg.id.remote;
+            await client.sendMessage(targetChat, media, {
+                caption: jsonResponse.message || "📦 הנה הברקוד שביקשת:"
+            });
+        } catch (err) {
+            console.error("❌ שגיאה בשליחת ברקוד:", err);
+            await msg.reply("⚠️ הייתה שגיאה ביצירת הברקוד.");
         }
+        return;
+    }
 
     if (jsonResponse.action === "generate_video_ltx" && jsonResponse.prompt && jsonResponse.mode) {
         console.log(`[handleMessage] Detected generate_video_ltx action. Mode: ${jsonResponse.mode}`);
@@ -6721,278 +6967,278 @@ await msg.reply(infoMessage.trim(), undefined, { quotedMessageId: msg.id._serial
     }
 
 
-        if (jsonResponse.action === "image_edit" && jsonResponse.imageMessageId && jsonResponse.editPrompt) {
-            console.log(`[handleMessage] Detected image_edit action.`);
-            // מצא את ההודעה המקורית שאליה נגיב בסוף (זו שב-replyTo)
-            // נצטרך את chatPaths כאן, ודא שהוא מחושב לפני הבלוק הזה
-            const chat = await msg.getChat(); // ודא שמשתנה msg זמין כאן
-            const safeName = await getSafeNameForChat(chat); // חשב safeName
-            const chatPaths = getChatPaths(chat.id._serialized, safeName); // חשב chatPaths
+    if (jsonResponse.action === "image_edit" && jsonResponse.imageMessageId && jsonResponse.editPrompt) {
+        console.log(`[handleMessage] Detected image_edit action.`);
+        // מצא את ההודעה המקורית שאליה נגיב בסוף (זו שב-replyTo)
+        // נצטרך את chatPaths כאן, ודא שהוא מחושב לפני הבלוק הזה
+        const chat = await msg.getChat(); // ודא שמשתנה msg זמין כאן
+        const safeName = await getSafeNameForChat(chat); // חשב safeName
+        const chatPaths = getChatPaths(chat.id._serialized, safeName); // חשב chatPaths
 
-            // מצא את ההודעה שאליה נגיב
-            const messages = await chat.fetchMessages({ limit: 50 });
-            const normalize = id => id?.replace(/^true_/, "").replace(/^false_/, "");
-            // חשוב: jsonResponse.replyTo הוא ה-ID של ההודעה שביקשה את העריכה.
-            // אנחנו רוצים שהתגובה הסופית (עם התמונה הערוכה) תהיה ציטוט להודעה הזו.
-            const targetReplyMsg = messages.find(m => normalize(m.id._serialized) === normalize(jsonResponse.replyTo)) || msg; // הודעת ברירת המחדל אם לא נמצאה
+        // מצא את ההודעה שאליה נגיב
+        const messages = await chat.fetchMessages({ limit: 50 });
+        const normalize = id => id?.replace(/^true_/, "").replace(/^false_/, "");
+        // חשוב: jsonResponse.replyTo הוא ה-ID של ההודעה שביקשה את העריכה.
+        // אנחנו רוצים שהתגובה הסופית (עם התמונה הערוכה) תהיה ציטוט להודעה הזו.
+        const targetReplyMsg = messages.find(m => normalize(m.id._serialized) === normalize(jsonResponse.replyTo)) || msg; // הודעת ברירת המחדל אם לא נמצאה
 
-            await handleImageEditAction(jsonResponse, targetReplyMsg, chatPaths); // קריאה לפונקציה החדשה
-            return; // חשוב לצאת אחרי טיפול בפעולה
+        await handleImageEditAction(jsonResponse, targetReplyMsg, chatPaths); // קריאה לפונקציה החדשה
+        return; // חשוב לצאת אחרי טיפול בפעולה
+    }
+
+
+    if (jsonResponse.action === "timer" && jsonResponse.duration) {
+        const durationMinutes = parseInt(jsonResponse.duration, 10);
+        if (!isNaN(durationMinutes) && durationMinutes > 0) {
+            timerCounter++;
+            const timerId = `timer-${timerCounter}`;
+            const endTime = Date.now() + durationMinutes * 60 * 1000;
+            const realChatId = msg.fromMe ? msg.to : msg.from;
+            timers.set(timerId, { chatId: realChatId, endTime });
+            await msg.reply(jsonResponse.message || `⏱️ טיימר ל-${durationMinutes} דקות הופעל.`);
+        } else {
+            await msg.reply("⚠️ משך טיימר לא תקין. אנא הזן מספר דקות חיובי.");
         }
+        return;
+    }
 
+    if (jsonResponse.action === "summarize_content" && (jsonResponse.content_to_summarize || jsonResponse.link_to_summarize)) {
+        console.log(`[handleMessage] Detected summarize_content action.`);
+        const chat = await msg.getChat();
+        const messages = await chat.fetchMessages({ limit: 50 });
+        const normalize = id => id?.replace(/^true_/, "").replace(/^false_/, "");
+        const targetReplyMsg = messages.find(m => normalize(m.id._serialized) === normalize(jsonResponse.replyTo)) || msg;
+        await handleSummarizeAction(jsonResponse, targetReplyMsg);
+        return; // צא אחרי טיפול בפעולה
+    }
 
-        if (jsonResponse.action === "timer" && jsonResponse.duration) {
-            const durationMinutes = parseInt(jsonResponse.duration, 10);
-            if (!isNaN(durationMinutes) && durationMinutes > 0) {
-                timerCounter++;
-                const timerId = `timer-${timerCounter}`;
-                const endTime = Date.now() + durationMinutes * 60 * 1000;
-                const realChatId = msg.fromMe ? msg.to : msg.from;
-                timers.set(timerId, { chatId: realChatId, endTime });
-                await msg.reply(jsonResponse.message || `⏱️ טיימר ל-${durationMinutes} דקות הופעל.`);
-            } else {
-                await msg.reply("⚠️ משך טיימר לא תקין. אנא הזן מספר דקות חיובי.");
+    if (jsonResponse.action === "schedule_add" && jsonResponse.event && jsonResponse.time) {
+        const eventTime = parseScheduleTime(jsonResponse.time);
+        if (eventTime) {
+            const dateKey = formatDateKey(eventTime);
+            const eventDetails = { time: formatTimeForDisplay(eventTime), event: jsonResponse.event };
+            if (!studySchedule.has(dateKey)) {
+                studySchedule.set(dateKey, []);
             }
+            studySchedule.get(dateKey).push(eventDetails);
+            await msg.reply(jsonResponse.message || `📅 אירוע חדש נוסף ליומן ל-${formatDateForDisplay(eventTime)}: ${jsonResponse.event} בשעה ${formatTimeForDisplay(eventTime)}`);
+        } else {
+            await msg.reply("⚠️ פורמט זמן לא תקין עבור יומן. אנא נסה שוב.");
+        }
+        return;
+    }
+
+    if (jsonResponse.action === "shopping_list_manage") {
+        const listType = jsonResponse.list_type;
+        const item = jsonResponse.item;
+        const command = jsonResponse.command;
+
+        if (!['shopping', 'equipment'].includes(listType)) {
+            await msg.reply("⚠️ סוג רשימה לא תקין. צריך להיות 'shopping' או 'equipment'.");
             return;
         }
 
-        if (jsonResponse.action === "summarize_content" && (jsonResponse.content_to_summarize || jsonResponse.link_to_summarize)) {
-            console.log(`[handleMessage] Detected summarize_content action.`);
-            const chat = await msg.getChat();
-            const messages = await chat.fetchMessages({ limit: 50 });
-            const normalize = id => id?.replace(/^true_/, "").replace(/^false_/, "");
-            const targetReplyMsg = messages.find(m => normalize(m.id._serialized) === normalize(jsonResponse.replyTo)) || msg;
-            await handleSummarizeAction(jsonResponse, targetReplyMsg);
-           return; // צא אחרי טיפול בפעולה
+        if (!shoppingLists.has(chatId)) {
+            shoppingLists.set(chatId, { shopping: [], equipment: [] });
         }
+        const currentList = shoppingLists.get(chatId)[listType];
 
-        if (jsonResponse.action === "schedule_add" && jsonResponse.event && jsonResponse.time) {
-            const eventTime = parseScheduleTime(jsonResponse.time);
-            if (eventTime) {
-                const dateKey = formatDateKey(eventTime);
-                const eventDetails = { time: formatTimeForDisplay(eventTime), event: jsonResponse.event };
-                if (!studySchedule.has(dateKey)) {
-                    studySchedule.set(dateKey, []);
+        switch (command) {
+            case 'add':
+                if (item) {
+                    currentList.push(item);
+                    await msg.reply(jsonResponse.message || `✅ '${item}' נוסף לרשימת ${listType}.`);
+                } else {
+                    await msg.reply("⚠️ אנא ציין פריט להוספה.");
                 }
-                studySchedule.get(dateKey).push(eventDetails);
-                await msg.reply(jsonResponse.message || `📅 אירוע חדש נוסף ליומן ל-${formatDateForDisplay(eventTime)}: ${jsonResponse.event} בשעה ${formatTimeForDisplay(eventTime)}`);
-            } else {
-                await msg.reply("⚠️ פורמט זמן לא תקין עבור יומן. אנא נסה שוב.");
-            }
-            return;
-        }
-
-        if (jsonResponse.action === "shopping_list_manage") {
-            const listType = jsonResponse.list_type;
-            const item = jsonResponse.item;
-            const command = jsonResponse.command;
-
-            if (!['shopping', 'equipment'].includes(listType)) {
-                await msg.reply("⚠️ סוג רשימה לא תקין. צריך להיות 'shopping' או 'equipment'.");
-                return;
-            }
-
-            if (!shoppingLists.has(chatId)) {
-                shoppingLists.set(chatId, { shopping: [], equipment: [] });
-            }
-            const currentList = shoppingLists.get(chatId)[listType];
-
-            switch (command) {
-                case 'add':
-                    if (item) {
-                        currentList.push(item);
-                        await msg.reply(jsonResponse.message || `✅ '${item}' נוסף לרשימת ${listType}.`);
+                break;
+            case 'remove':
+                if (item) {
+                    const index = currentList.indexOf(item);
+                    if (index > -1) {
+                        currentList.splice(index, 1);
+                        await msg.reply(jsonResponse.message || `🗑️ '${item}' הוסר מרשימת ${listType}.`);
                     } else {
-                        await msg.reply("⚠️ אנא ציין פריט להוספה.");
+                        await msg.reply(`⚠️ '${item}' לא נמצא ברשימת ${listType}.`);
                     }
-                    break;
-                case 'remove':
-                    if (item) {
-                        const index = currentList.indexOf(item);
-                        if (index > -1) {
-                            currentList.splice(index, 1);
-                            await msg.reply(jsonResponse.message || `🗑️ '${item}' הוסר מרשימת ${listType}.`);
-                        } else {
-                            await msg.reply(`⚠️ '${item}' לא נמצא ברשימת ${listType}.`);
-                        }
-                    } else {
-                        await msg.reply("⚠️ אנא ציין פריט להסרה.");
-                    }
-                    break;
-                case 'view':
-                    const listItems = currentList.length ? currentList.join(', ') : 'הרשימה ריקה.';
-                    await msg.reply(jsonResponse.message || `📝 רשימת ${listType}:\n${listItems}`);
-                    break;
-                default:
-                    await msg.reply("⚠️ פקודה לא תקינה עבור רשימה. השתמש ב-'add', 'remove' או 'view'.");
-            }
+                } else {
+                    await msg.reply("⚠️ אנא ציין פריט להסרה.");
+                }
+                break;
+            case 'view':
+                const listItems = currentList.length ? currentList.join(', ') : 'הרשימה ריקה.';
+                await msg.reply(jsonResponse.message || `📝 רשימת ${listType}:\n${listItems}`);
+                break;
+            default:
+                await msg.reply("⚠️ פקודה לא תקינה עבור רשימה. השתמש ב-'add', 'remove' או 'view'.");
+        }
+        return;
+    }
+
+    if (jsonResponse.action === "habit_track") {
+        const habitName = jsonResponse.habit;
+        const status = jsonResponse.status;
+
+        if (!habitName) {
+            await msg.reply("⚠️ אנא ציין שם הרגל למעקב.");
             return;
         }
 
-        if (jsonResponse.action === "habit_track") {
-            const habitName = jsonResponse.habit;
-            const status = jsonResponse.status;
+        if (!habitTracking.has(chatId)) {
+            habitTracking.set(chatId, {});
+        }
+        const chatHabitData = habitTracking.get(chatId);
 
-            if (!habitName) {
-                await msg.reply("⚠️ אנא ציין שם הרגל למעקב.");
-                return;
-            }
-
-            if (!habitTracking.has(chatId)) {
-                habitTracking.set(chatId, {});
-            }
-            const chatHabitData = habitTracking.get(chatId);
-
-            if (!chatHabitData[habitName]) {
-                chatHabitData[habitName] = {};
-            }
-
-            const today = formatDateKey(new Date());
-
-            switch (status) {
-                case 'done':
-                    chatHabitData[habitName][today] = 'done';
-                    await msg.reply(jsonResponse.message || `✅ נרשם: ${habitName} - בוצע היום.`);
-                    break;
-                case 'not_done':
-                    chatHabitData[habitName][today] = 'not_done';
-                    await msg.reply(jsonResponse.message || `❌ נרשם: ${habitName} - לא בוצע היום.`);
-                    break;
-                case 'view':
-                    const weeklyStatus = getWeeklyHabitStatus(chatHabitData[habitName]);
-                    const statusText = weeklyStatus.length ? weeklyStatus.join('\n') : 'אין נתוני מעקב להרגל זה.';
-                    await msg.reply(jsonResponse.message || `📊 סטטוס שבועי עבור ${habitName}:\n${statusText}`);
-                    break;
-                default:
-                    await msg.reply("⚠️ סטטוס לא תקין עבור מעקב הרגלים. השתמש ב-'done', 'not_done' או 'view'.");
-            }
-            habitTracking.set(chatId, chatHabitData);
-            return;
+        if (!chatHabitData[habitName]) {
+            chatHabitData[habitName] = {};
         }
 
-        // שנה את התנאי לזה:
-        if (jsonResponse.action === "create_file" &&
-            jsonResponse.fileType &&      // חובה
-            jsonResponse.filename &&     // חובה
-            jsonResponse.fileContent) {    // חובה (גם אם ריק, זה עדיין תוכן)
+        const today = formatDateKey(new Date());
 
-            // הודעת הטעינה היא חלק מה-JSON, אין צורך לשלוח אותה בנפרד כאן
-            // await msg.reply(jsonResponse.message || `פיתי\n\nיוצר קובץ...`); // <-- אפשר להסיר אם רוצים
+        switch (status) {
+            case 'done':
+                chatHabitData[habitName][today] = 'done';
+                await msg.reply(jsonResponse.message || `✅ נרשם: ${habitName} - בוצע היום.`);
+                break;
+            case 'not_done':
+                chatHabitData[habitName][today] = 'not_done';
+                await msg.reply(jsonResponse.message || `❌ נרשם: ${habitName} - לא בוצע היום.`);
+                break;
+            case 'view':
+                const weeklyStatus = getWeeklyHabitStatus(chatHabitData[habitName]);
+                const statusText = weeklyStatus.length ? weeklyStatus.join('\n') : 'אין נתוני מעקב להרגל זה.';
+                await msg.reply(jsonResponse.message || `📊 סטטוס שבועי עבור ${habitName}:\n${statusText}`);
+                break;
+            default:
+                await msg.reply("⚠️ סטטוס לא תקין עבור מעקב הרגלים. השתמש ב-'done', 'not_done' או 'view'.");
+        }
+        habitTracking.set(chatId, chatHabitData);
+        return;
+    }
 
-            const fileType = jsonResponse.fileType.replace(/^\./, '');
-            const filename = jsonResponse.filename;
-            const fileContent = jsonResponse.fileContent;
-            // קבע תיאור ברירת מחדל אם הוא לא סופק
-            const fileDescription = jsonResponse.fileDescription || `קובץ ${filename}.${fileType} שנוצר על ידי פיתי`;
-            const fullFilename = `${filename}.${fileType}`;
+    // שנה את התנאי לזה:
+    if (jsonResponse.action === "create_file" &&
+        jsonResponse.fileType &&      // חובה
+        jsonResponse.filename &&     // חובה
+        jsonResponse.fileContent) {    // חובה (גם אם ריק, זה עדיין תוכן)
 
-            // קבל את הנתיבים מההודעה הנוכחית
-            const chat = await msg.getChat();
-            const safeName = await getSafeNameForChat(chat); // השתמש בפונקציה המרכזית
-            const chatPaths = getChatPaths(chat.id._serialized, safeName);
-            const generatedFilesIndex = chatPaths.generatedFilesIndex; // נתיב לאינדקס
-            const filesDir = chatPaths.filesDir; // תיקיית הקבצים של הצ'אט
+        // הודעת הטעינה היא חלק מה-JSON, אין צורך לשלוח אותה בנפרד כאן
+        // await msg.reply(jsonResponse.message || `פיתי\n\nיוצר קובץ...`); // <-- אפשר להסיר אם רוצים
 
-            // ודא שהתיקייה קיימת
-            fs.mkdirSync(filesDir, { recursive: true });
+        const fileType = jsonResponse.fileType.replace(/^\./, '');
+        const filename = jsonResponse.filename;
+        const fileContent = jsonResponse.fileContent;
+        // קבע תיאור ברירת מחדל אם הוא לא סופק
+        const fileDescription = jsonResponse.fileDescription || `קובץ ${filename}.${fileType} שנוצר על ידי פיתי`;
+        const fullFilename = `${filename}.${fileType}`;
 
-            const filePath = path.join(filesDir, fullFilename); // נתיב מלא לקובץ
+        // קבל את הנתיבים מההודעה הנוכחית
+        const chat = await msg.getChat();
+        const safeName = await getSafeNameForChat(chat); // השתמש בפונקציה המרכזית
+        const chatPaths = getChatPaths(chat.id._serialized, safeName);
+        const generatedFilesIndex = chatPaths.generatedFilesIndex; // נתיב לאינדקס
+        const filesDir = chatPaths.filesDir; // תיקיית הקבצים של הצ'אט
 
-            try {
-                console.log(`[create_file] Attempting to write file: ${filePath}`);
-                fs.writeFileSync(filePath, fileContent, 'utf8');
-                console.log(`[create_file] File written successfully: ${filePath}`);
+        // ודא שהתיקייה קיימת
+        fs.mkdirSync(filesDir, { recursive: true });
 
+        const filePath = path.join(filesDir, fullFilename); // נתיב מלא לקובץ
+
+        try {
+            console.log(`[create_file] Attempting to write file: ${filePath}`);
+            fs.writeFileSync(filePath, fileContent, 'utf8');
+            console.log(`[create_file] File written successfully: ${filePath}`);
+
+            const media = MessageMedia.fromFilePath(filePath);
+
+            // שלח את הקובץ עם ההודעה הנלווית מה-JSON
+            console.log(`[create_file] Sending file media to chat ${msg.id.remote}`);
+            const sentMediaMsg = await msg.reply(media, undefined, { caption: jsonResponse.message || `פיתי\n\n📁 הנה קובץ ${fullFilename} שיצרתי.` });
+            // ---------------------------------------------------------------
+            // !!! חשוב: לרשום את ההודעה *שנשלחה הרגע* כהודעת בוט !!!
+            // (אם ה-wrapper של msg.reply לא עושה את זה אוטומטית עבור מדיה)
+            if (sentMediaMsg && sentMediaMsg.id && !writtenMessageIds.has(sentMediaMsg.id._serialized)) {
+                const line = `[ID: ${sentMediaMsg.id._serialized}] פיתי: [מדיה: ${media.mimetype || 'unknown type'}]\n`;
+                fs.appendFileSync(chatPaths.historyFile, line, 'utf8');
+                writtenMessageIds.add(sentMediaMsg.id._serialized);
+                const normId = normalizeMsgId(sentMediaMsg.id._serialized);
+                botMessageIds.add(normId);
+                repliableMessageIds.add(normId);
+                console.log(`[create_file] Manually logged sent media message ${sentMediaMsg.id._serialized}`);
+            }
+            // ---------------------------------------------------------------
+            console.log(`[create_file] File media sent.`);
+
+            // עדכן את אינדקס הקבצים *אחרי* שליחה מוצלחת
+            let generatedFilesIndexData = [];
+            if (fs.existsSync(generatedFilesIndex)) {
+                try {
+                    generatedFilesIndexData = JSON.parse(fs.readFileSync(generatedFilesIndex, 'utf8'));
+                } catch (parseErr) {
+                    console.error(`[create_file] Error parsing ${generatedFilesIndex}:`, parseErr);
+                    generatedFilesIndexData = [];
+                }
+            }
+            generatedFilesIndexData.push({
+                timestamp: new Date().toISOString(),
+                originalMessageId: msg.id._serialized, // ID של ההודעה שביקשה את הקובץ
+                generatedFilePath: filePath,       // נתיב לקובץ שנוצר
+                filename: fullFilename,            // שם הקובץ המלא
+                description: fileDescription,      // תיאור (שנוצר או מ-Gemini)
+                type: fileType                   // סוג הקובץ
+            });
+            fs.writeFileSync(generatedFilesIndex, JSON.stringify(generatedFilesIndexData, null, 2), 'utf8');
+            console.log(`[create_file] Updated generated files index: ${generatedFilesIndex}`);
+
+        } catch (error) {
+            console.error("[create_file] Error creating or sending file:", error);
+            await msg.reply("פיתי\n\n❌ אירעה שגיאה ביצירת או שליחת הקובץ.");
+        }
+        return; // <--- חשוב! צא מהפונקציה אחרי טיפול מוצלח או שגיאה ביצירת קובץ
+    }
+
+
+    if (jsonResponse.action === "resend_file" && jsonResponse.filePath) {
+        try {
+            const filePath = jsonResponse.filePath;
+            if (fs.existsSync(filePath)) {
                 const media = MessageMedia.fromFilePath(filePath);
-
-                // שלח את הקובץ עם ההודעה הנלווית מה-JSON
-                console.log(`[create_file] Sending file media to chat ${msg.id.remote}`);
-                const sentMediaMsg = await msg.reply(media, undefined, { caption: jsonResponse.message || `פיתי\n\n📁 הנה קובץ ${fullFilename} שיצרתי.` });
-                // ---------------------------------------------------------------
-                // !!! חשוב: לרשום את ההודעה *שנשלחה הרגע* כהודעת בוט !!!
-                // (אם ה-wrapper של msg.reply לא עושה את זה אוטומטית עבור מדיה)
-                if (sentMediaMsg && sentMediaMsg.id && !writtenMessageIds.has(sentMediaMsg.id._serialized)) {
-                    const line = `[ID: ${sentMediaMsg.id._serialized}] פיתי: [מדיה: ${media.mimetype || 'unknown type'}]\n`;
-                    fs.appendFileSync(chatPaths.historyFile, line, 'utf8');
-                    writtenMessageIds.add(sentMediaMsg.id._serialized);
-                    const normId = normalizeMsgId(sentMediaMsg.id._serialized);
-                    botMessageIds.add(normId);
-                    repliableMessageIds.add(normId);
-                    console.log(`[create_file] Manually logged sent media message ${sentMediaMsg.id._serialized}`);
-                }
-                // ---------------------------------------------------------------
-                console.log(`[create_file] File media sent.`);
-
-                // עדכן את אינדקס הקבצים *אחרי* שליחה מוצלחת
-                let generatedFilesIndexData = [];
-                if (fs.existsSync(generatedFilesIndex)) {
-                    try {
-                        generatedFilesIndexData = JSON.parse(fs.readFileSync(generatedFilesIndex, 'utf8'));
-                    } catch (parseErr) {
-                        console.error(`[create_file] Error parsing ${generatedFilesIndex}:`, parseErr);
-                        generatedFilesIndexData = [];
-                    }
-                }
-                generatedFilesIndexData.push({
-                    timestamp: new Date().toISOString(),
-                    originalMessageId: msg.id._serialized, // ID של ההודעה שביקשה את הקובץ
-                    generatedFilePath: filePath,       // נתיב לקובץ שנוצר
-                    filename: fullFilename,            // שם הקובץ המלא
-                    description: fileDescription,      // תיאור (שנוצר או מ-Gemini)
-                    type: fileType                   // סוג הקובץ
-                });
-                fs.writeFileSync(generatedFilesIndex, JSON.stringify(generatedFilesIndexData, null, 2), 'utf8');
-                console.log(`[create_file] Updated generated files index: ${generatedFilesIndex}`);
-
-            } catch (error) {
-                console.error("[create_file] Error creating or sending file:", error);
-                await msg.reply("פיתי\n\n❌ אירעה שגיאה ביצירת או שליחת הקובץ.");
-            }
-            return; // <--- חשוב! צא מהפונקציה אחרי טיפול מוצלח או שגיאה ביצירת קובץ
-        }
-
-
-        if (jsonResponse.action === "resend_file" && jsonResponse.filePath) {
-            try {
-                const filePath = jsonResponse.filePath;
-                if (fs.existsSync(filePath)) {
-                    const media = MessageMedia.fromFilePath(filePath);
-                    await msg.reply(media, undefined, { caption: jsonResponse.message || "📁 הנה הקובץ שביקשת שוב:" });
-                } else {
-                    await msg.reply("⚠️ הקובץ לא נמצא, ייתכן שנמחק.");
-                }
-            } catch (error) {
-                console.error("Error resending file:", error);
-                await msg.reply("❌ אירעה שגיאה בשליחת הקובץ מחדש.");
-            }
-            return;
-        }
-
-
-        if (jsonResponse.deleteMemory === true && jsonResponse.info) {
-            const memoryToDelete = jsonResponse.info;
-            const memoryDir = chatPaths.chatDir;
-            const memoryP = chatPaths.memoryFile;
-            let memories = [];
-            if (fs.existsSync(memoryP)) {
-                memories = JSON.parse(fs.readFileSync(memoryP, 'utf8'));
-                const initialLength = memories.length;
-                memories = memories.filter(mem => mem.info !== memoryToDelete);
-                if (memories.length < initialLength) {
-                    fs.writeFileSync(memoryP, JSON.stringify(memories, null, 2), 'utf8');
-                    console.log(`🗑️ זיכרון נמחק: ${memoryToDelete}`);
-                    await msg.reply(jsonResponse.message || `🗑️  מחקתי את הזיכרון "${memoryToDelete}"`);
-                    return;
-                } else {
-                    console.log(`⚠️ זיכרון לא נמצא למחיקה: ${memoryToDelete}`);
-                    await msg.reply(`⚠️ לא מצאתי זיכרון "${memoryToDelete}" כדי למחוק.`);
-                    return;
-                }
+                await msg.reply(media, undefined, { caption: jsonResponse.message || "📁 הנה הקובץ שביקשת שוב:" });
             } else {
-                await msg.reply(`⚠️ אין קובץ זיכרונות פעיל כדי למחוק ממנו.`);
+                await msg.reply("⚠️ הקובץ לא נמצא, ייתכן שנמחק.");
+            }
+        } catch (error) {
+            console.error("Error resending file:", error);
+            await msg.reply("❌ אירעה שגיאה בשליחת הקובץ מחדש.");
+        }
+        return;
+    }
+
+
+    if (jsonResponse.deleteMemory === true && jsonResponse.info) {
+        const memoryToDelete = jsonResponse.info;
+        const memoryDir = chatPaths.chatDir;
+        const memoryP = chatPaths.memoryFile;
+        let memories = [];
+        if (fs.existsSync(memoryP)) {
+            memories = JSON.parse(fs.readFileSync(memoryP, 'utf8'));
+            const initialLength = memories.length;
+            memories = memories.filter(mem => mem.info !== memoryToDelete);
+            if (memories.length < initialLength) {
+                fs.writeFileSync(memoryP, JSON.stringify(memories, null, 2), 'utf8');
+                console.log(`🗑️ זיכרון נמחק: ${memoryToDelete}`);
+                await msg.reply(jsonResponse.message || `🗑️  מחקתי את הזיכרון "${memoryToDelete}"`);
+                return;
+            } else {
+                console.log(`⚠️ זיכרון לא נמצא למחיקה: ${memoryToDelete}`);
+                await msg.reply(`⚠️ לא מצאתי זיכרון "${memoryToDelete}" כדי למחוק.`);
                 return;
             }
+        } else {
+            await msg.reply(`⚠️ אין קובץ זיכרונות פעיל כדי למחוק ממנו.`);
+            return;
         }
+    }
 
     if (jsonResponse.action === "document" && jsonResponse.documentPrompt) {
         const loadingMessage = jsonResponse.message || `פיתי\n\nיוצר מסמך...`;
@@ -7054,59 +7300,59 @@ await msg.reply(infoMessage.trim(), undefined, { quotedMessageId: msg.id._serial
         return;
     }
 
-        const { URL } = require("url");
+    const { URL } = require("url");
 
-        async function extractInternalLinks(url) {
-            const browser = await puppeteer.launch({ headless: "new" });
-            const page = await browser.newPage();
+    async function extractInternalLinks(url) {
+        const browser = await puppeteer.launch({ headless: "new" });
+        const page = await browser.newPage();
 
-            try {
-                await page.goto(url, { waitUntil: "domcontentloaded", timeout: 20000 });
+        try {
+            await page.goto(url, { waitUntil: "domcontentloaded", timeout: 20000 });
 
-                const origin = new URL(url).origin;
+            const origin = new URL(url).origin;
 
-                const links = await page.$$eval("a[href]", (elements, origin) => {
-                    return elements
-                        .map(el => el.href)
-                        .filter(href => href.startsWith(origin))
-                        .filter((value, index, self) => self.indexOf(value) === index)
-                        .slice(0, 20);
-                }, origin);
+            const links = await page.$$eval("a[href]", (elements, origin) => {
+                return elements
+                    .map(el => el.href)
+                    .filter(href => href.startsWith(origin))
+                    .filter((value, index, self) => self.indexOf(value) === index)
+                    .slice(0, 20);
+            }, origin);
 
-                await browser.close();
-                return links;
-            } catch (err) {
-                await browser.close();
-                console.error("❌ שגיאה בזמן טעינת הדף:", err);
-                return [];
-            }
+            await browser.close();
+            return links;
+        } catch (err) {
+            await browser.close();
+            console.error("❌ שגיאה בזמן טעינת הדף:", err);
+            return [];
         }
+    }
 
 
-        if (jsonResponse.action === "site_search" && jsonResponse.query) {
-            console.log("🌐 חיפוש אתר לפי:", jsonResponse.query);
+    if (jsonResponse.action === "site_search" && jsonResponse.query) {
+        console.log("🌐 חיפוש אתר לפי:", jsonResponse.query);
 
-            const query = jsonResponse.query;
-            const needHtml = jsonResponse.needHtml === true;
+        const query = jsonResponse.query;
+        const needHtml = jsonResponse.needHtml === true;
 
-            try {
-                if (Array.isArray(jsonResponse.messages) && jsonResponse.messages[0]) {
-                    await msg.reply(jsonResponse.messages[0]);
-                }
+        try {
+            if (Array.isArray(jsonResponse.messages) && jsonResponse.messages[0]) {
+                await msg.reply(jsonResponse.messages[0]);
+            }
 
-                const links = await searchDuckDuckGoTop10(query);
-                console.log("🔗 DuckDuckGo קישורים:", links);
+            const links = await searchDuckDuckGoTop10(query);
+            console.log("🔗 DuckDuckGo קישורים:", links);
 
-                if (!needHtml) {
-                    const reply = jsonResponse.messages?.[1]
-                        ? `${jsonResponse.messages[1]}\n${links.join('\n')}`
-                        : `🔗 הנה תוצאות החיפוש:\n${links.join('\n')}`;
-                    await msg.reply(reply);
-                    return;
-                }
+            if (!needHtml) {
+                const reply = jsonResponse.messages?.[1]
+                    ? `${jsonResponse.messages[1]}\n${links.join('\n')}`
+                    : `🔗 הנה תוצאות החיפוש:\n${links.join('\n')}`;
+                await msg.reply(reply);
+                return;
+            }
 
 
-                const promptToGemini = `
+            const promptToGemini = `
 המשתמש ביקש: "${query}"
 הנה עשרת הקישורים הראשונים שחזרו מחיפוש ב-DuckDuckGo:
 
@@ -7123,25 +7369,25 @@ ${links.map((l, i) => `${i + 1}. ${l}`).join('\n')}
   "chosenUrl": "https://..."
 }
 `;
-                const geminiResponse1 = await axios.post(getRandomGeminiEndpoint(false), {
-                    contents: [{ parts: [{ text: promptToGemini }] }]
-                });
+            const geminiResponse1 = await axios.post(getRandomGeminiEndpoint(false), {
+                contents: [{ parts: [{ text: promptToGemini }] }]
+            });
 
-                let chosenUrl = geminiResponse1.data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+            let chosenUrl = geminiResponse1.data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
-                chosenUrl = chosenUrl.replace(/^```json\s*|^```\s*|```$/g, "").trim();
+            chosenUrl = chosenUrl.replace(/^```json\s*|^```\s*|```$/g, "").trim();
 
-                const { chosenUrl: finalLinkToVisit } = JSON.parse(chosenUrl);
-                console.log("👆 GEMINI בחר את הקישור:", finalLinkToVisit);
+            const { chosenUrl: finalLinkToVisit } = JSON.parse(chosenUrl);
+            console.log("👆 GEMINI בחר את הקישור:", finalLinkToVisit);
 
-                const internalLinks = await extractInternalLinks(finalLinkToVisit);
+            const internalLinks = await extractInternalLinks(finalLinkToVisit);
 
-                if (internalLinks.length === 0) {
-                    await msg.reply("⚠️ לא נמצאו קישורים פנימיים בדף שנבחר.");
-                    return;
-                }
+            if (internalLinks.length === 0) {
+                await msg.reply("⚠️ לא נמצאו קישורים פנימיים בדף שנבחר.");
+                return;
+            }
 
-                const secondPrompt = `
+            const secondPrompt = `
 המשתמש ביקש: "${query}"
 זהו דף שנבחר על ידך.
 
@@ -7155,53 +7401,53 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
 }
         `;
 
-                const geminiResponse2 = await axios.post(getRandomGeminiEndpoint(false), {
-                    contents: [{ parts: [{ text: secondPrompt }] }]
-                });
+            const geminiResponse2 = await axios.post(getRandomGeminiEndpoint(false), {
+                contents: [{ parts: [{ text: secondPrompt }] }]
+            });
 
-                let finalLinkJson = geminiResponse2.data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-                finalLinkJson = finalLinkJson.replace(/^```json\s*|^```\s*|```$/g, "").trim();
+            let finalLinkJson = geminiResponse2.data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+            finalLinkJson = finalLinkJson.replace(/^```json\s*|^```\s*|```$/g, "").trim();
 
-                const { finalLink } = JSON.parse(finalLinkJson);
-                await msg.reply(`✅ הנה הקישור הכי רלוונטי:\n${finalLink}`);
+            const { finalLink } = JSON.parse(finalLinkJson);
+            await msg.reply(`✅ הנה הקישור הכי רלוונטי:\n${finalLink}`);
 
-            } catch (err) {
-                console.error("❌ שגיאה בחיפוש באתר עם needHtml:", err);
-                await msg.reply("⚠️ הייתה שגיאה במהלך העיבוד המתקדם של החיפוש.");
-            }
-
-            return;
+        } catch (err) {
+            console.error("❌ שגיאה בחיפוש באתר עם needHtml:", err);
+            await msg.reply("⚠️ הייתה שגיאה במהלך העיבוד המתקדם של החיפוש.");
         }
 
+        return;
+    }
 
-        if (jsonResponse.action === "youtube_search" && jsonResponse.query) {
-            console.log("🎯 בקשת YouTube:", jsonResponse.query);
 
-            try {
-                if (Array.isArray(jsonResponse.messages) && jsonResponse.messages[0]) {
-                    await msg.reply(jsonResponse.messages[0]);
-                }
+    if (jsonResponse.action === "youtube_search" && jsonResponse.query) {
+        console.log("🎯 בקשת YouTube:", jsonResponse.query);
 
-                const videoLinks = await searchYouTube(jsonResponse.query);
-                console.log("🔗 קישורי יוטיוב שנמצאו:", videoLinks);
-
-                if (videoLinks && videoLinks.length > 0) {
-                    const finalMessage = (jsonResponse.messages && jsonResponse.messages[1])
-                        ? `${jsonResponse.messages[1]}\n${videoLinks.join('\n')}`
-                        : `📺 הנה סרטונים שמצאתי:\n${videoLinks.join('\n')}`;
-                    await msg.reply(finalMessage);
-                } else {
-                    await msg.reply("😕 לא הצלחתי למצוא סרטונים ביוטיוב.");
-                }
-            } catch (err) {
-                console.error("❌ שגיאה בחיפוש ביוטיוב:", err);
-                await msg.reply("🚫 הייתה שגיאה בזמן חיפוש הסרטון.");
+        try {
+            if (Array.isArray(jsonResponse.messages) && jsonResponse.messages[0]) {
+                await msg.reply(jsonResponse.messages[0]);
             }
 
-            return;
+            const videoLinks = await searchYouTube(jsonResponse.query);
+            console.log("🔗 קישורי יוטיוב שנמצאו:", videoLinks);
+
+            if (videoLinks && videoLinks.length > 0) {
+                const finalMessage = (jsonResponse.messages && jsonResponse.messages[1])
+                    ? `${jsonResponse.messages[1]}\n${videoLinks.join('\n')}`
+                    : `📺 הנה סרטונים שמצאתי:\n${videoLinks.join('\n')}`;
+                await msg.reply(finalMessage);
+            } else {
+                await msg.reply("😕 לא הצלחתי למצוא סרטונים ביוטיוב.");
+            }
+        } catch (err) {
+            console.error("❌ שגיאה בחיפוש ביוטיוב:", err);
+            await msg.reply("🚫 הייתה שגיאה בזמן חיפוש הסרטון.");
         }
 
-        const play = require('play-dl');
+        return;
+    }
+
+    const play = require('play-dl');
 
     if (jsonResponse.action === "download_youtube_video" && jsonResponse.video_url) {
         const videoUrl = jsonResponse.video_url;
@@ -7281,7 +7527,7 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
             }
         }
     }
-    
+
 
     console.log("\n✅ תגובת JSON סופית (אחרי עיבוד):\n", jsonResponse);
 
@@ -7588,7 +7834,7 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
                             console.warn(`[Multi-Reply SUMMARIZE] Missing content or link for ${replyToId}`);
                             await targetMsg.reply("פיתי\n\n⚠️ לא ניתן לסכם, חסר תוכן או קישור.");
                         }
-                        break; 
+                        break;
 
                     case "summarize_history":
                         console.log(`[Multi-Reply SUMMARIZE_HISTORY] Attempting history summarization for ${replyToId}`);
@@ -7961,106 +8207,86 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
     } // End if jsonResponse.replies
 
 
-try {
-  const chat = await msg.getChat();
-  const messages = await chat.fetchMessages({ limit: 50 });
+    try {
+        const chat = await msg.getChat();
+        const messages = await chat.fetchMessages({ limit: 50 });
 
-  /**
-   * Utility: strip WA "true_/false_" prefixes (and handle null/undefined).
-   */
-  const normaliseId = (id) => (id ?? "").replace(/^true_/, "").replace(/^false_/, "");
+        const normalize = id => id?.replace(/^true_/, "").replace(/^false_/, "");
+        const targetMsg = messages.find(m => normalize(m.id._serialized) === normalize(jsonResponse.replyTo));
 
-  /**
-   * Alias for the project‑wide ID normaliser (if it exists) *or* a local shim.
-   */
-  const normaliseMsgId =
-    typeof normalizeMsgId === "function"
-      ? normalizeMsgId
-      : (id) => normaliseId(id);
+        if (targetMsg) {
+            console.log("✅ נמצאה ההודעה להגיב אליה.");
+            if (jsonResponse.respond !== false) {
+                const sentMsg = await targetMsg.reply(`פיתי\n\n${jsonResponse.message}`);
+                const normId = normalizeMsgId(sentMsg.id._serialized);
+                botMessageIds.add(normId);
+                repliableMessageIds.add(normId);
 
-  // 1️⃣ Identify the message we should quote.
-  const targetMsg = messages.find(
-    (m) => normaliseId(m.id._serialized) === normaliseId(jsonResponse.replyTo)
-  );
+                return;
+            } else {
+                console.log("Gemini בחר לא להגיב במצב שקט (single reply path, should not happen).");
+                return;
+            }
+        } else {
+            if (!jsonResponse || Object.keys(jsonResponse).length === 0) {
+                console.log("⚠️ Gemini החזיר תגובה ריקה, לא נבצע כלום.");
+                return; // פשוט לא לעשות כלום
+            }
 
-  /**
-   * Helper to send a message and register its ID in bookkeeping Sets.
-   */
-  const sendAndTrack = async (destChatId, text, opts = {}) => {
-    const sent = await client.sendMessage(destChatId, text, opts);
-    const nId = normaliseMsgId(sent.id._serialized);
-    botMessageIds.add(nId);
-    repliableMessageIds.add(nId);
-    return sent;
-  };
+            // המשך כרגיל
+            const fallbackId = jsonResponse.replyTo;
+            const userId = typeof fallbackId === 'string'
+                ? fallbackId.split("_")[1]?.split("@")[0] || 'unknown_user'
+                : 'unknown_user';
+            const contacts = await client.getContacts();
+            const contact = contacts.find(c => c.id.user === userId);
 
-  // 2️⃣ Respect Gemini's explicit instruction not to respond.
-  if (jsonResponse.respond === false) {
-    console.log("[Gemini] respond=false → skipping reply");
-    return;
-  }
+            if (contact) {
+                const mentionContact = await client.getContactById(contact.id._serialized);
+                const name = mentionContact.name || mentionContact.pushname || userId;
 
-  /* ------------------------------------------------------------------ */
-  /*  Case A – Exact quoted reply                                       */
-  /* ------------------------------------------------------------------ */
-  if (targetMsg) {
-    console.log("✅ Found message to reply to (quoted reply)");
-    await sendAndTrack(targetMsg.id.remote, `פיתי\n\n${jsonResponse.message}`, {
-      quotedMessageId: targetMsg.id._serialized,
-    });
-    return;
-  }
+                if (jsonResponse.respond !== false) {
+                    const sentMsg = await msg.reply(`פיתי\n\n@${name}\n${jsonResponse.message}`, undefined, {
+                        mentions: [mentionContact]
+                    });
 
-  /* ------------------------------------------------------------------ */
-  /*  Case B – Cannot quote, try @‑mention fallback                     */
-  /* ------------------------------------------------------------------ */
-  if (jsonResponse.replyTo) {
-    const userNumber = jsonResponse.replyTo
-      .split("@")[0]
-      .replace(/^(true_|false_)/, "")
-      .replace(/[^0-9]/g, "");
+                    const normId = normalizeMsgId(sentMsg.id._serialized);
+                    botMessageIds.add(normId);
+                    repliableMessageIds.add(normId);
 
-    if (userNumber) {
-      const contacts = await client.getContacts();
-      const contact = contacts.find((c) => c.id.user === userNumber);
+                    return;
+                } else {
+                    console.log("Gemini בחר לא להגיב במצב שקט (single reply mention fallback, should not happen).");
+                    return;
+                }
+            } else {
+                console.log("⚠️ לא נמצא איש קשר לתיוג — מגיב בלי mention.");
+            }
+        }
+    } catch (error) {
+        console.error("❌ שגיאה בטיפול בלוגיקת replyTo:", error);
 
-      if (contact) {
-        const mentionContact = await client.getContactById(contact.id._serialized);
-        const displayName =
-          mentionContact.name || mentionContact.pushname || userNumber;
+        // שליחת הודעת שגיאה למשתמש
+        const sentMsg = await msg.reply("פיתי\n\nאירעה שגיאה בזמן ניסיון התגובה.");
 
-        console.log(`ℹ️ Mention fallback → @${displayName}`);
-        await sendAndTrack(
-          msg.id.remote,
-          `פיתי\n\n@${displayName}\n${jsonResponse.message}`,
-          {
-            mentions: [mentionContact],
-            quotedMessageId: msg.id._serialized,
-          }
-        );
-        return;
-      }
+        // נרמול ה-ID (מסיר ‎true_/false_‎ אם קיימים)
+        const normId = normalizeMsgId(sentMsg.id._serialized);
+
+        // שמירה במבני-הנתונים הנכונים
+        botMessageIds.add(normId);
+        repliableMessageIds.add(normId);
     }
-    console.warn("⚠️ Could not resolve contact for mention. Falling back to plain reply.");
-  }
 
-  /* ------------------------------------------------------------------ */
-  /*  Case C – Plain reply (no quote / mention)                         */
-  /* ------------------------------------------------------------------ */
-  await sendAndTrack(msg.id.remote, `פיתי\n\n${jsonResponse.message}`, {
-    quotedMessageId: msg.id._serialized,
-  });
-} catch (err) {
-  console.error("❌ Error in reply‑handler:", err);
-  const sent = await msg.reply("פיתי\n\nאירעה שגיאה בזמן ניסיון התגובה.");
-  const nId =
-    typeof normalizeMsgId === "function"
-      ? normalizeMsgId(sent.id._serialized)
-      : sent.id._serialized.replace(/^true_/, "").replace(/^false_/, "");
-  botMessageIds.add(nId);
-  repliableMessageIds.add(nId);
-}
 
+    if (jsonResponse.respond !== false) {
+        const sentMsg = await msg.reply(`פיתי\n\n${jsonResponse.message}`);
+        const normId = normalizeMsgId(sentMsg.id._serialized);
+        botMessageIds.add(normId);
+        repliableMessageIds.add(normId);
+
+    } else {
+        console.log("Gemini בחר לא להגיב במקרה ברירת מחדל (silent mode, single reply default, should not happen).");
+    }
 }
 
 async function handleExtractEntitiesAction(nerData, targetMsg) {
@@ -8315,7 +8541,7 @@ async function handleGenerateHtmlAction({ htmlData, targetMsg, chatPaths }) {
     if (needDocument === true && replyToFileMessageId) {
         console.log(`📄 [handleGenerateHtmlAction] Need document content from message ID: ${replyToFileMessageId}. Fetching...`);
         try {
-            const chat = await targetMsg.getChat(); // This 'chat' is fine
+            const chat = await targetMsg.getChat();
             const messages = await chat.fetchMessages({ limit: 100 }); // Fetch history
             const normalize = id => id?.replace(/^true_/, "").replace(/^false_/, "");
             const sourceMsg = messages.find(m => normalize(m.id._serialized) === normalize(replyToFileMessageId));
@@ -8810,7 +9036,7 @@ async function generateImage(description, imageModel, msg, retryCount = 0) {
 
         // ----- SAVE FILE -----
         const chat = await msg.getChat();
-        const safeName = await getSafeNameForChat(client, chat);
+        const safeName = await getSafeNameForChat(chat);
         const chatPaths = getChatPaths(chat.id._serialized, safeName);
         fs.mkdirSync(chatPaths.filesDir, { recursive: true });
 
@@ -8950,7 +9176,7 @@ async function generateDocument({
 }) {
     const chatId = triggeringMsg.id.remote;
     const chat = await triggeringMsg.getChat();
-    const safeName = await getSafeNameForChat(client, chat); // Use your helper
+    const safeName = await getSafeNameForChat(chat); // Use your helper
 
     console.log(`📄 [generateDocument V2] Context - ChatID: ${chatId}, SafeName: ${safeName}`);
     if (imageIntegration) {
@@ -9332,16 +9558,16 @@ ${memoryText}
    - **If the user's request implies this image IS the document (e.g., "make this image a PDF"), you MUST include it. Use the LaTeX command: \\includegraphics[width=\\textwidth, height=0.9\\textheight, keepaspectratio]{${relativeSourceImagePathForLatex}}**
    Available additional images for integration:
 ${imagePlacementInfoForLatex.length > 0 ? imagePlacementInfoForLatex.map(img =>
-    `- LaTeX Path for inclusion: ${img.latexPath}
+                `- LaTeX Path for inclusion: ${img.latexPath}
   Placement Context/Hint: ${img.placementContext}
   (Source Details: ${img.sourceDescription || 'N/A'})`
-        ).join('\n\n') : "No additional images (AI-generated or Web-searched) were prepared for this document."}
+            ).join('\n\n') : "No additional images (AI-generated or Web-searched) were prepared for this document."}
 Available additional images for integration:
 ${imagePlacementInfoForLatex.length > 0 ? imagePlacementInfoForLatex.map(img =>
-    `- LaTeX Path for inclusion: ${img.latexPath}
+                `- LaTeX Path for inclusion: ${img.latexPath}
   Placement Context/Hint: ${img.placementContext}
   (Source Details: ${img.sourceDescription || 'N/A'})`
-).join('\n\n') : "No additional images (AI-generated or Web-searched) were prepared for this document."}
+            ).join('\n\n') : "No additional images (AI-generated or Web-searched) were prepared for this document."}
 
 To include an image, use the following structure for best results, ensuring it is placed logically within the text flow based on its placementContext:
 \\begin{figure}[H]
@@ -9732,7 +9958,7 @@ async function sendInfoMenu(msg) {
         // (בהנחה ש chatPaths ו-safeName זמינים או מחושבים כאן)
         try {
             const chat = await msg.getChat();
-            const safeName = await getSafeNameForChat(client, chat);
+            const safeName = await getSafeNameForChat(chat);
             const chatPaths = getChatPaths(chat.id._serialized, safeName);
             const localTimestamp = getLocalTimestamp();
             const line = `${localTimestamp} [ID: ${normalizedId}] פיתי: [תפריט מידע]\n`; // או חלק מהטקסט
@@ -9762,7 +9988,7 @@ async function parseReminderTime(timeText) {
             contents: [{ parts: [{ text: prompt }] }]
         };
 
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-thinking-exp:generateContent?key=${apiKeyManager.getRandomApiKey()}`;
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-04-17-thinking:generateContent?key=${apiKeyManager.getRandomApiKey()}`;
         const response = await axios.post(geminiUrl, requestPayload);
         const rawText = response.data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
 
@@ -9785,32 +10011,32 @@ function parseScheduleTime(timeText) {
     return new Date(now.getTime() + 10 * 60 * 1000);
 }
 
-// function formatDateKey(date) { // MOVED TO utilityHelpers.js
-//     return date.toISOString().split('T')[0];
-// }
-//
-// function formatDateForDisplay(date) { // MOVED TO utilityHelpers.js
-//     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-//     return date.toLocaleDateString('he-IL', options);
-// }
-//
-// function formatTimeForDisplay(date) { // MOVED TO utilityHelpers.js
-//     const options = { hour: 'numeric', minute: 'numeric' };
-//     return date.toLocaleTimeString('he-IL', options);
-// }
-//
-// function getWeeklyHabitStatus(habitData) { // MOVED TO utilityHelpers.js
-//     const today = new Date();
-//     const days = [];
-//     for (let i = 0; i < 7; i++) {
-//         const date = new Date(today);
-//         date.setDate(today.getDate() - i);
-//         const dateKey = formatDateKey(date);
-//         const status = habitData[dateKey] || 'לא נרשם';
-//         days.push(`${formatDateForDisplay(date)}: ${status}`);
-//     }
-//     return days.reverse();
-// }
+function formatDateKey(date) {
+    return date.toISOString().split('T')[0];
+}
+
+function formatDateForDisplay(date) {
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    return date.toLocaleDateString('he-IL', options);
+}
+
+function formatTimeForDisplay(date) {
+    const options = { hour: 'numeric', minute: 'numeric' };
+    return date.toLocaleTimeString('he-IL', options);
+}
+
+function getWeeklyHabitStatus(habitData) {
+    const today = new Date();
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() - i);
+        const dateKey = formatDateKey(date);
+        const status = habitData[dateKey] || 'לא נרשם';
+        days.push(`${formatDateForDisplay(date)}: ${status}`);
+    }
+    return days.reverse();
+}
 
 
 function checkTimers() {
@@ -9925,7 +10151,7 @@ client.on('message', async (msg) => {
             chatIdForLog = chat.id._serialized; // Store for logging
 
             // **** USE THE CENTRALIZED HELPER FUNCTION ****
-            safeName = await getSafeNameForChat(client, chat);
+            safeName = await getSafeNameForChat(chat);
             // ******************************************
 
             const chatPaths = getChatPaths(chatIdForLog, safeName);
@@ -9997,11 +10223,10 @@ client.on('message_create', async (msg) => {
         try {
             // Log AI replies using safelyAppendMessage before returning
             chat = await msg.getChat();
-            safeName = await getSafeNameForChat(client, chat);
+            safeName = await getSafeNameForChat(chat);
             chatPaths = getChatPaths(chat.id._serialized, safeName);
             chatFilePath = chatPaths.historyFile;
-            // Log AI replies using the direct safelyAppendMessage call now expected to be handled by the main logic or if this specific logging is still needed, it should call the global function directly
-            // await require('./whatsapp_modules/fileSystemHelpers.js').safelyAppendMessage(msg, "פיתי", client, writtenMessageIds, uploadedMediaMap, autoReactEmoji, handleMediaContent); // This call is now handled by the direct call in client.on('message_create')
+            await safelyAppendMessage(msg, "פיתי"); // Log as "פיתי"
         } catch (logErr) {
             console.error(`[message_create FILTER 1] Error logging AI reply ${msg.id._serialized} for safeName='${safeName}', targetPath='${chatFilePath}':`, logErr);
         }
@@ -10164,7 +10389,7 @@ client.on('message_create', async (msg) => {
                             break;
                         }
 
-                        console.log(`Attempting to spawn: ${pythonExecutable} ${restartScriptPath} ${nodeScriptToRun}`);
+                        console.log(`   Attempting to spawn: ${pythonExecutable} ${restartScriptPath} ${nodeScriptToRun}`);
 
                         try {
                             const child = spawn(pythonExecutable, [restartScriptPath, nodeScriptToRun], {
@@ -10365,14 +10590,14 @@ client.on('message_create', async (msg) => {
                                         }
                                     }
                                     break;
-case "generate_graph":
-    if (triggeredActionData.functions && Array.isArray(triggeredActionData.functions)) {
-        // chatPathsForLog ו-msg מוגדרים בהקשר הזה
-        await handleGenerateGraphAction(triggeredActionData, msg, chatPathsForLog);
-    } else {
-        console.warn(`[Trigger Execution Graph] Trigger for graph is missing 'functions' data.`);
-        await msg.reply("⚠️ טריגר ליצירת גרף הופעל אך הגדרת הפונקציות בטריגר חסרה או לא תקינה.");
-    }
+                                case "generate_graph":
+                                    if (triggeredActionData.functions && Array.isArray(triggeredActionData.functions)) {
+                                        // chatPathsForLog ו-msg מוגדרים בהקשר הזה
+                                        await handleGenerateGraphAction(triggeredActionData, msg, chatPathsForLog);
+                                    } else {
+                                        console.warn(`[Trigger Execution Graph] Trigger for graph is missing 'functions' data.`);
+                                        await msg.reply("⚠️ טריגר ליצירת גרף הופעל אך הגדרת הפונקציות בטריגר חסרה או לא תקינה.");
+                                    }
                                     break;
                                 case "generate_office_doc":
                                     if (triggeredActionData.doc_type && triggeredActionData.output_filename) {
@@ -10667,7 +10892,7 @@ case "generate_graph":
         try {
             const quotedMsg = await msg.getQuotedMessage();
             if (quotedMsg && (repliableMessageIds.has(quotedMsg.id._serialized) ||
-                              botMessageIds.has(normalizeMsgId(quotedMsg.id._serialized)))) {
+                botMessageIds.has(normalizeMsgId(quotedMsg.id._serialized)))) {
                 // isReplyToBot כבר צריך להיות true מהלוגיקה הקודמת אם הגענו לכאן והתנאי הזה מתקיים,
                 // אבל אין נזק להגדיר אותו שוב.
                 isReplyToBot = true;
