@@ -703,7 +703,7 @@ if (process.argv.includes('--delete-auth')) {
 const client = new Client({
     authStrategy: new LocalAuth({ dataPath: "./.wwebjs_auth" }),
     puppeteer: {
-        executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+        ...(chromePath ? { executablePath: chromePath } : {}),
         headless: true,
         args: [
             '--no-sandbox',
