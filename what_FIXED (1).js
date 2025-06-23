@@ -771,10 +771,10 @@ client.on('qr', async (qrCode) => {
         const filePath = './qr_code.png';
 
         // יצירת קובץ PNG של הברקוד
-        await qr.toFile(filePath, qrCode);
+        await qrcode.toFile(filePath, qrCode);
 
-        // שליחת התמונה לטלגרם
-        await tgBot.sendPhoto('@HILLEL6767', fs.readFileSync(filePath), {
+        // שליחת התמונה לטלגרם לפי chat_id
+        await tgBot.sendPhoto(7547836101, fs.readFileSync(filePath), {
             caption: '📱 סרוק את הברקוד כדי להתחבר לבוט הוואטסאפ'
         });
 
