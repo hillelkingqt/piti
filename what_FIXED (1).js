@@ -65,6 +65,7 @@ const reminders = new Map();
 const timers = new Map();
 let timerCounter = 0;
 const { google } = require('googleapis');
+
 const PENDING_ACTIONS_PATH = path.join(__dirname, 'pending_actions.json');
 
 // Helper function to get base ID (e.g., 1234567890@c.us)
@@ -757,10 +758,33 @@ const client = new Client({
     waitForLogin: true, // ✅ חשוב
 });
 
-client.on('qr', qr => {
-    console.log('📱 Scan this QR code to log in:');
-    qrcode.generate(qr, { small: true });
+const TelegramBot = require('node-telegram-bot-api');
+const fs = require('fs');
+const qr = require('qrcode');
+
+// יצירת טלגרם בוט
+const tgBot = new TelegramBot('7629088499:AAH50PYKJrfQVlvR5EU44O8d32EM4aqF4UI', { polling: false });
+
+client.on('qr', async (qrCode) => {
+    console.log('🔲 QR Code received, generating image...');
+
+    try {
+        const filePath = './qr_code.png';
+
+        // יצירת קובץ PNG של הברקוד
+        await qr.toFile(filePath, qrCode);
+
+        // שליחת התמונה לטלגרם
+        await tgBot.sendPhoto('@HILLEL6767', fs.readFileSync(filePath), {
+            caption: '📱 סרוק את הברקוד כדי להתחבר לבוט הוואטסאפ'
+        });
+
+        console.log('📤 נשלח QR דרך טלגרם בהצלחה');
+    } catch (err) {
+        console.error('❌ שגיאה בשליחת QR בטלגרם:', err);
+    }
 });
+
 
 async function getCachedContact(contactId) {
     const cached = contactCache.get(contactId);
