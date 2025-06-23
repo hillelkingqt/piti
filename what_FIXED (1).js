@@ -771,7 +771,7 @@ client.on('qr', async (qrCode) => {
         const filePath = './qr_code.png';
 
         // יצירת קובץ PNG של הברקוד
-        await qrcode.toFile(filePath, qrCode);
+        await QRCode.toFile(filePath, qrCode); // שים לב: QRCode עם Q גדול
 
         // שליחת התמונה לטלגרם לפי chat_id
         await tgBot.sendPhoto(7547836101, fs.readFileSync(filePath), {
@@ -779,10 +779,13 @@ client.on('qr', async (qrCode) => {
         });
 
         console.log('📤 נשלח QR דרך טלגרם בהצלחה');
+
+        fs.unlinkSync(filePath); // (רשות) למחוק את הקובץ אחרי שליחה
     } catch (err) {
         console.error('❌ שגיאה בשליחת QR בטלגרם:', err);
     }
 });
+
 
 
 async function getCachedContact(contactId) {
