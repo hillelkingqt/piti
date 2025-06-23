@@ -699,7 +699,37 @@ if (process.argv.includes('--delete-auth')) {
 } else {
     console.log(`ℹ️ --keep-auth flag detected. Attempting to use existing session data without prompting.`);
 }
-
+// קביעת נתיב הדפדפן לפי מערכת ההפעלה
+let chromePath = null;
+if (os.platform() === 'darwin') {
+    chromePath = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+} else if (os.platform() === 'linux') {
+    if (fs.existsSync('/usr/bin/chromium-browser')) {
+        chromePath = '/usr/bin/chromium-browser';
+    } else if (fs.existsSync('/usr/bin/chromium')) {
+        chromePath = '/usr/bin/chromium';
+    } else if (fs.existsSync('/usr/bin/google-chrome')) {
+        chromePath = '/usr/bin/google-chrome';
+    } else {
+        chromePath = null;
+    }
+} else if (os.platform() === 'win32') {
+    // Common Chrome paths on Windows
+    const winPaths = [
+        process.env.LOCALAPPDATA + '\\Google\\Chrome\\Application\\chrome.exe',
+        process.env.PROGRAMFILES + '\\Google\\Chrome\\Application\\chrome.exe',
+        process.env['PROGRAMFILES(X86)'] + '\\Google\\Chrome\\Application\\chrome.exe'
+    ];
+    for (const path of winPaths) {
+        if (fs.existsSync(path)) {
+            chromePath = path;
+            break;
+        }
+    }
+    if (!chromePath) {
+        console.error('Could not find Chrome executable on Windows');
+    }
+}
 const client = new Client({
     authStrategy: new LocalAuth({ dataPath: "./.wwebjs_auth" }),
     puppeteer: {
