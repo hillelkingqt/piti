@@ -759,7 +759,6 @@ const client = new Client({
 });
 
 const TelegramBot = require('node-telegram-bot-api');
-const fs = require('fs');
 const qr = require('qrcode');
 
 // יצירת טלגרם בוט
