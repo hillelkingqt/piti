@@ -10929,14 +10929,15 @@ client.on('message_create', async (msg) => {
         incoming.includes("פייטי");
 
     const botTriggeredByWordOrReplyToBot = isTriggerWord || isReplyToBot;
+    const isCommandMsg = incoming.startsWith('/');
 
     let shouldProcess = false;
 
     if (isGroup) {
-        // בקבוצות: רק אם יש מילת טריגר או תגובה לבוט, וזו *לא* תגובה להודעת הבעלים
-        if (botTriggeredByWordOrReplyToBot && !isReplyToOwner) {
+        // בקבוצות: יש לעבד אם יש מילת טריגר/תגובה לבוט או אם זו פקודה, וזו *לא* תגובה להודעת הבעלים
+        if ((botTriggeredByWordOrReplyToBot || isCommandMsg) && !isReplyToOwner) {
             shouldProcess = true;
-            console.log(`[message_create DECISION] Group message ${msg.id._serialized} IS triggered (word/replyToBot) AND NOT reply to owner. Processing.`);
+            console.log(`[message_create DECISION] Group message ${msg.id._serialized} IS triggered (word/replyToBot/command) AND NOT reply to owner. Processing.`);
         } else {
             // console.log(`[message_create DECISION] Group message ${msg.id._serialized} ignored (not triggered by word/replyToBot or IS reply to owner).`);
         }
