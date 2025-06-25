@@ -143,7 +143,7 @@ function saveLatexError(chatPaths, newErrorLog) {
     let errors = loadLatexErrors(chatPaths);
     errors.unshift({
         timestamp: new Date().toISOString(),
-        errorLog: newErrorLog.substring(0, 1500) // Keep it reasonably sized
+        errorLog: newErrorLog // Store full error log without truncation
     });
     if (errors.length > MAX_LATEX_ERRORS_TO_KEEP) {
         errors = errors.slice(0, MAX_LATEX_ERRORS_TO_KEEP);

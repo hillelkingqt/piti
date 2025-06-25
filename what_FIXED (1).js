@@ -9741,7 +9741,7 @@ async function compileLatexDocument({
                     // Find the first non-null capturing group that doesn't start with "! LaTeX Error:"
                     relevantErrorLog = errorMatch.slice(1).find(m => m && !m.startsWith("! LaTeX Error:")) || relevantErrorLog;
                 }
-                relevantErrorLog = relevantErrorLog.split('\n').slice(0, 10).join('\n'); // Keep it somewhat concise
+                // Use the full error message without truncation for clearer debugging
             }
             if (stdout && (!stderr || stderr.length < 50)) { // Show some stdout if stderr is minimal
                 console.log("LaTeX stdout (on error):", stdout.substring(0, 500));
@@ -9784,7 +9784,10 @@ async function compileLatexDocument({
                 await triggeringMsg.reply(`פיתי\n\nמצטערת, יצירת המסמך נכשלה גם לאחר ניסיון חוזר. שגיאת LaTeX עיקרית:\n\`\`\`${errorMessageForUser.slice(0, 250)}...\`\`\``);
                 const fullErrorLogForOwner = `LaTeX Compilation Failed for ${texPath} after ${maxRetries + 1} attempts.\nUser Error: ${errorMessageForUser}\nOriginal Error: ${error.message}\nStdout:\n${stdout}\nStderr:\n${stderr}`;
                 if (client && client.sendMessage && myId) { // בדיקה נוספת לפני שליחה לבעלים
-                    client.sendMessage(myId, fullErrorLogForOwner.substring(0, 4000));
+                    const chunkSize = 4000; // WhatsApp messages have length limits
+                    for (let i = 0; i < fullErrorLogForOwner.length; i += chunkSize) {
+                        await client.sendMessage(myId, fullErrorLogForOwner.substring(i, i + chunkSize));
+                    }
                 }
                 delete triggeringMsg.latexRetryCount;
             }
