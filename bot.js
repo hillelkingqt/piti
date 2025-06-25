@@ -1334,8 +1334,8 @@ async function handleGroupManagementAction(actionData, targetMsg) {
     /* --- OWNER-AUTH CHECK ---------------------------------------- */
     // בקבוצות sender נמצא בשדה author; בהודעות פרטיות – from
     const senderFullId = targetMsg.author || (targetMsg.fromMe ? myId : targetMsg.from);
-    const senderBase = getBaseId(senderFullId);
-    const ownerBase = getBaseId(myId);
+    const senderBase = getBaseIdForOwnerCheck(senderFullId);
+    const ownerBase = getBaseIdForOwnerCheck(myId);
 
     if (senderBase !== ownerBase) {
         await targetMsg.reply("⚠️ אין לך הרשאה לביצוע פקודות ניהול בקבוצה זו.");
