@@ -8,7 +8,6 @@ const cheerio = require('cheerio');
 const { searchDuckDuckGoTop10 } = require('./ducksearch');
 const QRCode = require('qrcode');
 const sharp = require('sharp');
-const readlineSync = require('readline-sync');
 const { Buffer } = require('buffer');
 const { spawn, spawnSync } = require('child_process');
 
@@ -675,9 +674,9 @@ async function generateTTS(text, voiceId = '21m00Tcm4TlvDq8ikWAM') {
 
 // --- AUTH Check and Initialization ---
 const authDir = './.wwebjs_auth';
-const keepAuthFlag = process.argv.includes('--keep-auth'); // Check for the new flag
+const deleteAuthFlag = process.argv.includes('--delete-auth') || process.argv.includes('--delete-session');
 
-if (process.argv.includes('--delete-auth')) {
+if (deleteAuthFlag) {
     console.log(`--delete-auth flag detected. Removing ${authDir}...`);
     if (fs.existsSync(authDir)) {
         fs.rmSync(authDir, { recursive: true, force: true });
@@ -685,20 +684,8 @@ if (process.argv.includes('--delete-auth')) {
     } else {
         console.log(`ℹ️ Directory ${authDir} not found, nothing to delete.`);
     }
-} else if (!keepAuthFlag) { // Only ask if --keep-auth is NOT present
-    const shouldDelete = readlineSync.question(`Delete previous session data (${authDir})? (yes/no): `);
-    if (shouldDelete.toLowerCase() === 'yes') {
-        if (fs.existsSync(authDir)) {
-            fs.rmSync(authDir, { recursive: true, force: true });
-            console.log(`🗑️ Deleted ${authDir}. Please scan the QR code.`);
-        } else {
-            console.log(`ℹ️ Directory ${authDir} not found, nothing to delete.`);
-        }
-    } else {
-        console.log(`ℹ️ Attempting to use existing session data.`);
-    }
 } else {
-    console.log(`ℹ️ --keep-auth flag detected. Attempting to use existing session data without prompting.`);
+    console.log(`ℹ️ Using session data from ${authDir}. Run with --delete-auth to reset.`);
 }
 // קביעת נתיב הדפדפן לפי מערכת ההפעלה
 let chromePath = null;
