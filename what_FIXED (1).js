@@ -8819,14 +8819,31 @@ async function generateImageWithGradio(gradioModelParams, gradioModelName, msg, 
 
             const result = await gradioClient.predict("/infer", payload, { timeout: GRADIO_TIMEOUT_MS });
 
-            if (!result || !result.data || !Array.isArray(result.data) || result.data.length === 0) {
-                console.error(`  [Attempt ${attempt}] Invalid or empty result structure from Gradio model ${gradioModelName}:`, result);
-                throw new Error("Invalid or empty result structure from Gradio.");
+            if (!result || result.data === undefined) {
+                console.error(`  [Attempt ${attempt}] Invalid result from Gradio model ${gradioModelName}:`, result);
+                throw new Error("Invalid result from Gradio");
             }
 
-            // The image is expected to be a base64 string in result.data[0]
-            const base64Image = result.data[0];
-            const seedUsed = result.data.length > 1 ? result.data[1] : payload.seed; // Get returned seed if available
+            let base64Image = null;
+            let seedUsed = payload.seed;
+
+            const resultData = result.data;
+
+            if (Array.isArray(resultData)) {
+                const first = resultData[0];
+                if (typeof first === 'string') {
+                    base64Image = first;
+                } else if (first && typeof first === 'object') {
+                    base64Image = first.image || first.data || first?.result?.image || null;
+                }
+                if (resultData.length > 1) {
+                    if (typeof resultData[1] === 'number') seedUsed = resultData[1];
+                    else if (typeof resultData[1] === 'object' && typeof resultData[1].seed === 'number') seedUsed = resultData[1].seed;
+                }
+            } else if (resultData && typeof resultData === 'object') {
+                base64Image = resultData.image || resultData.data || resultData?.result?.image || null;
+                if (typeof resultData.seed === 'number') seedUsed = resultData.seed;
+            }
 
             if (typeof base64Image !== 'string' || base64Image.length < 1000) {
                 console.error(`  [Attempt ${attempt}] Invalid or empty base64 image data from Gradio model ${gradioModelName}. Length: ${base64Image?.length}`);
