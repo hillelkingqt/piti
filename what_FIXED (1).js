@@ -1333,7 +1333,7 @@ async function handleGroupManagementAction(actionData, targetMsg) {
     let chatToManage; // אובייקט הצ'אט (הקבוצה) שעליו נבצע פעולות
     /* --- OWNER-AUTH CHECK ---------------------------------------- */
     // בקבוצות sender נמצא בשדה author; בהודעות פרטיות – from
-    const senderFullId = targetMsg.author || targetMsg.from;
+    const senderFullId = targetMsg.author || (targetMsg.fromMe ? myId : targetMsg.from);
     const senderBase = getBaseId(senderFullId);
     const ownerBase = getBaseId(myId);
 
@@ -10325,7 +10325,7 @@ client.on('message_create', async (msg) => {
     // --------------------------------------------------------------
     const isFromMe = msg.fromMe;
     const chatId = isFromMe ? msg.to : msg.from;
-    const authorId = msg.author || msg.from;
+    const authorId = msg.author || (isFromMe ? myId : msg.from);
 
     // הוסיפו מיד לאחר הגדרת authorId:
     const messageSenderBaseId = getBaseIdForOwnerCheck(authorId);
@@ -10376,6 +10376,22 @@ client.on('message_create', async (msg) => {
     // ==============================================================
     // SECTION 5: Owner Command Handling
     // ==============================================================
+
+    const restrictedPrefixes = [
+        '/startbot', '/stopbot', '/stop', '/unstop', '/block', '/unblock',
+        '/restart', '/silent', '/nosilent', '/break', '/liststopped',
+        '/emojis', '/shutdown', '/info'
+    ];
+    if (
+        incoming.startsWith('/') &&
+        !incoming.startsWith('/s ') &&
+        messageSenderBaseId !== ownerBaseId &&
+        restrictedPrefixes.some(cmd => incoming.startsWith(cmd))
+    ) {
+        console.log(`[UNAUTHORIZED COMMAND] ${authorId} attempted: ${incoming}`);
+        await msg.reply('⚠️ אין לך הרשאה להשתמש בפקודה זו.');
+        return;
+    }
 
 
     // --- Check if the message sender IS the owner ---
