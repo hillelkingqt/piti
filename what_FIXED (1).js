@@ -10934,12 +10934,16 @@ client.on('message_create', async (msg) => {
     let shouldProcess = false;
 
     if (isGroup) {
-        // בקבוצות: יש לעבד אם יש מילת טריגר/תגובה לבוט או אם זו פקודה, וזו *לא* תגובה להודעת הבעלים
-        if ((botTriggeredByWordOrReplyToBot || isCommandMsg) && !isReplyToOwner) {
+        // בקבוצות: תמיד עבד פקודות, גם אם זו תגובה לבעלים. עבור הודעות רגילות,
+        // תדרש מילת טריגר או תגובה לבוט ושלא תהיה תגובה לבעלים.
+        if (isCommandMsg) {
             shouldProcess = true;
-            console.log(`[message_create DECISION] Group message ${msg.id._serialized} IS triggered (word/replyToBot/command) AND NOT reply to owner. Processing.`);
+            console.log(`[message_create DECISION] Group command ${msg.id._serialized} detected. Processing.`);
+        } else if (botTriggeredByWordOrReplyToBot && !isReplyToOwner) {
+            shouldProcess = true;
+            console.log(`[message_create DECISION] Group message ${msg.id._serialized} triggered by word/reply. Processing.`);
         } else {
-            // console.log(`[message_create DECISION] Group message ${msg.id._serialized} ignored (not triggered by word/replyToBot or IS reply to owner).`);
+            // console.log(`[message_create DECISION] Group message ${msg.id._serialized} ignored (no trigger or reply to owner).`);
         }
     } else { // Private Chat
         if (messageSenderBaseId && ownerBaseId && messageSenderBaseId === ownerBaseId) {
