@@ -8819,15 +8819,16 @@ async function generateImageWithGradio(gradioModelParams, gradioModelName, msg, 
 
             const result = await gradioClient.predict("/infer", payload, { timeout: GRADIO_TIMEOUT_MS });
 
-            if (!result || result.data === undefined) {
+            if (!result || (result.data === undefined && result.result === undefined)) {
                 console.error(`  [Attempt ${attempt}] Invalid result from Gradio model ${gradioModelName}:`, result);
                 throw new Error("Invalid result from Gradio");
             }
 
             let base64Image = null;
             let seedUsed = payload.seed;
+            let imageMimeType = 'image/png'; // default until determined
 
-            const resultData = result.data;
+            const resultData = result.data ?? result.result ?? result;
 
             if (Array.isArray(resultData)) {
                 const first = resultData[0];
@@ -8835,6 +8836,11 @@ async function generateImageWithGradio(gradioModelParams, gradioModelName, msg, 
                     base64Image = first;
                 } else if (first && typeof first === 'object') {
                     base64Image = first.image || first.data || first?.result?.image || null;
+                    if (!base64Image && first.url) {
+                        const resp = await axios.get(first.url, { responseType: 'arraybuffer' });
+                        base64Image = Buffer.from(resp.data).toString('base64');
+                        imageMimeType = resp.headers['content-type'] || imageMimeType;
+                    }
                 }
                 if (resultData.length > 1) {
                     if (typeof resultData[1] === 'number') seedUsed = resultData[1];
@@ -8842,6 +8848,11 @@ async function generateImageWithGradio(gradioModelParams, gradioModelName, msg, 
                 }
             } else if (resultData && typeof resultData === 'object') {
                 base64Image = resultData.image || resultData.data || resultData?.result?.image || null;
+                if (!base64Image && resultData.url) {
+                    const resp = await axios.get(resultData.url, { responseType: 'arraybuffer' });
+                    base64Image = Buffer.from(resp.data).toString('base64');
+                    imageMimeType = resp.headers['content-type'] || imageMimeType;
+                }
                 if (typeof resultData.seed === 'number') seedUsed = resultData.seed;
             }
 
@@ -8850,7 +8861,6 @@ async function generateImageWithGradio(gradioModelParams, gradioModelName, msg, 
                 throw new Error("Invalid or empty base64 image data received.");
             }
 
-            let imageMimeType = 'image/png'; // Default for base64 from Gradio, often PNG
             let actualBase64Data = base64Image;
 
             // Check for common base64 prefixes and strip them
