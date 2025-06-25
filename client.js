@@ -1,7 +1,6 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const fs = require('fs');
-const readlineSync = require('readline-sync');
 const path = require('path'); // Required for path.join if AUTH_DIR is constructed with it
 
 // Import configurations from config.js
@@ -9,9 +8,9 @@ const config = require('./config');
 
 // --- AUTH Check and Initialization ---
 const authDir = config.AUTH_DIR || './.wwebjs_auth'; // Use from config or default
-const keepAuthFlag = process.argv.includes('--keep-auth');
+const deleteAuthFlag = process.argv.includes('--delete-auth') || process.argv.includes('--delete-session');
 
-if (process.argv.includes('--delete-auth')) {
+if (deleteAuthFlag) {
     console.log(`--delete-auth flag detected. Removing ${authDir}...`);
     if (fs.existsSync(authDir)) {
         fs.rmSync(authDir, { recursive: true, force: true });
@@ -19,20 +18,8 @@ if (process.argv.includes('--delete-auth')) {
     } else {
         console.log(`ℹ️ Directory ${authDir} not found, nothing to delete.`);
     }
-} else if (!keepAuthFlag) {
-    const shouldDelete = readlineSync.question(`Delete previous session data (${authDir})? (yes/no): `);
-    if (shouldDelete.toLowerCase() === 'yes') {
-        if (fs.existsSync(authDir)) {
-            fs.rmSync(authDir, { recursive: true, force: true });
-            console.log(`🗑️ Deleted ${authDir}. Please scan the QR code.`);
-        } else {
-            console.log(`ℹ️ Directory ${authDir} not found, nothing to delete.`);
-        }
-    } else {
-        console.log(`ℹ️ Attempting to use existing session data from ${authDir}.`);
-    }
 } else {
-    console.log(`ℹ️ --keep-auth flag detected. Attempting to use existing session data from ${authDir} without prompting.`);
+    console.log(`ℹ️ Using session data from ${authDir}. Run with --delete-auth to reset.`);
 }
 
 const client = new Client({
