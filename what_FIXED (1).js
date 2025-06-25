@@ -3206,7 +3206,9 @@ async function generateImageAndGetBuffer(description, imageModel, contextMsg, st
     // הגדרת גוף הבקשה לפי המודל הנבחר
     switch (imageModel) {
         case 'flux-1-schnell':
-            requestBody = { prompt: description, steps: 4, guidance: 0, num_inference_steps: 4, strength: 0.9, width: 512, height: 512 }; // גודל ברירת מחדל לסטיקרים
+            // The Flux model expects only the prompt and a small step count.
+            // Extra parameters like width/height or guidance cause errors.
+            requestBody = { prompt: description, steps: 4 };
             break;
         case 'dreamshaper-8-lcm':
             requestBody = { prompt: description, width: 512, height: 512, num_steps: 8, guidance: 2 }; // LCM models need fewer steps and lower guidance
