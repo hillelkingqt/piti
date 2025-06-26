@@ -91,6 +91,16 @@ function normalizeMsgId(id) {
     return id ? id.replace(/^true_/, '').replace(/^false_/, '') : id;
 }
 
+// Format a WhatsApp ID into a friendly phone number for display
+function phone(id) {
+    if (!id) return '';
+    const raw = String(id).split('@')[0].split(':')[0].replace(/\D/g, '');
+    if (raw.startsWith('972')) {
+        return '0' + raw.slice(3);
+    }
+    return raw;
+}
+
 function containsTriggerWord(text) {
     if (!text) return false;
     const triggers = ["פיתי", "פיטי", "פיטע", "פיתיי", "piti", "פיטא", "פיםי", "פתי", "תיתי", "טיטי", "טיתי", "פיתוש", "פטי", "פטוש", "פיטו", "פיטוש", "פיתיא", "פטושקה", "פייטי", "פיתיא", "פיטיי", "פיתושקה"];
