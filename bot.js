@@ -1410,15 +1410,32 @@ async function handleGroupManagementAction(actionData, targetMsg) {
         // אם Gemini זיהתה שהכוונה היא למשתתף מהודעה מצוטטת, ננסה לחלץ אותו
         if (quotedParticipantTarget === true && finalParticipantIds.length === 0) {
             if (targetMsg.hasQuotedMsg) {
-                const originalQuotedMsgBySender = await targetMsg.getQuotedMessage(); // ההודעה שהמשתמש המבקש ציטט
-                const participantId = originalQuotedMsgBySender.author || originalQuotedMsgBySender.from;
-                if (participantId) {
-                    const normalizedId = getBaseIdForOwnerCheck(participantId);
-                    finalParticipantIds.push(normalizedId);
-                    console.log(`[GroupMgmt] Identified participant ${normalizedId} from user's quoted message.`);
+                const originalQuotedMsgBySender = await targetMsg.getQuotedMessage();
+                
+                // --- NEW ROBUST PARTICIPANT ID EXTRACTION ---
+                // Try to get a valid phone number-based ID first.
+                // _data.author is often more reliable than the top-level 'author'.
+                let participantId = originalQuotedMsgBySender._data.author || originalQuotedMsgBySender.author || originalQuotedMsgBySender.from;
+                
+                if (participantId && typeof participantId === 'string') {
+                    // Further validation: Ensure it looks like a real WhatsApp ID for a user.
+                    // A real user ID ends with @c.us and has a number before it.
+                    // The problematic ID was '104900432232513@c.us', which isn't a phone number.
+                    // Let's check if the part before @ is a valid number format (e.g., starts with 972 or other country codes).
+                    const userPart = participantId.split('@')[0].split(':')[0]; // a.b:c@d.e -> a
+                    
+                    if (/^\d+$/.test(userPart) && userPart.length > 5) { // Simple check: is it all digits and of reasonable length?
+                        finalParticipantIds.push(participantId);
+                        console.log(`[GroupMgmt] Robustly identified participant ${participantId} from user's quoted message.`);
+                    } else {
+                         console.warn(`[GroupMgmt] Extracted a non-standard participant ID: ${participantId}. This might fail. Will not add to list.`);
+                    }
+
                 } else {
-                    console.warn("[GroupMgmt] 'quotedParticipantTarget' is true, but couldn't extract participant ID from user's quoted message.");
+                    console.warn("[GroupMgmt] 'quotedParticipantTarget' is true, but couldn't extract any participant ID from user's quoted message.");
                 }
+                // --- END OF NEW LOGIC ---
+
             } else {
                 console.warn("[GroupMgmt] 'quotedParticipantTarget' is true, but the triggering message did not quote anyone.");
             }
