@@ -10414,7 +10414,7 @@ client.on('message_create', async (msg) => {
 
         if (isCommand) {
             commandHandled = true; // Assume handled if it starts with '/', reset in default
-            console.log(`[message_create OWNER CHECK] Owner command detected from ${authorId}. Body: "${incoming}"`);
+console.log(`[message_create OWNER CHECK] Owner command detected from ${originalAuthorId}. Body: "${incoming}"`);
             if (incoming.startsWith('/s ')) { // שינוי: בדוק /s כאן
                 commandHandled = true; // סמן שטופל
                 const searchQuery = incoming.slice(3).trim(); // קח את הטקסט אחרי /s
