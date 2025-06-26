@@ -8273,10 +8273,16 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
         if (targetMsg) {
             console.log("✅ נמצאה ההודעה להגיב אליה.");
             if (jsonResponse.respond !== false) {
-                const sentMsg = await targetMsg.reply(`פיתי\n\n${jsonResponse.message}`);
-                const normId = normalizeMsgId(sentMsg.id._serialized);
-                botMessageIds.add(normId);
-                repliableMessageIds.add(normId);
+                const sentMsg = await targetMsg.reply(`פיתי\n\n${jsonResponse.message}`).catch(err => {
+                    console.error('Failed to send direct reply:', err);
+                    return null;
+                });
+
+                if (sentMsg?.id) {
+                    const normId = normalizeMsgId(sentMsg.id._serialized);
+                    botMessageIds.add(normId);
+                    repliableMessageIds.add(normId);
+                }
 
                 return;
             } else {
@@ -8349,10 +8355,15 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
 
 
     if (jsonResponse.respond !== false) {
-        const sentMsg = await msg.reply(`פיתי\n\n${jsonResponse.message}`);
-        const normId = normalizeMsgId(sentMsg.id._serialized);
-        botMessageIds.add(normId);
-        repliableMessageIds.add(normId);
+        const sentMsg = await msg.reply(`פיתי\n\n${jsonResponse.message}`).catch(err => {
+            console.error('Failed to send default reply:', err);
+            return null;
+        });
+        if (sentMsg?.id) {
+            const normId = normalizeMsgId(sentMsg.id._serialized);
+            botMessageIds.add(normId);
+            repliableMessageIds.add(normId);
+        }
 
     } else {
         console.log("Gemini בחר לא להגיב במקרה ברירת מחדל (silent mode, single reply default, should not happen).");
