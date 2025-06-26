@@ -1331,26 +1331,17 @@ async function handleGroupManagementAction(actionData, targetMsg) {
     const { subAction, participantIds: rawParticipantIds, value, targetGroupId, message: loadingMessage, replyTo, quotedParticipantTarget } = actionData;
     const currentChatId = targetMsg.id.remote; // ID הצ'אט שבו נשלחה ההודעה
     let chatToManage; // אובייקט הצ'אט (הקבוצה) שעליו נבצע פעולות
-    /* --- OWNER-AUTH CHECK ---------------------------------------- */
-    // בקבוצות sender נמצא בשדה author; בהודעות פרטיות – from
-    // const senderFullId = targetMsg.author || (targetMsg.fromMe ? myId : targetMsg.from); // Old logic
+   const senderIdForCheck = targetMsg.author || myId;
 
-    let effectiveSenderIdForGroupMgmt;
-    if (targetMsg.fromMe) {
-        effectiveSenderIdForGroupMgmt = myId;
-    } else {
-        effectiveSenderIdForGroupMgmt = targetMsg.author || targetMsg.from;
-    }
-
-    const senderBase = getBaseIdForOwnerCheck(effectiveSenderIdForGroupMgmt);
+    const senderBase = getBaseIdForOwnerCheck(senderIdForCheck);
     const ownerBase = getBaseIdForOwnerCheck(myId);
 
     if (senderBase !== ownerBase) {
-        console.log(`[GroupMgmt Auth] Denied. SenderBase: ${senderBase}, OwnerBase: ${ownerBase}, Original TargetMsg.Author: ${targetMsg.author}, TargetMsg.From: ${targetMsg.from}, TargetMsg.FromMe: ${targetMsg.fromMe}`);
+        console.log(`[GroupMgmt Auth] Denied. SenderBase: ${senderBase}, OwnerBase: ${ownerBase}, Original SenderIdForCheck: ${senderIdForCheck}, TargetMsg.Author: ${targetMsg.author}`);
         await targetMsg.reply("⚠️ אין לך הרשאה לביצוע פקודות ניהול בקבוצה זו.");
-        return;                 // חסום לחלוטין את המשך הביצוע
+        return; // חסום לחלוטין את המשך הביצוע
     }
-    /* -------------------------------------------------------------- */
+    console.log(`[GroupMgmt Auth] Granted. SenderBase: ${senderBase}, OwnerBase: ${ownerBase}`);
 
 
     // שלח הודעת טעינה/אישור ראשונית אם סופקה מ-Gemini
