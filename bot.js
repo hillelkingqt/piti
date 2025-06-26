@@ -1413,8 +1413,9 @@ async function handleGroupManagementAction(actionData, targetMsg) {
                 const originalQuotedMsgBySender = await targetMsg.getQuotedMessage(); // ההודעה שהמשתמש המבקש ציטט
                 const participantId = originalQuotedMsgBySender.author || originalQuotedMsgBySender.from;
                 if (participantId) {
-                    finalParticipantIds.push(participantId);
-                    console.log(`[GroupMgmt] Identified participant ${participantId} from user's quoted message.`);
+                    const normalizedId = getBaseIdForOwnerCheck(participantId);
+                    finalParticipantIds.push(normalizedId);
+                    console.log(`[GroupMgmt] Identified participant ${normalizedId} from user's quoted message.`);
                 } else {
                     console.warn("[GroupMgmt] 'quotedParticipantTarget' is true, but couldn't extract participant ID from user's quoted message.");
                 }
