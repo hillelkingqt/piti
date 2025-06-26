@@ -1336,35 +1336,20 @@ async function handleGroupManagementAction(actionData, targetMsg) {
     // const senderFullId = targetMsg.author || (targetMsg.fromMe ? myId : targetMsg.from); // Old logic
 
     let effectiveSenderIdForGroupMgmt;
-    // אם ההודעה היא מהבוט עצמו (כלומר, הבעלים שלח אותה דרך חשבון הבוט)
     if (targetMsg.fromMe) {
-        effectiveSenderIdForGroupMgmt = myId; // myId הוא "972532752474@c.us"
-        console.log(`[GroupMgmt Auth PRE-CHECK] Message is fromMe. Effective sender set to myId: ${myId}`);
+        effectiveSenderIdForGroupMgmt = myId;
     } else {
-        // אם ההודעה היא ממשתמש אחר בקבוצה
         effectiveSenderIdForGroupMgmt = targetMsg.author || targetMsg.from;
-        console.log(`[GroupMgmt Auth PRE-CHECK] Message NOT fromMe. Effective sender based on author/from: ${effectiveSenderIdForGroupMgmt}`);
     }
 
     const senderBase = getBaseIdForOwnerCheck(effectiveSenderIdForGroupMgmt);
     const ownerBase = getBaseIdForOwnerCheck(myId);
 
-    // הוספת לוגים מפורטים יותר לבדיקה
-    console.log(`[GroupMgmt Auth DETAILS]
-    - TargetMsg.fromMe: ${targetMsg.fromMe}
-    - TargetMsg.author: ${targetMsg.author}
-    - TargetMsg.from: ${targetMsg.from}
-    - myId: ${myId}
-    - effectiveSenderIdForGroupMgmt: ${effectiveSenderIdForGroupMgmt}
-    - senderBase (from effectiveSenderId): ${senderBase}
-    - ownerBase (from myId): ${ownerBase}`);
-
     if (senderBase !== ownerBase) {
-        console.log(`[GroupMgmt Auth] Denied. SenderBase: ${senderBase} !== OwnerBase: ${ownerBase}.`);
+        console.log(`[GroupMgmt Auth] Denied. SenderBase: ${senderBase}, OwnerBase: ${ownerBase}, Original TargetMsg.Author: ${targetMsg.author}, TargetMsg.From: ${targetMsg.from}, TargetMsg.FromMe: ${targetMsg.fromMe}`);
         await targetMsg.reply("⚠️ אין לך הרשאה לביצוע פקודות ניהול בקבוצה זו.");
         return;                 // חסום לחלוטין את המשך הביצוע
     }
-    console.log(`[GroupMgmt Auth] Granted. SenderBase: ${senderBase} === OwnerBase: ${ownerBase}.`);
     /* -------------------------------------------------------------- */
 
 
