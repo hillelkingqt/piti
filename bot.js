@@ -8303,12 +8303,20 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
 
                 if (jsonResponse.respond !== false) {
                     const sentMsg = await msg.reply(`פיתי\n\n@${name}\n${jsonResponse.message}`, undefined, {
-                        mentions: [mentionContact]
+                        // whatsapp-web.js no longer accepts Contact objects in the
+                        // mentions array. Pass the contact's ID instead to avoid
+                        // deprecation warnings and potential failures.
+                        mentions: [mentionContact.id._serialized]
+                    }).catch(err => {
+                        console.error('Failed to send mention reply:', err);
+                        return null;
                     });
 
-                    const normId = normalizeMsgId(sentMsg.id._serialized);
-                    botMessageIds.add(normId);
-                    repliableMessageIds.add(normId);
+                    if (sentMsg?.id) {
+                        const normId = normalizeMsgId(sentMsg.id._serialized);
+                        botMessageIds.add(normId);
+                        repliableMessageIds.add(normId);
+                    }
 
                     return;
                 } else {
@@ -8323,14 +8331,20 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
         console.error("❌ שגיאה בטיפול בלוגיקת replyTo:", error);
 
         // שליחת הודעת שגיאה למשתמש
-        const sentMsg = await msg.reply("פיתי\n\nאירעה שגיאה בזמן ניסיון התגובה.");
+        const sentMsg = await msg.reply("פיתי\n\nאירעה שגיאה בזמן ניסיון התגובה.")
+            .catch(err => {
+                console.error('Failed to send error notice:', err);
+                return null;
+            });
 
-        // נרמול ה-ID (מסיר ‎true_/false_‎ אם קיימים)
-        const normId = normalizeMsgId(sentMsg.id._serialized);
+        if (sentMsg?.id) {
+            // נרמול ה-ID (מסיר ‎true_/false_‎ אם קיימים)
+            const normId = normalizeMsgId(sentMsg.id._serialized);
 
-        // שמירה במבני-הנתונים הנכונים
-        botMessageIds.add(normId);
-        repliableMessageIds.add(normId);
+            // שמירה במבני-הנתונים הנכונים
+            botMessageIds.add(normId);
+            repliableMessageIds.add(normId);
+        }
     }
 
 
