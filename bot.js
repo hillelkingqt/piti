@@ -1469,28 +1469,41 @@ async function handleGroupManagementAction(actionData, targetMsg) {
                 await targetMsg.reply(`✅ המשתתפ(ים) הוסרו בהצלחה מהקבוצה.`, undefined, { quotedMessageId: replyTo });
                 break;
             case 'add_participant':
-                const addResult = await chatToManage.addParticipants(finalParticipantIds);
+                const addResult = await chatToManage.addParticipants(finalParticipantIds, { autoSendInviteV4: true });
                 const replies = [];
 
-                for (const id of finalParticipantIds) {
-                    const res = addResult[id];
+                // Helper function to format phone numbers nicely for replies
+                const phone = (id) => id.replace('@c.us', '');
 
-                    if (res?.code === 200 || res?.message == null) {
-                        replies.push(`✅ ${phone(id)} נוסף בהצלחה!`);
-                    } else if (res?.code === 403) {
+                for (const id in addResult) {
+                    const res = addResult[id];
+                    const friendlyNumber = phone(id);
+
+                    if (res.code === 200 || res.message === null) {
+                        replies.push(`✅ ${friendlyNumber} נוסף בהצלחה!`);
+                    } else if (res.code === 403) {
+                        // 403 can mean they need an invite link
                         if (res.isInviteV4Sent) {
-                            replies.push(`📩 נשלחה הזמנה פרטית ל-${phone(id)}. עליו ללחוץ "Join".`);
+                             replies.push(`📩 נשלחה הזמנה פרטית ל-${friendlyNumber}. הוא/היא צריכים לאשר את ההזמנה כדי להצטרף.`);
                         } else {
-                            replies.push(`⏳ ${phone(id)} ממתין לאישור בלשונית "Pending requests".`);
+                            replies.push(`⏳ המשתמש ${friendlyNumber} צריך לאשר את הבקשה להצטרפות (נמצא ב-Pending requests בקבוצה).`);
                         }
-                    } else if (res?.code === 409) {
-                        replies.push(`ℹ️ ${phone(id)} כבר נמצא בקבוצה.`);
+                    } else if (res.code === 409) {
+                        replies.push(`ℹ️ ${friendlyNumber} כבר חבר/ה בקבוצה.`);
+                    } else if (res.code === 408) {
+                         replies.push(`⚠️ המשתמש ${friendlyNumber} יצא לאחרונה מהקבוצה. יש לחכות לפני שניתן להוסיף אותו שוב.`);
                     } else {
-                        replies.push(`⚠️ שגיאה בהוספת ${phone(id)} (קוד ${res?.code}).`);
+                        // Catch-all for other errors like 400 (Bad Request), 401, etc.
+                        replies.push(`⚠️ שגיאה בהוספת ${friendlyNumber}. קוד: ${res.code}. סיבה אפשרית: המספר לא באנשי הקשר, חסם אותך, או שהגדרות הפרטיות שלו לא מאפשרות הוספה.`);
+                        console.error(`[GroupMgmt AddParticipant] Error for ${id}:`, res); // Log the full error object
                     }
                 }
 
-                await targetMsg.reply(replies.join('\n'), undefined, { quotedMessageId: replyTo });
+                if (replies.length > 0) {
+                    await targetMsg.reply(replies.join('\n'), undefined, { quotedMessageId: replyTo });
+                } else {
+                    await targetMsg.reply("לא היו משתתפים תקינים לנסות להוסיף.", undefined, { quotedMessageId: replyTo });
+                }
                 break;
 
 
