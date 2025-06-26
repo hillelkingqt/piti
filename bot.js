@@ -10340,13 +10340,18 @@ client.on('message_create', async (msg) => {
 
     // ID specifically for permission checking
     let effectiveSenderIdForPermissions;
-    if (isFromMe) {
-        // If the message is from the bot's own account (which is the owner's account),
-        // the sender for permission purposes is considered the owner (myId).
+    if (msg.fromMe) {
+        // Message sent from the account the bot is running on
         effectiveSenderIdForPermissions = myId;
+    } else if (msg.author) {
+        // In groups this should contain the real sender
+        effectiveSenderIdForPermissions = msg.author;
+    } else if (msg.id && msg.id.participant) {
+        // Fallback for some cases where author is missing
+        effectiveSenderIdForPermissions = msg.id.participant;
     } else {
-        // For messages from others, use the originalAuthorId (msg.author in groups, msg.from in private)
-        effectiveSenderIdForPermissions = originalAuthorId;
+        // Private chats fallback
+        effectiveSenderIdForPermissions = msg.from;
     }
     
     const messageSenderBaseId = getBaseIdForOwnerCheck(effectiveSenderIdForPermissions);
