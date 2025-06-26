@@ -1,4 +1,4 @@
-﻿
+
 const { Client, LocalAuth, MessageMedia, Contact, Poll } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const axios = require('axios');
@@ -1333,11 +1333,20 @@ async function handleGroupManagementAction(actionData, targetMsg) {
     let chatToManage; // אובייקט הצ'אט (הקבוצה) שעליו נבצע פעולות
     /* --- OWNER-AUTH CHECK ---------------------------------------- */
     // בקבוצות sender נמצא בשדה author; בהודעות פרטיות – from
-    const senderFullId = targetMsg.author || (targetMsg.fromMe ? myId : targetMsg.from);
-    const senderBase = getBaseIdForOwnerCheck(senderFullId);
+    // const senderFullId = targetMsg.author || (targetMsg.fromMe ? myId : targetMsg.from); // Old logic
+
+    let effectiveSenderIdForGroupMgmt;
+    if (targetMsg.fromMe) {
+        effectiveSenderIdForGroupMgmt = myId;
+    } else {
+        effectiveSenderIdForGroupMgmt = targetMsg.author || targetMsg.from;
+    }
+
+    const senderBase = getBaseIdForOwnerCheck(effectiveSenderIdForGroupMgmt);
     const ownerBase = getBaseIdForOwnerCheck(myId);
 
     if (senderBase !== ownerBase) {
+        console.log(`[GroupMgmt Auth] Denied. SenderBase: ${senderBase}, OwnerBase: ${ownerBase}, Original TargetMsg.Author: ${targetMsg.author}, TargetMsg.From: ${targetMsg.from}, TargetMsg.FromMe: ${targetMsg.fromMe}`);
         await targetMsg.reply("⚠️ אין לך הרשאה לביצוע פקודות ניהול בקבוצה זו.");
         return;                 // חסום לחלוטין את המשך הביצוע
     }
@@ -10325,15 +10334,29 @@ client.on('message_create', async (msg) => {
     // --------------------------------------------------------------
     const isFromMe = msg.fromMe;
     const chatId = isFromMe ? msg.to : msg.from;
-    const authorId = msg.author || (isFromMe ? myId : msg.from);
+    
+    // Original authorId for general context (logging, etc.)
+    const originalAuthorId = msg.author || (isFromMe ? myId : msg.from); 
 
-    // הוסיפו מיד לאחר הגדרת authorId:
-    const messageSenderBaseId = getBaseIdForOwnerCheck(authorId);
+    // ID specifically for permission checking
+    let effectiveSenderIdForPermissions;
+    if (isFromMe) {
+        // If the message is from the bot's own account (which is the owner's account),
+        // the sender for permission purposes is considered the owner (myId).
+        effectiveSenderIdForPermissions = myId;
+    } else {
+        // For messages from others, use the originalAuthorId (msg.author in groups, msg.from in private)
+        effectiveSenderIdForPermissions = originalAuthorId;
+    }
+    
+    const messageSenderBaseId = getBaseIdForOwnerCheck(effectiveSenderIdForPermissions);
     const ownerBaseId = getBaseIdForOwnerCheck(myId);
-    const contactNumber = (authorId || '').split('@')[0].split(':')[0];
+    
+    const contactNumber = (originalAuthorId || '').split('@')[0].split(':')[0]; // Use originalAuthorId for contactNumber
     const isGroup = chatId.includes('@g.us');
 
-    console.log(`[message_create CONTEXT] MsgID: ${msg.id._serialized}, From: ${msg.from}, Author: ${authorId || 'N/A'}, To: ${msg.to}, isGroup: ${isGroup}, isFromMe: ${isFromMe}, ChatID: ${chatId}, SenderNum: ${contactNumber}`);
+    // Updated log to show both original msg.author and the ID used for permission check
+    console.log(`[message_create CONTEXT] MsgID: ${msg.id._serialized}, From: ${msg.from}, Msg.Author: ${msg.author || 'N/A'}, OriginalAuthorId: ${originalAuthorId}, EffectiveSenderIdForPerms: ${effectiveSenderIdForPermissions}, To: ${msg.to}, isGroup: ${isGroup}, isFromMe: ${isFromMe}, ChatID: ${chatId}, SenderNum: ${contactNumber}`);
 
     // --------------------------------------------------------------
     // SECTION 3 + 4: Determine Sender & Unified Logging
@@ -10388,7 +10411,7 @@ client.on('message_create', async (msg) => {
         messageSenderBaseId !== ownerBaseId &&
         restrictedPrefixes.some(cmd => incoming.startsWith(cmd))
     ) {
-        console.log(`[UNAUTHORIZED COMMAND] ${authorId} attempted: ${incoming}`);
+        console.log(`[UNAUTHORIZED COMMAND] User: ${originalAuthorId} (Normalized for check: ${messageSenderBaseId}) attempted: ${incoming}`);
         await msg.reply('⚠️ אין לך הרשאה להשתמש בפקודה זו.');
         return;
     }
