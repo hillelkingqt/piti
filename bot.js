@@ -146,10 +146,10 @@ function delay(ms) {
 }
 
 function getRandomGeminiEndpoint(hasMedia = false) {
-    const baseUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-pro-exp:generateContent";
+    const baseUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent";
     const apiKey = apiKeyManager.getRandomApiKey();
     if (hasMedia) {
-        return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-pro-exp:generateContent?key=${apiKey}`;
+        return `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${apiKey}`;
     }
     return `${baseUrl}?key=${apiKey}`;
 }
