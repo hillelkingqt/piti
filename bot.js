@@ -146,10 +146,10 @@ function delay(ms) {
 }
 
 function getRandomGeminiEndpoint(hasMedia = false) {
-    const baseUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-04-17-thinking:generateContent";
+    const baseUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-preview-03-25:generateContent";
     const apiKey = apiKeyManager.getRandomApiKey();
     if (hasMedia) {
-        return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-04-17-thinking:generateContent?key=${apiKey}`;
+        return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-preview-03-25:generateContent?key=${apiKey}`;
     }
     return `${baseUrl}?key=${apiKey}`;
 }
@@ -334,7 +334,7 @@ const { Blob } = require("buffer");
 // ---------- Helper: בוחר מפתח API אקראי ובונה את ה-URL ----------
 function getRandomGeminiImageEndpoint() {
     const apiKey = apiKeyManager.getRandomApiKey();             // מנגנון המפתחות הקיים שלך
-    return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent?key=${apiKey}`;
+    return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${apiKey}`;
 }
 async function handleGenerateGraphAction(plotData, targetMsg, chatPaths) {
     const targetChatId = targetMsg?.id?.remote;
