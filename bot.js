@@ -337,8 +337,8 @@ function getRandomGeminiImageEndpoint() {
     return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent?key=${apiKey}`;
 }
 async function handleGenerateGraphAction(plotData, targetMsg, chatPaths) {
-    const targetChatId = targetMsg.id.remote;
-    const replyToId = plotData.replyTo || targetMsg.id._serialized;
+    const targetChatId = targetMsg?.id?.remote;
+    const replyToId = plotData.replyTo || targetMsg?.id?._serialized;
 
     console.log("📊 [handlePlotGeneration] Received plot request:", JSON.stringify(plotData, null, 2).substring(0, 1000));
 
@@ -451,14 +451,14 @@ async function handleGenerateGraphAction(plotData, targetMsg, chatPaths) {
                 caption: captionText,
                 quotedMessageId: replyToId
             });
-            console.log(`   ✅ Media sent successfully with quote. Message ID: ${sentMediaMsg.id._serialized}`);
+            console.log(`   ✅ Media sent successfully with quote. Message ID: ${sentMediaMsg?.id?._serialized}`);
         } catch (quoteError) {
             console.warn(`   ⚠️ Failed to send media with quote to ${replyToId}. Error: ${quoteError.message}. Attempting to send without quote...`);
             try {
                 sentMediaMsg = await client.sendMessage(targetChatId, media, {
                     caption: captionText
                 });
-                console.log(`   ✅ Media sent successfully WITHOUT quote. Message ID: ${sentMediaMsg.id._serialized}`);
+                console.log(`   ✅ Media sent successfully WITHOUT quote. Message ID: ${sentMediaMsg?.id?._serialized}`);
             } catch (sendError) {
                 console.error(`   ❌❌ Failed to send media even without quote. Error: ${sendError.message}`);
                 throw sendError; // זרוק את שגיאת השליחה כדי שה-catch הראשי יתפוס אותה
@@ -532,7 +532,7 @@ async function handleImageEditAction(editData, targetMsg, chatPaths) {
     } catch {
         const chat = await targetMsg.getChat();
         const messages = await chat.fetchMessages({ limit: 50 });
-        imageMsg = messages.find(m => m.id._serialized.includes(imageMessageId));
+        imageMsg = messages.find(m => m?.id?._serialized.includes(imageMessageId));
     }
     if (!imageMsg || !imageMsg.hasMedia || !imageMsg.type.startsWith("image")) {
         await targetMsg.reply("⚠️ לא מצאתי תמונה לעריכה.", undefined, { quotedMessageId: replyTo });
@@ -611,7 +611,7 @@ async function handleImageEditAction(editData, targetMsg, chatPaths) {
         `edited.${ext}`
     );
 
-    await client.sendMessage(targetMsg.id.remote, mediaToSend, {
+    await client.sendMessage(targetMsg?.id?.remote, mediaToSend, {
         caption: "הנה התמונה לאחר העריכה:",
         quotedMessageId: replyTo
     });
@@ -807,7 +807,7 @@ async function getSenderName(msgItem) {
         const contact = await msgItem.getContact();
         let name = contact.pushname || contact.name;
         const number = contact.number; // This is usually just the number part like '972532752474'
-        const senderFullId = contact.id._serialized; // e.g., "972501234567@c.us"
+        const senderFullId = contact?.id?._serialized; // e.g., "972501234567@c.us"
 
         // החלק המרכזי של myId הוא מספר הטלפון לפני ה-@
         const ownerFullId = myId; // "972532752474@c.us"
@@ -912,7 +912,7 @@ function getLocalTimestamp() {
 }
 
 async function sendAndLogMessage(chat, messageText, safeName) {
-    const chatPaths = getChatPaths(chat.id._serialized, safeName);
+    const chatPaths = getChatPaths(chat?.id?._serialized, safeName);
     const filePath = chatPaths.historyFile;
     fs.mkdirSync(chatPaths.chatDir, { recursive: true });
     const line = `[ID: auto_generated] פיתי: ${messageText}\n`;
@@ -922,7 +922,7 @@ async function sendAndLogMessage(chat, messageText, safeName) {
 
 
 async function safelyAppendMessage(msg, senderName) {
-    const msgId = msg.id._serialized; // This is the raw ID
+    const msgId = msg?.id?._serialized; // This is the raw ID
     if (writtenMessageIds.has(msgId)) return;
     writtenMessageIds.add(msgId);
     // const timestampISO = new Date().toISOString(); // REMOVE THIS LINE
@@ -936,7 +936,7 @@ async function safelyAppendMessage(msg, senderName) {
     try {
         chat = await msg.getChat();
         safeName = await getSafeNameForChat(chat);
-        chatPaths = getChatPaths(chat.id._serialized, safeName);
+        chatPaths = getChatPaths(chat?.id?._serialized, safeName);
         chatFilePath = chatPaths.historyFile;
 
         // Ensure directories exist FIRST
@@ -947,7 +947,7 @@ async function safelyAppendMessage(msg, senderName) {
         if (msg.hasQuotedMsg) {
             try {
                 const quoted = await msg.getQuotedMessage();
-                const quotedId = quoted.id._serialized;
+                const quotedId = quoted?.id?._serialized;
                 const quotedBodyShort = quoted.body?.slice(0, 25).replace(/\n/g, ' ') || '[מדיה]';
                 replySnippet = `(↩️ ל-ID:${quotedId} "${quotedBodyShort}...")\n`;
             } catch (err) {
@@ -1045,8 +1045,8 @@ async function safelyAppendMessage(msg, senderName) {
 // Helper function for consistent safe name generation
 async function getSafeNameForChat(chat) {
     try {
-        const contact = await getCachedContact(chat.id._serialized);
-        const chatIdUserPart = chat.id?.user || (chat.id?._serialized ? chat.id._serialized.split('@')[0] : null);
+        const contact = await getCachedContact(chat?.id?._serialized);
+        const chatIdUserPart = chat.id?.user || (chat.id?._serialized ? chat?.id?._serialized.split('@')[0] : null);
         const number = contact?.number || chatIdUserPart || 'unknown_number'; // More robust fallback for number
 
         let name;
@@ -1094,8 +1094,8 @@ async function getSafeNameForChat(chat) {
 }
 // פונקציה חדשה לסיכום היסטוריה
 async function handleSummarizeHistoryAction(historyData, targetMsg, chatPaths) {
-    const targetChatId = targetMsg.id.remote;
-    const replyToId = historyData.replyTo || targetMsg.id._serialized;
+    const targetChatId = targetMsg?.id?.remote;
+    const replyToId = historyData.replyTo || targetMsg?.id?._serialized;
     const timeRangeDesc = historyData.time_range_description;
 
     // שלח הודעת "מעבד..."
@@ -1194,16 +1194,16 @@ Summary:`;
 
 
 async function handleVoiceMessage(msg) {
-    console.log(`🎤 [handleVoiceMessage] Processing voice message ${msg.id._serialized}`);
+    console.log(`🎤 [handleVoiceMessage] Processing voice message ${msg?.id?._serialized}`);
     if (!msg.hasMedia || (msg.type !== 'audio' && msg.type !== 'ptt')) {
-        console.warn(`[handleVoiceMessage] Message ${msg.id._serialized} is not a valid voice message.`);
+        console.warn(`[handleVoiceMessage] Message ${msg?.id?._serialized} is not a valid voice message.`);
         return null; // לא הודעת קול תקינה
     }
 
     try {
         const media = await msg.downloadMedia();
         if (!media || !media.data) {
-            console.error(`[handleVoiceMessage] Failed to download media for ${msg.id._serialized}.`);
+            console.error(`[handleVoiceMessage] Failed to download media for ${msg?.id?._serialized}.`);
             await msg.reply("⚠️ נכשלתי בהורדת ההודעה הקולית.");
             return null;
         }
@@ -1253,8 +1253,8 @@ async function handleVoiceMessage(msg) {
 
 // פונקציה חדשה לטיפול בסיכום
 async function handleSummarizeAction(summaryData, targetMsg) {
-    const targetChatId = targetMsg.id.remote;
-    const replyToId = summaryData.replyTo || targetMsg.id._serialized;
+    const targetChatId = targetMsg?.id?.remote;
+    const replyToId = summaryData.replyTo || targetMsg?.id?._serialized;
     let textToSummarize = summaryData.content_to_summarize;
     const linkToSummarize = summaryData.link_to_summarize;
 
@@ -1301,7 +1301,7 @@ async function handleSummarizeAction(summaryData, targetMsg) {
 
 client.on('message_create', async (msg) => {
     // 1. לוג הודעות יוצאות של הבוט עצמו (אם fromMe + התחלת פיתי\n\n)
-    if (msg.fromMe && botMessageIds.has(msg.id._serialized)) {
+    if (msg.fromMe && botMessageIds.has(msg?.id?._serialized)) {
         let chat;
         let safeName = 'error_path_fromMe';
         let chatPaths;
@@ -1309,7 +1309,7 @@ client.on('message_create', async (msg) => {
         try {
             chat = await msg.getChat();
             safeName = await getSafeNameForChat(chat); // שימוש בפונקציית העזר
-            chatPaths = getChatPaths(chat.id._serialized, safeName);
+            chatPaths = getChatPaths(chat?.id?._serialized, safeName);
             chatFilePath = chatPaths.historyFile;
 
             fs.mkdirSync(chatPaths.chatDir, { recursive: true }); // ודא שהתיקייה קיימת
@@ -1317,7 +1317,7 @@ client.on('message_create', async (msg) => {
 
             const timestampISO = new Date().toISOString(); // קבל חותמת זמן
             const messageBodyForLog = typeof msg.body === 'string' ? msg.body : (msg.type === 'sticker' ? '[סטיקר]' : '[מדיה או אובייקט]');
-            const line = `[${timestampISO}] [ID: ${msg.id._serialized}] פיתי: ${messageBodyForLog}\n`; // <-- הוסף חותמת זמן
+            const line = `[${timestampISO}] [ID: ${msg?.id?._serialized}] פיתי: ${messageBodyForLog}\n`; // <-- הוסף חותמת זמן
             fs.appendFileSync(chatFilePath, line, 'utf8'); // כתוב לקובץ
             console.log(`[message_create fromMe POST-APPEND] Appended outgoing msg to: '${chatFilePath}'`);
 
@@ -1339,13 +1339,13 @@ async function handleGroupManagementAction(actionData, targetMsg) {
     // actionData הוא אובייקט ה-JSON ש-Gemini החזירה
 
     const { subAction, participantIds: rawParticipantIds, value, targetGroupId, message: loadingMessage, replyTo, quotedParticipantTarget } = actionData;
-    const currentChatId = targetMsg.id.remote; // ID הצ'אט שבו נשלחה ההודעה
+    const currentChatId = targetMsg?.id?.remote; // ID הצ'אט שבו נשלחה ההודעה
     let chatToManage; // אובייקט הצ'אט (הקבוצה) שעליו נבצע פעולות
     let effectiveSenderIdForCheck;
     if (targetMsg.fromMe) {
         // If the message is from the bot's own account, check if it's an AI reply or a command from the owner.
         // If it's not a known bot message, it's the owner sending a command.
-        effectiveSenderIdForCheck = botMessageIds.has(targetMsg.id._serialized) ? 'bot_id' : myId;
+        effectiveSenderIdForCheck = botMessageIds.has(targetMsg?.id?._serialized) ? 'bot_id' : myId;
     } else {
         // If the message is from another user, get their ID from 'author' in groups or 'from' in private.
         effectiveSenderIdForCheck = targetMsg.author || targetMsg.from;
@@ -1390,7 +1390,7 @@ async function handleGroupManagementAction(actionData, targetMsg) {
         }
 
         // בדוק אם הבוט הוא מנהל בקבוצה (נדרש לרוב הפעולות)
-        const botParticipant = chatToManage.participants.find(p => p.id._serialized === client.info.wid._serialized);
+        const botParticipant = chatToManage.participants.find(p => p?.id?._serialized === client.info.wid._serialized);
         const botIsAdmin = botParticipant && botParticipant.isAdmin;
 
         if (!botIsAdmin &&
@@ -1547,7 +1547,7 @@ async function handleGroupManagementAction(actionData, targetMsg) {
                 console.warn(`[GroupMgmt] Unknown subAction: ${subAction}`);
                 await targetMsg.reply(`⚠️ תת-פעולה לא מוכרת לניהול קבוצה: ${subAction}`, undefined, { quotedMessageId: replyTo });
         }
-        console.log(`[GroupMgmt] Action '${subAction}' attempted for chat ${chatToManage.id._serialized}.`);
+        console.log(`[GroupMgmt] Action '${subAction}' attempted for chat ${chatToManage?.id?._serialized}.`);
 
     } catch (error) {
         console.error(`❌ Error during group management action '${subAction}':`, error);
@@ -1564,7 +1564,7 @@ async function handleGroupManagementAction(actionData, targetMsg) {
 }
 // 1. Send Email Action
 async function handleSendEmailAction(replyData, targetMsg, chatPaths) {
-    const targetChatId = targetMsg.id.remote;
+    const targetChatId = targetMsg?.id?.remote;
     try {
         const to = replyData.to;
         const subject = replyData.subject;
@@ -1718,8 +1718,8 @@ function pcmToWav(pcm, sampleRate, channels, bits) {
 // 2. Text-to-Speech Action
 async function handleTTSAction(replyData, targetMsg) {
     const textToSpeak = replyData.text;
-    const replyToId = replyData.replyTo || targetMsg.id._serialized;
-    const targetChatId = targetMsg.id.remote;
+    const replyToId = replyData.replyTo || targetMsg?.id?._serialized;
+    const targetChatId = targetMsg?.id?.remote;
     const chosenVoice = replyData.voice;
     const preMessageText = replyData.preMessage;
 
@@ -1881,7 +1881,7 @@ async function streamToString(stream) {
 async function handleGenerateBarcodeAction(replyData, targetMsg) {
     const textToEncode = replyData.text;
     const caption = replyData.message || "📦 הנה הברקוד שביקשת:";
-    const targetChatId = targetMsg.id.remote;
+    const targetChatId = targetMsg?.id?.remote;
 
     if (!textToEncode) {
         console.warn("[handleGenerateBarcodeAction] No text provided for barcode.");
@@ -1901,7 +1901,7 @@ async function handleGenerateBarcodeAction(replyData, targetMsg) {
 
         const media = MessageMedia.fromFilePath(barcodePath);
         // Send as a new message, optionally quoting
-        await client.sendMessage(targetChatId, media, { caption: caption, quotedMessageId: targetMsg.id._serialized });
+        await client.sendMessage(targetChatId, media, { caption: caption, quotedMessageId: targetMsg?.id?._serialized });
         console.log("[handleGenerateBarcodeAction] Barcode sent successfully.");
 
         // Clean up
@@ -1923,7 +1923,7 @@ async function handleGenerateBarcodeAction(replyData, targetMsg) {
 
 // 4. Reminder Action
 async function handleReminderAction(replyData, targetMsg) {
-    const targetChatId = targetMsg.id.remote;
+    const targetChatId = targetMsg?.id?.remote;
     try {
         const reminderTime = await parseReminderTime(replyData.time); // Use the existing parser function
         if (reminderTime) {
@@ -1950,7 +1950,7 @@ async function handleReminderAction(replyData, targetMsg) {
 
 // 5. Timer Action
 async function handleTimerAction(replyData, targetMsg) {
-    const targetChatId = targetMsg.id.remote;
+    const targetChatId = targetMsg?.id?.remote;
     try {
         const durationMinutes = parseInt(replyData.duration, 10);
         if (!isNaN(durationMinutes) && durationMinutes > 0) {
@@ -2001,7 +2001,7 @@ async function handleScheduleAddAction(replyData, targetMsg) {
 
 // 7. Shopping List Action
 async function handleShoppingListAction(replyData, targetMsg) {
-    const chatId = targetMsg.id.remote; // Shopping lists are per-chat
+    const chatId = targetMsg?.id?.remote; // Shopping lists are per-chat
     try {
         const listType = replyData.list_type;
         const item = replyData.item;
@@ -2065,7 +2065,7 @@ async function handleShoppingListAction(replyData, targetMsg) {
 
 // 8. Habit Track Action
 async function handleHabitTrackAction(replyData, targetMsg) {
-    const chatId = targetMsg.id.remote; // Habit tracking is per-chat
+    const chatId = targetMsg?.id?.remote; // Habit tracking is per-chat
     try {
         const habitName = replyData.habit;
         const status = replyData.status;
@@ -2129,7 +2129,7 @@ async function handleCreateFileAction(replyData, targetMsg, chatPaths) {
         const fullFilename = `${filename}.${fileType}`;
         const filesDir = chatPaths.filesDir;
         const generatedFilesIndex = chatPaths.generatedFilesIndex;
-        const targetChatId = targetMsg.id.remote;
+        const targetChatId = targetMsg?.id?.remote;
 
         if (typeof fileContent === 'undefined') {
             console.warn("[handleCreateFileAction] fileContent is missing.");
@@ -2146,19 +2146,19 @@ async function handleCreateFileAction(replyData, targetMsg, chatPaths) {
         const caption = replyData.message || `AI\n\n📁 הנה קובץ ${fullFilename} שיצרתי.`;
 
         // Send the file to the target chat, quoting the target message
-        const sentMediaMsg = await client.sendMessage(targetChatId, media, { caption: caption, quotedMessageId: targetMsg.id._serialized });
+        const sentMediaMsg = await client.sendMessage(targetChatId, media, { caption: caption, quotedMessageId: targetMsg?.id?._serialized });
         console.log(`[handleCreateFileAction] File sent to ${targetChatId}`);
 
         // Log this bot message manually if needed (the reply wrapper might not catch media sends from client.sendMessage)
         // Example manual log:
-        if (sentMediaMsg && sentMediaMsg.id && !writtenMessageIds.has(sentMediaMsg.id._serialized)) {
-            const line = `[ID: ${sentMediaMsg.id._serialized}] פיתי: [מדיה: ${media.mimetype || 'unknown type'}]\n`;
+        if (sentMediaMsg && sentMediaMsg.id && !writtenMessageIds.has(sentMediaMsg?.id?._serialized)) {
+            const line = `[ID: ${sentMediaMsg?.id?._serialized}] פיתי: [מדיה: ${media.mimetype || 'unknown type'}]\n`;
             fs.appendFileSync(chatPaths.historyFile, line, 'utf8');
-            writtenMessageIds.add(sentMediaMsg.id._serialized);
-            const normId = normalizeMsgId(sentMediaMsg.id._serialized);
+            writtenMessageIds.add(sentMediaMsg?.id?._serialized);
+            const normId = normalizeMsgId(sentMediaMsg?.id?._serialized);
             botMessageIds.add(normId);
             repliableMessageIds.add(normId);
-            console.log(`[handleCreateFileAction] Manually logged sent media message ${sentMediaMsg.id._serialized}`);
+            console.log(`[handleCreateFileAction] Manually logged sent media message ${sentMediaMsg?.id?._serialized}`);
         }
 
 
@@ -2187,7 +2187,7 @@ async function handleCreateFileAction(replyData, targetMsg, chatPaths) {
 
 // 10. Resend File Action
 async function handleResendFileAction(replyData, targetMsg) {
-    const targetChatId = targetMsg.id.remote;
+    const targetChatId = targetMsg?.id?.remote;
     try {
         const filePath = replyData.filePath; // This should be the absolute path from the prompt
         const caption = replyData.message || "📁 הנה הקובץ שביקשת שוב:";
@@ -2200,7 +2200,7 @@ async function handleResendFileAction(replyData, targetMsg) {
         if (fs.existsSync(filePath)) {
             const media = MessageMedia.fromFilePath(filePath);
             // Send to the target chat, quoting the target message
-            await client.sendMessage(targetChatId, media, { caption: caption, quotedMessageId: targetMsg.id._serialized });
+            await client.sendMessage(targetChatId, media, { caption: caption, quotedMessageId: targetMsg?.id?._serialized });
             console.log(`[handleResendFileAction] Resent file ${filePath} to ${targetChatId}`);
         } else {
             console.warn(`[handleResendFileAction] File not found at path: ${filePath}`);
@@ -2214,7 +2214,7 @@ async function handleResendFileAction(replyData, targetMsg) {
 
 // 11. Send Contact Action
 async function handleContactAction(replyData, targetMsg) {
-    const targetChatId = targetMsg.id.remote;
+    const targetChatId = targetMsg?.id?.remote;
     try {
         const contactName = replyData.contactName;
         if (!contactName) {
@@ -2229,9 +2229,9 @@ async function handleContactAction(replyData, targetMsg) {
         );
 
         if (matched) {
-            const contactCard = await client.getContactById(matched.id._serialized);
+            const contactCard = await client.getContactById(matched?.id?._serialized);
             // Send the contact card to the target chat
-            await client.sendMessage(targetChatId, contactCard, { quotedMessageId: targetMsg.id._serialized });
+            await client.sendMessage(targetChatId, contactCard, { quotedMessageId: targetMsg?.id?._serialized });
             // Optionally send a preceding message
             if (replyData.message) {
                 await targetMsg.reply(replyData.message);
@@ -2256,7 +2256,7 @@ async function findMessageMedia(messageId, contextMsg, mediaType = 'image' | 'vi
         const chat = await contextMsg.getChat();
         const messages = await chat.fetchMessages({ limit: 50 });
         const normalize = id => id?.replace(/^true_/, "").replace(/^false_/, "");
-        targetMediaMsg = messages.find(m => normalize(m.id._serialized) === normalize(messageId));
+        targetMediaMsg = messages.find(m => normalize(m?.id?._serialized) === normalize(messageId));
     }
 
     if (!targetMediaMsg) {
@@ -2290,8 +2290,8 @@ async function findMessageMedia(messageId, contextMsg, mediaType = 'image' | 'vi
 // Main video generation handler function
 async function handleVideoGenerationAction(videoData, targetMsg, chatPaths) {
     const LTX_GRADIO_SPACE = "Lightricks/ltx-video-distilled"; // Space URL
-    const targetChatId = targetMsg.id.remote;
-    const replyToId = videoData.replyTo || targetMsg.id._serialized; // ID of the user's original request
+    const targetChatId = targetMsg?.id?.remote;
+    const replyToId = videoData.replyTo || targetMsg?.id?._serialized; // ID of the user's original request
 
     console.log(`[handleVideoGen LTX] Starting video generation. Mode: ${videoData.mode}, Prompt: "${videoData.prompt.substring(0, 50)}..."`);
 
@@ -2350,8 +2350,8 @@ async function handleVideoGenerationAction(videoData, targetMsg, chatPaths) {
         const sentLoadingMsg = await targetMsg.reply(loadingMsgToSend, undefined, { quotedMessageId: replyToId });
         loadingMessageSent = true;
 
-        if (sentLoadingMsg && sentLoadingMsg.id && sentLoadingMsg.id._serialized) {
-            const normalizedId = normalizeMsgId(sentLoadingMsg.id._serialized);
+        if (sentLoadingMsg && sentLoadingMsg.id && sentLoadingMsg?.id?._serialized) {
+            const normalizedId = normalizeMsgId(sentLoadingMsg?.id?._serialized);
             botMessageIds.add(normalizedId);
             writtenMessageIds.add(normalizedId); // Mark as written to prevent re-processing
             // No need to add to repliableMessageIds for a loading message usually
@@ -2467,8 +2467,8 @@ async function handleVideoGenerationAction(videoData, targetMsg, chatPaths) {
         console.log("[handleVideoGen LTX] Generated video sent successfully.");
 
         // Mark this final bot message as well
-        if (sentFinalVideoMsg && sentFinalVideoMsg.id && sentFinalVideoMsg.id._serialized) {
-            const normalizedId = normalizeMsgId(sentFinalVideoMsg.id._serialized);
+        if (sentFinalVideoMsg && sentFinalVideoMsg.id && sentFinalVideoMsg?.id?._serialized) {
+            const normalizedId = normalizeMsgId(sentFinalVideoMsg?.id?._serialized);
             botMessageIds.add(normalizedId);
             writtenMessageIds.add(normalizedId);
             repliableMessageIds.add(normalizedId); // If you want users to be able to reply to the video result
@@ -2527,7 +2527,7 @@ async function handleVideoGenerationAction(videoData, targetMsg, chatPaths) {
 }
 // 12. Create Poll Action
 async function handlePollAction(replyData, targetMsg) {
-    const targetChatId = targetMsg.id.remote;
+    const targetChatId = targetMsg?.id?.remote;
     try {
         const question = replyData.question;
         const options = replyData.options;
@@ -2554,7 +2554,7 @@ async function handlePollAction(replyData, targetMsg) {
         // ===================
 
         const sentPoll = await targetMsg.reply(poll);
-        console.log(`[handlePollAction] Poll sent successfully to ${targetChatId}. Allow multiple: ${replyData.allowMultipleAnswers === true}. Message ID: ${sentPoll.id._serialized}`);
+        console.log(`[handlePollAction] Poll sent successfully to ${targetChatId}. Allow multiple: ${replyData.allowMultipleAnswers === true}. Message ID: ${sentPoll?.id?._serialized}`);
 
     } catch (error) {
         console.error("❌ [handlePollAction] Error:", error);
@@ -2563,7 +2563,7 @@ async function handlePollAction(replyData, targetMsg) {
 }
 // 13. YouTube Search Action
 async function handleYoutubeSearchAction(replyData, targetMsg) {
-    const targetChatId = targetMsg.id.remote;
+    const targetChatId = targetMsg?.id?.remote;
     try {
         const query = replyData.query;
         if (!query) {
@@ -2755,9 +2755,9 @@ async function executeDelayedAction(task) {
             // Attempt to find the *specific* message Gemini wanted to reply to
             const messages = await chat.fetchMessages({ limit: 50 }); // Fetch some history
             const normalize = id => id?.replace(/^true_/, "").replace(/^false_/, "");
-            const specificTargetMsg = messages.find(m => normalize(m.id._serialized) === normalize(actionData.replyTo));
+            const specificTargetMsg = messages.find(m => normalize(m?.id?._serialized) === normalize(actionData.replyTo));
             if (specificTargetMsg) {
-                targetReplyId = specificTargetMsg.id._serialized;
+                targetReplyId = specificTargetMsg?.id?._serialized;
                 console.log(`[DelayedExec] Overriding reply target to specific message ${targetReplyId} requested by Gemini.`);
             } else {
                 console.warn(`[DelayedExec] Gemini requested reply to ${actionData.replyTo}, but it wasn't found. Replying to triggering message ${triggeringMsgId}.`);
@@ -2785,20 +2785,20 @@ async function executeDelayedAction(task) {
 
             // --- Manual Logging for Delayed Action Replies ---
             // The original msg.reply wrapper won't catch this.
-            if (sentMsg && sentMsg.id && sentMsg.id._serialized) {
+            if (sentMsg && sentMsg.id && sentMsg?.id?._serialized) {
                 const localTimestamp = getLocalTimestamp();
                 const messageContentLog = typeof content === 'string' ? content : (content instanceof MessageMedia ? `[מדיה: ${content.mimetype || 'unknown type'}]` : '[אובייקט]');
-                const logLine = `${localTimestamp} [ID: ${sentMsg.id._serialized}] פיתי: ${messageContentLog}\n`;
+                const logLine = `${localTimestamp} [ID: ${sentMsg?.id?._serialized}] פיתי: ${messageContentLog}\n`;
                 try {
                     fs.appendFileSync(chatPaths.historyFile, logLine, 'utf8');
-                    writtenMessageIds.add(sentMsg.id._serialized); // Prevent re-logging
-                    const normId = normalizeMsgId(sentMsg.id._serialized);
+                    writtenMessageIds.add(sentMsg?.id?._serialized); // Prevent re-logging
+                    const normId = normalizeMsgId(sentMsg?.id?._serialized);
                     botMessageIds.add(normId);
                     repliableMessageIds.add(normId);
 
-                    console.log(`[DelayedExec LOG] Logged bot reply ${sentMsg.id._serialized} to ${chatPaths.historyFile}`);
+                    console.log(`[DelayedExec LOG] Logged bot reply ${sentMsg?.id?._serialized} to ${chatPaths.historyFile}`);
                 } catch (logErr) {
-                    console.error(`[DelayedExec LOG] Error logging delayed reply ${sentMsg.id._serialized}:`, logErr);
+                    console.error(`[DelayedExec LOG] Error logging delayed reply ${sentMsg?.id?._serialized}:`, logErr);
                 }
             }
             // --- End Manual Logging ---
@@ -2867,11 +2867,11 @@ async function executeDelayedAction(task) {
                         const messagesForReact = await chatForReact.fetchMessages({ limit: 50 });
                         const normalize = id => id?.replace(/^true_/, "").replace(/^false_/, "");
                         // actionData.replyTo צריך להיות ה-ID של ההודעה שאליה ה-AI התכוון להגיב
-                        const msgToReactTo = messagesForReact.find(m => normalize(m.id._serialized) === normalize(actionData.replyTo));
+                        const msgToReactTo = messagesForReact.find(m => normalize(m?.id?._serialized) === normalize(actionData.replyTo));
 
                         if (msgToReactTo) {
                             await msgToReactTo.react(actionData.emoji.trim());
-                            console.log(`[DelayedExec React] Successfully reacted with ${actionData.emoji.trim()} to message ${msgToReactTo.id._serialized}`);
+                            console.log(`[DelayedExec React] Successfully reacted with ${actionData.emoji.trim()} to message ${msgToReactTo?.id?._serialized}`);
                             if (actionData.message) {
                                 // mockMsgForReply.reply כבר מוגדר להגיב להודעה המקורית שביקשה את התזמון
                                 await mockMsgForReply.reply(`פיתי\n\n${actionData.message}`);
@@ -2930,7 +2930,7 @@ async function executeDelayedAction(task) {
                     const triggerId = actionData?.triggerIdToDelete || jsonResponse?.triggerIdToDelete;
                     const confirmationMsg = actionData?.message || jsonResponse?.message || `טריגר נמחק.`;
                     const currentMsg = actionData ? mockMsgForReply : msg;
-                    const currentChatPaths = actionData ? chatPaths : getChatPaths(msg.id.remote, safeName); // Use correct paths
+                    const currentChatPaths = actionData ? chatPaths : getChatPaths(msg?.id?.remote, safeName); // Use correct paths
 
                     if (!triggerId) {
                         console.warn("[delete_trigger] No triggerIdToDelete provided.");
@@ -3108,7 +3108,7 @@ client.on('ready', () => {
 // 14. Site Search Action
 async function handleSiteSearchAction(replyData, targetMsg) {
     // Note: This follows the complex logic with DuckDuckGo and potentially Gemini selection
-    const targetChatId = targetMsg.id.remote;
+    const targetChatId = targetMsg?.id?.remote;
     try {
         const query = replyData.query;
         const needHtml = replyData.needHtml === true; // Check specifically for true
@@ -3481,7 +3481,7 @@ function generateTextSvgElement(textElement, dimension) {
 }
 
 async function handleCreateStickerAction(stickerData, targetMsg, chatPaths) {
-    const targetChatId = targetMsg.id.remote;
+    const targetChatId = targetMsg?.id?.remote;
     const {
         stickerSource = { type: "none" }, // ברירת מחדל אם לא סופק
         stickerElements = [],
@@ -3595,7 +3595,7 @@ async function handleCreateStickerAction(stickerData, targetMsg, chatPaths) {
                 stickerAuthor: "PitiBot",
                 quotedMessageId: replyTo
             });
-            console.log(`[handleCreateStickerAction] Sticker sent with quote. ID: ${sentStickerMsg.id._serialized}`);
+            console.log(`[handleCreateStickerAction] Sticker sent with quote. ID: ${sentStickerMsg?.id?._serialized}`);
         } catch (quoteError) {
             console.warn(`[handleCreateStickerAction] Failed to send sticker with quote to ${replyTo}. Error: ${quoteError.message}. Attempting without quote...`);
             sentStickerMsg = await client.sendMessage(targetChatId, media, {
@@ -3603,7 +3603,7 @@ async function handleCreateStickerAction(stickerData, targetMsg, chatPaths) {
                 stickerName: "פיתי סטיקר",
                 stickerAuthor: "PitiBot"
             });
-            console.log(`[handleCreateStickerAction] Sticker sent WITHOUT quote. ID: ${sentStickerMsg.id._serialized}`);
+            console.log(`[handleCreateStickerAction] Sticker sent WITHOUT quote. ID: ${sentStickerMsg?.id?._serialized}`);
         }
 
         // ... (לוגיקה של שמירת קובץ ועדכון אינדקס כמו קודם) ...
@@ -3635,7 +3635,7 @@ async function handleCreateStickerAction(stickerData, targetMsg, chatPaths) {
 }
 // 15. YouTube Download Action
 async function handleYoutubeDownloadAction(replyData, targetMsg) {
-    const targetChatId = targetMsg.id.remote;
+    const targetChatId = targetMsg?.id?.remote;
     const play = require('play-dl'); // Ensure play-dl is required at the top
     try {
         const videoUrl = replyData.video_url;
@@ -3673,7 +3673,7 @@ async function handleYoutubeDownloadAction(replyData, targetMsg) {
         // Send as a new message, quoting the target
         await client.sendMessage(targetChatId, videoMedia, {
             caption: `🎬 הנה הסרטון: ${videoTitle}`,
-            quotedMessageId: targetMsg.id._serialized
+            quotedMessageId: targetMsg?.id?._serialized
         });
         console.log(`[handleYoutubeDownloadAction] Video sent successfully for ${videoUrl}`);
 
@@ -3717,9 +3717,9 @@ async function handleMediaContent(msg, savedPath = null) {
     if (isDocx) {
         const chat = await msg.getChat();
         const safeName = await getSafeNameForChat(chat);
-        const { historyFile } = getChatPaths(chat.id._serialized, safeName);
+        const { historyFile } = getChatPaths(chat?.id?._serialized, safeName);
         const timestamp = getLocalTimestamp();
-        const docxFilePath = savedPath || path.join(os.tmpdir(), `${msg.id._serialized}.docx`);
+        const docxFilePath = savedPath || path.join(os.tmpdir(), `${msg?.id?._serialized}.docx`);
         if (!savedPath) {
             fs.writeFileSync(docxFilePath, Buffer.from(media.data, 'base64'));
         }
@@ -3732,8 +3732,8 @@ async function handleMediaContent(msg, savedPath = null) {
             const result = spawnSync('python3', args, { encoding: 'utf8' });
             const extracted = result.stdout ? result.stdout.trim() : '';
             if (extracted) {
-                fs.appendFileSync(historyFile, `${timestamp} [ID: ${msg.id._serialized}] פיתי (DOCX): ${extracted}\n`, 'utf8');
-                const entry = uploadedMediaMap.get(msg.id._serialized) || {};
+                fs.appendFileSync(historyFile, `${timestamp} [ID: ${msg?.id?._serialized}] פיתי (DOCX): ${extracted}\n`, 'utf8');
+                const entry = uploadedMediaMap.get(msg?.id?._serialized) || {};
                 entry.docxText = extracted;
                 if (includeImages) {
                     try {
@@ -3741,7 +3741,7 @@ async function handleMediaContent(msg, savedPath = null) {
                         entry.imagePaths = images;
                     } catch { entry.imagePaths = []; }
                 }
-                uploadedMediaMap.set(msg.id._serialized, entry);
+                uploadedMediaMap.set(msg?.id?._serialized, entry);
             }
         } catch (e) {
             console.error('[handleMediaContent] DOCX extraction failed:', e);
@@ -3792,9 +3792,9 @@ async function handleMediaContent(msg, savedPath = null) {
     // 5. append the AI’s description to chat history
     const chat = await msg.getChat();
     const safeName = await getSafeNameForChat(chat);
-    const { historyFile } = getChatPaths(chat.id._serialized, safeName);
+    const { historyFile } = getChatPaths(chat?.id?._serialized, safeName);
     const timestamp = getLocalTimestamp();
-    const entry = `${timestamp} [ID: ${msg.id._serialized}] פיתי (media content): ${description}\n`;
+    const entry = `${timestamp} [ID: ${msg?.id?._serialized}] פיתי (media content): ${description}\n`;
     fs.appendFileSync(historyFile, entry, "utf8");
 }
 
@@ -3875,7 +3875,7 @@ async function handleMessage(msg, incoming, quotedMedia = null, contextMediaArra
     const messageMedia = await downloadMediaPart(msg);
     if (messageMedia) {
         const isDocx = messageMedia.mimeType && messageMedia.mimeType.includes('officedocument.wordprocessingml.document');
-        const existing = uploadedMediaMap.get(msg.id._serialized) || {};
+        const existing = uploadedMediaMap.get(msg?.id?._serialized) || {};
         existing.mimeType = messageMedia.mimeType;
         if (!isDocx) {
             existing.base64 = messageMedia.base64;
@@ -3886,13 +3886,13 @@ async function handleMessage(msg, incoming, quotedMedia = null, contextMediaArra
                 }
             });
         }
-        uploadedMediaMap.set(msg.id._serialized, existing);
+        uploadedMediaMap.set(msg?.id?._serialized, existing);
         if (messageMedia.caption) {
             incoming += `\nMedia caption: ${messageMedia.caption}`;
         }
     }
 
-    const docxInfo = uploadedMediaMap.get(msg.id._serialized);
+    const docxInfo = uploadedMediaMap.get(msg?.id?._serialized);
     if (docxInfo && docxInfo.docxText) {
         if (containsTriggerWord(incoming)) {
             incoming += `\n${docxInfo.docxText}`;
@@ -5436,8 +5436,8 @@ ${incoming}
 
     async function handleMusicGenerationAction(musicData, targetMsg, chatPaths) {
         const ACE_STEP_GRADIO_SPACE = "ACE-Step/ACE-Step";
-        const targetChatId = targetMsg.id.remote;
-        const replyToId = musicData.replyTo || targetMsg.id._serialized;
+        const targetChatId = targetMsg?.id?.remote;
+        const replyToId = musicData.replyTo || targetMsg?.id?._serialized;
 
         console.log(`[handleMusicGen ACE] Starting music generation. Tags: "${musicData.prompt_tags.substring(0, 50)}..."`);
 
@@ -5475,8 +5475,8 @@ ${incoming}
             const sentLoadingMsg = await targetMsg.reply(loadingMsgToSend, undefined, { quotedMessageId: replyToId });
             loadingMessageSent = true;
 
-            if (sentLoadingMsg && sentLoadingMsg.id && sentLoadingMsg.id._serialized) {
-                const normalizedId = normalizeMsgId(sentLoadingMsg.id._serialized);
+            if (sentLoadingMsg && sentLoadingMsg.id && sentLoadingMsg?.id?._serialized) {
+                const normalizedId = normalizeMsgId(sentLoadingMsg?.id?._serialized);
                 botMessageIds.add(normalizedId);
                 writtenMessageIds.add(normalizedId);
                 console.log(`[handleMusicGen ACE] Sent and marked loading message: ${normalizedId}`);
@@ -5604,8 +5604,8 @@ ${incoming}
             });
             console.log("[handleMusicGen ACE] Generated audio sent successfully.");
 
-            if (sentFinalAudioMsg && sentFinalAudioMsg.id && sentFinalAudioMsg.id._serialized) {
-                const normalizedId = normalizeMsgId(sentFinalAudioMsg.id._serialized);
+            if (sentFinalAudioMsg && sentFinalAudioMsg.id && sentFinalAudioMsg?.id?._serialized) {
+                const normalizedId = normalizeMsgId(sentFinalAudioMsg?.id?._serialized);
                 botMessageIds.add(normalizedId);
                 writtenMessageIds.add(normalizedId);
                 repliableMessageIds.add(normalizedId);
@@ -5655,8 +5655,8 @@ ${incoming}
 
     console.log("\n\n🚀 Payload שנשלח ל-Gemini API:\n", JSON.stringify(requestPayload, null, 2));
     async function handleGeneratePowerPointAction(powerpointData, targetMsg, chatPaths) {
-        const targetChatId = targetMsg.id.remote;
-        const replyToId = powerpointData.replyTo || targetMsg.id._serialized;
+        const targetChatId = targetMsg?.id?.remote;
+        const replyToId = powerpointData.replyTo || targetMsg?.id?._serialized;
 
         console.log(`🖥️ [handleGeneratePowerPointAction] Received PowerPoint generation request.`);
         await targetMsg.reply(powerpointData.message || `פיתי\n\n📝 מכינה מצגת PowerPoint...`, undefined, { quotedMessageId: replyToId });
@@ -5824,7 +5824,7 @@ ${incoming}
                 console.warn(`   ⚠️ Failed to send PPT media with quote. Error: ${quoteError.message}. Retrying without quote...`);
                 sentMediaMsg = await client.sendMessage(targetChatId, media, { caption: captionText });
             }
-            console.log(`   ✅ PPT media sent successfully. Message ID: ${sentMediaMsg.id._serialized}`);
+            console.log(`   ✅ PPT media sent successfully. Message ID: ${sentMediaMsg?.id?._serialized}`);
 
             // Update generated files index
             const generatedFilesIndex = chatPaths.generatedFilesIndex;
@@ -5862,8 +5862,8 @@ ${incoming}
     const maxRetries = 7;
     const retryDelayMs = 3000;
     async function handleGenerateOfficeDocAction(docData, targetMsg, chatPaths) {
-        const targetChatId = targetMsg.id.remote;
-        const replyToId = docData.replyTo || targetMsg.id._serialized;
+        const targetChatId = targetMsg?.id?.remote;
+        const replyToId = docData.replyTo || targetMsg?.id?._serialized;
         const docType = docData.doc_type; // "word" or "excel"
         const outputFilename = docData.output_filename || `generated_document_${Date.now()}`;
 
@@ -5948,14 +5948,14 @@ ${incoming}
                     caption: captionText,
                     quotedMessageId: replyToId
                 });
-                console.log(`   ✅ ${docType} media sent successfully with quote. Message ID: ${sentMediaMsg.id._serialized}`);
+                console.log(`   ✅ ${docType} media sent successfully with quote. Message ID: ${sentMediaMsg?.id?._serialized}`);
             } catch (quoteError) {
                 console.warn(`   ⚠️ Failed to send ${docType} media with quote to ${replyToId}. Error: ${quoteError.message}. Attempting to send without quote...`);
                 try {
                     sentMediaMsg = await client.sendMessage(targetChatId, media, {
                         caption: captionText
                     });
-                    console.log(`   ✅ ${docType} media sent successfully WITHOUT quote. Message ID: ${sentMediaMsg.id._serialized}`);
+                    console.log(`   ✅ ${docType} media sent successfully WITHOUT quote. Message ID: ${sentMediaMsg?.id?._serialized}`);
                 } catch (sendError) {
                     console.error(`   ❌❌ Failed to send ${docType} media even without quote. Error: ${sendError.message}`);
                     throw sendError;
@@ -6018,7 +6018,7 @@ ${incoming}
     async function handleGenerateApkAction(apkData, msg, chatPaths) {
         console.log("[handleGenerateApkAction] Starting APK generation process (dynamic wrapper).");
         const { appName = `GeneratedApp${Date.now()}`, appDescription = "Generated Android App", fileContents, message: loadingMessage } = apkData; // Added defaults
-        const replyToId = apkData.replyTo || msg.id._serialized;
+        const replyToId = apkData.replyTo || msg?.id?._serialized;
 
         // Sanitize appName for directory usage (remove invalid chars)
         const safeAppNameForDir = appName.replace(/[^a-zA-Z0-9_-]/g, '_');
@@ -6266,7 +6266,7 @@ allprojects {
             const apkMedia = MessageMedia.fromFilePath(apkPath);
             apkMedia.filename = `${safeAppNameForDir}.apk`; // Use sanitized name for filename
 
-            await client.sendMessage(msg.id.remote, apkMedia, {
+            await client.sendMessage(msg?.id?.remote, apkMedia, {
                 caption: `פיתי\n\n📱 הנה קובץ ה-APK עבור האפליקציה '${appName}' שביקשת:\n${appDescription}`,
                 quotedMessageId: replyToId
             });
@@ -6498,7 +6498,7 @@ allprojects {
             if (actionMatch && actionMatch[1] === "text" && messageMatch && messageMatch[1]) {
                 console.log("ℹ️ זוהה כניסיון לשלוח text. חולץ טקסט הודעה מ-JSON שבור.");
                 jsonResponse = {
-                    replyTo: replyToMatch ? replyToMatch[1] : msg.id._serialized, // Fallback ל-ID הנוכחי
+                    replyTo: replyToMatch ? replyToMatch[1] : msg?.id?._serialized, // Fallback ל-ID הנוכחי
                     action: "text",
                     // ניקוי בסיסי של התוכן שחולץ
                     message: messageMatch[1]
@@ -6552,8 +6552,8 @@ allprojects {
             const task = {
                 executionTime: jsonResponse.executionTime, // Store as ISO string
                 actionData: jsonResponse, // Store the whole Gemini response
-                chatId: msg.id.remote, // Chat where action should happen
-                triggeringMsgId: msg.id._serialized, // ID of the user's message
+                chatId: msg?.id?.remote, // Chat where action should happen
+                triggeringMsgId: msg?.id?._serialized, // ID of the user's message
                 senderName: senderName // Store sender name for context if needed later
             };
 
@@ -6572,7 +6572,7 @@ allprojects {
             console.error("   Action Data that failed scheduling:", jsonResponse); // Log the data
             await msg.reply("פיתי\n\nאירעה שגיאה פנימית בתזמון הפעולה המבוקשת. לא ניתן לתזמן כרגע.");
             // Consider notifying owner as well
-            client.sendMessage(myId, `🚨 Error scheduling action:\nChat: ${msg.id.remote}\nAction: ${jsonResponse.action}\nError: ${scheduleError.message}`);
+            client.sendMessage(myId, `🚨 Error scheduling action:\nChat: ${msg?.id?.remote}\nAction: ${jsonResponse.action}\nError: ${scheduleError.message}`);
             return; // Still return even if scheduling failed
         }
     }
@@ -6602,7 +6602,7 @@ allprojects {
         const chat = await msg.getChat(); // Ensure chat object is available
         const messages = await chat.fetchMessages({ limit: 50 });
         const normalize = id => id?.replace(/^true_/, "").replace(/^false_/, "");
-        const targetReplyMsg = messages.find(m => normalize(m.id._serialized) === normalize(jsonResponse.replyTo)) || msg;
+        const targetReplyMsg = messages.find(m => normalize(m?.id?._serialized) === normalize(jsonResponse.replyTo)) || msg;
 
         await handleMusicGenerationAction(jsonResponse, targetReplyMsg, chatPaths);
         return; // Exit after handling
@@ -6671,10 +6671,10 @@ allprojects {
         const chat = await msg.getChat();
         const messages = await chat.fetchMessages({ limit: 50 });
         const normalize = id => id?.replace(/^true_/, "").replace(/^false_/, "");
-        const targetReplyMsg = messages.find(m => normalize(m.id._serialized) === normalize(jsonResponse.replyTo)) || msg;
+        const targetReplyMsg = messages.find(m => normalize(m?.id?._serialized) === normalize(jsonResponse.replyTo)) || msg;
 
         const currentSafeName = await getSafeNameForChat(chat); // safeName כבר צריך להיות מחושב למעלה
-        const currentChatPaths = getChatPaths(chat.id._serialized, currentSafeName); // chatPaths כבר צריך להיות מחושב למעלה
+        const currentChatPaths = getChatPaths(chat?.id?._serialized, currentSafeName); // chatPaths כבר צריך להיות מחושב למעלה
 
         await handleCreateStickerAction(jsonResponse, targetReplyMsg, currentChatPaths); // העבר את chatPaths
         return;
@@ -6685,13 +6685,13 @@ allprojects {
             const chat = await msg.getChat();
             const messages = await chat.fetchMessages({ limit: 50 }); // התאם את המגבלה אם צריך
             const normalize = id => id?.replace(/^true_/, "").replace(/^false_/, "");
-            const targetMsgToReact = messages.find(m => normalize(m.id._serialized) === normalize(jsonResponse.replyTo));
+            const targetMsgToReact = messages.find(m => normalize(m?.id?._serialized) === normalize(jsonResponse.replyTo));
 
             if (targetMsgToReact) {
                 // ודא שהאימוג'י הוא מחרוזת
                 if (typeof jsonResponse.emoji === 'string' && jsonResponse.emoji.trim().length > 0) {
                     await targetMsgToReact.react(jsonResponse.emoji.trim());
-                    console.log(`[Action React] Successfully reacted with ${jsonResponse.emoji.trim()} to message ${targetMsgToReact.id._serialized}`);
+                    console.log(`[Action React] Successfully reacted with ${jsonResponse.emoji.trim()} to message ${targetMsgToReact?.id?._serialized}`);
                     if (jsonResponse.message) {
                         await delay(200); // עיכוב קטן לפני שליחת הודעת האישור
                         await msg.reply(`פיתי\n\n${jsonResponse.message}`);
@@ -6715,7 +6715,7 @@ allprojects {
         const chat = await msg.getChat();
         const messages = await chat.fetchMessages({ limit: 50 });
         const normalize = id => id?.replace(/^true_/, "").replace(/^false_/, "");
-        const targetReplyMsg = messages.find(m => normalize(m.id._serialized) === normalize(jsonResponse.replyTo)) || msg;
+        const targetReplyMsg = messages.find(m => normalize(m?.id?._serialized) === normalize(jsonResponse.replyTo)) || msg;
         await handleExtractEntitiesAction(jsonResponse, targetReplyMsg);
         return; // צא אחרי טיפול בפעולה
     }
@@ -6725,11 +6725,11 @@ allprojects {
         const chat = await msg.getChat();
         const messages = await chat.fetchMessages({ limit: 50 });
         const normalize = id => id?.replace(/^true_/, "").replace(/^false_/, "");
-        const targetReplyMsg = messages.find(m => normalize(m.id._serialized) === normalize(jsonResponse.replyTo)) || msg;
+        const targetReplyMsg = messages.find(m => normalize(m?.id?._serialized) === normalize(jsonResponse.replyTo)) || msg;
 
         // Get chatPaths (it should be defined earlier in handleMessage)
         // const safeName = await getSafeNameForChat(chat); // Already calculated
-        // const chatPaths = getChatPaths(chat.id._serialized, safeName); // Already calculated
+        // const chatPaths = getChatPaths(chat?.id?._serialized, safeName); // Already calculated
 
         // Call the new handler
         await handleGenerateHtmlAction({ htmlData: jsonResponse, targetMsg: targetReplyMsg, chatPaths });
@@ -6810,10 +6810,10 @@ allprojects {
         const safeName = await getSafeNameForChat(chat);
         let originalIncoming = typeof msg.body === 'string' ? msg.body.trim() : ''; // שמור את הטקסט המקורי
         let incoming = originalIncoming; // זה המשתנה שישמש להמשך
-        const chatPaths = getChatPaths(chat.id._serialized, safeName);
+        const chatPaths = getChatPaths(chat?.id?._serialized, safeName);
         const messages = await chat.fetchMessages({ limit: 50 });
         const normalize = id => id?.replace(/^true_/, "").replace(/^false_/, "");
-        const targetReplyMsg = messages.find(m => normalize(m.id._serialized) === normalize(jsonResponse.replyTo)) || msg;
+        const targetReplyMsg = messages.find(m => normalize(m?.id?._serialized) === normalize(jsonResponse.replyTo)) || msg;
         await handleSummarizeHistoryAction(jsonResponse, targetReplyMsg, chatPaths);
         return; // צא אחרי טיפול בפעולה
     }
@@ -6823,7 +6823,7 @@ allprojects {
         const chat = await msg.getChat();
         const messages = await chat.fetchMessages({ limit: 50 });
         const normalize = id => id?.replace(/^true_/, "").replace(/^false_/, "");
-        const targetReplyMsg = messages.find(m => normalize(m.id._serialized) === normalize(jsonResponse.replyTo)) || msg;
+        const targetReplyMsg = messages.find(m => normalize(m?.id?._serialized) === normalize(jsonResponse.replyTo)) || msg;
         await handleSummarizeVideoAction(jsonResponse, targetReplyMsg);
         return; // צא אחרי טיפול בפעולה
     }
@@ -6913,7 +6913,7 @@ allprojects {
 `;
 
         // הדבק את הקוד הזה במקום infoMessage המקורי בפונקציה sendInfoMenu
-        await msg.reply(infoMessage.trim(), undefined, { quotedMessageId: msg.id._serialized });
+        await msg.reply(infoMessage.trim(), undefined, { quotedMessageId: msg?.id?._serialized });
         return;
     }
 
@@ -7033,7 +7033,7 @@ allprojects {
         try {
             const barcodePath = await generateBarcode(jsonResponse.text);
             const media = MessageMedia.fromFilePath(barcodePath);
-            const targetChat = msg.id.remote;
+            const targetChat = msg?.id?.remote;
             await client.sendMessage(targetChat, media, {
                 caption: jsonResponse.message || "📦 הנה הברקוד שביקשת:"
             });
@@ -7056,7 +7056,7 @@ allprojects {
         const chat = await msg.getChat();
         const messages = await chat.fetchMessages({ limit: 50 });
         const normalize = id => id?.replace(/^true_/, "").replace(/^false_/, "");
-        const targetReplyMsg = messages.find(m => normalize(m.id._serialized) === normalize(jsonResponse.replyTo)) || msg;
+        const targetReplyMsg = messages.find(m => normalize(m?.id?._serialized) === normalize(jsonResponse.replyTo)) || msg;
 
         await handleVideoGenerationAction(jsonResponse, targetReplyMsg, chatPaths);
         return; // Exit after handling
@@ -7069,14 +7069,14 @@ allprojects {
         // נצטרך את chatPaths כאן, ודא שהוא מחושב לפני הבלוק הזה
         const chat = await msg.getChat(); // ודא שמשתנה msg זמין כאן
         const safeName = await getSafeNameForChat(chat); // חשב safeName
-        const chatPaths = getChatPaths(chat.id._serialized, safeName); // חשב chatPaths
+        const chatPaths = getChatPaths(chat?.id?._serialized, safeName); // חשב chatPaths
 
         // מצא את ההודעה שאליה נגיב
         const messages = await chat.fetchMessages({ limit: 50 });
         const normalize = id => id?.replace(/^true_/, "").replace(/^false_/, "");
         // חשוב: jsonResponse.replyTo הוא ה-ID של ההודעה שביקשה את העריכה.
         // אנחנו רוצים שהתגובה הסופית (עם התמונה הערוכה) תהיה ציטוט להודעה הזו.
-        const targetReplyMsg = messages.find(m => normalize(m.id._serialized) === normalize(jsonResponse.replyTo)) || msg; // הודעת ברירת המחדל אם לא נמצאה
+        const targetReplyMsg = messages.find(m => normalize(m?.id?._serialized) === normalize(jsonResponse.replyTo)) || msg; // הודעת ברירת המחדל אם לא נמצאה
 
         await handleImageEditAction(jsonResponse, targetReplyMsg, chatPaths); // קריאה לפונקציה החדשה
         return; // חשוב לצאת אחרי טיפול בפעולה
@@ -7103,7 +7103,7 @@ allprojects {
         const chat = await msg.getChat();
         const messages = await chat.fetchMessages({ limit: 50 });
         const normalize = id => id?.replace(/^true_/, "").replace(/^false_/, "");
-        const targetReplyMsg = messages.find(m => normalize(m.id._serialized) === normalize(jsonResponse.replyTo)) || msg;
+        const targetReplyMsg = messages.find(m => normalize(m?.id?._serialized) === normalize(jsonResponse.replyTo)) || msg;
         await handleSummarizeAction(jsonResponse, targetReplyMsg);
         return; // צא אחרי טיפול בפעולה
     }
@@ -7231,7 +7231,7 @@ allprojects {
         // קבל את הנתיבים מההודעה הנוכחית
         const chat = await msg.getChat();
         const safeName = await getSafeNameForChat(chat); // השתמש בפונקציה המרכזית
-        const chatPaths = getChatPaths(chat.id._serialized, safeName);
+        const chatPaths = getChatPaths(chat?.id?._serialized, safeName);
         const generatedFilesIndex = chatPaths.generatedFilesIndex; // נתיב לאינדקס
         const filesDir = chatPaths.filesDir; // תיקיית הקבצים של הצ'אט
 
@@ -7248,19 +7248,19 @@ allprojects {
             const media = MessageMedia.fromFilePath(filePath);
 
             // שלח את הקובץ עם ההודעה הנלווית מה-JSON
-            console.log(`[create_file] Sending file media to chat ${msg.id.remote}`);
+            console.log(`[create_file] Sending file media to chat ${msg?.id?.remote}`);
             const sentMediaMsg = await msg.reply(media, undefined, { caption: jsonResponse.message || `פיתי\n\n📁 הנה קובץ ${fullFilename} שיצרתי.` });
             // ---------------------------------------------------------------
             // !!! חשוב: לרשום את ההודעה *שנשלחה הרגע* כהודעת בוט !!!
             // (אם ה-wrapper של msg.reply לא עושה את זה אוטומטית עבור מדיה)
-            if (sentMediaMsg && sentMediaMsg.id && !writtenMessageIds.has(sentMediaMsg.id._serialized)) {
-                const line = `[ID: ${sentMediaMsg.id._serialized}] פיתי: [מדיה: ${media.mimetype || 'unknown type'}]\n`;
+            if (sentMediaMsg && sentMediaMsg.id && !writtenMessageIds.has(sentMediaMsg?.id?._serialized)) {
+                const line = `[ID: ${sentMediaMsg?.id?._serialized}] פיתי: [מדיה: ${media.mimetype || 'unknown type'}]\n`;
                 fs.appendFileSync(chatPaths.historyFile, line, 'utf8');
-                writtenMessageIds.add(sentMediaMsg.id._serialized);
-                const normId = normalizeMsgId(sentMediaMsg.id._serialized);
+                writtenMessageIds.add(sentMediaMsg?.id?._serialized);
+                const normId = normalizeMsgId(sentMediaMsg?.id?._serialized);
                 botMessageIds.add(normId);
                 repliableMessageIds.add(normId);
-                console.log(`[create_file] Manually logged sent media message ${sentMediaMsg.id._serialized}`);
+                console.log(`[create_file] Manually logged sent media message ${sentMediaMsg?.id?._serialized}`);
             }
             // ---------------------------------------------------------------
             console.log(`[create_file] File media sent.`);
@@ -7277,7 +7277,7 @@ allprojects {
             }
             generatedFilesIndexData.push({
                 timestamp: new Date().toISOString(),
-                originalMessageId: msg.id._serialized, // ID של ההודעה שביקשה את הקובץ
+                originalMessageId: msg?.id?._serialized, // ID של ההודעה שביקשה את הקובץ
                 generatedFilePath: filePath,       // נתיב לקובץ שנוצר
                 filename: fullFilename,            // שם הקובץ המלא
                 description: fileDescription,      // תיאור (שנוצר או מ-Gemini)
@@ -7354,7 +7354,7 @@ allprojects {
                 const chat = await msg.getChat();
                 const messages = await chat.fetchMessages({ limit: 100 });
                 const normalize = id => id?.replace(/^true_/, "").replace(/^false_/, "");
-                const targetMsgForMedia = messages.find(m => normalize(m.id._serialized) === normalize(jsonResponse.replyToFileMessageId));
+                const targetMsgForMedia = messages.find(m => normalize(m?.id?._serialized) === normalize(jsonResponse.replyToFileMessageId));
 
                 if (targetMsgForMedia && targetMsgForMedia.hasMedia) {
                     const media = await targetMsgForMedia.downloadMedia();
@@ -7364,7 +7364,7 @@ allprojects {
                         const mediaFilename = `${jsonResponse.replyToFileMessageId}.${fileExtension}`;
 
                         // chatPaths כבר אמור להיות מוגדר למעלה ב-handleMessage
-                        const currentChatPaths = getChatPaths(chat.id._serialized, safeName); // שימוש ב-safeName מההקשר של handleMessage
+                        const currentChatPaths = getChatPaths(chat?.id?._serialized, safeName); // שימוש ב-safeName מההקשר של handleMessage
                         fs.mkdirSync(currentChatPaths.filesDir, { recursive: true });
                         determinedLocalMediaPath = path.join(currentChatPaths.filesDir, mediaFilename);
                         fs.writeFileSync(determinedLocalMediaPath, Buffer.from(media.data, 'base64'));
@@ -7632,7 +7632,7 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
         const messageToSend = jsonResponse.message;
         const requestedCount = parseInt(jsonResponse.count, 10);
         const delayBetweenMessages = parseInt(jsonResponse.delay, 10) || 500; // ברירת מחדל 500ms
-        const replyToId = jsonResponse.replyTo || msg.id._serialized;
+        const replyToId = jsonResponse.replyTo || msg?.id?._serialized;
 
         // --- בדיקת בעלות והגבלת כמות ---
         const messageSenderBaseId = getBaseIdForOwnerCheck(msg.author || msg.from);
@@ -7670,12 +7670,12 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
             const chat = await msg.getChat();
             const messages = await chat.fetchMessages({ limit: 50 });
             const normalize = id => id?.replace(/^true_/, "").replace(/^false_/, "");
-            const foundMsg = messages.find(m => normalize(m.id._serialized) === normalize(replyToId));
+            const foundMsg = messages.find(m => normalize(m?.id?._serialized) === normalize(replyToId));
             if (foundMsg) {
                 targetMsg = foundMsg;
-                console.log(`[Action MANY] Found target message ${targetMsg.id._serialized} to reply to.`);
+                console.log(`[Action MANY] Found target message ${targetMsg?.id?._serialized} to reply to.`);
             } else {
-                console.warn(`[Action MANY] Target message ${replyToId} not found, replying to triggering message ${msg.id._serialized}.`);
+                console.warn(`[Action MANY] Target message ${replyToId} not found, replying to triggering message ${msg?.id?._serialized}.`);
             }
         } catch (findErr) {
             console.error("[Action MANY] Error finding target message:", findErr);
@@ -7687,10 +7687,10 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
             try {
                 // השתמש ב-targetMsg שמצאנו (או ב-msg כברירת מחדל) כדי לשלוח את התגובה
                 const sentReply = await targetMsg.reply(`פיתי\n\n${messageToSend}`); // השתמש בפונקציית ה-reply העטופה שלנו
-                const normId = normalizeMsgId(sentReply.id._serialized);
+                const normId = normalizeMsgId(sentReply?.id?._serialized);
                 botMessageIds.add(normId); // הוסף למזהי הבוט
                 repliableMessageIds.add(normId); // הוסף למזהים שניתן להגיב להם
-                console.log(`[Action MANY] Sent message ${i + 1}/${effectiveCount} (ID: ${sentReply.id._serialized})`);
+                console.log(`[Action MANY] Sent message ${i + 1}/${effectiveCount} (ID: ${sentReply?.id?._serialized})`);
 
                 // המתן לפני שליחת ההודעה הבאה (אם זו לא ההודעה האחרונה)
                 if (i < effectiveCount - 1) {
@@ -7716,7 +7716,7 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
 
             if (matched) {
                 await msg.reply(jsonResponse.message || "שולח את איש הקשר שביקשת...");
-                const contactCard = await client.getContactById(matched.id._serialized);
+                const contactCard = await client.getContactById(matched?.id?._serialized);
                 await msg.reply(contactCard);
             } else {
                 await msg.reply(`לא מצאתי איש קשר בשם "${jsonResponse.contactName}".`);
@@ -7754,20 +7754,20 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
 
             let targetMessage = msg;
 
-            if (jsonResponse.replyTo && jsonResponse.replyTo !== msg.id._serialized) {
+            if (jsonResponse.replyTo && jsonResponse.replyTo !== msg?.id?._serialized) {
                 const chat = await msg.getChat();
                 const messages = await chat.fetchMessages({ limit: 50 });
 
                 const normalize = id => id.replace(/^true_/, '').replace(/^false_/, '');
                 targetMessage = messages.find(m =>
-                    normalize(m.id._serialized) === normalize(jsonResponse.replyTo)
+                    normalize(m?.id?._serialized) === normalize(jsonResponse.replyTo)
                 ) || msg;
             }
 
             // const targetChat = await targetMessage.getChat(); // Not strictly needed if targetMessage.reply() is used
             const sentPoll = await targetMessage.reply(poll); // Send as reply to the correct target
 
-            console.log(`✅ סקר נשלח כהודעת תגובה (Allow multiple: ${jsonResponse.allowMultipleAnswers === true}):`, sentPoll.id._serialized);
+            console.log(`✅ סקר נשלח כהודעת תגובה (Allow multiple: ${jsonResponse.allowMultipleAnswers === true}):`, sentPoll?.id?._serialized);
 
         } catch (error) {
             console.error("❌ שגיאה בשליחת הסקר:", error);
@@ -7848,21 +7848,21 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
                 const chat = await msg.getChat();
                 const messages = await chat.fetchMessages({ limit: 150 }); // Fetch enough history
                 const normalize = id => id?.replace(/^true_/, "").replace(/^false_/, "");
-                let targetMsg = messages.find(m => normalize(m.id._serialized) === normalize(replyToId));
-                let targetChatId = chat.id._serialized; // Default to triggering chat
+                let targetMsg = messages.find(m => normalize(m?.id?._serialized) === normalize(replyToId));
+                let targetChatId = chat?.id?._serialized; // Default to triggering chat
 
                 if (!targetMsg) {
-                    console.warn(`[Multi-Reply] Target message ${replyToId} not found for action ${replyAction}. Using triggering message ${msg.id._serialized} as fallback context.`);
+                    console.warn(`[Multi-Reply] Target message ${replyToId} not found for action ${replyAction}. Using triggering message ${msg?.id?._serialized} as fallback context.`);
                     targetMsg = msg; // Fallback to the overall triggering message
                 } else {
-                    targetChatId = targetMsg.id.remote; // Get chat ID from the actual target message
-                    console.log(`[Multi-Reply] Found target message ${targetMsg.id._serialized} for action ${replyAction}.`);
+                    targetChatId = targetMsg?.id?.remote; // Get chat ID from the actual target message
+                    console.log(`[Multi-Reply] Found target message ${targetMsg?.id?._serialized} for action ${replyAction}.`);
                 }
 
                 // Get safeName and paths based on the *triggering* message's chat context
                 // These are needed for functions that save files/memories relative to the chat
                 const safeName = await getSafeNameForChat(chat);
-                const chatPaths = getChatPaths(chat.id._serialized, safeName);
+                const chatPaths = getChatPaths(chat?.id?._serialized, safeName);
 
 
                 // --- Switch based on the action in the current reply object ---
@@ -7871,7 +7871,7 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
                         if (reply.message && reply.respond !== false) {
                             await delay(250); // Keep delay between replies
                             const sentReplyMsg = await targetMsg.reply(`פיתי\n\n${reply.message}`); // Reply to the *target* message
-                            const normId = normalizeMsgId(sentReplyMsg.id._serialized);
+                            const normId = normalizeMsgId(sentReplyMsg?.id?._serialized);
                             botMessageIds.add(normId);
                             repliableMessageIds.add(normId);
                             // Logging of this bot message happens via the message_create listener
@@ -7907,8 +7907,8 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
                                     // לוגינג של ההודעה הזו (כמו בפעולת טקסט)
                                     // אם ה-wrapper של msg.reply מטפל בלוג, אין צורך כאן.
                                     // אם לא, תוסיף לוג ידני.
-                                    // botMessageIds.add(sentReactionFollowUpMsg.id._serialized);
-                                    // repliableMessageIds.add(sentReactionFollowUpMsg.id._serialized);
+                                    // botMessageIds.add(sentReactionFollowUpMsg?.id?._serialized);
+                                    // repliableMessageIds.add(sentReactionFollowUpMsg?.id?._serialized);
                                 }
                                 repliesSentCount++;
                             } catch (multiReactError) {
@@ -8308,7 +8308,7 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
         const messages = await chat.fetchMessages({ limit: 50 });
 
         const normalize = id => id?.replace(/^true_/, "").replace(/^false_/, "");
-        const targetMsg = messages.find(m => normalize(m.id._serialized) === normalize(jsonResponse.replyTo));
+        const targetMsg = messages.find(m => normalize(m?.id?._serialized) === normalize(jsonResponse.replyTo));
 
         if (targetMsg) {
             console.log("✅ נמצאה ההודעה להגיב אליה.");
@@ -8319,7 +8319,7 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
                 });
 
                 if (sentMsg?.id) {
-                    const normId = normalizeMsgId(sentMsg.id._serialized);
+                    const normId = normalizeMsgId(sentMsg?.id?._serialized);
                     botMessageIds.add(normId);
                     repliableMessageIds.add(normId);
                 }
@@ -8341,10 +8341,10 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
                 ? fallbackId.split("_")[1]?.split("@")[0] || 'unknown_user'
                 : 'unknown_user';
             const contacts = await client.getContacts();
-            const contact = contacts.find(c => c.id.user === userId);
+            const contact = contacts.find(c => c?.id?.user === userId);
 
             if (contact) {
-                const mentionContact = await client.getContactById(contact.id._serialized);
+                const mentionContact = await client.getContactById(contact?.id?._serialized);
                 const name = mentionContact.name || mentionContact.pushname || userId;
 
                 if (jsonResponse.respond !== false) {
@@ -8352,14 +8352,14 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
                         // whatsapp-web.js no longer accepts Contact objects in the
                         // mentions array. Pass the contact's ID instead to avoid
                         // deprecation warnings and potential failures.
-                        mentions: [mentionContact.id._serialized]
+                        mentions: [mentionContact?.id?._serialized]
                     }).catch(err => {
                         console.error('Failed to send mention reply:', err);
                         return null;
                     });
 
                     if (sentMsg?.id) {
-                        const normId = normalizeMsgId(sentMsg.id._serialized);
+                        const normId = normalizeMsgId(sentMsg?.id?._serialized);
                         botMessageIds.add(normId);
                         repliableMessageIds.add(normId);
                     }
@@ -8385,7 +8385,7 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
 
         if (sentMsg?.id) {
             // נרמול ה-ID (מסיר ‎true_/false_‎ אם קיימים)
-            const normId = normalizeMsgId(sentMsg.id._serialized);
+            const normId = normalizeMsgId(sentMsg?.id?._serialized);
 
             // שמירה במבני-הנתונים הנכונים
             botMessageIds.add(normId);
@@ -8400,7 +8400,7 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
             return null;
         });
         if (sentMsg?.id) {
-            const normId = normalizeMsgId(sentMsg.id._serialized);
+            const normId = normalizeMsgId(sentMsg?.id?._serialized);
             botMessageIds.add(normId);
             repliableMessageIds.add(normId);
         }
@@ -8411,8 +8411,8 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
 }
 
 async function handleExtractEntitiesAction(nerData, targetMsg) {
-    const targetChatId = targetMsg.id.remote;
-    const replyToId = nerData.replyTo || targetMsg.id._serialized;
+    const targetChatId = targetMsg?.id?.remote;
+    const replyToId = nerData.replyTo || targetMsg?.id?._serialized;
     const textToAnalyze = nerData.text_to_analyze;
     const entitiesToFind = nerData.entities_to_find || ["all"]; // ברירת מחדל: חפש הכל
 
@@ -8494,8 +8494,8 @@ If no entities of the requested types are found, return an empty JSON object {}.
 }
 
 async function handleGenerateHtmlPdfAction(htmlPdfData, targetMsg, chatPaths) {
-    const targetChatId = targetMsg.id.remote;
-    const replyToId = htmlPdfData.replyTo || targetMsg.id._serialized;
+    const targetChatId = targetMsg?.id?.remote;
+    const replyToId = htmlPdfData.replyTo || targetMsg?.id?._serialized;
     const htmlContent = htmlPdfData.html_content;
     const outputFilenameBase = htmlPdfData.output_filename_base || `html_doc_${Date.now()}`;
 
@@ -8588,14 +8588,14 @@ async function handleGenerateHtmlPdfAction(htmlPdfData, targetMsg, chatPaths) {
                 caption: captionText,
                 quotedMessageId: replyToId
             });
-            console.log(`   ✅ PDF (from HTML) sent successfully with quote. Message ID: ${sentMediaMsg.id._serialized}`);
+            console.log(`   ✅ PDF (from HTML) sent successfully with quote. Message ID: ${sentMediaMsg?.id?._serialized}`);
         } catch (quoteError) {
             console.warn(`   ⚠️ Failed to send PDF (from HTML) with quote to ${replyToId}. Error: ${quoteError.message}. Attempting to send without quote...`);
             try {
                 sentMediaMsg = await client.sendMessage(targetChatId, media, {
                     caption: captionText
                 });
-                console.log(`   ✅ PDF (from HTML) sent successfully WITHOUT quote. Message ID: ${sentMediaMsg.id._serialized}`);
+                console.log(`   ✅ PDF (from HTML) sent successfully WITHOUT quote. Message ID: ${sentMediaMsg?.id?._serialized}`);
             } catch (sendError) {
                 console.error(`   ❌❌ Failed to send PDF (from HTML) even without quote. Error: ${sendError.message}`);
                 throw sendError;
@@ -8647,7 +8647,7 @@ async function handleGenerateHtmlPdfAction(htmlPdfData, targetMsg, chatPaths) {
     }
 }
 async function handleGenerateHtmlAction({ htmlData, targetMsg, chatPaths }) {
-    const chatId = targetMsg.id.remote;
+    const chatId = targetMsg?.id?.remote;
     const { htmlPrompt, htmlFilename, message, needDocument, replyToFileMessageId, replyTo } = htmlData;
 
     console.log(`📄 [handleGenerateHtmlAction] Starting HTML generation for chat ${chatId}. Prompt: "${htmlPrompt.substring(0, 50)}...", Filename: ${htmlFilename}`);
@@ -8665,7 +8665,7 @@ async function handleGenerateHtmlAction({ htmlData, targetMsg, chatPaths }) {
             const chat = await targetMsg.getChat();
             const messages = await chat.fetchMessages({ limit: 100 }); // Fetch history
             const normalize = id => id?.replace(/^true_/, "").replace(/^false_/, "");
-            const sourceMsg = messages.find(m => normalize(m.id._serialized) === normalize(replyToFileMessageId));
+            const sourceMsg = messages.find(m => normalize(m?.id?._serialized) === normalize(replyToFileMessageId));
 
             if (sourceMsg && sourceMsg.hasMedia) {
                 const media = await sourceMsg.downloadMedia();
@@ -8712,7 +8712,7 @@ async function handleGenerateHtmlAction({ htmlData, targetMsg, chatPaths }) {
                         finalHtmlPrompt = `User Request: ${htmlPrompt}\n\n[Warning: Could not extract text from source document ID ${replyToFileMessageId}]`;
                     }
                 } else {
-                    console.warn(`   ⚠️ Failed to download media data from ${sourceMsg.id._serialized}.`);
+                    console.warn(`   ⚠️ Failed to download media data from ${sourceMsg?.id?._serialized}.`);
                 }
             } else {
                 console.warn(`   ⚠️ Could not find source message ${replyToFileMessageId} or it has no media.`);
@@ -8793,21 +8793,21 @@ ${finalHtmlPrompt}
             caption: caption,
             quotedMessageId: replyTo // Quote the original request message ID
         });
-        console.log(`✅ [handleGenerateHtmlAction] HTML file sent to chat ${chatId}. Message ID: ${sentMediaMsg.id._serialized}`);
+        console.log(`✅ [handleGenerateHtmlAction] HTML file sent to chat ${chatId}. Message ID: ${sentMediaMsg?.id?._serialized}`);
 
         // --- Manual Logging for Sent Bot Media ---
-        if (sentMediaMsg && sentMediaMsg.id && !writtenMessageIds.has(sentMediaMsg.id._serialized)) {
+        if (sentMediaMsg && sentMediaMsg.id && !writtenMessageIds.has(sentMediaMsg?.id?._serialized)) {
             const localTimestamp = getLocalTimestamp();
-            const logLine = `${localTimestamp} [ID: ${sentMediaMsg.id._serialized}] פיתי: [מדיה: ${media.mimetype || 'text/html'}]\n`;
+            const logLine = `${localTimestamp} [ID: ${sentMediaMsg?.id?._serialized}] פיתי: [מדיה: ${media.mimetype || 'text/html'}]\n`;
             try {
                 fs.appendFileSync(chatPaths.historyFile, logLine, 'utf8');
-                writtenMessageIds.add(sentMediaMsg.id._serialized);
-                const normId = normalizeMsgId(sentMediaMsg.id._serialized);
+                writtenMessageIds.add(sentMediaMsg?.id?._serialized);
+                const normId = normalizeMsgId(sentMediaMsg?.id?._serialized);
                 botMessageIds.add(normId);
                 repliableMessageIds.add(normId);
-                console.log(`[handleGenerateHtmlAction LOG] Logged sent HTML file message ${sentMediaMsg.id._serialized}`);
+                console.log(`[handleGenerateHtmlAction LOG] Logged sent HTML file message ${sentMediaMsg?.id?._serialized}`);
             } catch (logErr) {
-                console.error(`[handleGenerateHtmlAction LOG] Error logging sent HTML message ${sentMediaMsg.id._serialized}:`, logErr);
+                console.error(`[handleGenerateHtmlAction LOG] Error logging sent HTML message ${sentMediaMsg?.id?._serialized}:`, logErr);
             }
         }
 
@@ -8959,7 +8959,7 @@ async function generateImageWithGradio(gradioModelParams, gradioModelName, msg, 
             // Save and index the file
             const chat = await msg.getChat();
             const safeName = await getSafeNameForChat(chat);
-            const chatPaths = getChatPaths(msg.id.remote, safeName);
+            const chatPaths = getChatPaths(msg?.id?.remote, safeName);
             fs.mkdirSync(chatPaths.filesDir, { recursive: true });
             const finalFilename = `gradio_image_${gradioModelName.split('/')[1]}_${Date.now()}.${mime.extension(imageMimeType) || 'png'}`;
             const fullPath = path.join(chatPaths.filesDir, finalFilename);
@@ -8971,7 +8971,7 @@ async function generateImageWithGradio(gradioModelParams, gradioModelName, msg, 
             }
             indexData.push({
                 timestamp: new Date().toISOString(),
-                originalMessageId: msg.id._serialized,
+                originalMessageId: msg?.id?._serialized,
                 generatedFilePath: fullPath,
                 filename: finalFilename,
                 description: description,
@@ -9185,7 +9185,7 @@ async function generateImage(description, imageModel, msg, retryCount = 0) {
         // ----- SAVE FILE -----
         const chat = await msg.getChat();
         const safeName = await getSafeNameForChat(chat);
-        const chatPaths = getChatPaths(chat.id._serialized, safeName);
+        const chatPaths = getChatPaths(chat?.id?._serialized, safeName);
         fs.mkdirSync(chatPaths.filesDir, { recursive: true });
 
         const finalFilename = `image_${imageModel}_${Date.now()}.${imageMimeType.split('/')[1] || 'png'}`;
@@ -9206,7 +9206,7 @@ async function generateImage(description, imageModel, msg, retryCount = 0) {
             }
             indexData.push({
                 timestamp: new Date().toISOString(),
-                originalMessageId: msg.id._serialized,
+                originalMessageId: msg?.id?._serialized,
                 generatedFilePath: fullPath,
                 filename: finalFilename,
                 description: description,
@@ -9245,8 +9245,8 @@ const play = require('play-dl'); // ודא שזה מיובא בתחילת הקו
 
 // פונקציה (בסיסית) לסיכום וידאו - דורשת שיפור/בדיקה של תמלול
 async function handleSummarizeVideoAction(videoData, targetMsg) {
-    const targetChatId = targetMsg.id.remote;
-    const replyToId = videoData.replyTo || targetMsg.id._serialized;
+    const targetChatId = targetMsg?.id?.remote;
+    const replyToId = videoData.replyTo || targetMsg?.id?._serialized;
     const videoUrl = videoData.video_url;
 
     if (!videoUrl || !play.yt_validate(videoUrl)) {
@@ -9322,7 +9322,7 @@ async function generateDocument({
     mediaMimeType = null,   // Mime type of the *source* document
     imageIntegration = null // New object for image handling
 }) {
-    const chatId = triggeringMsg.id.remote;
+    const chatId = triggeringMsg?.id?.remote;
     const chat = await triggeringMsg.getChat();
     const safeName = await getSafeNameForChat(chat); // Use your helper
 
@@ -9359,7 +9359,7 @@ async function generateDocument({
         try {
             const quoted = await triggeringMsg.getQuotedMessage();
             if (quoted) {
-                quoteSnippetForPrompt = `User quoted message (ID: ${quoted.id._serialized}): ${quoted.body || '[quoted media]'}`;
+                quoteSnippetForPrompt = `User quoted message (ID: ${quoted?.id?._serialized}): ${quoted.body || '[quoted media]'}`;
             }
         } catch (err) { /* ignore */ }
     }
@@ -9797,7 +9797,7 @@ async function compileLatexDocument({
     mediaMimeType,
     imageIntegration // חשוב שזה יועבר
 }) {
-    const chatPaths = getChatPaths(triggeringMsg.id.remote, safeName);
+    const chatPaths = getChatPaths(triggeringMsg?.id?.remote, safeName);
     const generatedFilesIndex = chatPaths.generatedFilesIndex;
     // שם קובץ ה-tex בלבד, כי אנחנו נריץ את הפקודה מתוך התיקייה שלו
     const texBaseFilename = path.basename(texPath); // <--- הגדר את המשתנה כאן
@@ -9916,13 +9916,13 @@ async function compileLatexDocument({
                 const chat = await triggeringMsg.getChat();
                 const messages = await chat.fetchMessages({ limit: 100 });
                 const normalize = id => id?.replace(/^true_/, "").replace(/^false_/, "");
-                const targetMsgToQuote = messages.find(m => normalize(m.id._serialized) === normalize(replyToIdFromGemini)) || triggeringMsg;
+                const targetMsgToQuote = messages.find(m => normalize(m?.id?._serialized) === normalize(replyToIdFromGemini)) || triggeringMsg;
 
                 if (targetMsgToQuote) {
-                    replyOptions.quotedMessageId = targetMsgToQuote.id._serialized;
+                    replyOptions.quotedMessageId = targetMsgToQuote?.id?._serialized;
                 }
             } catch (quoteError) {
-                console.error(`📄 [Compile] Error trying to find message ${replyToIdFromGemini} or ${triggeringMsg.id._serialized} to quote:`, quoteError);
+                console.error(`📄 [Compile] Error trying to find message ${replyToIdFromGemini} or ${triggeringMsg?.id?._serialized} to quote:`, quoteError);
             }
 
             try {
@@ -9933,9 +9933,9 @@ async function compileLatexDocument({
                     await triggeringMsg.reply(media, undefined, replyOptions);
                     console.log(`⚠️ PDF sent via triggeringMsg.reply as client was not directly available.`);
                 } else {
-                    await client.sendMessage(triggeringMsg.id.remote, media, replyOptions);
+                    await client.sendMessage(triggeringMsg?.id?.remote, media, replyOptions);
                 }
-                console.log(`✅ PDF sent successfully to ${triggeringMsg.id.remote}.`);
+                console.log(`✅ PDF sent successfully to ${triggeringMsg?.id?.remote}.`);
 
                 let generatedFilesIndexData = [];
                 if (fs.existsSync(generatedFilesIndex)) {
@@ -9945,7 +9945,7 @@ async function compileLatexDocument({
                 }
                 generatedFilesIndexData.push({
                     timestamp: new Date().toISOString(),
-                    originalMessageId: triggeringMsg.id._serialized,
+                    originalMessageId: triggeringMsg?.id?._serialized,
                     generatedFilePath: pdfPath,
                     filename: finalOutputDocumentName,
                     description: documentDescription || `PDF: ${documentName}`,
@@ -9957,7 +9957,7 @@ async function compileLatexDocument({
                 console.log(`💾 Logged generated PDF info to ${generatedFilesIndex}`);
 
             } catch (sendError) {
-                console.error(`❌ Error sending PDF message to ${triggeringMsg.id.remote}:`, sendError);
+                console.error(`❌ Error sending PDF message to ${triggeringMsg?.id?.remote}:`, sendError);
                 await triggeringMsg.reply("פיתי\n\nהצלחתי ליצור את קובץ ה-PDF, אבל נתקלתי בשגיאה כשניסיתי לשלוח אותו.");
             }
 
@@ -10095,11 +10095,11 @@ async function sendInfoMenu(msg) {
 
 מה תרצה/י לעשות עכשיו? 😊
     `;
-    const sentInfoMsg = await msg.reply(infoMessage.trim(), undefined, { quotedMessageId: msg.id._serialized });
+    const sentInfoMsg = await msg.reply(infoMessage.trim(), undefined, { quotedMessageId: msg?.id?._serialized });
 
     // --- הוסף את החלק הזה ---
-    if (sentInfoMsg && sentInfoMsg.id && sentInfoMsg.id._serialized) {
-        const normalizedId = normalizeMsgId(sentInfoMsg.id._serialized); // השתמש בפונקציית הנרמול אם יש לך אותה
+    if (sentInfoMsg && sentInfoMsg.id && sentInfoMsg?.id?._serialized) {
+        const normalizedId = normalizeMsgId(sentInfoMsg?.id?._serialized); // השתמש בפונקציית הנרמול אם יש לך אותה
         botMessageIds.add(normalizedId);       // סמן כהודעת בוט
         writtenMessageIds.add(normalizedId);   // סמן שכבר נכתבה/טופלה
         repliableMessageIds.add(normalizedId); // אם רוצים שיוכלו להגיב גם לתפריט
@@ -10110,7 +10110,7 @@ async function sendInfoMenu(msg) {
         try {
             const chat = await msg.getChat();
             const safeName = await getSafeNameForChat(chat);
-            const chatPaths = getChatPaths(chat.id._serialized, safeName);
+            const chatPaths = getChatPaths(chat?.id?._serialized, safeName);
             const localTimestamp = getLocalTimestamp();
             const line = `${localTimestamp} [ID: ${normalizedId}] פיתי: [תפריט מידע]\n`; // או חלק מהטקסט
             fs.appendFileSync(chatPaths.historyFile, line, 'utf8');
@@ -10299,7 +10299,7 @@ client.on('message', async (msg) => {
         try {
             // Phase 1: Get Chat and Calculate Paths based on the *original* message context ('this')
             const chat = await this.getChat(); // 'this' is the message reply() was called on
-            chatIdForLog = chat.id._serialized; // Store for logging
+            chatIdForLog = chat?.id?._serialized; // Store for logging
 
             // **** USE THE CENTRALIZED HELPER FUNCTION ****
             safeName = await getSafeNameForChat(chat);
@@ -10347,20 +10347,20 @@ client.on('message_create', async (msg) => {
     // --------------------------------------------------------------
     // SECTION 0: Prevent processing our own logging messages
     // --------------------------------------------------------------
-    if (writtenMessageIds.has(msg.id._serialized)) {
-        // console.log(`[message_create PRE-FILTER] Ignoring ${msg.id._serialized} - already logged.`);
+    if (writtenMessageIds.has(msg?.id?._serialized)) {
+        // console.log(`[message_create PRE-FILTER] Ignoring ${msg?.id?._serialized} - already logged.`);
         return;
     }
-    messageMap.set(msg.id._serialized, msg);
+    messageMap.set(msg?.id?._serialized, msg);
     let commandHandled = false;
 
     const infoMenuIdentifier = "🤖 *פיתי - העוזרת האישית החכמה שלך בוואטסאפ* 🤖";
     if (msg.fromMe && typeof msg.body === 'string' && msg.body.startsWith(infoMenuIdentifier)) {
-        console.log(`[message_create INFO MENU FILTER] Explicitly ignoring info menu message ${msg.id._serialized} sent by bot.`);
+        console.log(`[message_create INFO MENU FILTER] Explicitly ignoring info menu message ${msg?.id?._serialized} sent by bot.`);
         // ודא שהיא מסומנת כהודעת בוט לכל צורך עתידי אם טרם סומנה
-        if (!botMessageIds.has(normalizeMsgId(msg.id._serialized))) {
-            botMessageIds.add(normalizeMsgId(msg.id._serialized));
-            writtenMessageIds.add(normalizeMsgId(msg.id._serialized)); // חשוב גם ל-written
+        if (!botMessageIds.has(normalizeMsgId(msg?.id?._serialized))) {
+            botMessageIds.add(normalizeMsgId(msg?.id?._serialized));
+            writtenMessageIds.add(normalizeMsgId(msg?.id?._serialized)); // חשוב גם ל-written
         }
         return; // אל תמשיך לעבד את ההודעה הזו
     }
@@ -10369,30 +10369,30 @@ client.on('message_create', async (msg) => {
     // --------------------------------------------------------------
     const isBotAIReply = typeof msg.body === 'string' && msg.body.startsWith("פיתי\n\n");
     if (isBotAIReply) {
-        // console.log(`[message_create FILTER 1] Ignoring Bot AI Reply ${msg.id._serialized} for further processing, logging it.`);
+        // console.log(`[message_create FILTER 1] Ignoring Bot AI Reply ${msg?.id?._serialized} for further processing, logging it.`);
         let chat, safeName = 'error_path_ai_reply', chatPaths, chatFilePath = 'error_path_ai_reply/hist.txt';
         try {
             // Log AI replies using safelyAppendMessage before returning
             chat = await msg.getChat();
             safeName = await getSafeNameForChat(chat);
-            chatPaths = getChatPaths(chat.id._serialized, safeName);
+            chatPaths = getChatPaths(chat?.id?._serialized, safeName);
             chatFilePath = chatPaths.historyFile;
             await safelyAppendMessage(msg, "פיתי"); // Log as "פיתי"
         } catch (logErr) {
-            console.error(`[message_create FILTER 1] Error logging AI reply ${msg.id._serialized} for safeName='${safeName}', targetPath='${chatFilePath}':`, logErr);
+            console.error(`[message_create FILTER 1] Error logging AI reply ${msg?.id?._serialized} for safeName='${safeName}', targetPath='${chatFilePath}':`, logErr);
         }
         return; // Stop processing AI replies
     }
 
     const timestamp = msg.timestamp * 1000;
     if (timestamp < botStartTime) {
-        // console.log(`[message_create FILTER 2] Ignoring old msg ${msg.id._serialized}.`);
+        // console.log(`[message_create FILTER 2] Ignoring old msg ${msg?.id?._serialized}.`);
         return;
     }
 
     let incoming = typeof msg.body === 'string' ? msg.body.trim() : '';
     if (!incoming && !msg.hasMedia) {
-        // console.log(`[message_create FILTER 3] Ignoring empty msg ${msg.id._serialized}.`);
+        // console.log(`[message_create FILTER 3] Ignoring empty msg ${msg?.id?._serialized}.`);
         return;
     }
 
@@ -10423,7 +10423,7 @@ client.on('message_create', async (msg) => {
     const isGroup = chatId.includes('@g.us');
 
     // Updated log to show both original msg.author and the ID used for permission check
-    console.log(`[message_create CONTEXT] MsgID: ${msg.id._serialized}, From: ${msg.from}, Msg.Author: ${msg.author || 'N/A'}, OriginalAuthorId: ${originalAuthorId}, EffectiveSenderIdForPerms: ${effectiveSenderIdForPermissions}, To: ${msg.to}, isGroup: ${isGroup}, isFromMe: ${isFromMe}, ChatID: ${chatId}, SenderNum: ${contactNumber}`);
+    console.log(`[message_create CONTEXT] MsgID: ${msg?.id?._serialized}, From: ${msg.from}, Msg.Author: ${msg.author || 'N/A'}, OriginalAuthorId: ${originalAuthorId}, EffectiveSenderIdForPerms: ${effectiveSenderIdForPermissions}, To: ${msg.to}, isGroup: ${isGroup}, isFromMe: ${isFromMe}, ChatID: ${chatId}, SenderNum: ${contactNumber}`);
 
     // --------------------------------------------------------------
     // SECTION 3 + 4: Determine Sender & Unified Logging
@@ -10438,13 +10438,13 @@ client.on('message_create', async (msg) => {
     try {
         chatForLog = await msg.getChat();
         safeNameForLog = await getSafeNameForChat(chatForLog);
-        chatPathsForLog = getChatPaths(chatForLog.id._serialized, safeNameForLog);
+        chatPathsForLog = getChatPaths(chatForLog?.id?._serialized, safeNameForLog);
         historyFilePathForLog = chatPathsForLog.historyFile;
 
         if (isFromMe) {
             // ההודעה נשלחה מהחשבון שעליו הבוט רץ.
             // נבדוק אם זו הודעה שהבוט עצמו יצר (כבר נמצאת ב-botMessageIds).
-            if (botMessageIds.has(msg.id._serialized)) {
+            if (botMessageIds.has(msg?.id?._serialized)) {
                 senderNameForLog = "פיתי";
             } else {
                 // אם היא לא מזוהה כהודעת בוט, סביר להניח שאתה (הבעלים) שלחת אותה.
@@ -10460,7 +10460,7 @@ client.on('message_create', async (msg) => {
         successfullyLogged = true; // Mark as logged
 
     } catch (logSetupError) {
-        console.error(`❌ [message_create LOGGING ERROR] Failed during logging setup or execution for msg ${msg.id._serialized}. Error:`, logSetupError);
+        console.error(`❌ [message_create LOGGING ERROR] Failed during logging setup or execution for msg ${msg?.id?._serialized}. Error:`, logSetupError);
     }
 
     // ==============================================================
@@ -10746,7 +10746,7 @@ console.log(`[message_create OWNER CHECK] Owner command detected from ${original
                             // ניצור אובייקט דמוי jsonResponse מהטריגר
                             const triggeredActionData = {
                                 ...trigger.actionData, // העתק את כל נתוני הפעולה מהטריגר
-                                replyTo: msg.id._serialized // תמיד נגיב להודעה שהפעילה את הטריגר
+                                replyTo: msg?.id?._serialized // תמיד נגיב להודעה שהפעילה את הטריגר
                                 // 'wait' אמור להיות כבר בתוך actionData, לרוב false
                             };
 
@@ -10856,11 +10856,11 @@ console.log(`[message_create OWNER CHECK] Owner command detected from ${original
             }
 
             if (triggerActivated) {
-                console.log(`[message_create TRIGGER] Trigger handled message ${msg.id._serialized}. Exiting handler.`);
+                console.log(`[message_create TRIGGER] Trigger handled message ${msg?.id?._serialized}. Exiting handler.`);
                 return; // Exit after activating and executing trigger
             }
         } else {
-            console.warn(`[Trigger Check] Could not check triggers for msg ${msg.id._serialized}, chatPathsForLog invalid.`);
+            console.warn(`[Trigger Check] Could not check triggers for msg ${msg?.id?._serialized}, chatPathsForLog invalid.`);
         }
     }
     // ==============================================================
@@ -10872,16 +10872,16 @@ console.log(`[message_create OWNER CHECK] Owner command detected from ${original
     // SECTION 6: General Status Checks (If not owner command)
     // ==============================================================
     if (botStopped) {
-        // console.log(`[message_create STATUS 1] Bot is on a global break. Ignoring msg ${msg.id._serialized}.`);
+        // console.log(`[message_create STATUS 1] Bot is on a global break. Ignoring msg ${msg?.id?._serialized}.`);
         return;
     }
     if (stoppedChats.has(chatId)) {
-        // console.log(`[message_create STATUS 2] Bot stopped for chat ${chatId}. Ignoring msg ${msg.id._serialized}.`);
+        // console.log(`[message_create STATUS 2] Bot stopped for chat ${chatId}. Ignoring msg ${msg?.id?._serialized}.`);
         return;
     }
     // Check blocking only if msg is NOT from owner
     if (messageSenderBaseId !== ownerBaseId && blockedNumbers.has(contactNumber)) {
-        console.log(`[message_create STATUS 3] Ignoring message ${msg.id._serialized} from blocked number ${contactNumber}.`);
+        console.log(`[message_create STATUS 3] Ignoring message ${msg?.id?._serialized} from blocked number ${contactNumber}.`);
         return;
     }
 
@@ -10890,7 +10890,7 @@ console.log(`[message_create OWNER CHECK] Owner command detected from ${original
     // ==============================================================
     if (silentModeChats.get(chatId)) {
         // ... (Silent mode logic remains the same as previous version) ...
-        console.log(`[message_create SILENT] Queueing message ${msg.id._serialized} for silent mode in chat ${chatId}.`);
+        console.log(`[message_create SILENT] Queueing message ${msg?.id?._serialized} for silent mode in chat ${chatId}.`);
         const currentQueue = messageQueue.get(chatId) || [];
         currentQueue.push(msg);
         messageQueue.set(chatId, currentQueue);
@@ -10902,17 +10902,17 @@ console.log(`[message_create OWNER CHECK] Owner command detected from ${original
 
             const promptText1 = typeof pair[0].body === 'string' ? pair[0].body.trim() : '[no text/media]';
             const promptText2 = typeof pair[1].body === 'string' ? pair[1].body.trim() : '[no text/media]';
-            const combinedPrompt = `הודעה 1 (ID: ${pair[0].id._serialized}): ${promptText1}\nהודעה 2 (ID: ${pair[1].id._serialized}): ${promptText2}`;
+            const combinedPrompt = `הודעה 1 (ID: ${pair[0]?.id?._serialized}): ${promptText1}\nהודעה 2 (ID: ${pair[1]?.id?._serialized}): ${promptText2}`;
 
             let quotedMedia1 = null, quotedText1 = null, quotedId1 = null;
-            if (pair[0].hasQuotedMsg) { try { const qm = await pair[0].getQuotedMessage(); if (qm) { quotedId1 = qm.id._serialized; quotedText1 = qm.body; if (qm.hasMedia) { quotedMedia1 = await downloadMediaPart(qm); } } } catch (e) { console.error("Silent quote err:", e); } }
+            if (pair[0].hasQuotedMsg) { try { const qm = await pair[0].getQuotedMessage(); if (qm) { quotedId1 = qm?.id?._serialized; quotedText1 = qm.body; if (qm.hasMedia) { quotedMedia1 = await downloadMediaPart(qm); } } } catch (e) { console.error("Silent quote err:", e); } }
 
             try {
-                console.log(`[Silent Mode CALL] Calling handleMessage for pair ending with ${pair[1].id._serialized}.`);
+                console.log(`[Silent Mode CALL] Calling handleMessage for pair ending with ${pair[1]?.id?._serialized}.`);
                 await handleMessage(pair[1], combinedPrompt, quotedMedia1, [], quotedText1, quotedId1, true, null);
-                console.log(`[Silent Mode CALL] handleMessage finished for pair ending with ${pair[1].id._serialized}.`);
+                console.log(`[Silent Mode CALL] handleMessage finished for pair ending with ${pair[1]?.id?._serialized}.`);
             } catch (silentHandleErr) {
-                console.error(`❌❌❌ CRITICAL ERROR during SILENT handleMessage for pair ending ${pair[1].id._serialized}:`, silentHandleErr);
+                console.error(`❌❌❌ CRITICAL ERROR during SILENT handleMessage for pair ending ${pair[1]?.id?._serialized}:`, silentHandleErr);
                 client.sendMessage(myId, `Error in silent mode for chat ${chatId}: ${silentHandleErr.message}`);
             }
         }
@@ -10925,10 +10925,10 @@ console.log(`[message_create OWNER CHECK] Owner command detected from ${original
     // SECTION 7.5: Voice Message Transcription
     // SECTION 7.5: Voice Message Transcription
     if (!msg.fromMe && (msg.type === 'audio' || msg.type === 'ptt')) {
-        console.log(`[message_create VOICE DETECTED] Msg ${msg.id._serialized} is a voice message. Attempting transcription...`);
+        console.log(`[message_create VOICE DETECTED] Msg ${msg?.id?._serialized} is a voice message. Attempting transcription...`);
         const transcribedText = await handleVoiceMessage(msg);
         if (transcribedText && transcribedText.trim() !== '') {
-            console.log(`[message_create VOICE PROCESSED] Transcription successful for ${msg.id._serialized}. Using transcribed text.`);
+            console.log(`[message_create VOICE PROCESSED] Transcription successful for ${msg?.id?._serialized}. Using transcribed text.`);
             incoming = transcribedText;
 
             // שולחים את התמלול ישירות לפונקציית העיבוד (AI) וחוזרים
@@ -10944,7 +10944,7 @@ console.log(`[message_create OWNER CHECK] Owner command detected from ${original
             );
             return;
         } else {
-            console.log(`[message_create VOICE FAILED] Transcription failed or empty for ${msg.id._serialized}. Cannot process further.`);
+            console.log(`[message_create VOICE FAILED] Transcription failed or empty for ${msg?.id?._serialized}. Cannot process further.`);
             incoming = '';
         }
     }
@@ -10961,7 +10961,7 @@ console.log(`[message_create OWNER CHECK] Owner command detected from ${original
         try {
             const quotedMsg = await msg.getQuotedMessage();
             if (quotedMsg) {
-                const quotedMsgIdRaw = quotedMsg.id._serialized;
+                const quotedMsgIdRaw = quotedMsg?.id?._serialized;
                 const normQuotedId = normalizeMsgId(quotedMsgIdRaw);
 
                 // תגובה להודעת בוט
@@ -11028,12 +11028,12 @@ console.log(`[message_create OWNER CHECK] Owner command detected from ${original
         // תדרש מילת טריגר או תגובה לבוט ושלא תהיה תגובה לבעלים.
         if (isCommandMsg) {
             shouldProcess = true;
-            console.log(`[message_create DECISION] Group command ${msg.id._serialized} detected. Processing.`);
+            console.log(`[message_create DECISION] Group command ${msg?.id?._serialized} detected. Processing.`);
         } else if (botTriggeredByWordOrReplyToBot && !isReplyToOwner) {
             shouldProcess = true;
-            console.log(`[message_create DECISION] Group message ${msg.id._serialized} triggered by word/reply. Processing.`);
+            console.log(`[message_create DECISION] Group message ${msg?.id?._serialized} triggered by word/reply. Processing.`);
         } else {
-            // console.log(`[message_create DECISION] Group message ${msg.id._serialized} ignored (no trigger or reply to owner).`);
+            // console.log(`[message_create DECISION] Group message ${msg?.id?._serialized} ignored (no trigger or reply to owner).`);
         }
     } else { // Private Chat
         if (messageSenderBaseId && ownerBaseId && messageSenderBaseId === ownerBaseId) {
@@ -11046,27 +11046,27 @@ console.log(`[message_create OWNER CHECK] Owner command detected from ${original
             // אם אין מילת טריגר, נעבד רק אם זו תגובה לבוט ולא להודעת בעלים.
             if (isTriggerWord) { // אם הבעלים השתמש במילת טריגר, נעבד כמעט תמיד
                 shouldProcess = true;
-                console.log(`[message_create DECISION] Owner's private message ${msg.id._serialized} with trigger word. Processing.`);
+                console.log(`[message_create DECISION] Owner's private message ${msg?.id?._serialized} with trigger word. Processing.`);
             } else if (isReplyToBot && !isReplyToOwner) { // אם אין מילת טריגר, אבל זו תגובה לבוט (ולא לבעלים)
                 shouldProcess = true;
-                console.log(`[message_create DECISION] Owner's private message ${msg.id._serialized} is a reply to BOT (and not owner) without trigger word. Processing.`);
+                console.log(`[message_create DECISION] Owner's private message ${msg?.id?._serialized} is a reply to BOT (and not owner) without trigger word. Processing.`);
             }
             // אם לא זה ולא זה, לא נעבד (לדוגמה, הבעלים רק מצטט הודעה של עצמו בלי מילת טריגר)
             else {
-                console.log(`[message_create DECISION] Owner's private message ${msg.id._serialized} ignored (no trigger word, not a reply to bot, or is reply to self/owner without trigger).`);
+                console.log(`[message_create DECISION] Owner's private message ${msg?.id?._serialized} ignored (no trigger word, not a reply to bot, or is reply to self/owner without trigger).`);
             }
         } else { // הודעה פרטית ממשתמש אחר
             if ((botTriggeredByWordOrReplyToBot || replyToAllPrivates) && !isReplyToOwner) { // אם `replyToAllPrivates` מופעל או שיש טריגר
                 shouldProcess = true;
-                console.log(`[message_create DECISION] Other user's private message ${msg.id._serialized} processed (triggered or replyToAllPrivates ON) AND NOT reply to owner.`);
+                console.log(`[message_create DECISION] Other user's private message ${msg?.id?._serialized} processed (triggered or replyToAllPrivates ON) AND NOT reply to owner.`);
             } else {
-                // console.log(`[message_create DECISION] Other user's private message ${msg.id._serialized} ignored (not triggered, or replyToAll is OFF, or IS reply to owner).`);
+                // console.log(`[message_create DECISION] Other user's private message ${msg?.id?._serialized} ignored (not triggered, or replyToAll is OFF, or IS reply to owner).`);
             }
         }
     }
 
     if (!shouldProcess) {
-        console.log(`[message_create FINAL] Message ${msg.id._serialized} (from: "${senderNameForLog}") will NOT be processed by handleMessage (isReplyToOwner: ${isReplyToOwner}, botTriggeredByWordOrReplyToBot: ${botTriggeredByWordOrReplyToBot}, replyToAllPrivates: ${replyToAllPrivates}).`);
+        console.log(`[message_create FINAL] Message ${msg?.id?._serialized} (from: "${senderNameForLog}") will NOT be processed by handleMessage (isReplyToOwner: ${isReplyToOwner}, botTriggeredByWordOrReplyToBot: ${botTriggeredByWordOrReplyToBot}, replyToAllPrivates: ${replyToAllPrivates}).`);
         return; // Stop if not meant for processing
     }
 
@@ -11077,12 +11077,12 @@ console.log(`[message_create OWNER CHECK] Owner command detected from ${original
     if (msg.hasQuotedMsg) {
         try {
             const quotedMsg = await msg.getQuotedMessage();
-            if (quotedMsg && (repliableMessageIds.has(quotedMsg.id._serialized) ||
-                botMessageIds.has(normalizeMsgId(quotedMsg.id._serialized)))) {
+            if (quotedMsg && (repliableMessageIds.has(quotedMsg?.id?._serialized) ||
+                botMessageIds.has(normalizeMsgId(quotedMsg?.id?._serialized)))) {
                 // isReplyToBot כבר צריך להיות true מהלוגיקה הקודמת אם הגענו לכאן והתנאי הזה מתקיים,
                 // אבל אין נזק להגדיר אותו שוב.
                 isReplyToBot = true;
-                console.log(`[message_create DECISION - Redundant Check] Message ${msg.id._serialized} is a reply to repliable bot message ${quotedMsg.id._serialized}. This confirmation is for handleMessage context.`);
+                console.log(`[message_create DECISION - Redundant Check] Message ${msg?.id?._serialized} is a reply to repliable bot message ${quotedMsg?.id?._serialized}. This confirmation is for handleMessage context.`);
             }
         } catch (err) { console.error("[message_create DECISION - Redundant Check] Error checking quoted message:", err); }
     }
@@ -11112,7 +11112,7 @@ console.log(`[message_create OWNER CHECK] Owner command detected from ${original
     // ==============================================================
     // SECTION 9: Prepare for and Call handleMessage
     // ==============================================================
-    console.log(`[message_create PROCESS] Proceeding to handleMessage for msg ${msg.id._serialized} from "${senderNameForLog}" in chat ${chatId}.`);
+    console.log(`[message_create PROCESS] Proceeding to handleMessage for msg ${msg?.id?._serialized} from "${senderNameForLog}" in chat ${chatId}.`);
 
     let promptText = incoming;
     // Remove trigger words
@@ -11137,7 +11137,7 @@ console.log(`[message_create OWNER CHECK] Owner command detected from ${original
     let immediateQuotedId = null; // Store ID of the *first* reply
 
     if (msg.hasQuotedMsg) {
-        console.log(`[Reply Chain] Message ${msg.id._serialized} has quoted message. Starting chain collection.`);
+        console.log(`[Reply Chain] Message ${msg?.id?._serialized} has quoted message. Starting chain collection.`);
         for (let depth = 0; depth < 5; depth++) {
             if (!currentMsgInChain || !currentMsgInChain.hasQuotedMsg) {
                 console.log(`[Reply Chain] Chain ended at depth ${depth}.`);
@@ -11151,7 +11151,7 @@ console.log(`[message_create OWNER CHECK] Owner command detected from ${original
                     break;
                 }
 
-                const quotedId = quotedMsg.id._serialized;
+                const quotedId = quotedMsg?.id?._serialized;
                 let quotedSenderName = 'Unknown';
                 try {
                     // Attempt to get sender name for the message in the chain
@@ -11221,7 +11221,7 @@ console.log(`[message_create OWNER CHECK] Owner command detected from ${original
             console.log(`[Reply Chain] Collected chain:\n${replyChainString}`);
         }
     } else {
-        console.log(`[Reply Chain] Message ${msg.id._serialized} does not have a quoted message.`);
+        console.log(`[Reply Chain] Message ${msg?.id?._serialized} does not have a quoted message.`);
     }
     // --- END NEW Reply Chain Context ---
 
@@ -11231,7 +11231,7 @@ console.log(`[message_create OWNER CHECK] Owner command detected from ${original
     // Determine final prompt (This remains the same)
     const finalPrompt = promptText || messageMedia?.caption || (isReplyToBot ? "המשך/תגובה להודעה הקודמת שלי" : "[no text or media]");
 
-    console.log(`[message_create CALL] Calling handleMessage for msg ${msg.id._serialized} with finalPrompt: "${finalPrompt.slice(0, 50)}..."`);
+    console.log(`[message_create CALL] Calling handleMessage for msg ${msg?.id?._serialized} with finalPrompt: "${finalPrompt.slice(0, 50)}..."`);
     try {
         // --- MODIFY THE CALL TO handleMessage ---
         // Pass the new replyChainString and the immediate quote details
@@ -11247,10 +11247,10 @@ console.log(`[message_create OWNER CHECK] Owner command detected from ${original
             replyChainString // <<< Pass the new chain string here
         );
         // --- END MODIFICATION ---
-        console.log(`[message_create CALL] handleMessage finished successfully for msg ${msg.id._serialized}.`);
+        console.log(`[message_create CALL] handleMessage finished successfully for msg ${msg?.id?._serialized}.`);
     } catch (handleError) {
         // Error handling remains the same
-        console.error(`❌❌❌ CRITICAL ERROR during handleMessage call for msg ${msg.id._serialized}:`, handleError);
+        console.error(`❌❌❌ CRITICAL ERROR during handleMessage call for msg ${msg?.id?._serialized}:`, handleError);
         // ... (rest of error handling) ...
     }
 
