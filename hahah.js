@@ -66,7 +66,7 @@ async function listRecentEmails(auth, gmail) {
             return [];
         }
         console.log(`📊 Found ${messages.length} email IDs to check.`);
-        return messages.map(message => message.id);
+        return messages.map(message => message?.id);
     } catch (err) {
         console.error('❌ Error listing emails:', err);
         throw err; // Re-throw to be caught by main handler
@@ -199,7 +199,7 @@ async function getPdfAttachmentsFromEmail(auth, gmail, messageId, keyword) {
             console.log(`    📎 Found ${attachments.length} PDF attachment(s) in email ${messageId} (which also contains "${keyword}").`);
             return attachments.map(att => ({
                 messageId: messageId,
-                attachmentId: att.id,
+                attachmentId: att?.id,
                 filename: att.filename
             }));
         } else {
@@ -376,7 +376,7 @@ async function sendMergedPdf(auth, gmail, recipient, subject, bodyText, attachme
             },
         });
 
-        console.log('✅ Email with merged PDF sent successfully! Message ID:', res.data.id);
+        console.log('✅ Email with merged PDF sent successfully! Message ID:', res.data?.id);
     } catch (err) {
         const errorMessage = err.response?.data || err.message || err;
         console.error('❌ Error sending email with attachment:', errorMessage);

@@ -108,7 +108,7 @@ client.on('ready', () => {
  * @param {import('whatsapp-web.js').Chat} chat אובייקט הצ'אט שבו יש להפעיל את הפונקציה
  */
 async function makeJoke(chat) {
-    console.log(`[JokeBot] מנסה להכין בדיחה עבור צ'אט: ${chat.name || chat.id._serialized}`);
+    console.log(`[JokeBot] מנסה להכין בדיחה עבור צ'אט: ${chat.name || chat?.id?._serialized}`);
     
     if (GEMINI_API_KEY === "YOUR_GEMINI_API_KEY") {
         console.error("!!! שגיאה קריטית: מפתח ה-API של Gemini לא הוגדר. אנא עדכן את הקוד.");
@@ -120,7 +120,7 @@ async function makeJoke(chat) {
         // 1. איסוף 500 ההודעות האחרונות
         const messages = await chat.fetchMessages({ limit: 500 });
         if (messages.length === 0) {
-            console.log(`[JokeBot] לא נמצאו הודעות בצ'אט ${chat.id._serialized}. מדלג.`);
+            console.log(`[JokeBot] לא נמצאו הודעות בצ'אט ${chat?.id?._serialized}. מדלג.`);
             return;
         }
 
@@ -141,7 +141,7 @@ if (msg.body && !msg.body.startsWith('/')) {
         const contact = await msg.getContact();
         participants.set(senderId, {
             id: senderId,
-            name: contact.pushname || contact.name || `User_${contact.id.user}`
+            name: contact.pushname || contact.name || `User_${contact?.id?.user}`
         });
     }
     const sender = participants.get(senderId);
@@ -159,7 +159,7 @@ if (msg.body && !msg.body.startsWith('/')) {
                     const qContact = await quoted.getContact();
                     participants.set(qSenderId, {
                         id: qSenderId,
-                        name: qContact.pushname || qContact.name || `User_${qContact.id.user}`
+                        name: qContact.pushname || qContact.name || `User_${qContact?.id?.user}`
                     });
                 }
                 const qSender = participants.get(qSenderId);
@@ -182,7 +182,7 @@ if (msg.body && !msg.body.startsWith('/')) {
         }
         
         if (!formattedHistory) {
-             console.log(`[JokeBot] לא נמצא תוכן רלוונטי לעיבוד בצ'אט ${chat.id._serialized}.`);
+             console.log(`[JokeBot] לא נמצא תוכן רלוונטי לעיבוד בצ'אט ${chat?.id?._serialized}.`);
              return;
         }
 
@@ -279,30 +279,30 @@ for (const [, p] of participants) {
     if (!regex.test(jokeText)) continue;   // אין הופעה – דלג
 
     // הבא את האובייקט Contact (פעם אחת)
-    const contact = await client.getContactById(p.id);
+    const contact = await client.getContactById(p?.id);
     if (!contact) continue;
 
     // החלף *כל* ההופעות של @שם ➜ @מספר
-    jokeText = jokeText.replace(regex, `@${contact.id.user}`);
+    jokeText = jokeText.replace(regex, `@${contact?.id?.user}`);
 
     // הוסף לרשימת mentions אם עדיין לא שם
-    if (!mentions.find(c => c.id._serialized === contact.id._serialized)) {
+    if (!mentions.find(c => c?.id?._serialized === contact?.id?._serialized)) {
         mentions.push(contact);
     }
 }
 
 // שליחה
-console.log(`[JokeBot] שולח בדיחה לצ'אט ${chat.id._serialized}: "${jokeText}"`);
+console.log(`[JokeBot] שולח בדיחה לצ'אט ${chat?.id?._serialized}: "${jokeText}"`);
 await chat.sendMessage(jokeText, {
-  mentions: mentions.map(c => c.id._serialized)  // הפוך את ה-Contact[] למחרוזות ID
+  mentions: mentions.map(c => c?.id?._serialized)  // הפוך את ה-Contact[] למחרוזות ID
 });
 
         } else {
-            console.log(`[JokeBot] ה-AI החליט לא להגיב בצ'אט ${chat.id._serialized}.`);
+            console.log(`[JokeBot] ה-AI החליט לא להגיב בצ'אט ${chat?.id?._serialized}.`);
         }
 
     } catch (error) {
-        console.error(`[JokeBot] אירעה שגיאה במהלך הכנת בדיחה לצ'אט ${chat.id._serialized}:`);
+        console.error(`[JokeBot] אירעה שגיאה במהלך הכנת בדיחה לצ'אט ${chat?.id?._serialized}:`);
         if (error.response?.data) {
             console.error("API Error Data:", JSON.stringify(error.response.data, null, 2));
         } else {
@@ -323,18 +323,18 @@ function startJokeScheduler(chat) {
         const maxMinutes = 60;
         const randomDelay = (Math.random() * (maxMinutes - minMinutes) + minMinutes) * 60 * 1000;
         
-        console.log(`[Scheduler] הבדיחה הבאה עבור ${chat.id._serialized} מתוזמנת לעוד ${Math.round(randomDelay / 60000)} דקות.`);
+        console.log(`[Scheduler] הבדיחה הבאה עבור ${chat?.id?._serialized} מתוזמנת לעוד ${Math.round(randomDelay / 60000)} דקות.`);
 
         const timerId = setTimeout(async () => {
             // רק אם הצ'אט עדיין פעיל
-            if (activeScheduledChats.has(chat.id._serialized)) {
+            if (activeScheduledChats.has(chat?.id?._serialized)) {
                 await makeJoke(chat);
                 scheduleNextJoke(); // תזמון מחדש של הבדיחה הבאה
             }
         }, randomDelay);
         
         // שמירת הטיימר כדי שנוכל לבטל אותו מאוחר יותר
-        activeTimers.set(chat.id._serialized, timerId);
+        activeTimers.set(chat?.id?._serialized, timerId);
     };
     
     // התחלת הסבב הראשון
@@ -359,7 +359,7 @@ function stopJokeScheduler(chatId) {
 client.on('message_create', async (msg) => {
     const command = msg.body.trim().toLowerCase();
     const chat = await msg.getChat();
-    const chatId = chat.id._serialized;
+    const chatId = chat?.id?._serialized;
 
     // פקודת /start - הפעלה מיידית
     if (command === '/start') {

@@ -121,7 +121,7 @@ async function generateBarcode(text) {
 }
 
 async function getSafeNameForChat(client, chat) { // Added client as a parameter
-    if (!chat || !chat.id || !chat.id._serialized) {
+    if (!chat || !chat?.id?._serialized) {
         console.warn('[getSafeNameForChat] Chat object or chat.id._serialized is undefined. Returning default name.');
         return 'unknown_chat_or_user'; // Default name for undefined chat
     }
@@ -129,13 +129,13 @@ async function getSafeNameForChat(client, chat) { // Added client as a parameter
     if (chat.isGroup) {
         safeName = chat.name.replace(/[^\w\u0590-\u05FF\s-]/g, "").replace(/\s+/g, "_"); // Allowed hyphens
     } else {
-        const contact = await client.getContactById(chat.id._serialized); // Uses the passed client
-        safeName = contact.pushname || contact.name || contact.number || chat.id._serialized.split('@')[0];
+        const contact = await client.getContactById(chat?.id?._serialized); // Uses the passed client
+        safeName = contact.pushname || contact.name || contact.number || chat?.id?._serialized.split('@')[0];
         safeName = safeName.replace(/[^\w\u0590-\u05FF\s-]/g, "").replace(/\s+/g, "_"); // Allowed hyphens
     }
     // Ensure the name is not excessively long and doesn't start/end with underscores/hyphens
     safeName = safeName.substring(0, 50).replace(/^_+|-+$/g, '').replace(/^[-]+|[-]+$/g, '');
-    return `${chat.id.user}_${safeName || 'unknown'}`; // Added fallback for empty safeName
+    return `${chat?.id?.user}_${safeName || 'unknown'}`; // Added fallback for empty safeName
 }
 
 // Exporting all functions
