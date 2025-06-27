@@ -24,7 +24,8 @@ const messageMap = new Map();
 const mime = require('mime-types');
 const COGVIDEO_GRADIO_SPACE = "THUDM/CogVideoX-5B-Space"; // CogVideoX Space URL
 // בתחילת הקובץ, ליד שאר הקבועים של Cloudflare
-const puppeteer = require('puppeteer-core');
+// Use bundled Chromium to avoid specifying executablePath
+const puppeteer = require('puppeteer');
 
 
 
