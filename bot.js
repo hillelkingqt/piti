@@ -1603,6 +1603,9 @@ async function handleGroupManagementAction(actionData, targetMsg) {
                 await chatToManage.setMessagesAdminsOnly(value);
                 await targetMsg.reply(value ? "✅ מעתה רק מנהלים יכולים לשלוח הודעות בקבוצה." : "✅ מעתה כל המשתתפים יכולים לשלוח הודעות בקבוצה.", undefined, { quotedMessageId: replyTo });
                 break;
+            case 'set_picture':
+                await handleSetGroupPictureAction(actionData, targetMsg);
+                break;
             default:
                 console.warn(`[GroupMgmt] Unknown subAction: ${subAction}`);
                 await targetMsg.reply(`⚠️ תת-פעולה לא מוכרת לניהול קבוצה: ${subAction}`, undefined, { quotedMessageId: replyTo });
@@ -2752,6 +2755,65 @@ async function handleSendProfilePicAction(actionData, targetMsg, chatPaths) {
     } catch (err) {
         console.error('[handleSendProfilePicAction] Error:', err);
         await targetMsg.reply('אירעה שגיאה בהורדת או בשליחת תמונת הפרופיל.');
+    }
+}
+
+async function handleSetGroupPictureAction(actionData, targetMsg) {
+    const chatToManage = await targetMsg.getChat();
+    const replyTo = actionData.replyTo || targetMsg.id._serialized;
+
+    if (!chatToManage.isGroup) {
+        await targetMsg.reply("⚠️ הפקודה הזו רלוונטית לקבוצות בלבד.", undefined, { quotedMessageId: replyTo });
+        return;
+    }
+
+    const botParticipant = chatToManage.participants.find(p => p?.id?._serialized === client.info.wid._serialized);
+    if (!botParticipant || !botParticipant.isAdmin) {
+        await targetMsg.reply("⚠️ אין לי הרשאות מנהל בקבוצה הזו כדי לשנות את תמונת הקבוצה.", undefined, { quotedMessageId: replyTo });
+        return;
+    }
+
+    let imageBuffer = null;
+    let mimeType = 'image/jpeg';
+
+    const source = actionData.pictureSource || {};
+
+    if (source.type === 'existing_image' && source.sourceImageMessageId) {
+        const imgResult = await findMessageMedia(source.sourceImageMessageId, targetMsg, 'image');
+        if (imgResult.mediaData) {
+            imageBuffer = Buffer.from(imgResult.mediaData.data, 'base64');
+            mimeType = imgResult.mediaData.mimetype || mimeType;
+        }
+    } else if (source.type === 'ai_generated_image' && source.imagePrompt) {
+        const model = source.imageModel || 'flux-1-schnell';
+        const genRes = await generateImageAndGetBuffer(source.imagePrompt, model, targetMsg);
+        if (genRes && genRes.buffer) {
+            imageBuffer = genRes.buffer;
+            mimeType = genRes.mimeType || mimeType;
+        }
+    } else if (targetMsg.hasQuotedMsg) {
+        try {
+            const quoted = await targetMsg.getQuotedMessage();
+            if (quoted.hasMedia) {
+                const media = await quoted.downloadMedia();
+                imageBuffer = Buffer.from(media.data, 'base64');
+                mimeType = media.mimetype || mimeType;
+            }
+        } catch {}
+    }
+
+    if (!imageBuffer) {
+        await targetMsg.reply('⚠️ לא הצלחתי למצוא תמונה מתאימה לשינוי תמונת הקבוצה.', undefined, { quotedMessageId: replyTo });
+        return;
+    }
+
+    try {
+        const media = new MessageMedia(mimeType, imageBuffer.toString('base64'), 'grouppic');
+        await chatToManage.setPicture(media);
+        await targetMsg.reply(actionData.message || '✅ תמונת הקבוצה עודכנה.', undefined, { quotedMessageId: replyTo });
+    } catch (err) {
+        console.error('[handleSetGroupPictureAction] Error:', err);
+        await targetMsg.reply('⚠️ אירעה שגיאה במהלך עדכון תמונת הקבוצה.', undefined, { quotedMessageId: replyTo });
     }
 }
 // Function to load pending actions
@@ -4074,6 +4136,21 @@ async function handleMessage(msg, incoming, quotedMedia = null, contextMediaArra
     }
 
     const chatData = await msg.getChat();
+    let chatInfoPromptPart = "";
+    try {
+        if (chatData.isGroup) {
+            const groupName = chatData.name || "קבוצה ללא שם";
+            let groupDesc = "";
+            try { groupDesc = chatData.description || ""; } catch {}
+            chatInfoPromptPart = `מידע על הקבוצה: "${groupName}"${groupDesc ? `\nתיאור: ${groupDesc}` : ''}`;
+        } else {
+            const chatContact = await getCachedContact(chatData.id?._serialized);
+            const chatName = chatContact?.pushname || chatContact?.name || chatData.name || chatData.id?.user || "משתמש לא ידוע";
+            chatInfoPromptPart = `צ'אט פרטי עם ${chatName}`;
+        }
+    } catch (infoErr) {
+        console.error('[ChatInfoPrompt] Error building chat info:', infoErr);
+    }
 
 
     // Now this should work because loadTriggers is defined above
@@ -4183,6 +4260,7 @@ async function handleMessage(msg, incoming, quotedMedia = null, contextMediaArra
 
     const bigTextPrompt = `
 אתה עוזר אישי בצ'אט וואצאפ בשם "פיתי". תענה בעברית בלבד ובצורה אמפתית, תמציתית ואיכותית.
+${chatInfoPromptPart}
 
 
 **הוראה חשובה: תזמון פעולות**
@@ -5189,13 +5267,18 @@ ${generatedFilesText.length > 0 ? generatedFilesText : "אין קבצים שנו
 {
   "replyTo": "MESSAGE_ID_של_הבקשה", // חובה: ID ההודעה של המשתמש שביקש את הפעולה
   "action": "group_management",
-  "subAction": "remove_participant" | "add_participant" | "promote_admin" | "demote_admin" | "set_subject" | "set_description" | "set_edit_info_admins_only" | "set_send_messages_admins_only",
+  "subAction": "remove_participant" | "add_participant" | "promote_admin" | "demote_admin" | "set_subject" | "set_description" | "set_edit_info_admins_only" | "set_send_messages_admins_only" | "set_picture",
   "participantIds": ["972XXXXXXXXX@c.us", "ANOTHER_ID@c.us"], // מערך של מזהי משתתפים (מספרי טלפון בפורמט WhatsApp ID). נדרש עבור: remove_participant, add_participant, promote_admin, demote_admin
   "value": "טקסט חדש לקבוצה" | true | false, // נדרש עבור: set_subject (טקסט), set_description (טקסט), set_edit_info_admins_only (ערך בוליאני true/false), set_send_messages_admins_only (ערך בוליאני true/false)
+  // עבור set_picture השתמש בשדה pictureSource במקום value
   // "targetGroupId": "GROUP_ID@g.us", // אופציונלי: אם רוצים לפעול על קבוצה ספציפית שאינה הנוכחית
   "quotedParticipantTarget": true | false, // (אופציונלי) האם זיהית שהמשתמש ציטט מישהו כחלק מהבקשה לטיפול במשתתף
   "message": "הודעת טעינה/אישור למשתמש (לדוגמה: 'מנסה להסיר את המשתמש מהקבוצה...')", // הודעה ראשונית למשתמש
   "wait": false // (או true עם פרטי תזמון אם הבקשה היא מתוזמנת)
+  // עבור set_picture:
+  //   "pictureSource": { "type": "existing_image", "sourceImageMessageId": "ID" }
+  //   או
+  //   "pictureSource": { "type": "ai_generated_image", "imagePrompt": "Dog", "imageModel": "flux-1-schnell" }
 }
 \`\`\`
 שימי לב, וזה חשוב, אם מישהו מעצבן אותך, מציק לך, מפריע לך, או משהו, את תתני לו אזהרה שאת עומדת להעיף אותו, ואם הוא ימשיך להציק לך או לקלל אותך את תעיפי אותו, ברור? כל מי שיקלל אותך את תתני לון אזהרה ואם הוא לא יקשיב לך את תעיפי אותו מהקבוצה אל תעשי טעויות. את תעיפי ולא תתווכחי.
@@ -5224,6 +5307,14 @@ ${generatedFilesText.length > 0 ? generatedFilesText : "אין קבצים שנו
 -   בקשה: "פיתי תפתחי את הקבוצה שכולם יוכלו לערוך את הפרטים שלה"
     JSON לדוגמה:
     \`{ "replyTo": "ID_הבקשה", "action": "group_management", "subAction": "set_edit_info_admins_only", "value": false, "message": "מעדכנת הגדרות עריכת פרטי קבוצה..." }\`
+
+-   בקשה: "פיתי תשני את התמונה של הקבוצה לתמונה הזאת" (כאשר ההודעה מצטטת תמונה)
+    JSON לדוגמה:
+    \`{ "replyTo": "ID_הבקשה", "action": "group_management", "subAction": "set_picture", "pictureSource": { "type": "existing_image", "sourceImageMessageId": "ID_של_התמונה" }, "message": "משנה את תמונת הקבוצה..." }\`
+
+-   בקשה: "פיתי תשני את התמונה של הקבוצה לתמונה של כלב שאת תצרי"
+    JSON לדוגמה:
+    \`{ "replyTo": "ID_הבקשה", "action": "group_management", "subAction": "set_picture", "pictureSource": { "type": "ai_generated_image", "imagePrompt": "A cute dog", "imageModel": "flux-1-schnell" }, "message": "יוצרת תמונת קבוצה..." }\`
 
 
 **אם המשתמש מבקש ליצור סטיקר, עליך לזהות את כוונתו ולהחזיר JSON בפורמט הבא:**
