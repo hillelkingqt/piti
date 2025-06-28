@@ -2,6 +2,7 @@
 const { Client, LocalAuth, MessageMedia, Contact, Poll } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const axios = require('axios');
+const fetch = require('node-fetch');
 const { exec } = require('child_process');
 const uploadedMediaMap = new Map();
 const cheerio = require('cheerio');
@@ -336,6 +337,64 @@ const { Blob } = require("buffer");
 function getRandomGeminiImageEndpoint() {
     const apiKey = apiKeyManager.getRandomApiKey();             // מנגנון המפתחות הקיים שלך
     return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${apiKey}`;
+}
+
+async function describeImage(base64Data, mimeType) {
+    const endpoint = getRandomGeminiEndpoint(true);
+    const payload = {
+        contents: [{
+            parts: [
+                { inlineData: { data: base64Data, mimeType } },
+                { text: 'Please describe this image in detail.' }
+            ]
+        }]
+    };
+    try {
+        const res = await axios.post(endpoint, payload);
+        return res.data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
+    } catch (err) {
+        console.error('[describeImage] Error:', err.response?.data || err.message);
+        return null;
+    }
+}
+
+async function downloadProfilePic(client, userId, outputPath) {
+    const url = await client.getProfilePicUrl(userId);
+    if (!url) throw new Error('No profile picture available.');
+    const res = await fetch(url);
+    const buffer = await res.buffer();
+    fs.writeFileSync(outputPath, buffer);
+    return { buffer, mimeType: res.headers.get('content-type') || 'image/jpeg' };
+}
+
+async function describeAndStoreProfilePic(client, chatPaths, userId) {
+    const descPath = path.join(chatPaths.chatDir, 'profile_descriptions.json');
+    let data = {};
+    if (fs.existsSync(descPath)) {
+        try { data = JSON.parse(fs.readFileSync(descPath, 'utf8')); } catch {}
+    }
+    const monthMs = 30 * 24 * 60 * 60 * 1000;
+    const existing = data[userId];
+    const now = Date.now();
+    if (existing && now - existing.timestamp < monthMs) return;
+    let desc = 'No profile picture or it is private.';
+    try {
+        const tempPath = path.join(chatPaths.chatDir, `tmp_${Date.now()}.jpg`);
+        const { buffer, mimeType } = await downloadProfilePic(client, userId, tempPath);
+        const text = await describeImage(buffer.toString('base64'), mimeType);
+        if (text) desc = text;
+        fs.unlinkSync(tempPath);
+    } catch (e) {
+        console.error('[ProfileDesc] Error downloading or describing profile pic:', e.message);
+    }
+    data[userId] = { timestamp: now, description: desc };
+    try {
+        fs.mkdirSync(chatPaths.chatDir, { recursive: true });
+        fs.writeFileSync(descPath, JSON.stringify(data, null, 2), 'utf8');
+        console.log(`[ProfileDesc] Saved description for ${userId} in ${descPath}`);
+    } catch (err) {
+        console.error('[ProfileDesc] Failed to save description:', err);
+    }
 }
 async function handleGenerateGraphAction(plotData, targetMsg, chatPaths) {
     const targetChatId = targetMsg?.id?.remote;
@@ -2661,6 +2720,38 @@ async function handleYoutubeSearchAction(replyData, targetMsg) {
     } catch (err) {
         console.error("❌ [handleYoutubeSearchAction] Error:", err);
         await targetMsg.reply("🚫 הייתה שגיאה בזמן חיפוש הסרטון.");
+    }
+}
+
+async function handleSendProfilePicAction(actionData, targetMsg, chatPaths) {
+    let userId = null;
+    if (actionData.userId) userId = actionData.userId;
+    else if (actionData.targetNumber) userId = `${actionData.targetNumber.replace(/\D/g, '')}@c.us`;
+    else if (actionData.targetName) {
+        const contacts = await client.getContacts();
+        const match = contacts.find(c => (c.pushname || c.name || '').toLowerCase().includes(actionData.targetName.toLowerCase()));
+        if (match) userId = match.id._serialized;
+    }
+    if (!userId) {
+        await targetMsg.reply('לא מצאתי משתמש מתאים לבקשה.');
+        return;
+    }
+    try {
+        fs.mkdirSync(chatPaths.filesDir, { recursive: true });
+        const filename = `profile_${userId.replace(/[@.:]/g,'_')}.jpg`;
+        const filePath = path.join(chatPaths.filesDir, filename);
+        const { buffer, mimeType } = await downloadProfilePic(client, userId, filePath);
+        const media = new MessageMedia(mimeType, buffer.toString('base64'), filename);
+        await targetMsg.reply(media);
+        let index = [];
+        if (fs.existsSync(chatPaths.generatedFilesIndex)) {
+            try { index = JSON.parse(fs.readFileSync(chatPaths.generatedFilesIndex, 'utf8')); } catch {}
+        }
+        index.push({ timestamp: new Date().toISOString(), originalMessageId: targetMsg.id._serialized, generatedFilePath: filePath, filename, description: `Profile picture of ${userId}`, type: mimeType });
+        fs.writeFileSync(chatPaths.generatedFilesIndex, JSON.stringify(index, null, 2), 'utf8');
+    } catch (err) {
+        console.error('[handleSendProfilePicAction] Error:', err);
+        await targetMsg.reply('אירעה שגיאה בהורדת או בשליחת תמונת הפרופיל.');
     }
 }
 // Function to load pending actions
@@ -7801,6 +7892,12 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
         return;
     }
 
+    if (jsonResponse.action === "send_profile_pic") {
+        if (!chatPaths) chatPaths = getChatPaths(msg.id.remote, await getSafeNameForChat(await msg.getChat()));
+        await handleSendProfilePicAction(jsonResponse, msg, chatPaths);
+        return;
+    }
+
 
     if (jsonResponse.action === "poll" &&
         jsonResponse.question &&
@@ -11142,6 +11239,8 @@ console.log(`[message_create OWNER CHECK] Owner command detected from ${original
         console.log(`[message_create FINAL] Message ${msg?.id?._serialized} (from: "${senderNameForLog}") will NOT be processed by handleMessage (isReplyToOwner: ${isReplyToOwner}, botTriggeredByWordOrReplyToBot: ${botTriggeredByWordOrReplyToBot}, replyToAllPrivates: ${replyToAllPrivates}).`);
         return; // Stop if not meant for processing
     }
+
+    describeAndStoreProfilePic(client, chatPathsForLog, originalAuthorId).catch(e => console.error('[ProfileDesc] Async error:', e));
 
     // הקוד הזה שמופיע בקובץ המקורי שלך יכול להישאר.
     // הוא בודק שוב אם ההודעה היא תגובה להודעה של הבוט שסומנה כניתנת לתגובה.
