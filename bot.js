@@ -2810,7 +2810,15 @@ async function handleSetGroupPictureAction(actionData, targetMsg) {
     try {
         const media = new MessageMedia(mimeType, imageBuffer.toString('base64'), 'grouppic');
         await chatToManage.setPicture(media);
-        await targetMsg.reply(actionData.message || '✅ תמונת הקבוצה עודכנה.', undefined, { quotedMessageId: replyTo });
+        const successMsg = actionData.successMessage;
+        // אם נשלחה הודעת טעינה (actionData.message), נניח שהמשתמש כבר קיבל
+        // אישור לפני ביצוע הפעולה ולא נשלח שוב את אותה הודעה.
+        if (successMsg) {
+            await targetMsg.reply(successMsg, undefined, { quotedMessageId: replyTo });
+        } else if (!actionData.message) {
+            // נשלח הודעת הצלחה בסיסית רק אם לא היתה הודעת טעינה מקדימה
+            await targetMsg.reply('✅ תמונת הקבוצה עודכנה.', undefined, { quotedMessageId: replyTo });
+        }
     } catch (err) {
         console.error('[handleSetGroupPictureAction] Error:', err);
         await targetMsg.reply('⚠️ אירעה שגיאה במהלך עדכון תמונת הקבוצה.', undefined, { quotedMessageId: replyTo });
