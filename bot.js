@@ -1569,7 +1569,16 @@ async function handleGroupManagementAction(actionData, targetMsg) {
                         const adminIds = actionData.adminParticipantIds.map(id => typeof id === 'string' && !id.includes('@') ? `${id.replace(/\D/g, '')}@c.us` : id)
                             .filter(id => typeof id === 'string' && id.includes('@c.us'));
                         if (senderId && !adminIds.includes(senderId)) adminIds.push(senderId);
-                        await newChat.promoteParticipants(adminIds);
+                        let promoted = false;
+                        for (let attempt = 1; attempt <= 3 && !promoted; attempt++) {
+                            try {
+                                await newChat.promoteParticipants(adminIds);
+                                promoted = true;
+                            } catch (err) {
+                                console.error(`[GroupMgmt] Promote attempt ${attempt} failed:`, err);
+                                if (attempt < 3) await delay(2000);
+                            }
+                        }
                     } else if (senderId) {
                         await newChat.promoteParticipants([senderId]);
                     }
@@ -1583,7 +1592,14 @@ async function handleGroupManagementAction(actionData, targetMsg) {
             }
             case 'remove_participant':
                 await chatToManage.fetchMessages({limit:1});
-                await chatToManage.removeParticipants(finalParticipantIds);
+                for (const pId of finalParticipantIds) {
+                    try {
+                        await chatToManage.removeParticipants([pId]);
+                        await delay(500);
+                    } catch (err) {
+                        console.error(`[GroupMgmt] Failed to remove ${pId}:`, err);
+                    }
+                }
                 await targetMsg.reply(`✅ המשתתפ(ים) הוסרו בהצלחה מהקבוצה.`, undefined, { quotedMessageId: replyTo });
                 break;
             case 'add_participant':
