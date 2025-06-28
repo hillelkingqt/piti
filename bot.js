@@ -2,6 +2,7 @@
 const { Client, LocalAuth, MessageMedia, Contact, Poll } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const axios = require('axios');
+const fetch = require('node-fetch'); // הוספת node-fetch
 const { exec } = require('child_process');
 const uploadedMediaMap = new Map();
 const cheerio = require('cheerio');
@@ -837,18 +838,106 @@ async function getSenderName(msgItem) {
 }
 
 const BASE_CHAT_DIR = "C:\\Users\\hillel1\\Desktop\\WHAT\\chats";
+const PROFILE_DESCRIPTIONS_DIR = path.join(BASE_CHAT_DIR, 'profile_descriptions'); // תיקייה לתיאורי פרופיל
 
 function getChatPaths(chatId, safeName) {
     const chatDir = path.join(BASE_CHAT_DIR, safeName);
+    // ודא שתיקיית PROFILE_DESCRIPTIONS_DIR קיימת
+    if (!fs.existsSync(PROFILE_DESCRIPTIONS_DIR)) {
+        fs.mkdirSync(PROFILE_DESCRIPTIONS_DIR, { recursive: true });
+    }
     return {
         chatDir: chatDir,
         historyFile: path.join(chatDir, 'chat_history.txt'),
         memoryFile: path.join(chatDir, 'memories.json'),
         generatedFilesIndex: path.join(chatDir, 'generated_files.json'),
         filesDir: path.join(chatDir, 'files'),
-        triggersFile: path.join(chatDir, 'triggers.json') // ✅ הוספה חשובה!
+        triggersFile: path.join(chatDir, 'triggers.json'), // ✅ הוספה חשובה!
+        // הוספת נתיב לקובץ תיאור הפרופיל של משתמש ספציפי בתוך הצ'אט
+        profileDescriptionFile: (userId) => {
+            const userProfileDir = path.join(PROFILE_DESCRIPTIONS_DIR, chatId.replace(/[@.:]/g, '_')); // תיקייה לכל צ'אט
+            if (!fs.existsSync(userProfileDir)) {
+                fs.mkdirSync(userProfileDir, { recursive: true });
+            }
+            return path.join(userProfileDir, `${userId.replace(/[@.:]/g, '_')}_profile_desc.json`);
+        }
     };
 }
+
+// פונקציות עזר לניהול תיאורי פרופיל
+async function downloadProfilePic(client, userId, outputPath) {
+    try {
+        const url = await client.getProfilePicUrl(userId);
+        if (!url) {
+            console.log(`[ProfilePic] No profile picture URL for ${userId}`);
+            return false; // החזר false אם אין URL
+        }
+
+        const res = await fetch(url);
+        if (!res.ok) {
+            console.error(`[ProfilePic] Failed to fetch profile picture for ${userId}. Status: ${res.status}`);
+            return false; // החזר false אם ההורדה נכשלה
+        }
+        const buffer = await res.buffer();
+
+        await fsp.writeFile(outputPath, buffer); // שימוש ב-fsp לכתיבה אסינכרונית
+        console.log(`[ProfilePic] Saved profile pic for ${userId} to ${outputPath}`);
+        return true; // החזר true בהצלחה
+    } catch (error) {
+        console.error(`[ProfilePic] Error downloading profile picture for ${userId}:`, error);
+        return false; // החזר false במקרה של שגיאה
+    }
+}
+
+function getProfileDescriptionPath(chatId, userId) {
+    // הפונקציה הזו כבר לא נחוצה כי הנתיב מחושב בתוך getChatPaths
+    // אבל נשאיר אותה אם יש קריאות ישירות אליה במקומות אחרים (למרות שלא אמור להיות)
+    const chatPaths = getChatPaths(chatId, 'dummySafeName'); // Dummy safeName, כי chatId הוא החשוב כאן
+    return chatPaths.profileDescriptionFile(userId);
+}
+
+async function loadProfileDescription(chatId, userId) {
+    const chatPaths = getChatPaths(chatId, 'dummySafeName'); // שוב, safeName לא קריטי כאן
+    const filePath = chatPaths.profileDescriptionFile(userId);
+    if (fs.existsSync(filePath)) {
+        try {
+            const data = await fsp.readFile(filePath, 'utf8');
+            return JSON.parse(data);
+        } catch (e) {
+            console.error(`[ProfileDesc] Error reading or parsing ${filePath}:`, e);
+            return null;
+        }
+    }
+    return null;
+}
+
+async function saveProfileDescription(chatId, userId, description, timestamp) {
+    const chatPaths = getChatPaths(chatId, 'dummySafeName');
+    const filePath = chatPaths.profileDescriptionFile(userId);
+    const dataToSave = {
+        description: description,
+        lastUpdate: timestamp
+    };
+    try {
+        // ודא שהתיקייה קיימת (למרות ש-getChatPaths אמור לעשות זאת)
+        const dirPath = path.dirname(filePath);
+        if (!fs.existsSync(dirPath)) {
+            fs.mkdirSync(dirPath, { recursive: true });
+        }
+        await fsp.writeFile(filePath, JSON.stringify(dataToSave, null, 2), 'utf8');
+        console.log(`[ProfileDesc] Saved profile description for ${userId} in chat ${chatId} to ${filePath}`);
+    } catch (e) {
+        console.error(`[ProfileDesc] Error writing profile description to ${filePath}:`, e);
+    }
+}
+
+function shouldUpdateProfileDescription(lastUpdateTimestamp) {
+    if (!lastUpdateTimestamp) return true; // אם אין חותמת זמן, צריך לעדכן
+    const oneMonthInMillis = 30 * 24 * 60 * 60 * 1000;
+    return (Date.now() - new Date(lastUpdateTimestamp).getTime()) > oneMonthInMillis;
+}
+
+
 // Near other helper functions like loadMemories, saveMemories
 
 const MAX_LATEX_ERRORS_TO_KEEP = 5; // כמה שגיאות אחרונות לשמור
@@ -3871,6 +3960,7 @@ async function handleMediaContent(msg, savedPath = null) {
 
 async function handleMessage(msg, incoming, quotedMedia = null, contextMediaArray = [], quotedText = "", quotedId = null, isSilentMode = false, finalDocumentFileUri = null, replyChainString = "אין שרשור תגובות.") { // <<< הוסף כאן
     const contextMessages = [];
+    let profileDescriptionForPrompt = null; // אתחול המשתנה כאן
 
     const chatId = msg.fromMe ? msg.to : msg.from;
     if (stoppedChats.has(chatId)) {
@@ -3880,7 +3970,7 @@ async function handleMessage(msg, incoming, quotedMedia = null, contextMediaArra
 
     const senderName = await getSenderName(msg);
     // ראשית, מבצעים לוג להודעה הנכנסת
-    await safelyAppendMessage(msg, senderName); // safelyAppendMessage יחשב נתיבים פנימית ללוג הזה
+    // await safelyAppendMessage(msg, senderName); // נדחה את זה קצת כדי שנוכל לחשב נתיבים קודם
 
     // ---> חשב את הנתיבים *כאן* פעם אחת עבור כל הפונקציה <---
     let chatPaths;
@@ -3925,8 +4015,88 @@ async function handleMessage(msg, incoming, quotedMedia = null, contextMediaArra
         try { await msg.reply("פיתי\n\nשגיאה פנימית חמורה בהכנת נתוני הצ'אט."); } catch { }
         return; // חובה לצאת אם ההכנה נכשלה
     }
+    // כעת, אחרי ש-chatPaths מוגדר, אפשר לבצע את הלוג
+    await safelyAppendMessage(msg, senderName);
 
-    safelyAppendMessage(msg, senderName);
+
+    // --- לוגיקה חדשה לטיפול בתמונת פרופיל ---
+    const senderId = msg.author || msg.from; // ID של שולח ההודעה
+    if (containsTriggerWord(incoming) && senderId && chatPaths) { // ודא ש-chatPaths מוגדר
+        console.log(`[ProfileDesc] Piti triggered by ${senderName}. Checking profile description for ${senderId} in chat ${chatId}...`);
+        try {
+            const existingDescriptionData = await loadProfileDescription(chatId, senderId);
+            if (!existingDescriptionData || shouldUpdateProfileDescription(existingDescriptionData.lastUpdate)) {
+                console.log(`[ProfileDesc] Description for ${senderId} is missing or outdated. Attempting to update...`);
+
+                // ניסיון להוריד תמונת פרופיל
+                const tempPicPath = path.join(os.tmpdir(), `profile_${senderId.replace(/[@.:]/g, '_')}_${Date.now()}.jpg`);
+                const downloaded = await downloadProfilePic(client, senderId, tempPicPath);
+
+                if (downloaded && fs.existsSync(tempPicPath)) {
+                    const imageBuffer = await fsp.readFile(tempPicPath);
+                    const base64Image = imageBuffer.toString('base64');
+
+                    // שלח ל-Gemini לתיאור
+                    const describePrompt = "Please describe this profile picture in detail. Be accurate and objective.";
+                    const describeEndpoint = getRandomGeminiEndpoint(true); // hasMedia = true
+                    let descriptionText = "Error describing profile picture.";
+                    try {
+                        const describePayload = {
+                            contents: [{
+                                parts: [
+                                    { inline_data: { mime_type: 'image/jpeg', data: base64Image } },
+                                    { text: describePrompt }
+                                ]
+                            }]
+                        };
+                        const descResponse = await axios.post(describeEndpoint, describePayload);
+                        descriptionText = descResponse.data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "Could not get description.";
+                        console.log(`[ProfileDesc] Gemini description for ${senderId}: "${descriptionText.substring(0, 50)}..."`);
+                    } catch (geminiError) {
+                        console.error(`[ProfileDesc] Gemini error describing profile pic for ${senderId}:`, geminiError.response?.data || geminiError.message);
+                        // ננסה שוב עם API Key אחר אם השגיאה היא 429 (Too Many Requests) או 5xx
+                        if (geminiError.response && (geminiError.response.status === 429 || geminiError.response.status >= 500)) {
+                            console.log(`[ProfileDesc] Retrying Gemini profile pic description for ${senderId} due to status ${geminiError.response.status}...`);
+                            await delay(1500); // המתן קצת
+                            try {
+                                const retryEndpoint = getRandomGeminiEndpoint(true);
+                                const retryDescResponse = await axios.post(retryEndpoint, { contents: [{ parts: [{ inline_data: { mime_type: 'image/jpeg', data: base64Image } }, { text: describePrompt }] }] });
+                                descriptionText = retryDescResponse.data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "Could not get description on retry.";
+                                console.log(`[ProfileDesc] Gemini description (retry) for ${senderId}: "${descriptionText.substring(0, 50)}..."`);
+                            } catch (retryGeminiError) {
+                                console.error(`[ProfileDesc] Gemini retry error for ${senderId}:`, retryGeminiError.response?.data || retryGeminiError.message);
+                            }
+                        }
+                    }
+                    await saveProfileDescription(chatId, senderId, descriptionText, new Date().toISOString());
+                    profileDescriptionForPrompt = descriptionText;
+                    try { await fsp.unlink(tempPicPath); } catch (e) { console.warn(`[ProfileDesc] Could not delete temp profile pic ${tempPicPath}`, e); }
+                } else {
+                    console.log(`[ProfileDesc] No profile picture found or download failed for ${senderId}.`);
+                    await saveProfileDescription(chatId, senderId, "NO_PROFILE_PIC_OR_PRIVATE", new Date().toISOString());
+                    profileDescriptionForPrompt = "למשתמש אין תמונת פרופיל או שהיא פרטית.";
+                }
+            } else if (existingDescriptionData) {
+                // יש תיאור קיים והוא בתוקף
+                profileDescriptionForPrompt = existingDescriptionData.description === "NO_PROFILE_PIC_OR_PRIVATE"
+                    ? "למשתמש אין תמונת פרופיל או שהיא פרטית."
+                    : existingDescriptionData.description;
+                console.log(`[ProfileDesc] Using existing (valid) profile description for ${senderId}.`);
+            }
+        } catch (profileDescError) {
+            console.error(`[ProfileDesc] Error in profile description logic for ${senderId}:`, profileDescError);
+        }
+    } else if (senderId && chatPaths) { // אם "פיתי" לא הופעלה, אבל אנחנו רוצים להעביר מידע אם קיים
+        const existingDescriptionData = await loadProfileDescription(chatId, senderId);
+        if (existingDescriptionData) {
+            profileDescriptionForPrompt = existingDescriptionData.description === "NO_PROFILE_PIC_OR_PRIVATE"
+                ? "למשתמש אין תמונת פרופיל או שהיא פרטית."
+                : existingDescriptionData.description;
+            console.log(`[ProfileDesc] Loaded existing profile description for prompt (Piti not directly triggered) for ${senderId}.`);
+        }
+    }
+    // --- סוף לוגיקה חדשה ---
+
 
     let geminiMediaParts = [];
 
@@ -4093,6 +4263,11 @@ async function handleMessage(msg, incoming, quotedMedia = null, contextMediaArra
     const bigTextPrompt = `
 אתה עוזר אישי בצ'אט וואצאפ בשם "פיתי". תענה בעברית בלבד ובצורה אמפתית, תמציתית ואיכותית.
 
+---
+מידע על תמונת הפרופיל של המשתמש (${senderName}):
+${profileDescriptionForPrompt ? profileDescriptionForPrompt : "למשתמש אין תמונת פרופיל או שהיא פרטית."}
+(תוכל להשתמש במידע זה אם הוא רלוונטי להקשר השיחה, אך אין חובה.)
+---
 
 **הוראה חשובה: תזמון פעולות**
 לפני שאתה מחליט על הפעולה (שליחת טקסט, יצירת תמונה וכו'), בדוק אם המשתמש ביקש שהפעולה תתבצע *מיד* או *במועד מאוחר יותר* (למשל, "תזכירי לי עוד שעה", "תשלחי את התמונה מחר בבוקר", "בעוד 5 דקות תפעיל טיימר").
@@ -6660,6 +6835,33 @@ allprojects {
         }
         // המשך לעבד את הפעולה המרכזית (למשל, 'text')
     }
+
+    // --- טיפול בבקשה לשליחת תמונת פרופיל ---
+    if (jsonResponse.action === "send_profile_picture" && jsonResponse.targetUserId) {
+        console.log(`[ProfilePic] Action: send_profile_picture for ${jsonResponse.targetUserId}`);
+        try {
+            const picUrl = await client.getProfilePicUrl(jsonResponse.targetUserId);
+            if (picUrl) {
+                const tempPicPath = path.join(os.tmpdir(), `profile_send_${jsonResponse.targetUserId.replace(/[@.:]/g, '_')}.jpg`);
+                const downloaded = await downloadProfilePic(client, jsonResponse.targetUserId, tempPicPath); // הורדה דרך הפונקציה שלנו
+                if (downloaded && fs.existsSync(tempPicPath)) {
+                    const media = MessageMedia.fromFilePath(tempPicPath);
+                    await msg.reply(media, undefined, { caption: `פיתי\n\nהנה תמונת הפרופיל של ${jsonResponse.targetUserId.split('@')[0]}:`, quotedMessageId: jsonResponse.replyTo });
+                    try { await fsp.unlink(tempPicPath); } catch (e) { console.warn(`[ProfilePic] Could not delete temp send profile pic ${tempPicPath}`, e); }
+                } else {
+                    await msg.reply(`פיתי\n\nלא הצלחתי להוריד את תמונת הפרופיל של ${jsonResponse.targetUserId.split('@')[0]}.`, undefined, { quotedMessageId: jsonResponse.replyTo });
+                }
+            } else {
+                await msg.reply(`פיתי\n\nלמשתמש ${jsonResponse.targetUserId.split('@')[0]} אין תמונת פרופיל או שהיא פרטית.`, undefined, { quotedMessageId: jsonResponse.replyTo });
+            }
+        } catch (profilePicError) {
+            console.error(`[ProfilePic] Error sending profile picture for ${jsonResponse.targetUserId}:`, profilePicError);
+            await msg.reply(`פיתי\n\nאירעה שגיאה בניסיון לשלוח את תמונת הפרופיל.`, undefined, { quotedMessageId: jsonResponse.replyTo });
+        }
+        return; // סיים טיפול
+    }
+    // --- סוף טיפול בשליחת תמונת פרופיל ---
+
     if (jsonResponse.action === "generate_music_ace" && jsonResponse.prompt_tags) { // Check for essential field
         console.log(`[handleMessage] Detected generate_music_ace action. Tags: ${jsonResponse.prompt_tags.substring(0, 50)}`);
 
