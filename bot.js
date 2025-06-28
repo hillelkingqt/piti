@@ -2444,10 +2444,10 @@ async function handleVideoGenerationAction(videoData, targetMsg, chatPaths) {
             return;
         }
 
-        const videoBuffer = Buffer.from(videoResponse.data, 'binary');
-        const videoMimeType = videoResponse.headers['content-type'] || 'video/mp4';
-        const videoExtension = mime.extension(videoMimeType) || 'mp4';
-        console.log(`[handleVideoGen LTX] Video downloaded. MimeType: ${videoMimeType}, Size: ${videoBuffer.length}`);
+        let videoBuffer = Buffer.from(videoResponse.data, 'binary');
+        let videoMimeType = videoResponse.headers['content-type'] || 'video/mp4';
+        let videoExtension = mime.extension(videoMimeType) || 'mp4';
+        console.log(`[handleVideoGen LTX] Original video downloaded. MimeType: ${videoMimeType}, Size: ${videoBuffer.length}`);
 
         if (videoBuffer.length < 1000) {
             console.error("[handleVideoGen LTX] Downloaded video buffer seems too small or empty.");
@@ -2455,41 +2455,101 @@ async function handleVideoGenerationAction(videoData, targetMsg, chatPaths) {
             return;
         }
 
+        // --- FFMPEG Re-encoding Step ---
+        const tempInputDir = path.join(__dirname, 'temp_video_processing');
+        fs.mkdirSync(tempInputDir, { recursive: true });
+        const tempInputPath = path.join(tempInputDir, `gradio_temp_input_${Date.now()}.${videoExtension}`);
+        const tempOutputPath = path.join(tempInputDir, `gradio_temp_output_${Date.now()}.mp4`);
+
+        fs.writeFileSync(tempInputPath, videoBuffer);
+        console.log(`[handleVideoGen LTX] Saved temporary input video to ${tempInputPath}`);
+
+        try {
+            await new Promise((resolve, reject) => {
+                const ffmpegCommand = `ffmpeg -y -i "${tempInputPath}" -c:v libx264 -profile:v baseline -level 3.0 -preset medium -crf 23 -pix_fmt yuv420p -c:a aac -strict experimental -b:a 128k "${tempOutputPath}"`;
+                console.log(`[handleVideoGen LTX] Executing ffmpeg: ${ffmpegCommand}`);
+                exec(ffmpegCommand, (error, stdout, stderr) => {
+                    if (error) {
+                        console.error(`[handleVideoGen LTX] FFMPEG Error: ${error.message}`);
+                        console.error(`[handleVideoGen LTX] FFMPEG Stderr: ${stderr}`);
+                        // Try to inform the user about ffmpeg failure
+                        client.sendMessage(targetChatId, "פיתי\n\n⚠️ נכשלתי בעיבוד הוידאו (ffmpeg). ייתכן שחסרה תלות במערכת הבוט.", { quotedMessageId: replyToId }).catch(e => console.error("Failed to send ffmpeg error to user", e));
+                        reject(error);
+                        return;
+                    }
+                    console.log(`[handleVideoGen LTX] FFMPEG stdout: ${stdout}`);
+                    console.log(`[handleVideoGen LTX] FFMPEG re-encoding successful. Output: ${tempOutputPath}`);
+                    resolve();
+                });
+            });
+
+            videoBuffer = fs.readFileSync(tempOutputPath); // Read the re-encoded video
+            videoMimeType = 'video/mp4'; // Output is now MP4
+            videoExtension = 'mp4';
+            console.log(`[handleVideoGen LTX] Re-encoded video loaded. New Size: ${videoBuffer.length}`);
+
+        } catch (ffmpegError) {
+            console.error("❌ [handleVideoGen LTX] FFMPEG re-encoding failed. Sending original video instead.", ffmpegError);
+            // If ffmpeg fails, we will proceed with the original videoBuffer, but it might fail to send.
+            // The user has already been notified about ffmpeg failure.
+            // We could choose to return here, but let's try sending the original as a fallback.
+            // No: if ffmpeg fails, it's better not to proceed with a potentially problematic original.
+            // The user was notified. Let's return.
+             if (fs.existsSync(tempInputPath)) fs.unlinkSync(tempInputPath);
+             if (fs.existsSync(tempOutputPath)) fs.unlinkSync(tempOutputPath);
+             try { if (fs.readdirSync(tempInputDir).length === 0) fs.rmdirSync(tempInputDir); } catch (e) { console.warn("Error cleaning temp input dir", e); }
+            return; // Stop if ffmpeg failed
+        } finally {
+            // Clean up temporary files
+            if (fs.existsSync(tempInputPath)) fs.unlinkSync(tempInputPath);
+            if (fs.existsSync(tempOutputPath)) fs.unlinkSync(tempOutputPath);
+            try { if (fs.readdirSync(tempInputDir).length === 0) fs.rmdirSync(tempInputDir); } catch (e) { console.warn("Error cleaning temp input dir", e); }
+        }
+        // --- End FFMPEG Re-encoding Step ---
+
+
         const safePromptPart = videoData.prompt.replace(/[^a-zA-Z0-9א-ת\s\-]/g, '_').substring(0, 30);
-        const videoFilename = `ltx_video_${videoData.mode}_${safePromptPart}_${Date.now()}.${videoExtension}`;
+        const videoFilename = `ltx_video_${videoData.mode}_${safePromptPart}_${Date.now()}.${videoExtension}`; // Now always .mp4
         const videoMedia = new MessageMedia(videoMimeType, videoBuffer.toString('base64'), videoFilename);
 
-        // --- FIXED: Caption for the final video message ---
         const finalCaption = `פיתי\n\n🎬 הנה הסרטון שנוצר (${videoData.mode}):\nPrompt: ${videoData.prompt}${seedUsed ? `\nSeed: ${seedUsed}` : ''}`;
         let sentFinalVideoMsg;
         try {
             sentFinalVideoMsg = await client.sendMessage(targetChatId, videoMedia, {
                 caption: finalCaption,
-                quotedMessageId: replyToId // Quote the original user request
+                quotedMessageId: replyToId
             });
-            console.log("[handleVideoGen LTX] Generated video sent successfully.");
+            console.log("[handleVideoGen LTX] Generated (and re-encoded) video sent successfully.");
         } catch (sendErr) {
-            console.warn(`[handleVideoGen LTX] Failed to send video with quote: ${sendErr.message}. Trying without quote...`);
-            sentFinalVideoMsg = await client.sendMessage(targetChatId, videoMedia, {
-                caption: finalCaption
-            });
-            console.log("[handleVideoGen LTX] Generated video sent successfully WITHOUT quote.");
+            console.error(`[handleVideoGen LTX] Failed to send re-encoded video with quote: ${sendErr.message}. Trying without quote...`);
+            // Log the detailed error object from whatsapp-web.js if possible
+            if (sendErr && typeof sendErr === 'object') console.error("[handleVideoGen LTX] Send Error Object (with quote):", JSON.stringify(sendErr, null, 2));
+
+            try {
+                sentFinalVideoMsg = await client.sendMessage(targetChatId, videoMedia, {
+                    caption: finalCaption
+                });
+                console.log("[handleVideoGen LTX] Generated (and re-encoded) video sent successfully WITHOUT quote.");
+            } catch (sendErrNoQuote) {
+                 console.error(`❌ [handleVideoGen LTX] Failed to send re-encoded video even WITHOUT quote: ${sendErrNoQuote.message}`);
+                 if (sendErrNoQuote && typeof sendErrNoQuote === 'object') console.error("[handleVideoGen LTX] Send Error Object (no quote):", JSON.stringify(sendErrNoQuote, null, 2));
+                 await targetMsg.reply(`פיתי\n\nאוי לא 🤕 נכשלתי בשליחת הוידאו המעובד. השגיאה היא: ${sendErrNoQuote.message.split('\n')[0]}`, undefined, { quotedMessageId: replyToId });
+                 return; // Stop if both attempts fail
+            }
         }
 
-        // Mark this final bot message as well
         if (sentFinalVideoMsg && sentFinalVideoMsg.id && sentFinalVideoMsg?.id?._serialized) {
             const normalizedId = normalizeMsgId(sentFinalVideoMsg?.id?._serialized);
             botMessageIds.add(normalizedId);
             writtenMessageIds.add(normalizedId);
-            repliableMessageIds.add(normalizedId); // If you want users to be able to reply to the video result
+            repliableMessageIds.add(normalizedId);
         }
-        // --- End Fixed Caption ---
 
         const filesDir = chatPaths.filesDir;
         fs.mkdirSync(filesDir, { recursive: true });
-        const videoSavePath = path.join(filesDir, videoFilename);
-        fs.writeFileSync(videoSavePath, videoBuffer);
-        console.log(`[handleVideoGen LTX] Generated video saved locally: ${videoSavePath}`);
+        const videoSavePath = path.join(filesDir, videoFilename); // videoFilename is now correctly .mp4
+        fs.writeFileSync(videoSavePath, videoBuffer); // Save the re-encoded buffer
+        console.log(`[handleVideoGen LTX] Generated (and re-encoded) video saved locally: ${videoSavePath}`);
 
         const generatedFilesIndex = chatPaths.generatedFilesIndex;
         let generatedFilesIndexData = [];
