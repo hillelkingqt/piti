@@ -1531,8 +1531,18 @@ async function handleGroupManagementAction(actionData, targetMsg) {
                     break;
                 }
 
-                let participantsForNew = finalParticipantIds;
+                let participantsForNew = Array.isArray(finalParticipantIds) ? [...finalParticipantIds] : [];
                 const senderId = targetMsg.author || targetMsg.from;
+                if (Array.isArray(actionData.adminParticipantIds) && actionData.adminParticipantIds.length > 0) {
+                    const adminIdsForCreate = actionData.adminParticipantIds
+                        .map(id => typeof id === 'string' && !id.includes('@') ? `${id.replace(/\D/g, '')}@c.us` : id)
+                        .filter(id => typeof id === 'string' && id.includes('@c.us'));
+                    for (const aId of adminIdsForCreate) {
+                        if (!participantsForNew.includes(aId)) {
+                            participantsForNew.push(aId);
+                        }
+                    }
+                }
                 if (senderId && !participantsForNew.includes(senderId)) {
                     participantsForNew.push(senderId);
                 }
@@ -1551,6 +1561,7 @@ async function handleGroupManagementAction(actionData, targetMsg) {
 
                 try {
                     const newChat = await client.getChatById(newGroupId);
+                    await delay(1000);
                     if (actionData.groupDescription) {
                         await newChat.setDescription(actionData.groupDescription);
                     }
@@ -1571,6 +1582,7 @@ async function handleGroupManagementAction(actionData, targetMsg) {
                 break;
             }
             case 'remove_participant':
+                await chatToManage.fetchMessages({limit:1});
                 await chatToManage.removeParticipants(finalParticipantIds);
                 await targetMsg.reply(`✅ המשתתפ(ים) הוסרו בהצלחה מהקבוצה.`, undefined, { quotedMessageId: replyTo });
                 break;
