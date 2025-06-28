@@ -1415,7 +1415,7 @@ async function handleGroupManagementAction(actionData, targetMsg) {
     const senderBase = getBaseIdForOwnerCheck(effectiveSenderIdForCheck);
     const ownerBase = getBaseIdForOwnerCheck(myId);
 
-    if (senderBase !== ownerBase) {
+    if (subAction !== 'create_group' && senderBase !== ownerBase) {
         console.log(`[GroupMgmt Auth] Denied. SenderBase: ${senderBase}, OwnerBase: ${ownerBase}, EffectiveSenderId: ${effectiveSenderIdForCheck}`);
         await targetMsg.reply("⚠️ אין לך הרשאה לביצוע פקודות ניהול בקבוצה זו.");
         return; // Block execution
@@ -1430,39 +1430,40 @@ async function handleGroupManagementAction(actionData, targetMsg) {
     }
 
     try {
-        // קבע על איזו קבוצה לפעול
-        if (targetGroupId && targetGroupId !== currentChatId) {
-            // אם Gemini ציינה קבוצת יעד ספציפית (פחות נפוץ כרגע)
-            chatToManage = await client.getChatById(targetGroupId);
-            if (!chatToManage) {
-                await targetMsg.reply(`⚠️ לא מצאתי קבוצה עם המזהה שצויין: ${targetGroupId}`, undefined, { quotedMessageId: replyTo });
+        if (subAction !== 'create_group') {
+            // קבע על איזו קבוצה לפעול
+            if (targetGroupId && targetGroupId !== currentChatId) {
+                // אם Gemini ציינה קבוצת יעד ספציפית (פחות נפוץ כרגע)
+                chatToManage = await client.getChatById(targetGroupId);
+                if (!chatToManage) {
+                    await targetMsg.reply(`⚠️ לא מצאתי קבוצה עם המזהה שצויין: ${targetGroupId}`, undefined, { quotedMessageId: replyTo });
+                    return;
+                }
+            } else {
+                // לרוב, הפעולה תתבצע על הקבוצה הנוכחית
+                chatToManage = await targetMsg.getChat();
+            }
+
+            // ודא שמדובר בקבוצה
+            if (!chatToManage.isGroup) {
+                await targetMsg.reply("⚠️ הפקודה הזו רלוונטית לקבוצות בלבד.", undefined, { quotedMessageId: replyTo });
                 return;
             }
-        } else {
-            // לרוב, הפעולה תתבצע על הקבוצה הנוכחית
-            chatToManage = await targetMsg.getChat();
-        }
 
-        // ודא שמדובר בקבוצה
-        if (!chatToManage.isGroup) {
-            await targetMsg.reply("⚠️ הפקודה הזו רלוונטית לקבוצות בלבד.", undefined, { quotedMessageId: replyTo });
-            return;
-        }
+            // בדוק אם הבוט הוא מנהל בקבוצה (נדרש לרוב הפעולות)
+            const botParticipant = chatToManage.participants.find(p => p?.id?._serialized === client.info.wid._serialized);
+            const botIsAdmin = botParticipant && botParticipant.isAdmin;
 
-        // בדוק אם הבוט הוא מנהל בקבוצה (נדרש לרוב הפעולות)
-        const botParticipant = chatToManage.participants.find(p => p?.id?._serialized === client.info.wid._serialized);
-        const botIsAdmin = botParticipant && botParticipant.isAdmin;
-
-        if (!botIsAdmin &&
-            !['set_subject', 'set_description'].includes(subAction) // שינוי שם ותיאור לפעמים אפשרי גם ללא ניהול מלא, תלוי בהגדרות הקבוצה
-        ) {
-            // עבור רוב הפעולות, אם הבוט לא מנהל, הוא לא יכול לבצען
-            if (subAction === 'add_participant') {
-                console.warn(`[GroupMgmt] Bot is not admin in group "${chatToManage.name}", but attempting to add participants. This might fail depending on group settings.`);
-                // נאפשר ניסיון, ייתכן שהקבוצה פתוחה להוספת משתתפים על ידי כולם
-            } else if (subAction === 'remove_participant' || subAction === 'promote_admin' || subAction === 'demote_admin' || subAction === 'set_edit_info_admins_only' || subAction === 'set_send_messages_admins_only') {
-                await targetMsg.reply("⚠️ אין לי הרשאות מנהל בקבוצה זו כדי לבצע את הפעולה המבוקשת.", undefined, { quotedMessageId: replyTo });
-                return;
+            if (!botIsAdmin &&
+                !['set_subject', 'set_description'].includes(subAction) // שינוי שם ותיאור לפעמים אפשרי גם ללא ניהול מלא, תלוי בהגדרות הקבוצה
+            ) {
+                // עבור רוב הפעולות, אם הבוט לא מנהל, הוא לא יכול לבצען
+                if (subAction === 'add_participant') {
+                    console.warn(`[GroupMgmt] Bot is not admin in group "${chatToManage.name}", but attempting to add participants. This might fail depending on group settings.`);
+                } else if (subAction === 'remove_participant' || subAction === 'promote_admin' || subAction === 'demote_admin' || subAction === 'set_edit_info_admins_only' || subAction === 'set_send_messages_admins_only') {
+                    await targetMsg.reply("⚠️ אין לי הרשאות מנהל בקבוצה זו כדי לבצע את הפעולה המבוקשת.", undefined, { quotedMessageId: replyTo });
+                    return;
+                }
             }
         }
 
@@ -1524,6 +1525,51 @@ async function handleGroupManagementAction(actionData, targetMsg) {
 
         // ביצוע הפעולה הספציפית
         switch (subAction) {
+            case 'create_group': {
+                if (typeof actionData.groupSubject !== 'string' || !actionData.groupSubject.trim()) {
+                    await targetMsg.reply("⚠️ יש לספק שם קבוצה תקין.", undefined, { quotedMessageId: replyTo });
+                    break;
+                }
+
+                let participantsForNew = finalParticipantIds;
+                const senderId = targetMsg.author || targetMsg.from;
+                if (senderId && !participantsForNew.includes(senderId)) {
+                    participantsForNew.push(senderId);
+                }
+
+                let createRes;
+                try {
+                    createRes = await client.createGroup(actionData.groupSubject, participantsForNew);
+                } catch (err) {
+                    console.error('[GroupMgmt] Error creating group:', err);
+                    await targetMsg.reply('⚠️ אירעה שגיאה בעת יצירת הקבוצה.', undefined, { quotedMessageId: replyTo });
+                    break;
+                }
+
+                const newGroupId = createRes.gid?._serialized || createRes.gid || createRes.id;
+                await targetMsg.reply(`✅ הקבוצה "${actionData.groupSubject}" נוצרה בהצלחה.`, undefined, { quotedMessageId: replyTo });
+
+                try {
+                    const newChat = await client.getChatById(newGroupId);
+                    if (actionData.groupDescription) {
+                        await newChat.setDescription(actionData.groupDescription);
+                    }
+                    if (Array.isArray(actionData.adminParticipantIds) && actionData.adminParticipantIds.length > 0) {
+                        const adminIds = actionData.adminParticipantIds.map(id => typeof id === 'string' && !id.includes('@') ? `${id.replace(/\D/g, '')}@c.us` : id)
+                            .filter(id => typeof id === 'string' && id.includes('@c.us'));
+                        if (senderId && !adminIds.includes(senderId)) adminIds.push(senderId);
+                        await newChat.promoteParticipants(adminIds);
+                    } else if (senderId) {
+                        await newChat.promoteParticipants([senderId]);
+                    }
+                    if (actionData.pictureSource) {
+                        await handleSetGroupPictureAction({ pictureSource: actionData.pictureSource, replyTo }, targetMsg, newChat);
+                    }
+                } catch (postErr) {
+                    console.error('[GroupMgmt] Post creation setup failed:', postErr);
+                }
+                break;
+            }
             case 'remove_participant':
                 await chatToManage.removeParticipants(finalParticipantIds);
                 await targetMsg.reply(`✅ המשתתפ(ים) הוסרו בהצלחה מהקבוצה.`, undefined, { quotedMessageId: replyTo });
@@ -2758,8 +2804,8 @@ async function handleSendProfilePicAction(actionData, targetMsg, chatPaths) {
     }
 }
 
-async function handleSetGroupPictureAction(actionData, targetMsg) {
-    const chatToManage = await targetMsg.getChat();
+async function handleSetGroupPictureAction(actionData, targetMsg, chatOverride = null) {
+    const chatToManage = chatOverride || await targetMsg.getChat();
     const replyTo = actionData.replyTo || targetMsg.id._serialized;
 
     if (!chatToManage.isGroup) {
@@ -5275,7 +5321,7 @@ ${generatedFilesText.length > 0 ? generatedFilesText : "אין קבצים שנו
 {
   "replyTo": "MESSAGE_ID_של_הבקשה", // חובה: ID ההודעה של המשתמש שביקש את הפעולה
   "action": "group_management",
-  "subAction": "remove_participant" | "add_participant" | "promote_admin" | "demote_admin" | "set_subject" | "set_description" | "set_edit_info_admins_only" | "set_send_messages_admins_only" | "set_picture",
+  "subAction": "remove_participant" | "add_participant" | "promote_admin" | "demote_admin" | "set_subject" | "set_description" | "set_edit_info_admins_only" | "set_send_messages_admins_only" | "set_picture" | "create_group",
   "participantIds": ["972XXXXXXXXX@c.us", "ANOTHER_ID@c.us"], // מערך של מזהי משתתפים (מספרי טלפון בפורמט WhatsApp ID). נדרש עבור: remove_participant, add_participant, promote_admin, demote_admin
   "value": "טקסט חדש לקבוצה" | true | false, // נדרש עבור: set_subject (טקסט), set_description (טקסט), set_edit_info_admins_only (ערך בוליאני true/false), set_send_messages_admins_only (ערך בוליאני true/false)
   // עבור set_picture השתמש בשדה pictureSource במקום value
@@ -5287,6 +5333,10 @@ ${generatedFilesText.length > 0 ? generatedFilesText : "אין קבצים שנו
   //   "pictureSource": { "type": "existing_image", "sourceImageMessageId": "ID" }
   //   או
   //   "pictureSource": { "type": "ai_generated_image", "imagePrompt": "Dog", "imageModel": "flux-1-schnell" }
+  // עבור create_group:
+  //   "groupSubject": "שם הקבוצה", // חובה
+  //   "groupDescription": "תיאור הקבוצה", // אופציונלי
+  //   "adminParticipantIds": ["ID1@c.us", "ID2@c.us"], // אופציונלי, לקידום מנהלים לאחר יצירה
 }
 \`\`\`
 שימי לב, וזה חשוב, אם מישהו מעצבן אותך, מציק לך, מפריע לך, או משהו, את תתני לו אזהרה שאת עומדת להעיף אותו, ואם הוא ימשיך להציק לך או לקלל אותך את תעיפי אותו, ברור? כל מי שיקלל אותך את תתני לון אזהרה ואם הוא לא יקשיב לך את תעיפי אותו מהקבוצה אל תעשי טעויות. את תעיפי ולא תתווכחי.
@@ -5323,6 +5373,10 @@ ${generatedFilesText.length > 0 ? generatedFilesText : "אין קבצים שנו
 -   בקשה: "פיתי תשני את התמונה של הקבוצה לתמונה של כלב שאת תצרי"
     JSON לדוגמה:
     \`{ "replyTo": "ID_הבקשה", "action": "group_management", "subAction": "set_picture", "pictureSource": { "type": "ai_generated_image", "imagePrompt": "A cute dog", "imageModel": "flux-1-schnell" }, "message": "יוצרת תמונת קבוצה..." }\`
+
+-   בקשה: "פיתי תצרי קבוצה בשם 'קבוצת הפילים' שבה אני, הלל, יפית ואורי ונוסיף מנהל גם לאורי, עם תמונה של פיל"
+    JSON לדוגמה:
+    \`{ "replyTo": "ID_הבקשה", "action": "group_management", "subAction": "create_group", "groupSubject": "קבוצת הפילים", "groupDescription": "תיאור על פילים", "participantIds": ["ID_של_הלל@c.us", "ID_של_יפית@c.us", "ID_של_אורי@c.us"], "adminParticipantIds": ["ID_של_אורי@c.us"], "pictureSource": { "type": "ai_generated_image", "imagePrompt": "elephant", "imageModel": "flux-1-schnell" }, "message": "יוצרת קבוצה חדשה..." }\`
 
 
 **אם המשתמש מבקש ליצור סטיקר, עליך לזהות את כוונתו ולהחזיר JSON בפורמט הבא:**
