@@ -2461,11 +2461,20 @@ async function handleVideoGenerationAction(videoData, targetMsg, chatPaths) {
 
         // --- FIXED: Caption for the final video message ---
         const finalCaption = `פיתי\n\n🎬 הנה הסרטון שנוצר (${videoData.mode}):\nPrompt: ${videoData.prompt}${seedUsed ? `\nSeed: ${seedUsed}` : ''}`;
-        const sentFinalVideoMsg = await client.sendMessage(targetChatId, videoMedia, {
-            caption: finalCaption,
-            quotedMessageId: replyToId // Quote the original user request
-        });
-        console.log("[handleVideoGen LTX] Generated video sent successfully.");
+        let sentFinalVideoMsg;
+        try {
+            sentFinalVideoMsg = await client.sendMessage(targetChatId, videoMedia, {
+                caption: finalCaption,
+                quotedMessageId: replyToId // Quote the original user request
+            });
+            console.log("[handleVideoGen LTX] Generated video sent successfully.");
+        } catch (sendErr) {
+            console.warn(`[handleVideoGen LTX] Failed to send video with quote: ${sendErr.message}. Trying without quote...`);
+            sentFinalVideoMsg = await client.sendMessage(targetChatId, videoMedia, {
+                caption: finalCaption
+            });
+            console.log("[handleVideoGen LTX] Generated video sent successfully WITHOUT quote.");
+        }
 
         // Mark this final bot message as well
         if (sentFinalVideoMsg && sentFinalVideoMsg.id && sentFinalVideoMsg?.id?._serialized) {
