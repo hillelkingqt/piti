@@ -1556,7 +1556,22 @@ async function handleGroupManagementAction(actionData, targetMsg) {
                     break;
                 }
 
-                const newGroupId = createRes.gid?._serialized || createRes.gid || createRes.id;
+                let newGroupId = createRes?.gid?._serialized;
+                if (!newGroupId && createRes?.gid) {
+                    if (typeof createRes.gid === 'string') {
+                        newGroupId = createRes.gid;
+                    } else if (typeof createRes.gid === 'object' && createRes.gid.user && createRes.gid.server) {
+                        newGroupId = `${createRes.gid.user}@${createRes.gid.server}`;
+                    }
+                }
+                if (!newGroupId && createRes?.id) {
+                    newGroupId = createRes.id?._serialized || createRes.id;
+                }
+                if (!newGroupId) {
+                    console.error('[GroupMgmt] Could not determine new group ID from createGroup result:', createRes);
+                    await targetMsg.reply('⚠️ אירעה שגיאה בזיהוי הקבוצה החדשה.', undefined, { quotedMessageId: replyTo });
+                    break;
+                }
                 await targetMsg.reply(`✅ הקבוצה "${actionData.groupSubject}" נוצרה בהצלחה.`, undefined, { quotedMessageId: replyTo });
 
                 try {
