@@ -93,7 +93,12 @@ const manualApiKeys = [
   "AIzaSyAqgGxBFKXGAbwGOUpXr0ywY2IryANPEBE",
   "AIzaSyCuRud_9maOdEh4L00ripxgBLoImqoqY_E",
   "AIzaSyCqQDiGTA-wX4Aggm-xxWATqTjO7tvW8W8",
-  "AIzaSyC6sjR-2NCamBDnk6d5ZLA5JbF-Mcr24Uk"
+  "AIzaSyC6sjR-2NCamBDnk6d5ZLA5JbF-Mcr24Uk",
+  "AIzaSyBXWjVbbCDEXnr-50OBI0jXd_OFjOth5ro",
+  "AIzaSyBsWfQp_6_0VKkt-pP85sUmLp5fzhhx4KM",
+  "AIzaSyCuyZpZYWjJSKL7akEi7r6cZmnvx0g-AqE",
+  "AIzaSyA8n_-S9IjQS1IMvfCOsoVV-psNRRXPXvk",
+  "AIzaSyDyHx_jFNueElRn2VRs8_wweKkwu99SqyY"
 ];
 
 const envKeys = process.env.GEMINI_API_KEYS
