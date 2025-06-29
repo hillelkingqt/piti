@@ -20,6 +20,8 @@ class ApiKeyManager {
             }
         }
         this.currentIndex = 0;
+        this.cooldowns = new Map(); // key -> timestamp when key becomes active
+        this.defaultCooldownMs = 30 * 60 * 1000; // 30 minutes
         console.log(`[ApiKeyManager] Initialized with ${this.keys.length} API key(s). First key starts with: ${this.keys[0]?.substring(0,10)}`);
     }
 
@@ -30,12 +32,22 @@ class ApiKeyManager {
     getRandomApiKey() {
         if (this.keys.length === 0 || this.keys[0].startsWith("DUMMY_KEY")) {
             console.error("❌ [ApiKeyManager] No valid keys available to return!");
-            // In a real application, this should ideally throw an error or be handled more gracefully.
             return "NO_VALID_API_KEYS_CONFIGURED";
         }
-        const key = this.keys[this.currentIndex];
-        this.currentIndex = (this.currentIndex + 1) % this.keys.length;
-        return key;
+
+        const startIndex = this.currentIndex;
+        const now = Date.now();
+        do {
+            const key = this.keys[this.currentIndex];
+            this.currentIndex = (this.currentIndex + 1) % this.keys.length;
+            const cooldownUntil = this.cooldowns.get(key);
+            if (!cooldownUntil || cooldownUntil <= now) {
+                return key;
+            }
+        } while (this.currentIndex !== startIndex);
+
+        console.warn("[ApiKeyManager] All API keys are currently on cooldown.");
+        return "NO_VALID_API_KEYS_AVAILABLE";
     }
 
     /**
@@ -64,6 +76,18 @@ class ApiKeyManager {
         } else {
             console.warn(`[ApiKeyManager] Attempted to add invalid API key: ${key}`);
         }
+    }
+
+    /**
+     * Temporarily disables an API key for a given duration.
+     * @param {string} key - The API key to disable.
+     * @param {number} [durationMs=this.defaultCooldownMs] - Duration in milliseconds.
+     */
+    disableKey(key, durationMs = this.defaultCooldownMs) {
+        if (!this.keys.includes(key)) return;
+        const until = Date.now() + durationMs;
+        this.cooldowns.set(key, until);
+        console.warn(`[ApiKeyManager] Disabled key ${key.substring(0, 10)}... for ${Math.round(durationMs / 60000)} minute(s)`);
     }
 
     /**
