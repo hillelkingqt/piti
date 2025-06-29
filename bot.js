@@ -1547,9 +1547,23 @@ async function handleGroupManagementAction(actionData, targetMsg) {
                     participantsForNew.push(senderId);
                 }
 
+                // Validate participants to avoid invalid WIDs during group creation
+                const validatedParticipants = [];
+                for (const pid of participantsForNew) {
+                    try {
+                        if (await client.isRegisteredUser(pid)) {
+                            validatedParticipants.push(pid);
+                        } else {
+                            console.warn(`[GroupMgmt] Skipping unregistered participant: ${pid}`);
+                        }
+                    } catch (valErr) {
+                        console.warn(`[GroupMgmt] Validation failed for ${pid}:`, valErr);
+                    }
+                }
+
                 let createRes;
                 try {
-                    createRes = await client.createGroup(actionData.groupSubject, participantsForNew);
+                    createRes = await client.createGroup(actionData.groupSubject, validatedParticipants);
                 } catch (err) {
                     console.error('[GroupMgmt] Error creating group:', err);
                     await targetMsg.reply('⚠️ אירעה שגיאה בעת יצירת הקבוצה.', undefined, { quotedMessageId: replyTo });
