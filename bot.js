@@ -11659,6 +11659,19 @@ client.on("message", async (msg) => {
     const chatId = msg.fromMe ? msg.to : msg.from;
     const command = msg.body.trim().toLowerCase();
 
+    // Determine who sent the message for permission checking
+    const originalAuthorId = msg.author || (msg.fromMe ? myId : msg.from);
+    const effectiveSenderId = msg.fromMe ? myId : originalAuthorId;
+    const senderBaseId = getBaseIdForOwnerCheck(effectiveSenderId);
+    const ownerBaseId = getBaseIdForOwnerCheck(myId);
+
+    // Prevent non-owners from using /stop or /unstop here. The main
+    // message_create handler will reply with the unauthorized message.
+    if ((command === "/stop" || command === "/unstop") && senderBaseId !== ownerBaseId) {
+        console.log(`[UNAUTHORIZED SIMPLE HANDLER] ${senderBaseId} attempted ${command}`);
+        return;
+    }
+
     if (command === "/stop") {
         if (!stoppedChats.has(chatId)) {
             stoppedChats.add(chatId);
