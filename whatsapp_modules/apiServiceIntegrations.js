@@ -7,6 +7,8 @@ const mime = require('mime-types'); // For functions like searchAndDownloadWebIm
 const { apiKeyManager } = require('../services/ApiKeyManager.js'); // Adjusted path
 const { generateCloudflareImage, transcribeAudioCF } = require('../services/CloudflareService.js');
 
+let lastGeminiApiKey = null; // track last Gemini API key used
+
 // --- Cloudflare API Constants ---
 // Moved from what_FIXED (1).js
 const CLOUDFLARE_ACCOUNT_ID = "38a8437a72c997b85a542a6b64a699e2";
@@ -31,6 +33,7 @@ const CLOUDFLARE_WHISPER_API_ENDPOINT = `https://api.cloudflare.com/client/v4/ac
 
 function getRandomGeminiEndpoint(hasMedia = false) {
     const apiKey = apiKeyManager.getRandomApiKey();
+    lastGeminiApiKey = apiKey;
     if (hasMedia) {
         return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-thinking-exp:generateContent?key=${apiKey}`;
     }
@@ -39,11 +42,13 @@ function getRandomGeminiEndpoint(hasMedia = false) {
 
 function getRandomGeminiImageEndpoint() {
     const apiKey = apiKeyManager.getRandomApiKey();
+    lastGeminiApiKey = apiKey;
     return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-thinking-exp:generateContent?key=${apiKey}`;
 }
 
 function getRandomGeminiEndpoints(hasMedia = false, modelVersion = "v1beta") {
     const apiKey = apiKeyManager.getRandomApiKey();
+    lastGeminiApiKey = apiKey;
     let modelName = "gemini-2.0-flash-thinking-exp";
     if (hasMedia) {
         modelName = "gemini-2.0-flash-thinking-exp";
@@ -68,6 +73,11 @@ async function uploadMediaToGemini(base64Data, mimeType) {
         return null;
     } catch (error) {
         console.error("❌ [uploadMediaToGemini API Service] Gemini media upload error:", error?.response?.data || error);
+        if (error?.response && error.response.status === 429 &&
+            (error.response.data?.error?.status === 'RESOURCE_EXHAUSTED' ||
+             /quota/i.test(error.response.data?.error?.message || '')) && lastGeminiApiKey) {
+            apiKeyManager.disableKey(lastGeminiApiKey);
+        }
         throw error; // Re-throw to be handled by caller
     }
 }
@@ -87,6 +97,11 @@ async function askGeminiWithSearchGrounding(promptText) {
         return answer;
     } catch (error) {
         console.error("❌ [askGeminiWithSearchGrounding API Service] שגיאה:", error.response?.data || error.message || error);
+        if (error?.response && error.response.status === 429 &&
+            (error.response.data?.error?.status === 'RESOURCE_EXHAUSTED' ||
+             /quota/i.test(error.response.data?.error?.message || '')) && lastGeminiApiKey) {
+            apiKeyManager.disableKey(lastGeminiApiKey);
+        }
         return "⚠️ הייתה שגיאה בזמן הבקשה ל-Gemini עם Grounding.";
     }
 }

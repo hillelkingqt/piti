@@ -132,6 +132,8 @@ let stoppedChats = new Set();
 const YOUR_GEMINI_API_KEY = apiKeyManager.getRandomApiKey(); // <<--- השתמש במנהל המפתחות הקיים שלך!
 const GRADIO_SPACE_URL = "ameerazam08/Gemini-Image-Edit"; // שם ה-Space ב-Hugging Face
 
+let lastGeminiApiKey = null; // Tracks last key used for Gemini API
+
 if (fs.existsSync(STOPPED_CHATS_PATH)) {
     try {
         stoppedChats = new Set(JSON.parse(fs.readFileSync(STOPPED_CHATS_PATH, 'utf8')));
@@ -150,6 +152,7 @@ function delay(ms) {
 function getRandomGeminiEndpoint(hasMedia = false) {
     const baseUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-thinking-exp:generateContent";
     const apiKey = apiKeyManager.getRandomApiKey();
+    lastGeminiApiKey = apiKey;
     if (hasMedia) {
         return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-thinking-exp:generateContent?key=${apiKey}`;
     }
@@ -273,6 +276,7 @@ async function searchAndDownloadWebImages(query, maxImagesToDownload, filenamePr
 }
 function getRandomGeminiEndpoints() {
     const apiKey = apiKeyManager.getRandomApiKey();
+    lastGeminiApiKey = apiKey;
     return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
 }
 
@@ -299,6 +303,11 @@ async function askGeminiWithSearchGrounding(promptText) {
     } catch (error) {
         // הדפס את השגיאה המלאה כדי שנוכל לראות אם היא משתנה
         console.error("❌ [askGeminiWithSearchGrounding] שגיאה:", error.response?.data || error.message || error);
+        if (error?.response && error.response.status === 429 &&
+            (error.response.data?.error?.status === 'RESOURCE_EXHAUSTED' ||
+             /quota/i.test(error.response.data?.error?.message || '')) && lastGeminiApiKey) {
+            apiKeyManager.disableKey(lastGeminiApiKey);
+        }
         // שקול להחזיר הודעת שגיאה שונה או לזרוק את השגיאה הלאה
         return "⚠️ הייתה שגיאה בזמן הבקשה ל-Gemini עם Grounding.";
     }
@@ -321,6 +330,11 @@ async function uploadMediaToGemini(base64Data, mimeType) {
         return null;
     } catch (error) {
         console.error("Gemini media upload error:", error?.response?.data || error);
+        if (error?.response && error.response.status === 429 &&
+            (error.response.data?.error?.status === 'RESOURCE_EXHAUSTED' ||
+             /quota/i.test(error.response.data?.error?.message || '')) && lastGeminiApiKey) {
+            apiKeyManager.disableKey(lastGeminiApiKey);
+        }
         throw error;
     }
 }
@@ -354,6 +368,11 @@ async function describeImage(base64Data, mimeType) {
         return res.data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
     } catch (err) {
         console.error('[describeImage] Error:', err.response?.data || err.message);
+        if (err?.response && err.response.status === 429 &&
+            (err.response.data?.error?.status === 'RESOURCE_EXHAUSTED' ||
+             /quota/i.test(err.response.data?.error?.message || '')) && lastGeminiApiKey) {
+            apiKeyManager.disableKey(lastGeminiApiKey);
+        }
         return null;
     }
 }
@@ -1248,6 +1267,11 @@ Summary:`;
 
     } catch (error) {
         console.error("❌ Error during history summarization:", error.response?.data || error.message || error);
+        if (error?.response && error.response.status === 429 &&
+            (error.response.data?.error?.status === 'RESOURCE_EXHAUSTED' ||
+             /quota/i.test(error.response.data?.error?.message || '')) && lastGeminiApiKey) {
+            apiKeyManager.disableKey(lastGeminiApiKey);
+        }
         await targetMsg.reply("❌ אירעה שגיאה במהלך סיכום היסטוריית הצ'אט.", undefined, { quotedMessageId: replyToId });
     }
 }
@@ -1355,6 +1379,11 @@ async function handleSummarizeAction(summaryData, targetMsg) {
         }
     } catch (error) {
         console.error("❌ Error during summarization:", error.response?.data || error.message || error);
+        if (error?.response && error.response.status === 429 &&
+            (error.response.data?.error?.status === 'RESOURCE_EXHAUSTED' ||
+             /quota/i.test(error.response.data?.error?.message || '')) && lastGeminiApiKey) {
+            apiKeyManager.disableKey(lastGeminiApiKey);
+        }
         await targetMsg.reply("❌ אירעה שגיאה במהלך ניסיון הסיכום.", undefined, { quotedMessageId: replyToId });
     }
 }
@@ -3556,6 +3585,11 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
 
     } catch (err) {
         console.error("❌ [handleSiteSearchAction] Error:", err);
+        if (err?.response && err.response.status === 429 &&
+            (err.response.data?.error?.status === 'RESOURCE_EXHAUSTED' ||
+             /quota/i.test(err.response.data?.error?.message || '')) && lastGeminiApiKey) {
+            apiKeyManager.disableKey(lastGeminiApiKey);
+        }
         await targetMsg.reply("⚠️ הייתה שגיאה במהלך חיפוש האתר.");
     }
 }
@@ -4118,6 +4152,11 @@ async function handleMediaContent(msg, savedPath = null) {
         description = res.data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
     } catch (e) {
         console.error("⚠️ handleMediaContent error:", e.response?.data || e.message);
+        if (e?.response && e.response.status === 429 &&
+            (e.response.data?.error?.status === 'RESOURCE_EXHAUSTED' ||
+             /quota/i.test(e.response.data?.error?.message || '')) && lastGeminiApiKey) {
+            apiKeyManager.disableKey(lastGeminiApiKey);
+        }
         return;
     }
 
@@ -6720,6 +6759,12 @@ allprojects {
             } catch (apiError) {
                 retryCount++;
                 console.error(`❌ Gemini API error (attempt ${retryCount}/${maxRetries}):`, apiError.response?.data || apiError.message || apiError);
+                const quotaExceeded = apiError.response && apiError.response.status === 429 &&
+                    (apiError.response.data?.error?.status === 'RESOURCE_EXHAUSTED' ||
+                     /quota/i.test(apiError.response.data?.error?.message || ''));
+                if (quotaExceeded && lastGeminiApiKey) {
+                    apiKeyManager.disableKey(lastGeminiApiKey);
+                }
                 if (apiError.response && (apiError.response.status === 503 || apiError.response.status === 429 || apiError.response.status === 500)) {
                     // *** שינוי שם המשתנה כאן ***
                     const calculatedDelay = retryDelayMs * Math.pow(2, retryCount - 1); // <-- שינוי שם המשתנה
@@ -7896,6 +7941,11 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
 
         } catch (err) {
             console.error("❌ שגיאה בחיפוש באתר עם needHtml:", err);
+            if (err?.response && err.response.status === 429 &&
+                (err.response.data?.error?.status === 'RESOURCE_EXHAUSTED' ||
+                 /quota/i.test(err.response.data?.error?.message || '')) && lastGeminiApiKey) {
+                apiKeyManager.disableKey(lastGeminiApiKey);
+            }
             await msg.reply("⚠️ הייתה שגיאה במהלך העיבוד המתקדם של החיפוש.");
         }
 
@@ -8882,6 +8932,11 @@ If no entities of the requested types are found, return an empty JSON object {}.
 
     } catch (error) {
         console.error("❌ Error during entity extraction:", error.response?.data || error.message || error);
+        if (error?.response && error.response.status === 429 &&
+            (error.response.data?.error?.status === 'RESOURCE_EXHAUSTED' ||
+             /quota/i.test(error.response.data?.error?.message || '')) && lastGeminiApiKey) {
+            apiKeyManager.disableKey(lastGeminiApiKey);
+        }
         await targetMsg.reply("❌ אירעה שגיאה במהלך חיפוש פרטי המידע.", undefined, { quotedMessageId: replyToId });
     }
 }
@@ -9700,6 +9755,11 @@ async function handleSummarizeVideoAction(videoData, targetMsg) {
 
     } catch (error) {
         console.error("❌ Error during video summarization attempt:", error.response?.data || error.message || error);
+        if (error?.response && error.response.status === 429 &&
+            (error.response.data?.error?.status === 'RESOURCE_EXHAUSTED' ||
+             /quota/i.test(error.response.data?.error?.message || '')) && lastGeminiApiKey) {
+            apiKeyManager.disableKey(lastGeminiApiKey);
+        }
         await targetMsg.reply("❌ אירעה שגיאה בניסיון לסכם את הסרטון.", undefined, { quotedMessageId: replyToId });
     }
 }
