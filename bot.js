@@ -133,6 +133,8 @@ const YOUR_GEMINI_API_KEY = apiKeyManager.getRandomApiKey(); // <<--- השתמש
 const GRADIO_SPACE_URL = "ameerazam08/Gemini-Image-Edit"; // שם ה-Space ב-Hugging Face
 
 let lastGeminiApiKey = null; // Tracks last key used for Gemini API
+let gemini2FlashCooldownUntil = 0; // timestamp until main model is disabled
+let geminiFallbackModel = null;   // current fallback model while disabled
 
 if (fs.existsSync(STOPPED_CHATS_PATH)) {
     try {
@@ -150,13 +152,34 @@ function delay(ms) {
 }
 
 function getRandomGeminiEndpoint(hasMedia = false) {
-    const baseUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-thinking-exp:generateContent";
+    const now = Date.now();
+    let model = "gemini-2.0-flash-thinking-exp";
+    if (gemini2FlashCooldownUntil > now) {
+        // Use fallback model while main model is on cooldown
+        model = geminiFallbackModel || "gemini-2.5-flash-preview-05-20";
+    } else {
+        geminiFallbackModel = null; // reset after cooldown
+    }
     const apiKey = apiKeyManager.getRandomApiKey();
     lastGeminiApiKey = apiKey;
-    if (hasMedia) {
-        return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-thinking-exp:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    return url;
+}
+
+function handleGeminiOverloadError(err) {
+    const isOverload = err?.response?.status === 503 &&
+        /model is overloaded/i.test(err.response?.data?.error?.message || '');
+    if (!isOverload) return;
+
+    const now = Date.now();
+    if (gemini2FlashCooldownUntil <= now) {
+        gemini2FlashCooldownUntil = now + 30 * 60 * 1000; // 30 minutes
+        geminiFallbackModel = "gemini-2.5-flash-preview-05-20";
+        console.warn(`[Gemini] Main model overloaded. Using ${geminiFallbackModel} for 30 minutes.`);
+    } else if (geminiFallbackModel === "gemini-2.5-flash-preview-05-20") {
+        geminiFallbackModel = "gemini-1.5-flash-latest";
+        console.warn(`[Gemini] Fallback model overloaded. Switching to ${geminiFallbackModel}.`);
     }
-    return `${baseUrl}?key=${apiKey}`;
 }
 async function generateBarcode(text) {
     const filePath = './barcode.png';
@@ -303,6 +326,7 @@ async function askGeminiWithSearchGrounding(promptText) {
     } catch (error) {
         // הדפס את השגיאה המלאה כדי שנוכל לראות אם היא משתנה
         console.error("❌ [askGeminiWithSearchGrounding] שגיאה:", error.response?.data || error.message || error);
+        handleGeminiOverloadError(error);
         if (error?.response && error.response.status === 429 &&
             (error.response.data?.error?.status === 'RESOURCE_EXHAUSTED' ||
              /quota/i.test(error.response.data?.error?.message || '')) && lastGeminiApiKey) {
@@ -330,6 +354,7 @@ async function uploadMediaToGemini(base64Data, mimeType) {
         return null;
     } catch (error) {
         console.error("Gemini media upload error:", error?.response?.data || error);
+        handleGeminiOverloadError(error);
         if (error?.response && error.response.status === 429 &&
             (error.response.data?.error?.status === 'RESOURCE_EXHAUSTED' ||
              /quota/i.test(error.response.data?.error?.message || '')) && lastGeminiApiKey) {
@@ -368,6 +393,7 @@ async function describeImage(base64Data, mimeType) {
         return res.data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
     } catch (err) {
         console.error('[describeImage] Error:', err.response?.data || err.message);
+        handleGeminiOverloadError(err);
         if (err?.response && err.response.status === 429 &&
             (err.response.data?.error?.status === 'RESOURCE_EXHAUSTED' ||
              /quota/i.test(err.response.data?.error?.message || '')) && lastGeminiApiKey) {
@@ -653,6 +679,7 @@ async function handleImageEditAction(editData, targetMsg, chatPaths) {
         });
     } catch (err) {
         console.error("❌ Error calling Gemini Image API:", err.response?.data || err.message);
+        handleGeminiOverloadError(err);
         await targetMsg.reply("❌ הייתה שגיאה בשליחת הבקשה ל-Gemini.", undefined, { quotedMessageId: replyTo });
         return;
     }
@@ -6759,6 +6786,7 @@ allprojects {
             } catch (apiError) {
                 retryCount++;
                 console.error(`❌ Gemini API error (attempt ${retryCount}/${maxRetries}):`, apiError.response?.data || apiError.message || apiError);
+                handleGeminiOverloadError(apiError);
                 const quotaExceeded = apiError.response && apiError.response.status === 429 &&
                     (apiError.response.data?.error?.status === 'RESOURCE_EXHAUSTED' ||
                      /quota/i.test(apiError.response.data?.error?.message || ''));
@@ -6790,6 +6818,7 @@ allprojects {
 
     } catch (apiError) {
         console.error("🚫 Gemini API error after retries:", apiError.response?.data || apiError.message || apiError);
+        handleGeminiOverloadError(apiError);
         // בגלל שה- wrapper ל-reply מטפל בלוג, נוכל לשלוח ישירות
         try {
             await msg.reply("פיתי\n\nמצטערת, משהו השתבש בתקשורת עם הבינה המלאכותית אחרי מספר ניסיונות. אנא נסה שוב מאוחר יותר.");

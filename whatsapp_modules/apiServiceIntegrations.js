@@ -8,6 +8,8 @@ const { apiKeyManager } = require('../services/ApiKeyManager.js'); // Adjusted p
 const { generateCloudflareImage, transcribeAudioCF } = require('../services/CloudflareService.js');
 
 let lastGeminiApiKey = null; // track last Gemini API key used
+let gemini2FlashCooldownUntil = 0;
+let geminiFallbackModel = null;
 
 // --- Cloudflare API Constants ---
 // Moved from what_FIXED (1).js
@@ -32,12 +34,16 @@ const CLOUDFLARE_WHISPER_API_ENDPOINT = `https://api.cloudflare.com/client/v4/ac
 // Moved from what_FIXED (1).js / utilityHelpers.js
 
 function getRandomGeminiEndpoint(hasMedia = false) {
+    const now = Date.now();
+    let model = "gemini-2.0-flash-thinking-exp";
+    if (gemini2FlashCooldownUntil > now) {
+        model = geminiFallbackModel || "gemini-2.5-flash-preview-05-20";
+    } else {
+        geminiFallbackModel = null;
+    }
     const apiKey = apiKeyManager.getRandomApiKey();
     lastGeminiApiKey = apiKey;
-    if (hasMedia) {
-        return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-thinking-exp:generateContent?key=${apiKey}`;
-    }
-    return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-thinking-exp:generateContent?key=${apiKey}`;
+    return `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 }
 
 function getRandomGeminiImageEndpoint() {
@@ -54,6 +60,22 @@ function getRandomGeminiEndpoints(hasMedia = false, modelVersion = "v1beta") {
         modelName = "gemini-2.0-flash-thinking-exp";
     }
     return `https://generativelanguage.googleapis.com/${modelVersion}/models/${modelName}:generateContent?key=${apiKey}`;
+}
+
+function handleGeminiOverloadError(err) {
+    const isOverload = err?.response?.status === 503 &&
+        /model is overloaded/i.test(err.response?.data?.error?.message || '');
+    if (!isOverload) return;
+
+    const now = Date.now();
+    if (gemini2FlashCooldownUntil <= now) {
+        gemini2FlashCooldownUntil = now + 30 * 60 * 1000;
+        geminiFallbackModel = "gemini-2.5-flash-preview-05-20";
+        console.warn(`[Gemini] Main model overloaded. Using ${geminiFallbackModel} for 30 minutes.`);
+    } else if (geminiFallbackModel === "gemini-2.5-flash-preview-05-20") {
+        geminiFallbackModel = "gemini-1.5-flash-latest";
+        console.warn(`[Gemini] Fallback model overloaded. Switching to ${geminiFallbackModel}.`);
+    }
 }
 // --- End Gemini Endpoint Helper Functions ---
 
@@ -73,6 +95,7 @@ async function uploadMediaToGemini(base64Data, mimeType) {
         return null;
     } catch (error) {
         console.error("❌ [uploadMediaToGemini API Service] Gemini media upload error:", error?.response?.data || error);
+        handleGeminiOverloadError(error);
         if (error?.response && error.response.status === 429 &&
             (error.response.data?.error?.status === 'RESOURCE_EXHAUSTED' ||
              /quota/i.test(error.response.data?.error?.message || '')) && lastGeminiApiKey) {
@@ -97,6 +120,7 @@ async function askGeminiWithSearchGrounding(promptText) {
         return answer;
     } catch (error) {
         console.error("❌ [askGeminiWithSearchGrounding API Service] שגיאה:", error.response?.data || error.message || error);
+        handleGeminiOverloadError(error);
         if (error?.response && error.response.status === 429 &&
             (error.response.data?.error?.status === 'RESOURCE_EXHAUSTED' ||
              /quota/i.test(error.response.data?.error?.message || '')) && lastGeminiApiKey) {

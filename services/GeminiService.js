@@ -4,6 +4,9 @@ const { Buffer } = require('buffer');
 const { apiKeyManager } = require('./ApiKeyManager'); // Assumes ApiKeyManager class is exported and instantiated elsewhere, then passed or required
 const config = require('../config'); // For base URLs and model names
 
+let gemini2FlashCooldownUntil = 0;
+let geminiFallbackModel = null;
+
 // Default model names - these can be overridden by config.js if present there
 const DEFAULT_MODEL_FLASH = "gemini-1.5-flash-latest";
 const DEFAULT_MODEL_PRO = "gemini-1.5-pro-latest";
@@ -17,6 +20,10 @@ const DEFAULT_MODEL_UPLOAD = "files";
  * @returns {string} The selected model name string.
  */
 function selectGeminiModel(options = { type: 'flash' }) {
+    const now = Date.now();
+    if (options.type === 'flash' && gemini2FlashCooldownUntil > now) {
+        return geminiFallbackModel || 'gemini-2.5-flash-preview-05-20';
+    }
     switch (options.type) {
         case 'pro':
             return config.GEMINI_MODEL_PRO || DEFAULT_MODEL_PRO;
@@ -65,10 +72,12 @@ async function callGeminiApi(payload, modelOptions = { type: 'flash' }) {
     const url = getGeminiUrl(model, 'generateContent', false);
     console.log(`[GeminiService] Calling Gemini (${model}) at ${url.split('?')[0]}`);
 
-    // Axios automatically throws for non-2xx status codes, so specific retry logic
-    // based on status code might be better handled by the caller if complex retries are needed.
-    // This service will just make the attempt.
-    return await axios.post(url, payload, { timeout: config.GEMINI_API_TIMEOUT || 120000 }); // Default 2 min timeout
+    try {
+        return await axios.post(url, payload, { timeout: config.GEMINI_API_TIMEOUT || 120000 });
+    } catch (err) {
+        handleGeminiOverloadError(err);
+        throw err;
+    }
 }
 
 /**
@@ -122,6 +131,22 @@ async function uploadMedia(base64Data, mimeType) {
     } catch (error) {
         console.error("❌ [GeminiService - Upload] Error:", error.response?.data || error.message);
         return null;
+    }
+}
+
+function handleGeminiOverloadError(err) {
+    const isOverload = err?.response?.status === 503 &&
+        /model is overloaded/i.test(err.response?.data?.error?.message || '');
+    if (!isOverload) return;
+
+    const now = Date.now();
+    if (gemini2FlashCooldownUntil <= now) {
+        gemini2FlashCooldownUntil = now + 30 * 60 * 1000;
+        geminiFallbackModel = 'gemini-2.5-flash-preview-05-20';
+        console.warn(`[Gemini] Main model overloaded. Using ${geminiFallbackModel} for 30 minutes.`);
+    } else if (geminiFallbackModel === 'gemini-2.5-flash-preview-05-20') {
+        geminiFallbackModel = 'gemini-1.5-flash-latest';
+        console.warn(`[Gemini] Fallback model overloaded. Switching to ${geminiFallbackModel}.`);
     }
 }
 
