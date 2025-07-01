@@ -4203,8 +4203,11 @@ async function handleMessage(msg, incoming, quotedMedia = null, contextMediaArra
     const contextMessages = [];
 
     const chatId = msg.fromMe ? msg.to : msg.from;
-    if (stoppedChats.has(chatId)) {
-        console.log("⛔️ Bot is stopped in this chat. Ignoring message.");
+    const senderIdForCheck = msg.fromMe ? myId : (msg.author || msg.from);
+    const senderBase = getBaseIdForOwnerCheck(senderIdForCheck);
+    const ownerBase = getBaseIdForOwnerCheck(myId);
+    if (stoppedChats.has(chatId) && senderBase !== ownerBase) {
+        console.log("⛔️ Bot is stopped in this chat. Ignoring message from non-owner.");
         return;
     }
 
@@ -11357,7 +11360,7 @@ console.log(`[message_create OWNER CHECK] Owner command detected from ${original
         // console.log(`[message_create STATUS 1] Bot is on a global break. Ignoring msg ${msg?.id?._serialized}.`);
         return;
     }
-    if (stoppedChats.has(chatId)) {
+    if (stoppedChats.has(chatId) && messageSenderBaseId !== ownerBaseId) {
         // console.log(`[message_create STATUS 2] Bot stopped for chat ${chatId}. Ignoring msg ${msg?.id?._serialized}.`);
         return;
     }
