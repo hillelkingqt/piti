@@ -2336,8 +2336,26 @@ async function handleHabitTrackAction(replyData, targetMsg) {
 
     } catch (err) {
         console.error("❌ [handleHabitTrackAction] Error:", err);
-        await targetMsg.reply("⚠️ הייתה שגיאה במעקב אחר ההרגל.");
-    }
+    await targetMsg.reply("⚠️ הייתה שגיאה במעקב אחר ההרגל.");
+  }
+}
+
+// 8b. Many Messages Action
+async function handleManyAction(actionData, targetMsg) {
+  const messageToSend = actionData.message;
+  const requestedCount = parseInt(actionData.count, 10);
+  const delayBetweenMessages = parseInt(actionData.delay, 10) || 500;
+  const replyId = actionData.replyTo || targetMsg?.id?._serialized;
+
+  if (!messageToSend || !requestedCount || requestedCount <= 0) {
+    await targetMsg.reply("פיתי\n\nמספר החזרות או הטקסט לא תקינים.");
+    return;
+  }
+
+  for (let i = 0; i < requestedCount; i++) {
+    const sent = await targetMsg.reply(`פיתי\n\n${messageToSend}`, undefined, { quotedMessageId: replyId });
+    if (i < requestedCount - 1) await delay(delayBetweenMessages);
+  }
 }
 
 // 9. Create File Action
@@ -3382,6 +3400,60 @@ async function executeDelayedAction(task) {
                 if (actionData.text) {
                     await handleGenerateBarcodeAction(actionData, mockMsgForReply);
                 }
+                break;
+            case "generate_powerpoint":
+                await handleGeneratePowerPointAction(actionData, mockMsgForReply, chatPaths);
+                break;
+            case "generate_apk":
+                await handleGenerateApkAction(actionData, mockMsgForReply, chatPaths);
+                break;
+            case "generate_html":
+                await handleGenerateHtmlAction({ htmlData: actionData, targetMsg: mockMsgForReply, chatPaths });
+                break;
+            case "generate_music_ace":
+                await handleMusicGenerationAction(actionData, mockMsgForReply, chatPaths);
+                break;
+            case "generate_table_chart":
+                await handleGenerateGraphAction(actionData, mockMsgForReply, chatPaths);
+                break;
+            case "generate_video_ltx":
+                await handleVideoGenerationAction(actionData, mockMsgForReply, chatPaths);
+                break;
+            case "image_edit":
+                await handleImageEditAction(actionData, mockMsgForReply, chatPaths);
+                break;
+            case "schedule_add":
+                await handleScheduleAddAction(actionData, mockMsgForReply);
+                break;
+            case "timer":
+                await handleTimerAction(actionData, mockMsgForReply);
+                break;
+            case "shopping_list_manage":
+                await handleShoppingListAction(actionData, mockMsgForReply);
+                break;
+            case "habit_track":
+                await handleHabitTrackAction(actionData, mockMsgForReply);
+                break;
+            case "extract_entities":
+                await handleExtractEntitiesAction(actionData, mockMsgForReply);
+                break;
+            case "summarize_content":
+                await handleSummarizeAction(actionData, mockMsgForReply);
+                break;
+            case "summarize_history":
+                await handleSummarizeHistoryAction(actionData, mockMsgForReply, chatPaths);
+                break;
+            case "summarize_video":
+                await handleSummarizeVideoAction(actionData, mockMsgForReply);
+                break;
+            case "send_profile_pic":
+                await handleSendProfilePicAction(actionData, mockMsgForReply, chatPaths);
+                break;
+            case "many":
+                await handleManyAction(actionData, mockMsgForReply);
+                break;
+            case "info_menu":
+                await sendInfoMenu(mockMsgForReply);
                 break;
             // ... Add cases for ALL other actions you have handlers for ...
             // Make sure each handler function is adapted to receive the
@@ -4863,10 +4935,22 @@ ${triggersTextForPrompt} // triggersTextForPrompt יצטרך להציג את t.a
     "imageQuality": "Medium",
     "speed": "Extremely Fast ⚡⚡",
     "style": "General, less accurate in detail",
-    "advantages": "Fastest of all models (~1-2 seconds), useful for quick sketches.",
-    "recommendedUse": "Rapid prototyping, casual generation, when quality is less critical."
+  "advantages": "Fastest of all models (~1-2 seconds), useful for quick sketches.",
+  "recommendedUse": "Rapid prototyping, casual generation, when quality is less critical."
   }
 השתמש ב-\`flux - 1 - schnell\` או \`stable - diffusion - xl - lighting\` למהירות. השתמש ב-\`stable - diffusion - xl - base - 1.0\` לאיכות גבוהה עם Cloudflare. השתמש ב-\`dreamshaper - 8 - lcm\` לסגנונות פנטזיה/אמנותיים. השתמש ב-\`black - forest - labs / FLUX.1 - dev\` (דרך \`imageModelType: "gradio"\`) לאיכות מקסימלית או תוכן מאתגר (כגון פורנו), אך שים לב שהוא עשוי להיות איטי יותר.
+
+**אם המשתמש מבקש ליצור תמונה מקוד SVG קיים, ענה בפורמט JSON הבא:**
+\`\`\`json
+{
+  "replyTo": "MESSAGE_ID",
+  "action": "svg_image",
+  "svg_code": "<svg>...</svg>",
+  "filename": "name_without_extension",
+  "message": "הודעה למשתמש בעברית, לדוגמה: 'יוצרת את התמונה מה־SVG המבוקש...'",
+  "wait": false // (או true...)
+}
+\`\`\`
 
 **אם ההודעה של המשתמש מבקשת לשלוח איש קשר, ענה בפורמט JSON הבא:**
 \`\`\`json
@@ -11408,6 +11492,60 @@ console.log(`[message_create OWNER CHECK] Owner command detected from ${original
                                     if (triggeredActionData.fileType && triggeredActionData.filename && typeof triggeredActionData.fileContent !== 'undefined') {
                                         await handleCreateFileAction(triggeredActionData, msg, chatPathsForLog);
                                     }
+                                    break;
+                                case "generate_powerpoint":
+                                    await handleGeneratePowerPointAction(triggeredActionData, msg, chatPathsForLog);
+                                    break;
+                                case "generate_apk":
+                                    await handleGenerateApkAction(triggeredActionData, msg, chatPathsForLog);
+                                    break;
+                                case "generate_html":
+                                    await handleGenerateHtmlAction({ htmlData: triggeredActionData, targetMsg: msg, chatPaths: chatPathsForLog });
+                                    break;
+                                case "generate_music_ace":
+                                    await handleMusicGenerationAction(triggeredActionData, msg, chatPathsForLog);
+                                    break;
+                                case "generate_table_chart":
+                                    await handleGenerateGraphAction(triggeredActionData, msg, chatPathsForLog);
+                                    break;
+                                case "generate_video_ltx":
+                                    await handleVideoGenerationAction(triggeredActionData, msg, chatPathsForLog);
+                                    break;
+                                case "image_edit":
+                                    await handleImageEditAction(triggeredActionData, msg, chatPathsForLog);
+                                    break;
+                                case "schedule_add":
+                                    await handleScheduleAddAction(triggeredActionData, msg);
+                                    break;
+                                case "timer":
+                                    await handleTimerAction(triggeredActionData, msg);
+                                    break;
+                                case "shopping_list_manage":
+                                    await handleShoppingListAction(triggeredActionData, msg);
+                                    break;
+                                case "habit_track":
+                                    await handleHabitTrackAction(triggeredActionData, msg);
+                                    break;
+                                case "extract_entities":
+                                    await handleExtractEntitiesAction(triggeredActionData, msg);
+                                    break;
+                                case "summarize_content":
+                                    await handleSummarizeAction(triggeredActionData, msg);
+                                    break;
+                                case "summarize_history":
+                                    await handleSummarizeHistoryAction(triggeredActionData, msg, chatPathsForLog);
+                                    break;
+                                case "summarize_video":
+                                    await handleSummarizeVideoAction(triggeredActionData, msg);
+                                    break;
+                                case "send_profile_pic":
+                                    await handleSendProfilePicAction(triggeredActionData, msg, chatPathsForLog);
+                                    break;
+                                case "many":
+                                    await handleManyAction(triggeredActionData, msg);
+                                    break;
+                                case "info_menu":
+                                    await sendInfoMenu(msg);
                                     break;
                                 // ... הוסף caseים לכל שאר הפעולות שאתה רוצה לתמוך בהן בטריגרים ...
                                 // (tts, generate_barcode, document, poll, contact, many, etc.)
