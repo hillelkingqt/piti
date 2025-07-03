@@ -1684,18 +1684,40 @@ async function handleGroupManagementAction(actionData, targetMsg) {
                 const currentParticipantIds = new Set(
                     chatToManage.participants.map(p => p.id?._serialized)
                 );
+
+                const attemptRemove = async (chat, participantId) => {
+                    try {
+                        await chat.removeParticipants([participantId]);
+                        return true;
+                    } catch (err) {
+                        // Occasionally the group metadata is not fully loaded
+                        // which causes the removeParticipants call to fail.
+                        if (err.message && err.message.includes('expected at least 1 children')) {
+                            console.warn(`[GroupMgmt] Retrying removal of ${participantId} after refreshing chat data.`);
+                            try {
+                                const refreshedChat = await client.getChatById(chat.id._serialized);
+                                await refreshedChat.fetchMessages({ limit: 1 });
+                                await refreshedChat.removeParticipants([participantId]);
+                                return true;
+                            } catch (retryErr) {
+                                console.error(`[GroupMgmt] Retry failed for ${participantId}:`, retryErr);
+                            }
+                        } else {
+                            console.error(`[GroupMgmt] Failed to remove ${participantId}:`, err);
+                        }
+                    }
+                    return false;
+                };
+
                 let anyRemoved = false;
                 for (const pId of finalParticipantIds) {
                     if (!currentParticipantIds.has(pId)) {
                         console.warn(`[GroupMgmt] Participant ${pId} not found in group "${chatToManage.name}". Skipping removal.`);
                         continue;
                     }
-                    try {
-                        await chatToManage.removeParticipants([pId]);
+                    if (await attemptRemove(chatToManage, pId)) {
                         await delay(500);
                         anyRemoved = true;
-                    } catch (err) {
-                        console.error(`[GroupMgmt] Failed to remove ${pId}:`, err);
                     }
                 }
                 if (anyRemoved) {
