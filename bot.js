@@ -4184,7 +4184,11 @@ async function handleSvgImageAction(replyData, targetMsg, chatPaths) {
         const caption = replyData.message || `פיתי\n\nהנה התמונה שיצרתי מ-SVG:`;
 
         await client.sendMessage(targetChatId, imageMedia, { caption, quotedMessageId: replyTo });
-        await client.sendMessage(targetChatId, svgMedia, { quotedMessageId: replyTo });
+        // Send the raw SVG file as a document so it does not appear as a duplicate image
+        await client.sendMessage(targetChatId, svgMedia, {
+            quotedMessageId: replyTo,
+            sendMediaAsDocument: true
+        });
 
         const indexPath = chatPaths.generatedFilesIndex;
         let indexData = [];
