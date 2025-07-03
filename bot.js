@@ -1681,49 +1681,90 @@ async function handleGroupManagementAction(actionData, targetMsg) {
             }
             case 'remove_participant':
                 await chatToManage.fetchMessages({ limit: 1 });
+                await chatToManage.fetchMessages({ limit: 1 }); // Refresh participants
                 const currentParticipantIds = new Set(
                     chatToManage.participants.map(p => p.id?._serialized)
                 );
 
                 const attemptRemove = async (chat, participantId) => {
+                    // Check if participant is in the group before attempting removal
+                    if (!currentParticipantIds.has(participantId)) {
+                        console.warn(`[GroupMgmt] Participant ${participantId} is not in group "${chat.name}" or was already removed. Skipping removal attempt.`);
+                        return { success: false, skipped: true, participantId: participantId };
+                    }
+
                     try {
                         await chat.removeParticipants([participantId]);
-                        return true;
+                        console.log(`[GroupMgmt] Successfully removed participant ${participantId} from group "${chat.name}".`);
+                        return { success: true, participantId: participantId };
                     } catch (err) {
-                        // Occasionally the group metadata is not fully loaded
-                        // which causes the removeParticipants call to fail.
                         if (err.message && err.message.includes('expected at least 1 children')) {
-                            console.warn(`[GroupMgmt] Retrying removal of ${participantId} after refreshing chat data.`);
+                            console.warn(`[GroupMgmt] Retrying removal of ${participantId} from "${chat.name}" after refreshing chat data due to "expected at least 1 children" error.`);
                             try {
+                                // Ensure the chat object is fully up-to-date
                                 const refreshedChat = await client.getChatById(chat.id._serialized);
-                                await refreshedChat.fetchMessages({ limit: 1 });
+                                // Fetching messages can sometimes help update internal participant lists
+                                await refreshedChat.fetchMessages({ limit: 1, fromMe: false }); 
+                                
+                                // Re-check participant existence in the refreshed chat data
+                                const refreshedParticipantList = refreshedChat.participants.map(p => p.id?._serialized);
+                                if (!refreshedParticipantList.includes(participantId)) {
+                                    console.warn(`[GroupMgmt] Participant ${participantId} not found in refreshed chat data for "${refreshedChat.name}". Skipping retry.`);
+                                     return { success: false, skipped: true, participantId: participantId, error: "Not found after refresh" };
+                                }
+
                                 await refreshedChat.removeParticipants([participantId]);
-                                return true;
+                                console.log(`[GroupMgmt] Successfully removed participant ${participantId} from "${refreshedChat.name}" on retry.`);
+                                return { success: true, participantId: participantId };
                             } catch (retryErr) {
-                                console.error(`[GroupMgmt] Retry failed for ${participantId}:`, retryErr);
+                                console.error(`[GroupMgmt] Retry failed for ${participantId} in "${chat.name}":`, retryErr);
+                                return { success: false, participantId: participantId, error: retryErr.message };
                             }
                         } else {
-                            console.error(`[GroupMgmt] Failed to remove ${participantId}:`, err);
+                            console.error(`[GroupMgmt] Failed to remove ${participantId} from "${chat.name}":`, err);
+                            return { success: false, participantId: participantId, error: err.message };
                         }
                     }
-                    return false;
                 };
 
-                let anyRemoved = false;
+                let removedCount = 0;
+                let skippedCount = 0;
+                let failedCount = 0;
+                const failedParticipants = [];
+
                 for (const pId of finalParticipantIds) {
-                    if (!currentParticipantIds.has(pId)) {
-                        console.warn(`[GroupMgmt] Participant ${pId} not found in group "${chatToManage.name}". Skipping removal.`);
-                        continue;
-                    }
-                    if (await attemptRemove(chatToManage, pId)) {
-                        await delay(500);
-                        anyRemoved = true;
+                    const result = await attemptRemove(chatToManage, pId);
+                    if (result.success) {
+                        removedCount++;
+                        await delay(500); // Delay between successful removals
+                    } else if (result.skipped) {
+                        skippedCount++;
+                    } else {
+                        failedCount++;
+                        failedParticipants.push(pId);
                     }
                 }
-                if (anyRemoved) {
-                    await targetMsg.reply(`✅ המשתתפ(ים) הוסרו בהצלחה מהקבוצה.`, undefined, { quotedMessageId: replyTo });
+
+                let replyMessageParts = [];
+                if (removedCount > 0) {
+                    replyMessageParts.push(`✅ ${removedCount} משתתפ(ים) הוסרו בהצלחה.`);
+                }
+                if (skippedCount > 0) {
+                    replyMessageParts.push(`ℹ️ ${skippedCount} משתתפ(ים) לא נמצאו בקבוצה (או כבר הוסרו).`);
+                }
+                if (failedCount > 0) {
+                    replyMessageParts.push(`❌ נכשל ניסיון ההסרה עבור ${failedCount} משתתפ(ים).`);
+                    // Optionally list failed participants if desired, e.g., for debugging by owner
+                    // if (failedParticipants.length > 0 && senderBase === ownerBase) {
+                    //    replyMessageParts.push(`   (${failedParticipants.map(p => phone(p)).join(', ')})`);
+                    // }
+                }
+
+                if (replyMessageParts.length > 0) {
+                    await targetMsg.reply(replyMessageParts.join('\n'), undefined, { quotedMessageId: replyTo });
                 } else {
-                    await targetMsg.reply(`⚠️ לא נמצאו משתתפים מתאימים להסרה.`, undefined, { quotedMessageId: replyTo });
+                    // This case should ideally be rare if finalParticipantIds had items
+                    await targetMsg.reply(`⚠️ לא זוהו משתתפים לפעולה, או שכולם כבר הוסרו/לא היו בקבוצה.`, undefined, { quotedMessageId: replyTo });
                 }
                 break;
             case 'add_participant':
