@@ -1021,7 +1021,8 @@ async function sendAndLogMessage(chat, messageText, safeName) {
     const chatPaths = getChatPaths(chat?.id?._serialized, safeName);
     const filePath = chatPaths.historyFile;
     fs.mkdirSync(chatPaths.chatDir, { recursive: true });
-    const line = `[ID: auto_generated] פיתי: ${messageText}\n`;
+    const botPhone = phone(myId);
+    const line = `[ID: auto_generated] פיתי (${botPhone}): ${messageText}\n`;
     fs.appendFileSync(filePath, line, 'utf8');
     return await chat.sendAndLogMessage(messageText);
 }
@@ -1044,6 +1045,8 @@ async function safelyAppendMessage(msg, senderName) {
         safeName = await getSafeNameForChat(chat);
         chatPaths = getChatPaths(chat?.id?._serialized, safeName);
         chatFilePath = chatPaths.historyFile;
+        const contact = await msg.getContact();
+        var senderPhone = phone(contact?.id?._serialized);
 
         // Ensure directories exist FIRST
         fs.mkdirSync(chatPaths.chatDir, { recursive: true });
@@ -1069,10 +1072,10 @@ async function safelyAppendMessage(msg, senderName) {
             console.warn(`[safelyAppendMessage] Message ${msgId} too long (${fullBody.length}), logging truncated body.`);
             // *** FIX HERE: Define shortBody *before* constructing lineToAppend ***
             const shortBody = `${replySnippet}${msg.body?.slice(0, 100) || '[מדיה]'}${msg.body?.length > 100 ? '...' : ''}`;
-            lineToAppend = `${localTimestamp} [ID: ${msgId}] ${senderName}: [הודעה ארוכה, התוכן קוצץ]\n${shortBody}\n`; // Use localTimestamp
+            lineToAppend = `${localTimestamp} [ID: ${msgId}] ${senderName} (${senderPhone}): [הודעה ארוכה, התוכן קוצץ]\n${shortBody}\n`; // Use localTimestamp
             // ********************************************************************
         } else {
-            lineToAppend = `${localTimestamp} [ID: ${msgId}] ${senderName}: ${fullBody}\n`; // Use localTimestamp here too
+            lineToAppend = `${localTimestamp} [ID: ${msgId}] ${senderName} (${senderPhone}): ${fullBody}\n`; // Use localTimestamp here too
         }
 
         await fsp.appendFile(chatFilePath, lineToAppend, 'utf8'); // ASYNC
@@ -1433,7 +1436,8 @@ client.on('message_create', async (msg) => {
 
             const timestampISO = new Date().toISOString(); // קבל חותמת זמן
             const messageBodyForLog = typeof msg.body === 'string' ? msg.body : (msg.type === 'sticker' ? '[סטיקר]' : '[מדיה או אובייקט]');
-            const line = `[${timestampISO}] [ID: ${msg?.id?._serialized}] פיתי: ${messageBodyForLog}\n`; // <-- הוסף חותמת זמן
+            const botPhoneLog = phone(myId);
+            const line = `[${timestampISO}] [ID: ${msg?.id?._serialized}] פיתי (${botPhoneLog}): ${messageBodyForLog}\n`; // <-- הוסף חותמת זמן
             fs.appendFileSync(chatFilePath, line, 'utf8'); // כתוב לקובץ
             console.log(`[message_create fromMe POST-APPEND] Appended outgoing msg to: '${chatFilePath}'`);
 
@@ -2405,7 +2409,8 @@ async function handleCreateFileAction(replyData, targetMsg, chatPaths) {
         // Log this bot message manually if needed (the reply wrapper might not catch media sends from client.sendMessage)
         // Example manual log:
         if (sentMediaMsg && sentMediaMsg.id && !writtenMessageIds.has(sentMediaMsg?.id?._serialized)) {
-            const line = `[ID: ${sentMediaMsg?.id?._serialized}] פיתי: [מדיה: ${media.mimetype || 'unknown type'}]\n`;
+            const botPhoneLog = phone(myId);
+            const line = `[ID: ${sentMediaMsg?.id?._serialized}] פיתי (${botPhoneLog}): [מדיה: ${media.mimetype || 'unknown type'}]\n`;
             fs.appendFileSync(chatPaths.historyFile, line, 'utf8');
             writtenMessageIds.add(sentMediaMsg?.id?._serialized);
             const normId = normalizeMsgId(sentMediaMsg?.id?._serialized);
@@ -3209,7 +3214,8 @@ async function executeDelayedAction(task) {
             if (sentMsg && sentMsg.id && sentMsg?.id?._serialized) {
                 const localTimestamp = getLocalTimestamp();
                 const messageContentLog = typeof content === 'string' ? content : (content instanceof MessageMedia ? `[מדיה: ${content.mimetype || 'unknown type'}]` : '[אובייקט]');
-                const logLine = `${localTimestamp} [ID: ${sentMsg?.id?._serialized}] פיתי: ${messageContentLog}\n`;
+                const botPhoneLog = phone(myId);
+                const logLine = `${localTimestamp} [ID: ${sentMsg?.id?._serialized}] פיתי (${botPhoneLog}): ${messageContentLog}\n`;
                 try {
                     fs.appendFileSync(chatPaths.historyFile, logLine, 'utf8');
                     writtenMessageIds.add(sentMsg?.id?._serialized); // Prevent re-logging
@@ -4625,7 +4631,7 @@ ${chatInfoPromptPart}
 \`\`\`
 השתמש בנתיב המוחלט לקובץ המצורף. אם המשתמש התייחס לקובץ שהוא שלח בהודעה מצוטטת או בהודעה האחרונה שלו, אתה יכול להשתמש בנתיב השמירה של הקובץ הזה.
 
-לפני שאתה עונה, קרא בעיון את כל ההודעות האחרונות שנשלחו בצ'אט. ההיסטוריה כוללת 50 הודעות אחרונות, כאשר כל הודעה כוללת מזהה ייחודי (ID) ותוכן ההודעה, בין אם נשלחה על ידי המשתמש ובין אם על ידי הבוט. הקפד לקרוא את כל ההקשר – שים לב לאיזו הודעה המשתמש מתייחס או מצטט, ולתוכן הכללי של השיחה. **אם יש הודעה מצוטטת, תמיד התייחס אליה קודם.** אם אין הודעה מצוטטת, התייחס להודעה האחרונה בהיסטוריה.
+לפני שאתה עונה, קרא בעיון את כל ההודעות האחרונות שנשלחו בצ'אט. ההיסטוריה כוללת 50 הודעות אחרונות, כאשר כל הודעה כוללת מזהה ייחודי (ID), שם השולח ומספר הטלפון שלו, ותוכן ההודעה, בין אם נשלחה על ידי המשתמש ובין אם על ידי הבוט. הקפד לקרוא את כל ההקשר – שים לב לאיזו הודעה המשתמש מתייחס או מצטט, ולתוכן הכללי של השיחה. **אם יש הודעה מצוטטת, תמיד התייחס אליה קודם.** אם אין הודעה מצוטטת, התייחס להודעה האחרונה בהיסטוריה.
 
 על סמך המידע הזה, נתח את ההודעה האחרונה של המשתמש.
 **תגובות מרובות (גם במצב רגיל):**
@@ -5618,7 +5624,7 @@ ${generatedFilesText.length > 0 ? generatedFilesText : "אין קבצים שנו
   //   "adminParticipantIds": ["ID1@c.us", "ID2@c.us"], // אופציונלי, לקידום מנהלים לאחר יצירה
 }
 \`\`\`
-שימי לב, וזה חשוב, אם מישהו מעצבן אותך, מציק לך, מפריע לך, או משהו, את תתני לו אזהרה שאת עומדת להעיף אותו, ואם הוא ימשיך להציק לך או לקלל אותך את תעיפי אותו, ברור? כל מי שיקלל אותך את תתני לון אזהרה ואם הוא לא יקשיב לך את תעיפי אותו מהקבוצה אל תעשי טעויות. את תעיפי ולא תתווכחי.
+שימי לב, וזה חשוב, אם מישהו מעצבן אותך, מציק לך, מפריע לך, או משהו, את תתני לו אזהרה שאת עומדת להעיף אותו, ואם הוא ימשיך להציק לך או לקלל אותך את תעיפי אותו, ברור? כל מי שיקלל אותך את תתני לו אזהרה ואם הוא לא יקשיב לך את תעיפי אותו מהקבוצה. אל תעשי טעויות. את תעיפי ולא תתווכחי. כאשר את מתבקשת להעיף מישהו, צייני תמיד את מספר הטלפון שלו במפורש.
 דוגמאות:
 -   בקשה: "פיתי תעיפי בבקשה את יוסי מהקבוצה הזאת" (כאשר ההודעה מצטטת הודעה של יוסי)
     הנחיה ל-Gemini: זהה את ה-ID של יוסי מההודעה המצוטטת.
@@ -7868,7 +7874,8 @@ allprojects {
             // !!! חשוב: לרשום את ההודעה *שנשלחה הרגע* כהודעת בוט !!!
             // (אם ה-wrapper של msg.reply לא עושה את זה אוטומטית עבור מדיה)
             if (sentMediaMsg && sentMediaMsg.id && !writtenMessageIds.has(sentMediaMsg?.id?._serialized)) {
-                const line = `[ID: ${sentMediaMsg?.id?._serialized}] פיתי: [מדיה: ${media.mimetype || 'unknown type'}]\n`;
+                const botPhoneLog = phone(myId);
+                const line = `[ID: ${sentMediaMsg?.id?._serialized}] פיתי (${botPhoneLog}): [מדיה: ${media.mimetype || 'unknown type'}]\n`;
                 fs.appendFileSync(chatPaths.historyFile, line, 'utf8');
                 writtenMessageIds.add(sentMediaMsg?.id?._serialized);
                 const normId = normalizeMsgId(sentMediaMsg?.id?._serialized);
@@ -9464,7 +9471,8 @@ ${finalHtmlPrompt}
         // --- Manual Logging for Sent Bot Media ---
         if (sentMediaMsg && sentMediaMsg.id && !writtenMessageIds.has(sentMediaMsg?.id?._serialized)) {
             const localTimestamp = getLocalTimestamp();
-            const logLine = `${localTimestamp} [ID: ${sentMediaMsg?.id?._serialized}] פיתי: [מדיה: ${media.mimetype || 'text/html'}]\n`;
+            const botPhoneLog = phone(myId);
+            const logLine = `${localTimestamp} [ID: ${sentMediaMsg?.id?._serialized}] פיתי (${botPhoneLog}): [מדיה: ${media.mimetype || 'text/html'}]\n`;
             try {
                 fs.appendFileSync(chatPaths.historyFile, logLine, 'utf8');
                 writtenMessageIds.add(sentMediaMsg?.id?._serialized);
@@ -10783,7 +10791,8 @@ async function sendInfoMenu(msg) {
             const safeName = await getSafeNameForChat(chat);
             const chatPaths = getChatPaths(chat?.id?._serialized, safeName);
             const localTimestamp = getLocalTimestamp();
-            const line = `${localTimestamp} [ID: ${normalizedId}] פיתי: [תפריט מידע]\n`; // או חלק מהטקסט
+            const botPhoneLog = phone(myId);
+            const line = `${localTimestamp} [ID: ${normalizedId}] פיתי (${botPhoneLog}): [תפריט מידע]\n`; // או חלק מהטקסט
             fs.appendFileSync(chatPaths.historyFile, line, 'utf8');
         } catch (logErr) {
             console.error("[sendInfoMenu] Error manually logging info menu message:", logErr);
@@ -10992,7 +11001,8 @@ client.on('message', async (msg) => {
             const messageContent = typeof text === 'string' ? text : (text instanceof MessageMedia ? `[מדיה: ${text.mimetype || 'unknown type'}]` : '[אובייקט]');
             // Construct the log line using the ID of the message *actually sent* by the bot
             const localTimestamp = getLocalTimestamp();
-            const line = `${localTimestamp} [ID: ${sentMsgIdForLog}] פיתי: ${messageContent}\n`;
+            const botPhoneLog = phone(myId);
+            const line = `${localTimestamp} [ID: ${sentMsgIdForLog}] פיתי (${botPhoneLog}): ${messageContent}\n`;
             console.log(`[msg.reply Phase 3] Attempting appendFileSync to: '${historyFilePathForLog}' with bot msg ID ${sentMsgIdForLog}`);
             fs.appendFileSync(historyFilePathForLog, line, 'utf8');
             // *** התיקון כאן ***
