@@ -1676,16 +1676,29 @@ async function handleGroupManagementAction(actionData, targetMsg) {
                 break;
             }
             case 'remove_participant':
-                await chatToManage.fetchMessages({limit:1});
+                await chatToManage.fetchMessages({ limit: 1 });
+                const currentParticipantIds = new Set(
+                    chatToManage.participants.map(p => p.id?._serialized)
+                );
+                let anyRemoved = false;
                 for (const pId of finalParticipantIds) {
+                    if (!currentParticipantIds.has(pId)) {
+                        console.warn(`[GroupMgmt] Participant ${pId} not found in group "${chatToManage.name}". Skipping removal.`);
+                        continue;
+                    }
                     try {
                         await chatToManage.removeParticipants([pId]);
                         await delay(500);
+                        anyRemoved = true;
                     } catch (err) {
                         console.error(`[GroupMgmt] Failed to remove ${pId}:`, err);
                     }
                 }
-                await targetMsg.reply(`✅ המשתתפ(ים) הוסרו בהצלחה מהקבוצה.`, undefined, { quotedMessageId: replyTo });
+                if (anyRemoved) {
+                    await targetMsg.reply(`✅ המשתתפ(ים) הוסרו בהצלחה מהקבוצה.`, undefined, { quotedMessageId: replyTo });
+                } else {
+                    await targetMsg.reply(`⚠️ לא נמצאו משתתפים מתאימים להסרה.`, undefined, { quotedMessageId: replyTo });
+                }
                 break;
             case 'add_participant':
                 const addResult = await chatToManage.addParticipants(finalParticipantIds, { autoSendInviteV4: true });
