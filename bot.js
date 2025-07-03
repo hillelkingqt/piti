@@ -153,7 +153,7 @@ function delay(ms) {
 
 function getRandomGeminiEndpoint(hasMedia = false) {
     const now = Date.now();
-    let model = "gemini-2.0-flash-thinking-exp";
+    let model = "gemini-2.5-pro";
     if (gemini2FlashCooldownUntil > now) {
         // Use fallback model while main model is on cooldown
         model = geminiFallbackModel || "gemini-2.5-flash-preview-05-20";
