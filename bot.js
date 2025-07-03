@@ -3353,6 +3353,14 @@ async function executeDelayedAction(task) {
                     await generateImage(actionData.imagePrompt, actionData.imageModel || 'stable-diffusion-xl-base-1.0', mockMsgForReply);
                 }
                 break;
+            case "svg_image":
+                if (actionData.svg_code && actionData.filename) {
+                    await handleSvgImageAction(actionData, mockMsgForReply, chatPaths);
+                } else {
+                    console.warn(`[DelayedExec] Missing svg_code or filename for delayed svg_image.`);
+                    await client.sendMessage(chatId, `פיתי\n\n⚠️ לא הצלחתי ליצור את התמונה המתוזמנת מקוד SVG.`);
+                }
+                break;
             case "create_file":
                 if (actionData.fileType && actionData.filename && typeof actionData.fileContent !== 'undefined') {
                     // handleCreateFileAction needs action data, the msg obj to reply to, and paths
@@ -4075,6 +4083,50 @@ async function handleYoutubeDownloadAction(replyData, targetMsg) {
     } catch (error) {
         console.error("❌ [handleYoutubeDownloadAction] Error:", error);
         await targetMsg.reply("❌ אירעה שגיאה בהורדת הסרטון מיוטיוב.");
+    }
+}
+
+// 16. Create Image From SVG Action
+async function handleSvgImageAction(replyData, targetMsg, chatPaths) {
+    const targetChatId = targetMsg?.id?.remote;
+    const replyTo = replyData.replyTo || targetMsg?.id?._serialized;
+    const svgCode = replyData.svg_code;
+    const fileBase = (replyData.filename || `svg_image_${Date.now()}`).replace(/[^a-zA-Z0-9א-ת_-]/g, '_');
+
+    if (!svgCode) {
+        await targetMsg.reply("⚠️ לא סופק קוד SVG ליצירת התמונה.", undefined, { quotedMessageId: replyTo });
+        return;
+    }
+
+    fs.mkdirSync(chatPaths.filesDir, { recursive: true });
+    const svgPath = path.join(chatPaths.filesDir, `${fileBase}.svg`);
+    const pngPath = path.join(chatPaths.filesDir, `${fileBase}.png`);
+
+    try {
+        fs.writeFileSync(svgPath, svgCode, 'utf8');
+        const pngBuffer = await sharp(Buffer.from(svgCode)).png().toBuffer();
+        fs.writeFileSync(pngPath, pngBuffer);
+
+        const imageMedia = MessageMedia.fromFilePath(pngPath);
+        const svgMedia = MessageMedia.fromFilePath(svgPath);
+        const caption = replyData.message || `פיתי\n\nהנה התמונה שיצרתי מ-SVG:`;
+
+        await client.sendMessage(targetChatId, imageMedia, { caption, quotedMessageId: replyTo });
+        await client.sendMessage(targetChatId, svgMedia, { quotedMessageId: replyTo });
+
+        const indexPath = chatPaths.generatedFilesIndex;
+        let indexData = [];
+        if (fs.existsSync(indexPath)) {
+            try { indexData = JSON.parse(fs.readFileSync(indexPath, 'utf8')); } catch { indexData = []; }
+        }
+        const ts = new Date().toISOString();
+        indexData.push({ timestamp: ts, originalMessageId: replyTo, generatedFilePath: svgPath, filename: path.basename(svgPath), description: 'SVG source', type: 'image/svg+xml' });
+        indexData.push({ timestamp: ts, originalMessageId: replyTo, generatedFilePath: pngPath, filename: path.basename(pngPath), description: 'Image from SVG', type: 'image/png' });
+        fs.writeFileSync(indexPath, JSON.stringify(indexData, null, 2), 'utf8');
+
+    } catch (err) {
+        console.error("❌ [handleSvgImageAction] Error:", err);
+        await targetMsg.reply("פיתי\n\nשגיאה ביצירת התמונה מ-SVG.", undefined, { quotedMessageId: replyTo });
     }
 }
 
@@ -8276,6 +8328,30 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
         return;
     }
 
+    if (jsonResponse.action === "svg_image") {
+        if (jsonResponse.svg_code && jsonResponse.filename) {
+            const chat = await msg.getChat();
+            const safeName = await getSafeNameForChat(chat);
+            const chatPaths = getChatPaths(chat?.id?._serialized, safeName);
+            await handleSvgImageAction(jsonResponse, msg, chatPaths);
+        } else {
+            await msg.reply("פיתי\n\nשגיאה: חסר קוד SVG או שם קובץ.");
+        }
+        return;
+    }
+
+    if (jsonResponse.action === "svg_image") {
+        if (jsonResponse.svg_code && jsonResponse.filename) {
+            const chat = await msg.getChat();
+            const safeName = await getSafeNameForChat(chat);
+            const chatPaths = getChatPaths(chat?.id?._serialized, safeName);
+            await handleSvgImageAction(jsonResponse, msg, chatPaths);
+        } else {
+            await msg.reply("פיתי\n\nשגיאה: חסר קוד SVG או שם קובץ.");
+        }
+        return;
+    }
+
     if (jsonResponse.action === "image") {
         const loadingMessageText = jsonResponse.message || `פיתי\n\nיוצר תמונה...`;
         // הודעת טעינה תישלח אוטומטית על ידי פונקציית יצירת התמונה
@@ -8516,6 +8592,15 @@ ${internalLinks.map((l, i) => `${i + 1}. ${l}`).join('\n')}
                             repliesSentCount++;
                         } else {
                             console.warn(`[Multi-Reply IMAGE] Missing imagePrompt for ${replyToId}`);
+                        }
+                        break;
+                    case "svg_image":
+                        if (reply.svg_code && reply.filename) {
+                            console.log(`[Multi-Reply SVG_IMAGE] Generating from SVG for ${replyToId}`);
+                            await handleSvgImageAction(reply, targetMsg, chatPaths);
+                            repliesSentCount++;
+                        } else {
+                            console.warn(`[Multi-Reply SVG_IMAGE] Missing svg_code or filename for ${replyToId}`);
                         }
                         break;
                     case "delete_memory":
@@ -11284,6 +11369,14 @@ console.log(`[message_create OWNER CHECK] Owner command detected from ${original
                                         // await sendActionResult(msg, imageData, triggeredActionData, chatPathsForLog);
                                     }
                                     break;
+                                case "svg_image":
+                                    if (triggeredActionData.svg_code && triggeredActionData.filename) {
+                                        await handleSvgImageAction(triggeredActionData, msg, chatPathsForLog);
+                                    } else {
+                                        console.warn(`[Trigger Execution] svg_image action missing svg_code or filename.`);
+                                        await msg.reply("פיתי\n\n⚠️ טריגר SVG חסר מידע נחוץ.");
+                                    }
+                                    break;
                                 case "group_management": // אם תרצה שטריגר יפעיל ניהול קבוצה
                                     if (triggeredActionData.subAction) {
                                         console.log(`[Trigger Execution GROUP_MGMT] SubAction: ${triggeredActionData.subAction}`);
@@ -11813,7 +11906,8 @@ module.exports = {
     apiKeyManager,          // If helpers use it directly
     IMAGE_MODEL_ENDPOINTS,  // Constants
     CLOUDFLARE_API_TOKEN,
-    BASE_IMAGE_GENERATION_API_ENDPOINT
+    BASE_IMAGE_GENERATION_API_ENDPOINT,
+    handleSvgImageAction
     // Add any other functions/variables that generateDocument or its children might depend on
     // For example, if generateImageAndGetBuffer uses client.sendMessage for errors, client is needed.
 };
