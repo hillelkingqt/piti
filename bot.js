@@ -129,6 +129,8 @@ const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
 const habitTracking = new Map();
 const STOPPED_CHATS_PATH = path.join(__dirname, 'stoppedChats.json');
 let stoppedChats = new Set();
+const ALLOWED_USERS_PATH = path.join(__dirname, 'allowedUsers.json');
+let allowedNumbers = new Set();
 const YOUR_GEMINI_API_KEY = apiKeyManager.getRandomApiKey(); // <<--- השתמש במנהל המפתחות הקיים שלך!
 const GRADIO_SPACE_URL = "ameerazam08/Gemini-Image-Edit"; // שם ה-Space ב-Hugging Face
 
@@ -145,6 +147,17 @@ if (fs.existsSync(STOPPED_CHATS_PATH)) {
 }
 function saveStoppedChats() {
     fs.writeFileSync(STOPPED_CHATS_PATH, JSON.stringify([...stoppedChats], null, 2));
+}
+
+if (fs.existsSync(ALLOWED_USERS_PATH)) {
+    try {
+        allowedNumbers = new Set(JSON.parse(fs.readFileSync(ALLOWED_USERS_PATH, 'utf8')));
+    } catch (e) {
+        console.error("שגיאה בקריאת allowedUsers.json", e);
+    }
+}
+function saveAllowedUsers() {
+    fs.writeFileSync(ALLOWED_USERS_PATH, JSON.stringify([...allowedNumbers], null, 2));
 }
 
 function delay(ms) {
@@ -4416,7 +4429,7 @@ async function handleMessage(msg, incoming, quotedMedia = null, contextMediaArra
     const senderIdForCheck = msg.fromMe ? myId : (msg.author || msg.from);
     const senderBase = getBaseIdForOwnerCheck(senderIdForCheck);
     const ownerBase = getBaseIdForOwnerCheck(myId);
-    if (stoppedChats.has(chatId) && senderBase !== ownerBase) {
+    if (stoppedChats.has(chatId) && senderBase !== ownerBase && !allowedNumbers.has(senderBase.split('@')[0])) {
         console.log("⛔️ Bot is stopped in this chat. Ignoring message from non-owner.");
         return;
     }
@@ -10821,6 +10834,8 @@ async function sendInfoMenu(msg) {
 *   \`/nosilent\` (*) - כיבוי "מצב שקט" בצ'אט הנוכחי.
 *   \`/break <דקות>\` (*) - הפסקה גלובלית של הבוט למספר דקות.
 *   \`/liststopped\` (*) - הצגת רשימת הצ'אטים שבהם הבוט מושבת.
+*   \`/allow\` (*) - תיוג משתמש כדי להוסיף אותו לרשימת המורשים להשיב גם בקבוצות חסומות.
+*   \`/allownot\` (*) - תיוג משתמש כדי להסירו מרשימת המורשים.
 *   \`/emojis <אימוג'י>\` (*) - הגדרת אימוג'י לתגובה אוטומטית לכל הודעה (מלבד הודעות בוט).
 *   \`/emojis off\` (*) - כיבוי תגובה אוטומטית עם אימוג'י.
 
@@ -11214,6 +11229,7 @@ client.on('message_create', async (msg) => {
     const restrictedPrefixes = [
         '/startbot', '/stopbot', '/stop', '/unstop', '/block', '/unblock',
         '/restart', '/silent', '/nosilent', '/break', '/liststopped',
+        '/allow', '/allownot',
         '/emojis', '/shutdown', '/info'
     ];
     if (
@@ -11370,6 +11386,43 @@ console.log(`[message_create OWNER CHECK] Owner command detected from ${original
                         const stoppedList = [...stoppedChats].join('\n') || 'None';
                         await msg.reply(`פיתי\n\nStopped Chats:\n${stoppedList}`);
                         console.log(`[COMMAND /liststopped] Listed stopped chats.`);
+                        break;
+                    case "/allow":
+                        if (msg.mentionedIds && msg.mentionedIds.length > 0) {
+                            const added = [];
+                            for (const mid of msg.mentionedIds) {
+                                const base = getBaseId(mid);
+                                if (base) {
+                                    const num = base.split('@')[0];
+                                    allowedNumbers.add(num);
+                                    added.push(num);
+                                }
+                            }
+                            saveAllowedUsers();
+                            await msg.reply(`פיתי\n\nהמספרים הבאים נוספו לרשימת המורשים: ${added.join(', ')}`);
+                            console.log(`[COMMAND /allow] Added allowed numbers: ${added.join(', ')}.`);
+                        } else {
+                            await msg.reply("פיתי\n\nאנא תייג משתמש אחד לפחות להפעלת /allow.");
+                        }
+                        break;
+                    case "/allownot":
+                        if (msg.mentionedIds && msg.mentionedIds.length > 0) {
+                            const removed = [];
+                            for (const mid of msg.mentionedIds) {
+                                const base = getBaseId(mid);
+                                if (base) {
+                                    const num = base.split('@')[0];
+                                    if (allowedNumbers.delete(num)) {
+                                        removed.push(num);
+                                    }
+                                }
+                            }
+                            saveAllowedUsers();
+                            await msg.reply(`פיתי\n\nהמספרים הבאים הוסרו מרשימת המורשים: ${removed.join(', ')}`);
+                            console.log(`[COMMAND /allownot] Removed allowed numbers: ${removed.join(', ')}.`);
+                        } else {
+                            await msg.reply("פיתי\n\nאנא תייג משתמש אחד לפחות להפעלת /allownot.");
+                        }
                         break;
                     // --- Commands with arguments or requiring quotes go below ---
                     default:
@@ -11681,7 +11734,7 @@ console.log(`[message_create OWNER CHECK] Owner command detected from ${original
         // console.log(`[message_create STATUS 1] Bot is on a global break. Ignoring msg ${msg?.id?._serialized}.`);
         return;
     }
-    if (stoppedChats.has(chatId) && messageSenderBaseId !== ownerBaseId) {
+    if (stoppedChats.has(chatId) && messageSenderBaseId !== ownerBaseId && !allowedNumbers.has(contactNumber)) {
         // console.log(`[message_create STATUS 2] Bot stopped for chat ${chatId}. Ignoring msg ${msg?.id?._serialized}.`);
         return;
     }
