@@ -7187,10 +7187,10 @@ allprojects {
         if (!recoveryAttemptSuccess || jsonResponse === null) { // בדוק אם השחזור נכשל או שהתוצאה אופסה
             console.log("⚠️ לא ניתן לפענח כ-JSON. מנסה לחלץ כטקסט רגיל אם רלוונטי.");
             // Regex משופר לחילוץ replyTo ו-message, גמיש יותר לגבי רווחים ושורות חדשות
-            const replyToMatch = responseText.match(/"replyTo"\s*:\s*"([^"]*)"/);
-            const actionMatch = responseText.match(/"action"\s*:\s*"([^"]*)"/);
+            const replyToMatch = responseText.match(/["']replyTo["']\s*:\s*["']([^"']*)["']/);
+            const actionMatch = responseText.match(/["']action["']\s*:\s*["']([^"']*)["']/);
             // Regex זה מנסה לתפוס את כל התוכן בין "message": " לבין " בסוף השורה או לפני הפסיק הבא, כולל שורות חדשות
-            const messageMatch = responseText.match(/"message"\s*:\s*"([\s\S]*?)"/); // Simpler, less strict - might grab too much if followed by junk
+            const messageMatch = responseText.match(/["']message["']\s*:\s*["']([\s\S]*?)["']/); // Simpler, less strict - might grab too much if followed by junk
             if (actionMatch && actionMatch[1] === "text" && messageMatch && messageMatch[1]) {
                 console.log("ℹ️ זוהה כניסיון לשלוח text. חולץ טקסט הודעה מ-JSON שבור.");
                 jsonResponse = {
@@ -11388,9 +11388,19 @@ console.log(`[message_create OWNER CHECK] Owner command detected from ${original
                         console.log(`[COMMAND /liststopped] Listed stopped chats.`);
                         break;
                     case "/allow":
-                        if (msg.mentionedIds && msg.mentionedIds.length > 0) {
+                        let targets = msg.mentionedIds ? [...msg.mentionedIds] : [];
+                        if (targets.length === 0 && msg.hasQuotedMsg) {
+                            try {
+                                const quotedMsg = await msg.getQuotedMessage();
+                                if (quotedMsg) {
+                                    const qAuthor = quotedMsg.author || quotedMsg.from;
+                                    if (qAuthor) targets.push(qAuthor);
+                                }
+                            } catch (e) { console.error("[COMMAND /allow] Failed to get quoted message", e); }
+                        }
+                        if (targets.length > 0) {
                             const added = [];
-                            for (const mid of msg.mentionedIds) {
+                            for (const mid of targets) {
                                 const base = getBaseId(mid);
                                 if (base) {
                                     const num = base.split('@')[0];
@@ -11406,9 +11416,19 @@ console.log(`[message_create OWNER CHECK] Owner command detected from ${original
                         }
                         break;
                     case "/allownot":
-                        if (msg.mentionedIds && msg.mentionedIds.length > 0) {
+                        let removeTargets = msg.mentionedIds ? [...msg.mentionedIds] : [];
+                        if (removeTargets.length === 0 && msg.hasQuotedMsg) {
+                            try {
+                                const quotedMsg = await msg.getQuotedMessage();
+                                if (quotedMsg) {
+                                    const qAuthor = quotedMsg.author || quotedMsg.from;
+                                    if (qAuthor) removeTargets.push(qAuthor);
+                                }
+                            } catch (e) { console.error("[COMMAND /allownot] Failed to get quoted message", e); }
+                        }
+                        if (removeTargets.length > 0) {
                             const removed = [];
-                            for (const mid of msg.mentionedIds) {
+                            for (const mid of removeTargets) {
                                 const base = getBaseId(mid);
                                 if (base) {
                                     const num = base.split('@')[0];
