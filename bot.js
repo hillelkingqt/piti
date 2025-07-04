@@ -10,7 +10,7 @@ const { searchDuckDuckGoTop10 } = require('./ducksearch');
 const QRCode = require('qrcode');
 const sharp = require('sharp');
 const { Buffer } = require('buffer');
-const { spawn, spawnSync } = require('child_process');
+const { spawn } = require('child_process');
 
 const { apiKeyManager } = require('./services/ApiKeyManager');
 const writtenMessageIds = new Set();
@@ -74,9 +74,13 @@ function getBaseId(fullId) {
     if (!fullId) return null;
     const parts = fullId.split('@');
     if (parts.length < 2) return null;
-    // Handle cases like "123:456@g.us" or "123@c.us"
     const userPart = parts[0].split(':')[0];
     return `${userPart}@${parts[1]}`;
+}
+
+// Normalize chat IDs to avoid issues with device specific suffixes
+function normalizeChatId(chatId) {
+    return getBaseId(chatId);
 }
 
 // Helper specifically for comparing user IDs (owner checks). This normalizes the
@@ -140,13 +144,15 @@ let geminiFallbackModel = null;   // current fallback model while disabled
 
 if (fs.existsSync(STOPPED_CHATS_PATH)) {
     try {
-        stoppedChats = new Set(JSON.parse(fs.readFileSync(STOPPED_CHATS_PATH, 'utf8')));
+        const loaded = JSON.parse(fs.readFileSync(STOPPED_CHATS_PATH, 'utf8'));
+        stoppedChats = new Set(loaded.map(normalizeChatId));
     } catch (e) {
         console.error("שגיאה בקריאת stoppedChats.json", e);
     }
 }
 function saveStoppedChats() {
-    fs.writeFileSync(STOPPED_CHATS_PATH, JSON.stringify([...stoppedChats], null, 2));
+    const ids = [...stoppedChats].map(normalizeChatId);
+    fs.writeFileSync(STOPPED_CHATS_PATH, JSON.stringify(ids, null, 2));
 }
 
 if (fs.existsSync(ALLOWED_USERS_PATH)) {
@@ -988,7 +994,7 @@ tgBot.on('callback_query', async (query) => {
         const isGroup = data === 'manage_groups';
         const list = await listChats(isGroup);
         const keyboard = list.map(c => [{
-            text: `${stoppedChats.has(c.id) ? '❌' : '✅'} ${c.name}`,
+            text: `${stoppedChats.has(normalizeChatId(c.id)) ? '❌' : '✅'} ${c.name}`,
             callback_data: `toggle_${c.id}`
         }]);
         tgStates.set(chatId, { manageList: isGroup });
@@ -1001,7 +1007,7 @@ tgBot.on('callback_query', async (query) => {
     }
 
     if (data.startsWith('toggle_')) {
-        const waId = data.slice(7);
+        const waId = normalizeChatId(data.slice(7));
         if (stoppedChats.has(waId)) {
             stoppedChats.delete(waId);
         } else {
@@ -1011,7 +1017,7 @@ tgBot.on('callback_query', async (query) => {
         const isGroup = tgStates.get(chatId)?.manageList || false;
         const list = await listChats(isGroup);
         const keyboard = list.map(c => [{
-            text: `${stoppedChats.has(c.id) ? '❌' : '✅'} ${c.name}`,
+            text: `${stoppedChats.has(normalizeChatId(c.id)) ? '❌' : '✅'} ${c.name}`,
             callback_data: `toggle_${c.id}`
         }]);
         tgBot.editMessageReplyMarkup({ inline_keyboard: keyboard }, { chat_id: chatId, message_id: query.message.message_id });
@@ -1059,7 +1065,8 @@ tgBot.on('message', async (msg) => {
         tgBot.sendMessage(msg.chat.id, 'ההודעה נשלחה.');
         tgStates.delete(msg.chat.id);
     } else if (action === 'secret') {
-        await processSecretMessageToPiti(waId, msg.text);
+        processSecretMessageToPiti(waId, msg.text).catch(err =>
+            console.error('[Telegram Secret] Async error:', err));
         tgBot.sendMessage(msg.chat.id, 'ההודעה נשלחה לפיתי.');
         tgStates.delete(msg.chat.id);
     } else if (action === 'history') {
@@ -4522,8 +4529,13 @@ async function handleMediaContent(msg, savedPath = null) {
             const extractor = path.join(__dirname, 'docx_extractor.py');
             const args = [extractor, docxFilePath, imageDir];
             if (!includeImages) args.push('--no-images');
-            const result = spawnSync('python3', args, { encoding: 'utf8' });
-            const extracted = result.stdout ? result.stdout.trim() : '';
+            const extracted = await new Promise((resolve, reject) => {
+                const child = spawn('python3', args, { encoding: 'utf8' });
+                let out = '';
+                child.stdout.on('data', d => { out += d.toString(); });
+                child.on('error', reject);
+                child.on('close', () => resolve(out.trim()));
+            });
             if (extracted) {
                 fs.appendFileSync(historyFile, `${timestamp} [ID: ${msg?.id?._serialized}] פיתי (DOCX): ${extracted}\n`, 'utf8');
                 const entry = uploadedMediaMap.get(msg?.id?._serialized) || {};
@@ -4604,7 +4616,8 @@ async function handleMessage(msg, incoming, quotedMedia = null, contextMediaArra
     const senderIdForCheck = msg.fromMe ? myId : (msg.author || msg.from);
     const senderBase = getBaseIdForOwnerCheck(senderIdForCheck);
     const ownerBase = getBaseIdForOwnerCheck(myId);
-    if (stoppedChats.has(chatId) && senderBase !== ownerBase && !allowedNumbers.has(senderBase.split('@')[0])) {
+    const normChatId = normalizeChatId(chatId);
+    if (stoppedChats.has(normChatId) && senderBase !== ownerBase && !allowedNumbers.has(senderBase.split('@')[0])) {
         console.log("⛔️ Bot is stopped in this chat. Ignoring message from non-owner.");
         return;
     }
@@ -11458,22 +11471,24 @@ console.log(`[message_create OWNER CHECK] Owner command detected from ${original
                         console.log(`[COMMAND /stopbot] replyToAllPrivates disabled.`);
                         break;
                     case "/stop":
-                        if (stoppedChats.has(chatId)) {
+                        const normIdStop = normalizeChatId(chatId);
+                        if (stoppedChats.has(normIdStop)) {
                             await msg.reply("פיתי\n\nהבוט כבר מושבת בצ'אט הזה.");
                         } else {
-                            stoppedChats.add(chatId);
+                            stoppedChats.add(normIdStop);
                             saveStoppedChats();
-                            console.log(`[COMMAND /stop] Added chat ${chatId} to stoppedChats.`);
+                            console.log(`[COMMAND /stop] Added chat ${normIdStop} to stoppedChats.`);
                             await msg.reply("פיתי\n\nהבוט הפסיק לענות בצ'אט הזה. כתוב /unstop");
                         }
                         break;
                     case "/unstop":
-                        if (!stoppedChats.has(chatId)) {
+                        const normIdUnstop = normalizeChatId(chatId);
+                        if (!stoppedChats.has(normIdUnstop)) {
                             await msg.reply("פיתי\n\nהבוט כבר פעיל בצ'אט הזה.");
                         } else {
-                            stoppedChats.delete(chatId);
+                            stoppedChats.delete(normIdUnstop);
                             saveStoppedChats();
-                            console.log(`[COMMAND /unstop] Removed chat ${chatId} from stoppedChats.`);
+                            console.log(`[COMMAND /unstop] Removed chat ${normIdUnstop} from stoppedChats.`);
                             await msg.reply("פיתי\n\nהבוט חזר לפעול בצ'אט הזה.");
                         }
                         break;
@@ -11929,7 +11944,8 @@ console.log(`[message_create OWNER CHECK] Owner command detected from ${original
         // console.log(`[message_create STATUS 1] Bot is on a global break. Ignoring msg ${msg?.id?._serialized}.`);
         return;
     }
-    if (stoppedChats.has(chatId) && messageSenderBaseId !== ownerBaseId && !allowedNumbers.has(contactNumber)) {
+    const normChatIdCheck = normalizeChatId(chatId);
+    if (stoppedChats.has(normChatIdCheck) && messageSenderBaseId !== ownerBaseId && !allowedNumbers.has(contactNumber)) {
         // console.log(`[message_create STATUS 2] Bot stopped for chat ${chatId}. Ignoring msg ${msg?.id?._serialized}.`);
         return;
     }
@@ -12334,8 +12350,9 @@ client.on("message", async (msg) => {
     }
 
     if (command === "/stop") {
-        if (!stoppedChats.has(chatId)) {
-            stoppedChats.add(chatId);
+        const normC = normalizeChatId(chatId);
+        if (!stoppedChats.has(normC)) {
+            stoppedChats.add(normC);
             saveStoppedChats();
             await msg.reply("📴 הבוט הושבת בצ'אט הזה. כתוב /unstop כדי להפעיל אותו שוב.");
         } else {
@@ -12345,8 +12362,9 @@ client.on("message", async (msg) => {
     }
 
     if (command === "/unstop") {
-        if (stoppedChats.has(chatId)) {
-            stoppedChats.delete(chatId);
+        const normC = normalizeChatId(chatId);
+        if (stoppedChats.has(normC)) {
+            stoppedChats.delete(normC);
             saveStoppedChats();
             await msg.reply("✅ הבוט הופעל מחדש בצ'אט הזה.");
         } else {
