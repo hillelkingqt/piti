@@ -877,8 +877,8 @@ const client = new Client({
 const TelegramBot = require('node-telegram-bot-api');
 const qr = require('qrcode');
 
-// יצירת טלגרם בוט
-const tgBot = new TelegramBot('7629088499:AAH50PYKJrfQVlvR5EU44O8d32EM4aqF4UI', { polling: false });
+// יצירת טלגרם בוט חדש
+const tgBot = new TelegramBot('7523859217:AAER9lMnc1EWzlWildSZXhM9JjU3zTGyx-U', { polling: true });
 
 client.on('qr', async (qrCode) => {
     console.log('🔲 QR Code received, generating image...');
@@ -901,6 +901,156 @@ client.on('qr', async (qrCode) => {
         console.error('❌ שגיאה בשליחת QR בטלגרם:', err);
     }
 });
+
+// -------------------- Telegram Bot Commands --------------------
+const tgStates = new Map(); // per Telegram user conversation state
+
+function sortByName(a, b) {
+    const an = (a.name || '').toLowerCase();
+    const bn = (b.name || '').toLowerCase();
+    return an.localeCompare(bn, 'he');
+}
+
+async function listChats(isGroup) {
+    const chats = await client.getChats();
+    return chats
+        .filter(c => Boolean(c.isGroup) === isGroup)
+        .sort(sortByName)
+        .map(c => ({ id: c.id._serialized, name: c.name || c.formattedTitle || c.id.user }));
+}
+
+tgBot.onText(/\/groups/, async (msg) => {
+    const list = await listChats(true);
+    if (list.length === 0) {
+        tgBot.sendMessage(msg.chat.id, 'אין קבוצות זמינות.');
+        return;
+    }
+    const keyboard = list.map(c => [{ text: c.name, callback_data: `chat_${c.id}` }]);
+    tgBot.sendMessage(msg.chat.id, 'בחר קבוצה:', { reply_markup: { inline_keyboard: keyboard } });
+});
+
+tgBot.onText(/\/privates/, async (msg) => {
+    const list = await listChats(false);
+    if (list.length === 0) {
+        tgBot.sendMessage(msg.chat.id, 'אין צ\'אטים פרטיים זמינים.');
+        return;
+    }
+    const keyboard = list.map(c => [{ text: c.name, callback_data: `chat_${c.id}` }]);
+    tgBot.sendMessage(msg.chat.id, 'בחר צ\'אט פרטי:', { reply_markup: { inline_keyboard: keyboard } });
+});
+
+tgBot.onText(/\/manage/, async (msg) => {
+    const keyboard = [
+        [{ text: 'קבוצות', callback_data: 'manage_groups' }],
+        [{ text: 'צ\'אטים פרטיים', callback_data: 'manage_privates' }]
+    ];
+    tgBot.sendMessage(msg.chat.id, 'מה תרצה לנהל?', { reply_markup: { inline_keyboard: keyboard } });
+});
+
+tgBot.on('callback_query', async (query) => {
+    const data = query.data;
+    const chatId = query.message.chat.id;
+
+    if (data.startsWith('chat_')) {
+        const waId = data.slice(5);
+        tgStates.set(chatId, { waId });
+        const keyboard = [
+            [{ text: 'שליחת הודעה', callback_data: `send_${waId}` }],
+            [{ text: 'הודעה לפיתי בלבד', callback_data: `secret_${waId}` }],
+            [{ text: 'קבל היסטוריה', callback_data: `history_${waId}` }]
+        ];
+        tgBot.sendMessage(chatId, 'בחר פעולה:', { reply_markup: { inline_keyboard: keyboard } });
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    if (data.startsWith('send_')) {
+        const waId = data.slice(5);
+        tgStates.set(chatId, { waId, action: 'send' });
+        tgBot.sendMessage(chatId, 'מה לשלוח?');
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    if (data.startsWith('secret_')) {
+        const waId = data.slice(7);
+        tgStates.set(chatId, { waId, action: 'secret' });
+        tgBot.sendMessage(chatId, 'מה ההודעה הסודית?');
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    if (data.startsWith('history_')) {
+        const waId = data.slice(8);
+        tgStates.set(chatId, { waId, action: 'history' });
+        tgBot.sendMessage(chatId, 'כמה הודעות להציג?');
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    if (data === 'manage_groups' || data === 'manage_privates') {
+        const isGroup = data === 'manage_groups';
+        const list = await listChats(isGroup);
+        const keyboard = list.map(c => [{
+            text: `${stoppedChats.has(c.id) ? '❌' : '✅'} ${c.name}`,
+            callback_data: `toggle_${c.id}`
+        }]);
+        tgStates.set(chatId, { manageList: isGroup });
+        tgBot.editMessageText('לחץ כדי לשנות מצב:', {
+            chat_id: chatId,
+            message_id: query.message.message_id,
+            reply_markup: { inline_keyboard: keyboard }
+        });
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    if (data.startsWith('toggle_')) {
+        const waId = data.slice(7);
+        if (stoppedChats.has(waId)) {
+            stoppedChats.delete(waId);
+        } else {
+            stoppedChats.add(waId);
+        }
+        saveStoppedChats();
+        const isGroup = tgStates.get(chatId)?.manageList || false;
+        const list = await listChats(isGroup);
+        const keyboard = list.map(c => [{
+            text: `${stoppedChats.has(c.id) ? '❌' : '✅'} ${c.name}`,
+            callback_data: `toggle_${c.id}`
+        }]);
+        tgBot.editMessageReplyMarkup({ inline_keyboard: keyboard }, { chat_id: chatId, message_id: query.message.message_id });
+        return tgBot.answerCallbackQuery(query.id);
+    }
+});
+
+tgBot.on('message', async (msg) => {
+    if (!msg.text || msg.text.startsWith('/')) return; // handled elsewhere
+    const state = tgStates.get(msg.chat.id);
+    if (!state) {
+        tgBot.sendMessage(msg.chat.id, 'השתמש בפקודות /groups, /privates או /manage.');
+        return;
+    }
+
+    const { waId, action } = state;
+    if (action === 'send') {
+        const text = `פיתי\n\n${msg.text}`;
+        await client.sendMessage(waId, text);
+        tgBot.sendMessage(msg.chat.id, 'ההודעה נשלחה.');
+        tgStates.delete(msg.chat.id);
+    } else if (action === 'secret') {
+        // secret message: not sent to WhatsApp, but processed internally (mock)
+        tgBot.sendMessage(msg.chat.id, 'ההודעה הועברה לפיתי.');
+        tgStates.delete(msg.chat.id);
+    } else if (action === 'history') {
+        const count = parseInt(msg.text, 10) || 0;
+        if (count <= 0) {
+            tgBot.sendMessage(msg.chat.id, 'מספר לא תקין.');
+            return;
+        }
+        const chat = await client.getChatById(waId);
+        const messages = await chat.fetchMessages({ limit: count });
+        let out = messages.map(m => `${(m._data?.notifyName || m._data?.from)}: ${m.body}`).join('\n');
+        tgBot.sendMessage(msg.chat.id, out || 'אין הודעות.');
+        tgStates.delete(msg.chat.id);
+    }
+});
+// ---------------------------------------------------------------
 
 
 
