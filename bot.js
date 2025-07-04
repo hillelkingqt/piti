@@ -877,8 +877,163 @@ const client = new Client({
 const TelegramBot = require('node-telegram-bot-api');
 const qr = require('qrcode');
 
-// יצירת טלגרם בוט
-const tgBot = new TelegramBot('7629088499:AAH50PYKJrfQVlvR5EU44O8d32EM4aqF4UI', { polling: false });
+// יצירת טלגרם בוט (polling enabled)
+const tgBot = new TelegramBot('7629088499:AAH50PYKJrfQVlvR5EU44O8d32EM4aqF4UI', { polling: true });
+const TELEGRAM_OWNER_ID = 7547836101;
+
+// State for interactive telegram commands
+const tgSessions = new Map();
+
+function tgCheckOwner(msg) {
+    if (msg.from?.id !== TELEGRAM_OWNER_ID) {
+        tgBot.sendMessage(msg.chat.id, '⛔ הרשאה נדרשת.');
+        return false;
+    }
+    return true;
+}
+
+tgBot.onText(/\/groups/, async (msg) => {
+    if (!tgCheckOwner(msg)) return;
+    const chats = await client.getChats();
+    const groups = chats.filter(c => c.isGroup);
+    groups.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'he'));
+    const keyboard = groups.map(g => [{ text: g.name || g.id._serialized, callback_data: `chat:${g.id._serialized}` }]);
+    if (keyboard.length === 0) {
+        tgBot.sendMessage(msg.chat.id, 'אין קבוצות זמינות.');
+        return;
+    }
+    tgBot.sendMessage(msg.chat.id, 'בחר קבוצה:', { reply_markup: { inline_keyboard: keyboard } });
+});
+
+tgBot.onText(/\/privates/, async (msg) => {
+    if (!tgCheckOwner(msg)) return;
+    const chats = await client.getChats();
+    const privates = chats.filter(c => !c.isGroup);
+    privates.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'he'));
+    const keyboard = privates.map(c => [{ text: c.name || c.id._serialized, callback_data: `chat:${c.id._serialized}` }]);
+    if (keyboard.length === 0) {
+        tgBot.sendMessage(msg.chat.id, 'אין צ\'אטים פרטיים.');
+        return;
+    }
+    tgBot.sendMessage(msg.chat.id, 'בחר צ\'אט:', { reply_markup: { inline_keyboard: keyboard } });
+});
+
+tgBot.onText(/\/manageStop/, async (msg) => {
+    if (!tgCheckOwner(msg)) return;
+    const keyboard = [
+        [{ text: 'קבוצות', callback_data: 'stoplist:groups' }],
+        [{ text: 'צ\'אטים פרטיים', callback_data: 'stoplist:privates' }]
+    ];
+    tgBot.sendMessage(msg.chat.id, 'בחר רשימה לניהול:', { reply_markup: { inline_keyboard: keyboard } });
+});
+
+tgBot.on('callback_query', async (query) => {
+    const data = query.data || '';
+    if (query.from.id !== TELEGRAM_OWNER_ID) {
+        tgBot.answerCallbackQuery(query.id, { text: '⛔' });
+        return;
+    }
+
+    if (data.startsWith('chat:')) {
+        const chatId = data.slice(5);
+        tgSessions.set(query.from.id, { chatId });
+        const keyboard = [
+            [{ text: 'שלח הודעה', callback_data: `send:${chatId}` }],
+            [{ text: 'הודעה לפיתי בלבד', callback_data: `hidden:${chatId}` }],
+            [{ text: 'היסטוריה', callback_data: `history:${chatId}` }]
+        ];
+        tgBot.sendMessage(query.from.id, 'מה תרצה לעשות?', { reply_markup: { inline_keyboard: keyboard } });
+        tgBot.answerCallbackQuery(query.id);
+        return;
+    }
+
+    if (data.startsWith('stoplist:')) {
+        const mode = data.split(':')[1];
+        const chats = await client.getChats();
+        const list = chats.filter(c => (mode === 'groups') ? c.isGroup : !c.isGroup);
+        list.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'he'));
+        const keyboard = list.map(c => {
+            const stopped = stoppedChats.has(c.id._serialized);
+            const icon = stopped ? '❌' : '✅';
+            return [{ text: `${icon} ${c.name || c.id._serialized}`, callback_data: `togglestop:${c.id._serialized}` }];
+        });
+        tgBot.sendMessage(query.from.id, 'הקלק כדי לשנות:', { reply_markup: { inline_keyboard: keyboard } });
+        tgBot.answerCallbackQuery(query.id);
+        return;
+    }
+
+    if (data.startsWith('togglestop:')) {
+        const chatId = data.split(':')[1];
+        if (stoppedChats.has(chatId)) {
+            stoppedChats.delete(chatId);
+        } else {
+            stoppedChats.add(chatId);
+        }
+        saveStoppedChats();
+        tgBot.answerCallbackQuery(query.id, { text: 'עודכן.' });
+        return;
+    }
+
+    if (data.startsWith('send:')) {
+        const chatId = data.split(':')[1];
+        tgSessions.set(query.from.id, { action: 'send', chatId });
+        tgBot.sendMessage(query.from.id, 'מה לשלוח?');
+        tgBot.answerCallbackQuery(query.id);
+        return;
+    }
+
+    if (data.startsWith('hidden:')) {
+        const chatId = data.split(':')[1];
+        tgSessions.set(query.from.id, { action: 'hidden', chatId });
+        tgBot.sendMessage(query.from.id, 'מה ההודעה הסודית?');
+        tgBot.answerCallbackQuery(query.id);
+        return;
+    }
+
+    if (data.startsWith('history:')) {
+        const chatId = data.split(':')[1];
+        tgSessions.set(query.from.id, { action: 'history', chatId });
+        tgBot.sendMessage(query.from.id, 'כמה הודעות מהיסטוריה?');
+        tgBot.answerCallbackQuery(query.id);
+        return;
+    }
+});
+
+tgBot.on('message', async (msg) => {
+    if (msg.chat.id !== TELEGRAM_OWNER_ID) return;
+    const state = tgSessions.get(msg.from.id);
+    if (!state || msg.text?.startsWith('/')) return;
+
+    const { action, chatId } = state;
+    tgSessions.delete(msg.from.id);
+
+    if (action === 'send') {
+        await client.sendMessage(chatId, `פיתי\n${msg.text}`);
+        tgBot.sendMessage(msg.chat.id, '✅ נשלח.');
+    } else if (action === 'hidden') {
+        try {
+            const answer = await askGeminiWithSearchGrounding(msg.text);
+            await client.sendMessage(chatId, `פיתי\n${answer}`);
+            tgBot.sendMessage(msg.chat.id, '✅ בוצע.');
+        } catch (e) {
+            tgBot.sendMessage(msg.chat.id, '❌ שגיאה בהפעלת הבינה.');
+        }
+    } else if (action === 'history') {
+        const count = parseInt(msg.text.trim(), 10) || 10;
+        const chat = await client.getChatById(chatId);
+        const messages = await chat.fetchMessages({ limit: count });
+        messages.reverse();
+        const lines = [];
+        for (const m of messages) {
+            const { pushname, name, number } = await m.getContact();
+            const senderName = pushname || name || number || 'Unknown';
+            const senderNum = phone(m.author || m.from);
+            const body = (m.body || '[מדיה]').replace(/\n/g, ' ').slice(0, 50);
+            lines.push(`${senderName} (${senderNum}): ${body}`);
+        }
+        tgBot.sendMessage(msg.chat.id, lines.join('\n') || 'אין הודעות.');
+    }
+});
 
 client.on('qr', async (qrCode) => {
     console.log('🔲 QR Code received, generating image...');
