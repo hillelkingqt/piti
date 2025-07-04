@@ -1,5 +1,5 @@
 
-const { Client, LocalAuth, MessageMedia, Contact, Poll, Location } = require('whatsapp-web.js');
+const { Client, LocalAuth, MessageMedia, Contact, Poll } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const axios = require('axios');
 const fetch = require('node-fetch');
@@ -926,33 +926,6 @@ async function listChats(isGroup) {
         .map(c => ({ id: c.id._serialized, name: c.name || c.formattedTitle || c.id.user }));
 }
 
-function sendCommandMenu(chatId) {
-    const keyboard = [
-        [{ text: '/groups', callback_data: 'cmd_groups' }],
-        [{ text: '/privates', callback_data: 'cmd_privates' }],
-        [{ text: '/manage', callback_data: 'cmd_manage' }],
-        [{ text: '/status', callback_data: 'cmd_status' }],
-        [{ text: '/restartbot', callback_data: 'cmd_restartbot' }],
-        [{ text: '/setvoice', callback_data: 'cmd_setvoice' }],
-        [{ text: '/schedule', callback_data: 'cmd_schedule' }],
-        [{ text: '/backupmems', callback_data: 'cmd_backupmems' }],
-        [{ text: '/restoremems', callback_data: 'cmd_restoremems' }],
-        [{ text: '/allowuser', callback_data: 'cmd_allowuser' }],
-        [{ text: '/unallowuser', callback_data: 'cmd_unallowuser' }],
-        [{ text: '/mutechat', callback_data: 'cmd_mutechat' }],
-        [{ text: '/unmutechat', callback_data: 'cmd_unmutechat' }],
-        [{ text: '/archivechat', callback_data: 'cmd_archivechat' }],
-        [{ text: '/unarchivechat', callback_data: 'cmd_unarchivechat' }],
-        [{ text: '/pinchat', callback_data: 'cmd_pinchat' }],
-        [{ text: '/unpinchat', callback_data: 'cmd_unpinchat' }],
-        [{ text: '/clearchat', callback_data: 'cmd_clearchat' }],
-        [{ text: '/leavechat', callback_data: 'cmd_leavechat' }],
-        [{ text: '/groupinfo', callback_data: 'cmd_groupinfo' }],
-        [{ text: '/sendlocation', callback_data: 'cmd_sendlocation' }]
-    ];
-    tgBot.sendMessage(chatId, 'בחר פקודה:', { reply_markup: { inline_keyboard: keyboard } });
-}
-
 tgBot.onText(/\/groups/, async (msg) => {
     const list = await listChats(true);
     if (list.length === 0) {
@@ -1055,75 +1028,6 @@ tgBot.onText(/\/schedule (\S+) (\S+) (.+)/, (msg, match) => {
     }
 });
 
-tgBot.onText(/\/mutechat (\S+) (\d+)/, async (msg, match) => {
-    const waId = match[1];
-    const mins = parseInt(match[2], 10);
-    if (isNaN(mins)) return tgBot.sendMessage(msg.chat.id, 'משך לא תקין.');
-    try {
-        const chat = await client.getChatById(waId);
-        await chat.mute(new Date(Date.now() + mins * 60000));
-        tgBot.sendMessage(msg.chat.id, 'הצ\'אט הושתק.');
-    } catch (e) { tgBot.sendMessage(msg.chat.id, 'שגיאה בהשתקה.'); }
-});
-
-tgBot.onText(/\/unmutechat (\S+)/, async (msg, match) => {
-    const waId = match[1];
-    try { const chat = await client.getChatById(waId); await chat.unmute(); tgBot.sendMessage(msg.chat.id, 'בוטלה ההשתקה.'); }
-    catch(e){ tgBot.sendMessage(msg.chat.id,'שגיאה בביטול השתקה.'); }
-});
-
-tgBot.onText(/\/archivechat (\S+)/, async (msg, match) => {
-    const waId = match[1];
-    try { const chat = await client.getChatById(waId); await chat.archive(); tgBot.sendMessage(msg.chat.id, 'הצ\'אט הועבר לארכיון.'); }
-    catch(e){ tgBot.sendMessage(msg.chat.id,'שגיאה בארכוב.'); }
-});
-
-tgBot.onText(/\/unarchivechat (\S+)/, async (msg, match) => {
-    const waId = match[1];
-    try { const chat = await client.getChatById(waId); await chat.unarchive(); tgBot.sendMessage(msg.chat.id, 'הצ\'אט הוחזר מהארכיון.'); }
-    catch(e){ tgBot.sendMessage(msg.chat.id,'שגיאה בהחזרה מארכיון.'); }
-});
-
-tgBot.onText(/\/pinchat (\S+)/, async (msg, match) => {
-    const waId = match[1];
-    try { const chat = await client.getChatById(waId); await chat.pin(); tgBot.sendMessage(msg.chat.id, 'הצ\'אט ננעץ.'); }
-    catch(e){ tgBot.sendMessage(msg.chat.id,'שגיאה בנעיצה.'); }
-});
-
-tgBot.onText(/\/unpinchat (\S+)/, async (msg, match) => {
-    const waId = match[1];
-    try { const chat = await client.getChatById(waId); await chat.unpin(); tgBot.sendMessage(msg.chat.id, 'הצ\'אט שוחרר מנעיצה.'); }
-    catch(e){ tgBot.sendMessage(msg.chat.id,'שגיאה בשחרור נעיצה.'); }
-});
-
-tgBot.onText(/\/clearchat (\S+)/, async (msg, match) => {
-    const waId = match[1];
-    try { const chat = await client.getChatById(waId); await chat.clearMessages(); tgBot.sendMessage(msg.chat.id, 'ההיסטוריה נמחקה.'); }
-    catch(e){ tgBot.sendMessage(msg.chat.id,'שגיאה במחיקה.'); }
-});
-
-tgBot.onText(/\/leavechat (\S+)/, async (msg, match) => {
-    const waId = match[1];
-    try { const chat = await client.getChatById(waId); await chat.leave(); tgBot.sendMessage(msg.chat.id, 'יצאתי מהקבוצה.'); }
-    catch(e){ tgBot.sendMessage(msg.chat.id,'שגיאה ביציאה.'); }
-});
-
-tgBot.onText(/\/groupinfo (\S+)/, async (msg, match) => {
-    const waId = match[1];
-    try { const chat = await client.getChatById(waId); const info = `שם: ${chat.name}\nמשתתפים: ${chat.participants?.length || 0}\nתיאור: ${chat.description || ''}`; tgBot.sendMessage(msg.chat.id, info); }
-    catch(e){ tgBot.sendMessage(msg.chat.id,'שגיאה בקבלת פרטים.'); }
-});
-
-tgBot.onText(/\/sendlocation (\S+) ([\d.]+) ([\d.]+)(?: (.+))?/, async (msg, match) => {
-    const waId = match[1];
-    const lat = parseFloat(match[2]);
-    const lng = parseFloat(match[3]);
-    const desc = match[4] || '';
-    if (isNaN(lat) || isNaN(lng)) return tgBot.sendMessage(msg.chat.id, 'ערכי מיקום לא תקינים.');
-    try { await client.sendMessage(waId, new Location(lat, lng, desc)); tgBot.sendMessage(msg.chat.id, 'Location נשלח.'); }
-    catch(e){ tgBot.sendMessage(msg.chat.id,'שגיאה בשליחת מיקום.'); }
-});
-
 tgBot.on('callback_query', async (query) => {
     const data = query.data;
     const chatId = query.message.chat.id;
@@ -1132,14 +1036,6 @@ tgBot.on('callback_query', async (query) => {
     if(data === 'cmd_privates') { const list=await listChats(false); const keyboard=list.map(c=>[{text:c.name,callback_data:`chat_${c.id}`}]); tgBot.sendMessage(chatId,'בחר צ\'אט פרטי:',{reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
     if(data === 'cmd_manage') { const keyboard=[[{text:'קבוצות',callback_data:'manage_groups'}],[{text:"צ'אטים פרטיים",callback_data:'manage_privates'}]]; tgBot.sendMessage(chatId,'מה תרצה לנהל?',{reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
     if(data === 'cmd_status') { const load=os.loadavg()[0].toFixed(2); const mem=((os.totalmem()-os.freemem())/1024/1024).toFixed(0); exec('df -h /',(e,out)=>{const disk=e?'N/A':out.split('\n')[1]; tgBot.sendMessage(chatId,`CPU load: ${load}\nRAM used: ${mem}MB\nDisk: ${disk}`);}); return tgBot.answerCallbackQuery(query.id); }
-    if(data === 'cmd_restartbot') { const py='python'; const restart=path.join(__dirname,'restart_bot.py'); const nodeScript=process.argv[1]; if(fs.existsSync(restart)){ spawn(py,[restart,nodeScript],{detached:true,stdio:'ignore'}).unref(); tgBot.sendMessage(chatId,'מפעיל מחדש את הבוט...'); } else { tgBot.sendMessage(chatId,'לא נמצא סקריפט הפעלה.'); } return tgBot.answerCallbackQuery(query.id); }
-    if(data === 'cmd_backupmems') { const memPath=path.join(__dirname,'memories.json'); if(fs.existsSync(memPath)){ tgBot.sendDocument(chatId,memPath); } else { tgBot.sendMessage(chatId,'קובץ memories.json לא נמצא.'); } return tgBot.answerCallbackQuery(query.id); }
-    if(data === 'cmd_restoremems') { tgStates.set(chatId,{action:'restore_mems'}); tgBot.sendMessage(chatId,'שלח את קובץ memories.json כעת.'); return tgBot.answerCallbackQuery(query.id); }
-    if(data === 'cmd_setvoice') { tgBot.sendMessage(chatId,'השתמש ב-/setvoice <voice>'); return tgBot.answerCallbackQuery(query.id); }
-    if(data === 'cmd_schedule') { tgBot.sendMessage(chatId,'פורמט: /schedule <chatId> <ISODate> <text>'); return tgBot.answerCallbackQuery(query.id); }
-    if(data === 'cmd_allowuser') { tgBot.sendMessage(chatId,'פורמט: /allowuser <phone>'); return tgBot.answerCallbackQuery(query.id); }
-    if(data === 'cmd_unallowuser') { tgBot.sendMessage(chatId,'פורמט: /unallowuser <phone>'); return tgBot.answerCallbackQuery(query.id); }
-    if(data.startsWith('cmd_')) { const cmd=data.slice(4); tgBot.sendMessage(chatId,`הקלד ${cmd} ...`); return tgBot.answerCallbackQuery(query.id); }
 
     if (data.startsWith('chat_')) {
         const waId = data.slice(5);
@@ -1383,7 +1279,13 @@ tgBot.on('message', async (msg) => {
     if (msg.text && msg.text.startsWith('/')) return; // handled elsewhere
     const state = tgStates.get(msg.chat.id);
     if (!state) {
-        sendCommandMenu(msg.chat.id);
+        const keyboard = [
+            [{text:'/groups',callback_data:'cmd_groups'}],
+            [{text:'/privates',callback_data:'cmd_privates'}],
+            [{text:'/manage',callback_data:'cmd_manage'}],
+            [{text:'/status',callback_data:'cmd_status'}]
+        ];
+        tgBot.sendMessage(msg.chat.id, 'בחר פקודה:', {reply_markup:{inline_keyboard:keyboard}});
         return;
     }
 
