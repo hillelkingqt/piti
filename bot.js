@@ -28,14 +28,42 @@ const COGVIDEO_GRADIO_SPACE = "THUDM/CogVideoX-5B-Space"; // CogVideoX Space URL
 // Use bundled Chromium to avoid specifying executablePath
 const puppeteer = require('puppeteer');
 
+const API_KEYS_PATH = path.join(__dirname, 'api_keys.json');
+let apiKeysData = {};
+function loadApiKeys() {
+    try {
+        if (fs.existsSync(API_KEYS_PATH)) {
+            apiKeysData = JSON.parse(fs.readFileSync(API_KEYS_PATH, 'utf8'));
+        }
+    } catch (e) {
+        console.error('❌ Failed to load API keys file:', e);
+        apiKeysData = {};
+    }
+}
+function saveApiKeys() {
+    try {
+        fs.writeFileSync(API_KEYS_PATH, JSON.stringify(apiKeysData, null, 2));
+    } catch (e) {
+        console.error('❌ Failed to save API keys file:', e);
+    }
+}
+loadApiKeys();
 
+let CLOUDFLARE_ACCOUNT_ID = apiKeysData.cloudflare?.account_id || "38a8437a72c997b85a542a6b64a699e2";
+let CLOUDFLARE_API_TOKEN = apiKeysData.cloudflare?.api_token || "jCnlim7diZ_oSCKIkSUxRJGRS972sHEHfgGTmDWK";
+let BASE_IMAGE_GENERATION_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/`;
+let CLOUDFLARE_VISION_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/unum/uform-gen2-qwen-500m`;
+let CLOUDFLARE_WHISPER_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/openai/whisper-large-v3-turbo`;
 
+if (Array.isArray(apiKeysData.gemini)) {
+    apiKeyManager.keys = apiKeysData.gemini;
+}
 
-const CLOUDFLARE_ACCOUNT_ID = "38a8437a72c997b85a542a6b64a699e2";
-const CLOUDFLARE_API_TOKEN = "jCnlim7diZ_oSCKIkSUxRJGRS972sHEHfgGTmDWK";
-const BASE_IMAGE_GENERATION_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/`;
-const CLOUDFLARE_VISION_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/unum/uform-gen2-qwen-500m`;
-const CLOUDFLARE_WHISPER_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/openai/whisper-large-v3-turbo`; // <-- הוסף שורה זו
+function updateCloudflareEndpoints() {
+    BASE_IMAGE_GENERATION_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/`;
+    CLOUDFLARE_VISION_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/unum/uform-gen2-qwen-500m`;
+    CLOUDFLARE_WHISPER_API_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/openai/whisper-large-v3-turbo`;
+}
 
 
 const myId = "972532752474@c.us";
@@ -383,7 +411,7 @@ async function uploadMediaToGemini(base64Data, mimeType) {
     }
 }
 
-const GEMINI_API_KEY = "AIzaSyDfqo_60y39EG_ZW5Fn3EeB6BoZMru5V_k"; // המפתח שלך
+let GEMINI_API_KEY = apiKeysData.gemini?.[0] || "AIzaSyDfqo_60y39EG_ZW5Fn3EeB6BoZMru5V_k";
 const pdf = require('pdf-parse'); // If using PDF parsing
 const mammoth = require("mammoth"); // If using DOCX parsing
 const { Blob } = require("buffer");
@@ -925,24 +953,55 @@ async function listChats(isGroup) {
         .map(c => ({ id: c.id._serialized, name: c.name || c.formattedTitle || c.id.user }));
 }
 
-tgBot.onText(/\/groups/, async (msg) => {
+function sendCommandMenu(chatId) {
+    const keyboard = [
+        [{ text: 'קבוצות', callback_data: 'cmd_groups' }],
+        [{ text: 'צ\'אטים פרטיים', callback_data: 'cmd_privates' }],
+        [{ text: 'ניהול', callback_data: 'cmd_manage' }],
+        [{ text: 'מפתחות API', callback_data: 'cmd_keys' }],
+        [{ text: 'מצב מערכת', callback_data: 'cmd_system' }],
+        [{ text: 'הפעל מחדש', callback_data: 'cmd_restart' }]
+    ];
+    tgBot.sendMessage(chatId, 'בחר פקודה:', { reply_markup: { inline_keyboard: keyboard } });
+}
+
+async function handleGroupsCommand(chatId) {
     const list = await listChats(true);
     if (list.length === 0) {
-        tgBot.sendMessage(msg.chat.id, 'אין קבוצות זמינות.');
+        tgBot.sendMessage(chatId, 'אין קבוצות זמינות.');
         return;
     }
     const keyboard = list.map(c => [{ text: c.name, callback_data: `chat_${c.id}` }]);
-    tgBot.sendMessage(msg.chat.id, 'בחר קבוצה:', { reply_markup: { inline_keyboard: keyboard } });
+    tgBot.sendMessage(chatId, 'בחר קבוצה:', { reply_markup: { inline_keyboard: keyboard } });
+}
+
+async function handlePrivatesCommand(chatId) {
+    const list = await listChats(false);
+    if (list.length === 0) {
+        tgBot.sendMessage(chatId, 'אין צ\'אטים פרטיים זמינים.');
+        return;
+    }
+    const keyboard = list.map(c => [{ text: c.name, callback_data: `chat_${c.id}` }]);
+    tgBot.sendMessage(chatId, 'בחר צ\'אט פרטי:', { reply_markup: { inline_keyboard: keyboard } });
+}
+
+function sendSystemStatus(chatId) {
+    const load = os.loadavg()[0].toFixed(2);
+    const memFree = (os.freemem() / 1024 / 1024).toFixed(0);
+    const memTotal = (os.totalmem() / 1024 / 1024).toFixed(0);
+    exec('df -h / | tail -1 | awk "{print $5}"', (err, stdout) => {
+        const disk = err ? '?' : stdout.trim();
+        const msg = `CPU: ${load}\nRAM: ${memFree}/${memTotal} MB\nDisk: ${disk}`;
+        tgBot.sendMessage(chatId, msg);
+    });
+}
+
+tgBot.onText(/\/groups/, async (msg) => {
+    await handleGroupsCommand(msg.chat.id);
 });
 
 tgBot.onText(/\/privates/, async (msg) => {
-    const list = await listChats(false);
-    if (list.length === 0) {
-        tgBot.sendMessage(msg.chat.id, 'אין צ\'אטים פרטיים זמינים.');
-        return;
-    }
-    const keyboard = list.map(c => [{ text: c.name, callback_data: `chat_${c.id}` }]);
-    tgBot.sendMessage(msg.chat.id, 'בחר צ\'אט פרטי:', { reply_markup: { inline_keyboard: keyboard } });
+    await handlePrivatesCommand(msg.chat.id);
 });
 
 tgBot.onText(/\/manage/, async (msg) => {
@@ -953,9 +1012,88 @@ tgBot.onText(/\/manage/, async (msg) => {
     tgBot.sendMessage(msg.chat.id, 'מה תרצה לנהל?', { reply_markup: { inline_keyboard: keyboard } });
 });
 
+tgBot.onText(/\/keys/, async (msg) => {
+    const keyboard = [
+        [{ text: 'Gemini', callback_data: 'key_Gemini' }],
+        [{ text: 'Cloudflare', callback_data: 'key_Cloudflare' }]
+    ];
+    tgBot.sendMessage(msg.chat.id, 'בחר שירות:', { reply_markup: { inline_keyboard: keyboard } });
+});
+
+tgBot.onText(/\/system/, async (msg) => {
+    sendSystemStatus(msg.chat.id);
+});
+
+tgBot.onText(/\/restartbot/, async (msg) => {
+    tgBot.sendMessage(msg.chat.id, 'מפעיל מחדש את הבוט...');
+    const restartScriptPath = path.join(__dirname, 'restart_bot.py');
+    const nodeScript = process.argv[1];
+    try {
+        const child = spawn('python', [restartScriptPath, nodeScript], { detached: true, stdio: 'ignore' });
+        child.unref();
+        setTimeout(() => process.exit(1), 2000);
+    } catch (e) {
+        tgBot.sendMessage(msg.chat.id, 'שגיאה בהפעלה מחדש.');
+    }
+});
+
 tgBot.on('callback_query', async (query) => {
     const data = query.data;
     const chatId = query.message.chat.id;
+
+    if (data === 'cmd_groups') {
+        await handleGroupsCommand(chatId);
+        return tgBot.answerCallbackQuery(query.id);
+    }
+    if (data === 'cmd_privates') {
+        await handlePrivatesCommand(chatId);
+        return tgBot.answerCallbackQuery(query.id);
+    }
+    if (data === 'cmd_manage') {
+        tgBot.emit('text', { chat: { id: chatId }, text: '/manage' });
+        return tgBot.answerCallbackQuery(query.id);
+    }
+    if (data === 'cmd_system') {
+        sendSystemStatus(chatId);
+        return tgBot.answerCallbackQuery(query.id);
+    }
+    if (data === 'cmd_restart') {
+        tgBot.emit('text', { chat: { id: chatId }, text: '/restartbot' });
+        return tgBot.answerCallbackQuery(query.id);
+    }
+    if (data === 'cmd_keys') {
+        tgBot.emit('text', { chat: { id: chatId }, text: '/keys' });
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    if (data.startsWith('key_')) {
+        const service = data.slice(4);
+        const keyboard = [
+            [{ text: '👁️ לראות', callback_data: `keyview_${service}` }],
+            [{ text: '✏️ לערוך', callback_data: `keyedit_${service}` }]
+        ];
+        tgBot.sendMessage(chatId, `ניהול מפתח עבור ${service}:`, { reply_markup: { inline_keyboard: keyboard } });
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    if (data.startsWith('keyview_')) {
+        const service = data.slice(8);
+        let text = 'לא נמצא.';
+        if (service === 'Gemini') {
+            text = (apiKeysData.gemini || []).join('\n');
+        } else if (service === 'Cloudflare') {
+            text = `Account: ${CLOUDFLARE_ACCOUNT_ID}\nToken: ${CLOUDFLARE_API_TOKEN}`;
+        }
+        tgBot.sendMessage(chatId, text);
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    if (data.startsWith('keyedit_')) {
+        const service = data.slice(8);
+        tgStates.set(chatId, { action: 'key_edit', service });
+        tgBot.sendMessage(chatId, 'הכנס מפתח חדש:');
+        return tgBot.answerCallbackQuery(query.id);
+    }
 
     if (data.startsWith('chat_')) {
         const waId = data.slice(5);
@@ -1004,6 +1142,8 @@ tgBot.on('callback_query', async (query) => {
             callback_data: `memview_${waId}_${m.id}`
         }]);
         keyboard.push([{ text: '➕ הוסף זיכרון', callback_data: `memadd_${waId}` }]);
+        keyboard.push([{ text: '📤 ייצוא קובץ זכרונות', callback_data: `memexport_${waId}` }]);
+        keyboard.push([{ text: '📥 ייבוא קובץ זכרונות', callback_data: `memimport_${waId}` }]);
         tgBot.sendMessage(chatId, 'זכרונות:', { reply_markup: { inline_keyboard: keyboard } });
         return tgBot.answerCallbackQuery(query.id);
     }
@@ -1050,8 +1190,30 @@ tgBot.on('callback_query', async (query) => {
         return tgBot.answerCallbackQuery(query.id);
     }
 
+    if (data.startsWith('memexport_')) {
+        const waId = data.slice(9);
+        const chat = await client.getChatById(waId);
+        const safeName = await getSafeNameForChat(chat);
+        const paths = getChatPaths(waId, safeName);
+        if (fs.existsSync(paths.memoryFile)) {
+            await tgBot.sendDocument(chatId, paths.memoryFile);
+        } else {
+            tgBot.sendMessage(chatId, 'קובץ זכרונות לא קיים.');
+        }
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    if (data.startsWith('memimport_')) {
+        const waId = data.slice(10);
+        tgStates.set(chatId, { waId, action: 'mem_import' });
+        tgBot.sendMessage(chatId, 'שלח קובץ memories.json');
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
     if (data.startsWith('files_')) {
-        const waId = data.slice(6);
+        const parts = data.split('_');
+        const waId = parts[1];
+        const page = parseInt(parts[2] || '0', 10);
         const chat = await client.getChatById(waId);
         const safeName = await getSafeNameForChat(chat);
         const paths = getChatPaths(waId, safeName);
@@ -1061,10 +1223,21 @@ tgBot.on('callback_query', async (query) => {
                 files = JSON.parse(fs.readFileSync(paths.generatedFilesIndex, 'utf8'));
             } catch {}
         }
-        const keyboard = files.slice(0, 10).map((f, idx) => [{ text: f.filename || `file${idx+1}`, callback_data: `getfile_${waId}_${idx}` }]);
+        const pageSize = 10;
+        const start = page * pageSize;
+        const keyboard = files.slice(start, start + pageSize).map((f, idx) => [{ text: f.filename || `file${start + idx + 1}`, callback_data: `getfile_${waId}_${start + idx}` }]);
+        if (start + pageSize < files.length) keyboard.push([{ text: 'עוד', callback_data: `files_${waId}_${page + 1}` }]);
+        keyboard.push([{ text: '🔍 חפש קובץ', callback_data: `filesearch_${waId}` }]);
         if (keyboard.length === 0) keyboard.push([{ text: 'אין קבצים', callback_data: 'noop' }]);
         tgStates.set(chatId, { waId, files });
         tgBot.sendMessage(chatId, 'בחר קובץ:', { reply_markup: { inline_keyboard: keyboard } });
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    if (data.startsWith('filesearch_')) {
+        const waId = data.slice(10);
+        tgStates.set(chatId, { waId, action: 'file_search' });
+        tgBot.sendMessage(chatId, 'כתוב מילת חיפוש:');
         return tgBot.answerCallbackQuery(query.id);
     }
 
@@ -1076,6 +1249,20 @@ tgBot.on('callback_query', async (query) => {
         const file = state?.files?.[idx];
         if (file && fs.existsSync(file.generatedFilePath)) {
             await tgBot.sendDocument(chatId, file.generatedFilePath);
+        } else {
+            tgBot.sendMessage(chatId, 'קובץ לא נמצא.');
+        }
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    if (data.startsWith('sendabs_')) {
+        const parts = data.split('_');
+        const waId = parts[1];
+        const idx = Number(parts[2]);
+        const state = tgStates.get(chatId);
+        const file = state?.searchResults?.[idx];
+        if (file && fs.existsSync(file)) {
+            await tgBot.sendDocument(chatId, file);
         } else {
             tgBot.sendMessage(chatId, 'קובץ לא נמצא.');
         }
@@ -1199,11 +1386,11 @@ tgBot.on('message', async (msg) => {
     if (msg.text && msg.text.startsWith('/')) return; // handled elsewhere
     const state = tgStates.get(msg.chat.id);
     if (!state) {
-        tgBot.sendMessage(msg.chat.id, 'השתמש בפקודות /groups, /privates או /manage.');
+        sendCommandMenu(msg.chat.id);
         return;
     }
 
-    const { waId, action, memId, trId, files } = state;
+    const { waId, action, memId, trId, files, service, searchResults } = state;
 
     const downloadTgFile = async () => {
         let fileId, mime;
@@ -1275,6 +1462,62 @@ tgBot.on('message', async (msg) => {
         } else {
             tgBot.sendMessage(msg.chat.id, 'זיכרון לא נמצא.');
         }
+        tgStates.delete(msg.chat.id);
+    } else if (action === 'mem_import') {
+        const chat = await client.getChatById(waId);
+        const safeName = await getSafeNameForChat(chat);
+        const paths = getChatPaths(waId, safeName);
+        if (msg.document) {
+            const filePath = await tgBot.downloadFile(msg.document.file_id, path.join(__dirname, 'tg_downloads'));
+            try {
+                const data = fs.readFileSync(filePath, 'utf8');
+                const mems = JSON.parse(data);
+                await saveMemories(paths, mems);
+                tgBot.sendMessage(msg.chat.id, 'הזיכרונות שוחזרו.');
+            } catch (e) {
+                tgBot.sendMessage(msg.chat.id, 'שגיאה בקריאת הקובץ.');
+            }
+        } else {
+            tgBot.sendMessage(msg.chat.id, 'לא נמצא קובץ.');
+        }
+        tgStates.delete(msg.chat.id);
+    } else if (action === 'file_search') {
+        const chat = await client.getChatById(waId);
+        const safeName = await getSafeNameForChat(chat);
+        const paths = getChatPaths(waId, safeName);
+        const searchTerm = (msg.text || '').toLowerCase();
+        function walk(dir) {
+            let results = [];
+            fs.readdirSync(dir).forEach(f => {
+                const p = path.join(dir, f);
+                if (fs.statSync(p).isDirectory()) results = results.concat(walk(p));
+                else results.push(p);
+            });
+            return results;
+        }
+        const all = walk(paths.chatDir);
+        const matches = all.filter(p => p.toLowerCase().includes(searchTerm));
+        const keyboard = matches.slice(0, 10).map((f, i) => [{ text: path.basename(f), callback_data: `sendabs_${waId}_${i}` }]);
+        if (keyboard.length === 0) keyboard.push([{ text: 'לא נמצאו קבצים', callback_data: 'noop' }]);
+        tgStates.set(msg.chat.id, { waId, searchResults: matches });
+        tgBot.sendMessage(msg.chat.id, 'תוצאות:', { reply_markup: { inline_keyboard: keyboard } });
+    } else if (action === 'key_edit') {
+        const service = state.service;
+        const newKey = msg.text.trim();
+        if (service === 'Gemini') {
+            apiKeysData.gemini = [newKey];
+            apiKeyManager.keys = [newKey];
+        } else if (service === 'Cloudflare') {
+            const parts = newKey.split(',');
+            if (parts.length === 2) {
+                CLOUDFLARE_ACCOUNT_ID = parts[0].trim();
+                CLOUDFLARE_API_TOKEN = parts[1].trim();
+                apiKeysData.cloudflare = { account_id: CLOUDFLARE_ACCOUNT_ID, api_token: CLOUDFLARE_API_TOKEN };
+                updateCloudflareEndpoints();
+            }
+        }
+        saveApiKeys();
+        tgBot.sendMessage(msg.chat.id, 'המפתח עודכן.');
         tgStates.delete(msg.chat.id);
     } else if (action === 'tr_edit') {
         const chat = await client.getChatById(waId);
