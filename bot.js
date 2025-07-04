@@ -41,7 +41,6 @@ const CLOUDFLARE_WHISPER_API_ENDPOINT = `https://api.cloudflare.com/client/v4/ac
 const myId = "972532752474@c.us";
 let replyToAllPrivates = false;
 let autoReactEmoji = null; // <--- מקם אותה כאן, למשל
-let defaultTtsVoice = "Kore"; // default TTS voice
 
 let botStopped = false;
 let breakTimeout = null;
@@ -954,88 +953,9 @@ tgBot.onText(/\/manage/, async (msg) => {
     tgBot.sendMessage(msg.chat.id, 'מה תרצה לנהל?', { reply_markup: { inline_keyboard: keyboard } });
 });
 
-tgBot.onText(/\/restartbot/, async (msg) => {
-    const pythonExecutable = 'python';
-    const restartScriptPath = path.join(__dirname, 'restart_bot.py');
-    const nodeScript = process.argv[1];
-    if (fs.existsSync(restartScriptPath)) {
-        spawn(pythonExecutable, [restartScriptPath, nodeScript], { detached: true, stdio: 'ignore' }).unref();
-        tgBot.sendMessage(msg.chat.id, 'מפעיל מחדש את הבוט...');
-    } else {
-        tgBot.sendMessage(msg.chat.id, 'לא נמצא סקריפט הפעלה.');
-    }
-});
-
-tgBot.onText(/\/status/, async (msg) => {
-    const load = os.loadavg()[0].toFixed(2);
-    const mem = ((os.totalmem()-os.freemem())/1024/1024).toFixed(0);
-    exec('df -h /', (err, stdout) => {
-        const disk = err ? 'N/A' : stdout.split('\n')[1];
-        tgBot.sendMessage(msg.chat.id, `CPU load: ${load}\nRAM used: ${mem}MB\nDisk: ${disk}`);
-    });
-});
-
-tgBot.onText(/\/allowuser (.+)/, (msg, match) => {
-    const num = (match[1]||'').trim();
-    if (num) {
-        allowedNumbers.add(num);
-        saveAllowedUsers();
-        tgBot.sendMessage(msg.chat.id, `המשתמש ${num} נוסף לרשימת המורשים.`);
-    }
-});
-
-tgBot.onText(/\/unallowuser (.+)/, (msg, match) => {
-    const num = (match[1]||'').trim();
-    if (allowedNumbers.delete(num)) {
-        saveAllowedUsers();
-        tgBot.sendMessage(msg.chat.id, `המשתמש ${num} הוסר מרשימת המורשים.`);
-    }
-});
-
-tgBot.onText(/\/setvoice (.+)/, (msg, match) => {
-    const v = (match[1]||'').trim();
-    if (v) {
-        defaultTtsVoice = v;
-        tgBot.sendMessage(msg.chat.id, `עודכן קול ברירת המחדל ל-${v}`);
-    }
-});
-
-tgBot.onText(/\/backupmems/, (msg) => {
-    const memPath = path.join(__dirname, 'memories.json');
-    if (fs.existsSync(memPath)) {
-        tgBot.sendDocument(msg.chat.id, memPath);
-    } else {
-        tgBot.sendMessage(msg.chat.id, 'קובץ memories.json לא נמצא.');
-    }
-});
-
-tgBot.onText(/\/restoremems/, (msg) => {
-    tgStates.set(msg.chat.id, { action: 'restore_mems' });
-    tgBot.sendMessage(msg.chat.id, 'שלח את קובץ memories.json כעת.');
-});
-
-tgBot.onText(/\/schedule (\S+) (\S+) (.+)/, (msg, match) => {
-    const chat = match[1];
-    const when = new Date(match[2]);
-    const text = match[3];
-    if (!isNaN(when)) {
-        const actions = loadPendingActions();
-        actions.push({ chatId: chat, executionTime: when.toISOString(), actionData: { action: 'text', message: text } });
-        savePendingActions(actions);
-        tgBot.sendMessage(msg.chat.id, 'הודעה תוזמנה בהצלחה.');
-    } else {
-        tgBot.sendMessage(msg.chat.id, 'פורמט זמן שגוי.');
-    }
-});
-
 tgBot.on('callback_query', async (query) => {
     const data = query.data;
     const chatId = query.message.chat.id;
-
-    if(data === 'cmd_groups') { const list=await listChats(true); const keyboard=list.map(c=>[{text:c.name,callback_data:`chat_${c.id}`}]); tgBot.sendMessage(chatId,'בחר קבוצה:',{reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
-    if(data === 'cmd_privates') { const list=await listChats(false); const keyboard=list.map(c=>[{text:c.name,callback_data:`chat_${c.id}`}]); tgBot.sendMessage(chatId,'בחר צ\'אט פרטי:',{reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
-    if(data === 'cmd_manage') { const keyboard=[[{text:'קבוצות',callback_data:'manage_groups'}],[{text:"צ'אטים פרטיים",callback_data:'manage_privates'}]]; tgBot.sendMessage(chatId,'מה תרצה לנהל?',{reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
-    if(data === 'cmd_status') { const load=os.loadavg()[0].toFixed(2); const mem=((os.totalmem()-os.freemem())/1024/1024).toFixed(0); exec('df -h /',(e,out)=>{const disk=e?'N/A':out.split('\n')[1]; tgBot.sendMessage(chatId,`CPU load: ${load}\nRAM used: ${mem}MB\nDisk: ${disk}`);}); return tgBot.answerCallbackQuery(query.id); }
 
     if (data.startsWith('chat_')) {
         const waId = data.slice(5);
@@ -1279,13 +1199,7 @@ tgBot.on('message', async (msg) => {
     if (msg.text && msg.text.startsWith('/')) return; // handled elsewhere
     const state = tgStates.get(msg.chat.id);
     if (!state) {
-        const keyboard = [
-            [{text:'/groups',callback_data:'cmd_groups'}],
-            [{text:'/privates',callback_data:'cmd_privates'}],
-            [{text:'/manage',callback_data:'cmd_manage'}],
-            [{text:'/status',callback_data:'cmd_status'}]
-        ];
-        tgBot.sendMessage(msg.chat.id, 'בחר פקודה:', {reply_markup:{inline_keyboard:keyboard}});
+        tgBot.sendMessage(msg.chat.id, 'השתמש בפקודות /groups, /privates או /manage.');
         return;
     }
 
@@ -1374,16 +1288,6 @@ tgBot.on('message', async (msg) => {
             tgBot.sendMessage(msg.chat.id, 'הטריגר עודכן.');
         } else {
             tgBot.sendMessage(msg.chat.id, 'טריגר לא נמצא.');
-        }
-        tgStates.delete(msg.chat.id);
-    } else if (action === 'restore_mems') {
-        if (msg.document) {
-            const filePath = await tgBot.downloadFile(msg.document.file_id, path.join(__dirname, 'tg_downloads'));
-            fs.copyFileSync(filePath, path.join(__dirname, 'memories.json'));
-            tgBot.sendMessage(msg.chat.id, 'הזיכרונות שוחזרו.');
-        } else {
-            tgBot.sendMessage(msg.chat.id, 'אנא שלח קובץ memories.json.');
-            return;
         }
         tgStates.delete(msg.chat.id);
     }
@@ -2535,7 +2439,7 @@ async function handleTTSAction(replyData, targetMsg) {
         "Algenib", "Achernar", "Zubenelgenubi", "Sadaltager", "Charon", "Iapetus",
         "Rasalgethi", "Alnilam"
     ];
-    const VOICE = (chosenVoice && validVoices.includes(chosenVoice)) ? chosenVoice : defaultTtsVoice;
+    const VOICE = (chosenVoice && validVoices.includes(chosenVoice)) ? chosenVoice : "Kore";
     const SAMPLE_RATE = 24000;
     const NUM_CHANNELS = 1;
     const BITS_PER_SAMPLE = 16;
