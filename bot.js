@@ -1019,6 +1019,31 @@ tgBot.on('callback_query', async (query) => {
     }
 });
 
+async function processSecretMessageToPiti(waId, text) {
+    try {
+        const chat = await client.getChatById(waId);
+        const fakeId = `tg_${Date.now()}`;
+        const fakeMsg = {
+            id: { _serialized: fakeId },
+            body: text,
+            from: myId,
+            to: waId,
+            author: myId,
+            fromMe: true,
+            hasMedia: false,
+            hasQuotedMsg: false,
+            timestamp: Math.floor(Date.now() / 1000),
+            getChat: async () => chat,
+            getContact: async () => client.getContactById(myId),
+            reply: async (content, options = {}) => chat.sendMessage(content, options)
+        };
+
+        await handleMessage(fakeMsg, text);
+    } catch (err) {
+        console.error('[Telegram Secret] Error processing secret message:', err);
+    }
+}
+
 tgBot.on('message', async (msg) => {
     if (!msg.text || msg.text.startsWith('/')) return; // handled elsewhere
     const state = tgStates.get(msg.chat.id);
@@ -1034,8 +1059,8 @@ tgBot.on('message', async (msg) => {
         tgBot.sendMessage(msg.chat.id, 'ההודעה נשלחה.');
         tgStates.delete(msg.chat.id);
     } else if (action === 'secret') {
-        // secret message: not sent to WhatsApp, but processed internally (mock)
-        tgBot.sendMessage(msg.chat.id, 'ההודעה הועברה לפיתי.');
+        await processSecretMessageToPiti(waId, msg.text);
+        tgBot.sendMessage(msg.chat.id, 'ההודעה נשלחה לפיתי.');
         tgStates.delete(msg.chat.id);
     } else if (action === 'history') {
         const count = parseInt(msg.text, 10) || 0;
