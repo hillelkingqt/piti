@@ -21,6 +21,8 @@ const CACHE_TTL = 1000 * 60 * 60 * 24; // 24 שעות באלפיות שנייה
 
 const path = require('path');
 const os = require('os');
+// Load configurable paths from config.js
+const { BASE_CHAT_DIR, ANDROID_SDK_PATH } = require('./config');
 const messageMap = new Map();
 const mime = require('mime-types');
 const COGVIDEO_GRADIO_SPACE = "THUDM/CogVideoX-5B-Space"; // CogVideoX Space URL
@@ -1443,7 +1445,6 @@ async function getSenderName(msgItem) {
     }
 }
 
-const BASE_CHAT_DIR = "C:\\Users\\hillel1\\Desktop\\WHAT\\chats";
 
 function getChatPaths(chatId, safeName) {
     const chatDir = path.join(BASE_CHAT_DIR, safeName);
@@ -5229,7 +5230,7 @@ ${chatInfoPromptPart}
   "to": "example@email.com",
   "subject": "נושא האימייל",
   "html": "<p>תוכן האימייל ב-HTML</p>",
-  "attachmentPath": "נתיב מוחלט לקובץ מצורף", לדוגמא,   attachmentPath: 'C:\\Users\\hillel1\\Desktop\\WHAT\\chats\\972532752474_Hillel\\messgesid',
+  "attachmentPath": "נתיב מוחלט לקובץ מצורף", לדוגמא,   attachmentPath: 'path/to/972532752474_Hillel/messgesid',
   "replyTo": "MESSAGE_ID"
   "wait": false // (או true...)
 }
@@ -5935,7 +5936,7 @@ ${triggersTextForPrompt} // triggersTextForPrompt יצטרך להציג את t.a
     },
     {
       "type": "image", // להוספת תמונה שנוצרה/הורדה קודם
-      "path": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats\\CHAT_ID_DIR\\files\\image_name.png", // נתיב מלא לתמונה
+      "path": "path/to/CHAT_ID_DIR/files/image_name.png", // נתיב מלא לתמונה
       "width_inches": 6.0 // (אופציונלי) רוחב התמונה באינצ'ים
     }
   ],
@@ -6181,7 +6182,7 @@ ${generatedFilesText.length > 0 ? generatedFilesText : "אין קבצים שנו
 {
   "replyTo": "MESSAGE_ID_של_הבקשה_של_המשתמש",
   "action": "resend_file",
-  "filePath": "הנתיב_המוחלט_לקובץ_כפי_שמופיע_ברשימה_למעלה", // לדוגמה: "C:\\Users\\hillel1\\Desktop\\WHAT\\chats\\SOME_CHAT_ID\\files\\document_name.pdf"
+  "filePath": "הנתיב_המוחלט_לקובץ_כפי_שמופיע_ברשימה_למעלה", // לדוגמה: "path/to/SOME_CHAT_ID/files/document_name.pdf"
   "message": "הודעה למשתמש שתצורף לקובץ (לדוגמה: 'בטח, הנה הקובץ [שם הקובץ] שביקשת שוב.')",
   "wait": false // שליחה חוזרת היא תמיד מיידית
 }
@@ -7271,7 +7272,7 @@ ${incoming}
             console.log(`[handleGenerateApkAction] Created temporary project directory: ${tempProjectDir}`);
             // Step: Write local.properties pointing to Android SDK
             const localPropsPath = path.join(tempProjectDir, 'local.properties');
-            const androidSdkPath = 'C:\\Users\\hillel1\\Desktop\\Android\\Sdk'; // Adjust if your SDK path ever changes
+            const androidSdkPath = ANDROID_SDK_PATH;
             const localPropsContent = `sdk.dir=${androidSdkPath.replace(/\\/g, '\\\\')}`; // Double-backslashes
 
             try {

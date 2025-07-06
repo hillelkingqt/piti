@@ -4,7 +4,8 @@ const path = require('path');
 const MY_ID = "972532752474@c.us";
 
 // Paths
-const BASE_CHAT_DIR = "C:\\Users\\hillel1\\Desktop\\WHAT\\chats"; // Note: escaped backslashes for Windows paths in JS strings
+// Store chat data inside a local 'chats' directory by default
+const BASE_CHAT_DIR = path.join(__dirname, 'chats');
 const PENDING_ACTIONS_PATH = path.join(__dirname, 'pending_actions.json');
 const TOKEN_PATH = path.join(__dirname, 'token.json');
 const CREDENTIALS_PATH = path.join(__dirname, 'client_secret_170964452340-4a28usprg4v3ga2mua7rlgf3uvp3u8ns.apps.googleusercontent.com.json');
@@ -48,7 +49,8 @@ const MAX_LATEX_ERRORS_TO_KEEP = 5;
 // APK Generation (Experimental)
 const GRADLE_VERSION = '8.12.1';
 const APK_BUILD_BASE_DIR = path.join(__dirname, 'apk_builds');
-const ANDROID_SDK_PATH = 'C:\\Users\\hillel1\\Desktop\\Android\\Sdk'; // Note: escaped backslashes
+// Allow overriding the Android SDK location via environment variable
+const ANDROID_SDK_PATH = process.env.ANDROID_SDK_PATH || path.join(__dirname, 'Android', 'Sdk');
 
 module.exports = {
     MY_ID,
