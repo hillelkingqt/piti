@@ -441,8 +441,9 @@ async function describeAndStoreProfilePic(client, chatPaths, userId) {
     if (fs.existsSync(descPath)) {
         try { data = JSON.parse(fs.readFileSync(descPath, 'utf8')); } catch {}
     }
+    const baseId = getBaseIdForOwnerCheck(userId) || userId;
     const monthMs = 30 * 24 * 60 * 60 * 1000;
-    const existing = data[userId];
+    const existing = data[baseId];
     const now = Date.now();
     if (existing && now - existing.timestamp < monthMs) return;
     let desc = 'No profile picture or it is private.';
@@ -455,13 +456,27 @@ async function describeAndStoreProfilePic(client, chatPaths, userId) {
     } catch (e) {
         console.error('[ProfileDesc] Error downloading or describing profile pic:', e.message);
     }
-    data[userId] = { timestamp: now, description: desc };
+    data[baseId] = { timestamp: now, description: desc };
     try {
         fs.mkdirSync(chatPaths.chatDir, { recursive: true });
         fs.writeFileSync(descPath, JSON.stringify(data, null, 2), 'utf8');
-        console.log(`[ProfileDesc] Saved description for ${userId} in ${descPath}`);
+        console.log(`[ProfileDesc] Saved description for ${baseId} in ${descPath}`);
     } catch (err) {
         console.error('[ProfileDesc] Failed to save description:', err);
+    }
+}
+
+function getProfileDescription(chatPaths, userId) {
+    const descPath = path.join(chatPaths.chatDir, 'profile_descriptions.json');
+    if (!fs.existsSync(descPath)) return null;
+    try {
+        const data = JSON.parse(fs.readFileSync(descPath, 'utf8'));
+        const baseId = getBaseIdForOwnerCheck(userId) || userId;
+        const entry = data[baseId];
+        return entry?.description || null;
+    } catch (err) {
+        console.error('[ProfileDesc] Failed to read description:', err);
+        return null;
     }
 }
 async function handleGenerateGraphAction(plotData, targetMsg, chatPaths) {
@@ -5191,9 +5206,16 @@ async function handleMessage(msg, incoming, quotedMedia = null, contextMediaArra
         ).join('\n');
     }
 
-    const bigTextPrompt = `
+    let profileDescPromptPart = "";
+    const senderProfileDesc = getProfileDescription(chatPaths, senderIdForCheck);
+    if (senderProfileDesc) {
+        profileDescPromptPart = `\nתיאור תמונת הפרופיל של ${senderName}: ${senderProfileDesc}`;
+    }
+
+const bigTextPrompt = `
 אתה עוזר אישי בצ'אט וואצאפ בשם "פיתי". תענה בעברית בלבד ובצורה אמפתית, תמציתית ואיכותית.
 ${chatInfoPromptPart}
+${profileDescPromptPart}
 
 
 **הוראה חשובה: תזמון פעולות**
