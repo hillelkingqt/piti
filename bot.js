@@ -6646,8 +6646,7 @@ ${incoming}
 `;
 
 
-    console.log("\n💬 היסטוריית הודעות שנשלחה ל-Gemini:\n" + contextText);
-    console.log("\n🗣️ הודעה אחרונה שנשלחה ל-Gemini:\n" + incoming);
+    console.log(`🚨 פיתי זומנה על ידי ${senderName} בצ'אט ${chatId}. הודעה: "${incoming.replace(/\n/g, ' ').slice(0,80)}${incoming.length > 80 ? '...' : ''}"`);
 
 
     const requestPayload = { contents: [] };
