@@ -6877,7 +6877,6 @@ ${incoming}
         }
     }
 
-    console.log("\n\n🚀 Payload שנשלח ל-Gemini API:\n", JSON.stringify(requestPayload, null, 2));
     async function handleGeneratePowerPointAction(powerpointData, targetMsg, chatPaths) {
         const targetChatId = targetMsg?.id?.remote;
         const replyToId = powerpointData.replyTo || targetMsg?.id?._serialized;
