@@ -2043,22 +2043,20 @@ async function handleGroupManagementAction(actionData, targetMsg) {
         if (quotedParticipantTarget === true && finalParticipantIds.length === 0) {
             if (targetMsg.hasQuotedMsg) {
                 const originalQuotedMsgBySender = await targetMsg.getQuotedMessage();
-                
+
                 // --- NEW ROBUST PARTICIPANT ID EXTRACTION ---
                 // Try to get a valid phone number-based ID first.
                 // _data.author is often more reliable than the top-level 'author'.
                 let participantId = originalQuotedMsgBySender._data.author || originalQuotedMsgBySender.author || originalQuotedMsgBySender.from;
-                
+
                 if (participantId && typeof participantId === 'string') {
                     // Further validation: Ensure it looks like a real WhatsApp ID for a user.
-                    // A real user ID ends with @c.us and has a number before it.
-                    // The problematic ID was '104900432232513@c.us', which isn't a phone number.
-                    // Let's check if the part before @ is a valid number format (e.g., starts with 972 or other country codes).
                     const userPart = participantId.split('@')[0].split(':')[0]; // a.b:c@d.e -> a
-                    
+
                     if (/^\d+$/.test(userPart) && userPart.length > 5) { // Simple check: is it all digits and of reasonable length?
-                        finalParticipantIds.push(participantId);
-                        console.log(`[GroupMgmt] Robustly identified participant ${participantId} from user's quoted message.`);
+                        const sanitizedId = `${userPart}@c.us`;
+                        finalParticipantIds.push(sanitizedId);
+                        console.log(`[GroupMgmt] Robustly identified participant ${sanitizedId} from user's quoted message.`);
                     } else {
                          console.warn(`[GroupMgmt] Extracted a non-standard participant ID: ${participantId}. This might fail. Will not add to list.`);
                     }
@@ -2072,6 +2070,9 @@ async function handleGroupManagementAction(actionData, targetMsg) {
                 console.warn("[GroupMgmt] 'quotedParticipantTarget' is true, but the triggering message did not quote anyone.");
             }
         }
+
+        // Ensure only valid phone-based IDs remain
+        finalParticipantIds = finalParticipantIds.filter(id => typeof id === 'string' && id.includes('@c.us'));
 
 
         // בדיקה אם חסרים מזהי משתתפים עבור פעולות שדורשות אותם
@@ -5049,14 +5050,23 @@ async function handleMessage(msg, incoming, quotedMedia = null, contextMediaArra
             try { groupDesc = chatData.description || ""; } catch {}
             let participantsList = [];
             try {
-                await chatData.fetchParticipants();
-                for (const p of chatData.participants) {
-                    const contact = await getCachedContact(p.id?._serialized);
-                    const name = contact?.pushname || contact?.name;
-                    if (name) {
-                        const number = phone(contact?.id?._serialized);
-                        participantsList.push(`${name} (${number})`);
-                        if (participantsList.length >= 50) break;
+                if (typeof chatData.fetchParticipants === 'function') {
+                    await chatData.fetchParticipants();
+                } else if (!chatData.participants || chatData.participants.length === 0) {
+                    const refreshed = await client.getChatById(chatData.id._serialized);
+                    if (refreshed && Array.isArray(refreshed.participants)) {
+                        chatData.participants = refreshed.participants;
+                    }
+                }
+                if (Array.isArray(chatData.participants)) {
+                    for (const p of chatData.participants) {
+                        const contact = await getCachedContact(p.id?._serialized);
+                        const name = contact?.pushname || contact?.name;
+                        if (name) {
+                            const number = phone(contact?.id?._serialized);
+                            participantsList.push(`${name} (${number})`);
+                            if (participantsList.length >= 50) break;
+                        }
                     }
                 }
             } catch (pErr) {
