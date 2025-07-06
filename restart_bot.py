@@ -14,7 +14,20 @@ def log_print(message):
 
 # --- לוגיקה ראשית ---
 def main():
-    log_print("Python script to run Node.js bot in a new terminal.")
+    log_print("Python script to update repo and run Node.js bot in a new terminal.")
+
+    # cd piti (the repo directory)
+    repo_dir = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(repo_dir)
+    log_print(f"Changed working directory to {repo_dir}")
+
+    # git pull origin main to get latest updates
+    try:
+        log_print("Running 'git pull origin main' ...")
+        subprocess.check_call(["git", "pull", "origin", "main"])
+    except subprocess.CalledProcessError as e:
+        log_print(f"ERROR: git pull failed: {e}")
+        # continue even if pull fails
 
     if not os.path.exists(NODE_SCRIPT_PATH):
         log_print(f"ERROR: Node.js script not found at: {NODE_SCRIPT_PATH}")
