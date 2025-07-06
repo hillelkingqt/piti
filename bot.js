@@ -424,7 +424,8 @@ async function describeImage(base64Data, mimeType) {
 }
 
 async function downloadProfilePic(client, userId, outputPath) {
-    const url = await client.getProfilePicUrl(userId);
+    const normalizedId = getBaseId(userId);
+    const url = await client.getProfilePicUrl(normalizedId);
     if (!url) throw new Error('No profile picture available.');
     const res = await fetch(url);
     const buffer = await res.buffer();
