@@ -4,8 +4,8 @@ import os
 import platform
 
 # --- הגדרות ---
-# הנתיב המלא לסקריפט ה-Node.js שלך
-NODE_SCRIPT_PATH = r"C:\Users\hillel1\Desktop\WHAT\what_FIXED (1).js"
+# הנתיב לסקריפט ה-Node.js בתוך הפרויקט
+NODE_SCRIPT_PATH = os.path.join(os.path.dirname(__file__), 'bot.js')
 NODE_EXECUTABLE = "node" # או הנתיב המלא ל-node.exe אם צריך
 
 # --- פונקציות ---
