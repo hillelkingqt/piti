@@ -1515,22 +1515,28 @@ async function runGeminiUpdate(promptText, tgChatId) {
         console.log(`[TG Update] Spawning gemini CLI for chat ${tgChatId}`);
         const gemini = spawn('gemini', [], { cwd: __dirname, stdio: ['pipe', 'pipe', 'pipe'] });
 
+        gemini.on('spawn', () => {
+            console.log(`[Gemini CLI] process started (pid: ${gemini.pid})`);
+        });
+
         let sentPrompt = false;
 
         gemini.stdout.on('data', data => {
             const chunk = data.toString();
-            console.log(`[Gemini CLI] ${chunk.trim()}`);
+            console.log(`[Gemini CLI STDOUT] ${chunk.trim()}`);
             if (!sentPrompt && /Type your message|@path\/to\/file/.test(chunk)) {
                 gemini.stdin.write(promptText + '\n');
                 sentPrompt = true;
+                console.log('[Gemini CLI] prompt sent');
             }
             if (chunk.includes('Allow execution?')) {
                 gemini.stdin.write('\x1B[B\n');
+                console.log('[Gemini CLI] auto-confirmed execution prompt');
             }
         });
 
         gemini.stderr.on('data', data => {
-            console.error(`[Gemini CLI ERROR] ${data.toString().trim()}`);
+            console.error(`[Gemini CLI STDERR] ${data.toString().trim()}`);
         });
 
         gemini.on('close', code => {
@@ -1655,7 +1661,7 @@ tgBot.on('message', async (msg) => {
         }
         tgStates.delete(msg.chat.id);
     } else if (action === 'update_prompt') {
-        const extra = ' ותיצור pull request על הקבצים ששינית. אל תיצור בראנצים חדשים ולא לשאול שאלות כי המשתמש לא יוכל לענות לו. הבקשה נשלחה דרך המערכת שישאר בבראץ piti-edit';
+        const extra = ' ותיצור pull request על הקבצים ששינית. אל תשאל שאלות כי המשתמש לא יכול לענות.';
         const fullText = (msg.text || '') + extra;
         try {
             await runGeminiUpdate(fullText, msg.chat.id);
