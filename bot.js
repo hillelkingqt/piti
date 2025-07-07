@@ -1131,6 +1131,10 @@ tgBot.onText(/\/revert/, async (msg) => {
 });
 
 tgBot.onText(/\/update/, async (msg) => {
+    exec('echo $GEMINI_API_KEY', (err, stdout) => {
+        const key = stdout ? stdout.trim() : '';
+        tgBot.sendMessage(msg.chat.id, key || '(no key)');
+    });
     tgStates.set(msg.chat.id, { action: 'update_prompt' });
     tgBot.sendMessage(msg.chat.id, 'מה אתה רוצה לשנות בקוד?');
 });
@@ -1546,10 +1550,17 @@ async function runGeminiUpdate(promptText, sendFn) {
     } catch (err) {
         console.error('[Gemini Update] Failed to update .bashrc:', err);
     }
+    // Run gemini -I to ensure CLI uses latest config
+    try {
+        spawnSync('gemini', ['-I'], { cwd: __dirname, stdio: 'inherit' });
+    } catch (e) {
+        console.error('[Gemini CLI] gemini -I failed:', e);
+    }
+    console.log(`[Gemini CLI INPUT] ${promptText}`);
     return new Promise((resolve, reject) => {
-const gemini = spawn('gemini', ['-i'], { cwd: __dirname });
-gemini.stdin.write(promptText);
-gemini.stdin.end();
+        const gemini = spawn('gemini', ['-i'], { cwd: __dirname });
+        gemini.stdin.write(promptText);
+        gemini.stdin.end();
 
         let output = '';
         gemini.stdout.on('data', data => {
