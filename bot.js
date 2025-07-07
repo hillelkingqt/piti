@@ -1114,13 +1114,17 @@ tgBot.onText(/\/restartbot/, async (msg) => {
     restartBotViaTG(msg.chat.id);
 });
 
-tgBot.onText(/\/status/, async (msg) => {
+tgBot.onText(null, async (msg) => {
     const load = os.loadavg()[0].toFixed(2);
     const mem = ((os.totalmem()-os.freemem())/1024/1024).toFixed(0);
     exec('df -h /', (err, stdout) => {
         const disk = err ? 'N/A' : stdout.split('\n')[1];
         tgBot.sendMessage(msg.chat.id, `CPU load: ${load}\nRAM used: ${mem}MB\nDisk: ${disk}`);
     });
+});
+
+tgBot.onText(null, async (msg) => {
+    tgBot.sendMessage(msg.chat.id, 'שלום');
 });
 
 tgBot.onText(/\/allowuser (.+)/, (msg, match) => {
