@@ -1334,7 +1334,8 @@ tgBot.on('message', async (msg) => {
     };
 
     if (action === 'send') {
-        const text = msg.text ? `פיתי\n\n${msg.text}` : '';
+        const textContent = msg.text || msg.caption || '';
+        const text = textContent ? `פיתי\n\n${textContent}` : '';
         const file = await downloadTgFile();
         if (file) {
             const media = MessageMedia.fromFilePath(file.path);
@@ -1346,7 +1347,8 @@ tgBot.on('message', async (msg) => {
         tgStates.delete(msg.chat.id);
     } else if (action === 'secret') {
         const file = await downloadTgFile();
-        await processSecretMessageToPiti(waId, msg.text || '', file).catch(err =>
+        const textContent = msg.text || msg.caption || '';
+        await processSecretMessageToPiti(waId, textContent, file).catch(err =>
             console.error('[Telegram Secret] Async error:', err));
         tgBot.sendMessage(msg.chat.id, 'ההודעה נשלחה לפיתי.');
         tgStates.delete(msg.chat.id);
