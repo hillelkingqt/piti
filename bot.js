@@ -55,6 +55,7 @@ const blockedNumbers = new Set();
 const botMessageIds = new Set();
 const repliableMessageIds = new Set();
 let botStartTime = Date.now();
+let pendingUpdateWAId = null;
 
 const IMAGE_MODEL_ENDPOINTS = {
     'stable-diffusion-xl-lighting': '@cf/bytedance/stable-diffusion-xl-lightning',
@@ -1514,31 +1515,15 @@ async function processSecretMessageToPiti(waId, text, file) {
     }
 }
 
-async function runGeminiUpdate(promptText, tgChatId) {
+async function runGeminiUpdate(promptText, sendFn) {
     return new Promise((resolve, reject) => {
-        console.log(`[TG Update] Spawning gemini CLI for chat ${tgChatId}`);
-        const gemini = spawn('gemini', [], { cwd: __dirname, stdio: ['pipe', 'pipe', 'pipe'] });
-
-        gemini.on('spawn', () => {
-            console.log(`[Gemini CLI] process started (pid: ${gemini.pid})`);
-        });
-
-        let sentPrompt = false;
+        const gemini = spawn('gemini', ['-i', promptText], { cwd: __dirname });
         let output = '';
 
         gemini.stdout.on('data', data => {
             const chunk = data.toString();
             output += chunk;
             console.log(`[Gemini CLI STDOUT] ${chunk.trim()}`);
-            if (!sentPrompt && /Type your message|Enter your message|@path\/to\/file/.test(chunk)) {
-                gemini.stdin.write(promptText + '\n');
-                sentPrompt = true;
-                console.log('[Gemini CLI] prompt sent');
-            }
-            if (chunk.includes('Allow execution?')) {
-                gemini.stdin.write('\x1B[B\n');
-                console.log('[Gemini CLI] auto-confirmed execution prompt');
-            }
         });
 
         gemini.stderr.on('data', data => {
@@ -1548,11 +1533,10 @@ async function runGeminiUpdate(promptText, tgChatId) {
         });
 
         gemini.on('close', code => {
-            console.log(`[Gemini CLI] exited with code ${code}`);
-            tgBot.sendMessage(tgChatId, `העדכון הסתיים (קוד יציאה ${code}).`);
+            sendFn(`העדכון הסתיים (קוד יציאה ${code}).`);
             if (output.trim()) {
                 const msg = output.length > 3500 ? output.slice(-3500) : output;
-                tgBot.sendMessage(tgChatId, `פלט gemini:\n\n${msg}`);
+                sendFn(`פלט gemini:\n\n${msg}`);
             }
             resolve();
         });
@@ -1560,7 +1544,7 @@ async function runGeminiUpdate(promptText, tgChatId) {
         gemini.on('error', err => {
             console.error('[Gemini CLI] spawn error:', err);
             const errMsg = err.code === 'ENOENT' ? 'gemini CLI לא נמצא במערכת.' : 'שגיאה בהרצת gemini CLI.';
-            tgBot.sendMessage(tgChatId, errMsg);
+            sendFn(errMsg);
             reject(err);
         });
     });
@@ -1677,7 +1661,7 @@ tgBot.on('message', async (msg) => {
         const extra = ' ותיצור pull request על הקבצים ששינית. אל תשאל שאלות כי המשתמש לא יכול לענות.';
         const fullText = (msg.text || '') + extra;
         try {
-            await runGeminiUpdate(fullText, msg.chat.id);
+            await runGeminiUpdate(fullText, txt => tgBot.sendMessage(msg.chat.id, txt));
         } catch (err) {
             console.error('[TG Update]', err);
             tgBot.sendMessage(msg.chat.id, 'שגיאה בביצוע העדכון.');
@@ -11721,6 +11705,7 @@ async function sendInfoMenu(msg) {
 *   \`/allownot\` (*) - תיוג משתמש כדי להסירו מרשימת המורשים.
 *   \`/emojis <אימוג'י>\` (*) - הגדרת אימוג'י לתגובה אוטומטית לכל הודעה (מלבד הודעות בוט).
 *   \`/emojis off\` (*) - כיבוי תגובה אוטומטית עם אימוג'י.
+*   \`/update\` (*) - שליחת בקשת עדכון קוד באמצעות Gemini.
 
 (*) פקודות המסומנות בכוכבית הן בדרך כלל לשימוש הבעלים של הבוט בלבד.
 
@@ -12316,6 +12301,17 @@ console.log(`[message_create OWNER CHECK] Owner command detected from ${original
                         }
                         commandHandled = true;
                         break;
+                    case "/update":
+                        const qMsg = await msg.reply("מה אתה רוצה לשנות בקוד?");
+                        if (qMsg && qMsg.id && qMsg.id._serialized) {
+                            const norm = normalizeMsgId(qMsg.id._serialized);
+                            pendingUpdateWAId = norm;
+                            botMessageIds.add(norm);
+                            writtenMessageIds.add(norm);
+                            repliableMessageIds.add(norm);
+                        }
+                        commandHandled = true;
+                        break;
                     case "/shutdown": // פקודה חדשה
                         await msg.reply("פיתי\n\nמכבה את הבוט...");
                         console.log("🔌 Bot is shutting down by owner command...");
@@ -12507,6 +12503,20 @@ console.log(`[message_create OWNER CHECK] Owner command detected from ${original
             // Let it fall through to Section 8 to decide if handleMessage should run
         }
     } // --- End of owner check ---
+
+    if (pendingUpdateWAId && messageSenderBaseId === ownerBaseId && msg.hasQuotedMsg) {
+        try {
+            const quotedMsg = await msg.getQuotedMessage();
+            const normQ = normalizeMsgId(quotedMsg?.id?._serialized);
+            if (normQ === pendingUpdateWAId) {
+                pendingUpdateWAId = null;
+                const extra = ' ותיצור pull request על הקבצים ששינית. אל תשאל שאלות כי המשתמש לא יכול לענות.';
+                const fullText = (incoming || '') + extra;
+                await runGeminiUpdate(fullText, t => client.sendMessage(chatId, t));
+                return;
+            }
+        } catch (e) { console.error('[WA Update]', e); }
+    }
 
     // ==============================================================
     // SECTION 5.5: Automatic Trigger Check (REVISED)
