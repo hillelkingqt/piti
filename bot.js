@@ -1517,7 +1517,9 @@ async function processSecretMessageToPiti(waId, text, file) {
 
 async function runGeminiUpdate(promptText, sendFn) {
     return new Promise((resolve, reject) => {
-        const gemini = spawn('gemini', ['-i', promptText], { cwd: __dirname });
+        const gemini = spawn('gemini', ['-i'], { cwd: __dirname });
+        gemini.stdin.write(promptText);
+        gemini.stdin.end();
         let output = '';
 
         gemini.stdout.on('data', data => {
