@@ -1524,12 +1524,14 @@ async function runGeminiUpdate(promptText, sendFn) {
             const chunk = data.toString();
             output += chunk;
             console.log(`[Gemini CLI STDOUT] ${chunk.trim()}`);
+            sendFn(chunk); // send progress updates
         });
 
         gemini.stderr.on('data', data => {
             const errChunk = data.toString();
             output += errChunk;
             console.error(`[Gemini CLI STDERR] ${errChunk.trim()}`);
+            sendFn(errChunk); // send progress updates
         });
 
         gemini.on('close', code => {
