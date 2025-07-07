@@ -4,6 +4,8 @@ const qrcode = require('qrcode-terminal');
 const axios = require('axios');
 const fetch = require('node-fetch');
 const { exec } = require('child_process');
+const { promisify } = require('util');
+const execPromise = promisify(exec);
 const uploadedMediaMap = new Map();
 const cheerio = require('cheerio');
 const { searchDuckDuckGoTop10 } = require('./ducksearch');
@@ -1022,6 +1024,54 @@ async function listChats(isGroup) {
     return [...contactList.sort(sortFn), ...otherList.sort(sortFn)];
 }
 
+async function sendMergeOptions(chatId) {
+    try {
+        const { stdout } = await execPromise('gh pr list --state open --json number,title,author --limit 100');
+        const prs = JSON.parse(stdout.trim() || '[]');
+        if (prs.length === 0) {
+            await tgBot.sendMessage(chatId, 'אין Pull Requests פתוחים.');
+            return;
+        }
+        tgStates.set(chatId, { action: 'merge_select', prs });
+        const keyboard = prs.slice(0, 10).map((pr, idx) => [{ text: `#${pr.number} ${pr.title.slice(0, 30)}`, callback_data: `mergepr_${idx}` }]);
+        keyboard.push([{ text: '❌ ביטול', callback_data: 'merge_cancel' }]);
+        await tgBot.sendMessage(chatId, 'בחר Pull Request למיזוג:', { reply_markup: { inline_keyboard: keyboard } });
+    } catch (err) {
+        console.error('[sendMergeOptions] failed:', err);
+        await tgBot.sendMessage(chatId, 'שגיאה בקבלת רשימת ה-PR.');
+    }
+}
+
+async function sendRevertOptions(chatId) {
+    try {
+        const { stdout } = await execPromise('gh pr list --state merged --json number,title,author,mergedAt --limit 100');
+        const prs = JSON.parse(stdout.trim() || '[]');
+        if (prs.length === 0) {
+            await tgBot.sendMessage(chatId, 'לא נמצאו PR ממוזגים.');
+            return;
+        }
+        tgStates.set(chatId, { action: 'revert_select', prs });
+        const keyboard = prs.slice(0, 10).map((pr, idx) => [{ text: `#${pr.number} ${pr.title.slice(0, 30)}`, callback_data: `revertpr_${idx}` }]);
+        keyboard.push([{ text: '❌ ביטול', callback_data: 'revert_cancel' }]);
+        await tgBot.sendMessage(chatId, 'בחר Pull Request לשחזור:', { reply_markup: { inline_keyboard: keyboard } });
+    } catch (err) {
+        console.error('[sendRevertOptions] failed:', err);
+        await tgBot.sendMessage(chatId, 'שגיאה בקבלת רשימת ה-PR.');
+    }
+}
+
+function restartBotViaTG(chatId) {
+    const pythonExecutable = 'python';
+    const restartScriptPath = path.join(__dirname, 'restart_bot.py');
+    const nodeScript = process.argv[1];
+    if (fs.existsSync(restartScriptPath)) {
+        spawn(pythonExecutable, [restartScriptPath, nodeScript], { detached: true, stdio: 'ignore' }).unref();
+        tgBot.sendMessage(chatId, 'מפעיל מחדש את הבוט...');
+    } else {
+        tgBot.sendMessage(chatId, 'לא נמצא סקריפט הפעלה.');
+    }
+}
+
 tgBot.onText(/\/groups/, async (msg) => {
     await sendChatList(msg.chat.id, true);
 });
@@ -1036,6 +1086,14 @@ tgBot.onText(/\/manage/, async (msg) => {
         [{ text: 'צ\'אטים פרטיים', callback_data: 'manage_privates' }]
     ];
     tgBot.sendMessage(msg.chat.id, 'מה תרצה לנהל?', { reply_markup: { inline_keyboard: keyboard } });
+});
+
+tgBot.onText(/\/merge/, async (msg) => {
+    await sendMergeOptions(msg.chat.id);
+});
+
+tgBot.onText(/\/revert/, async (msg) => {
+    await sendRevertOptions(msg.chat.id);
 });
 
 tgBot.onText(/\/restartbot/, async (msg) => {
@@ -1121,8 +1179,10 @@ tgBot.on('callback_query', async (query) => {
     if(data && data.startsWith('groups_')) { const page=parseInt(data.split('_')[1])||0; await sendChatList(chatId,true,page,query.message.message_id); return tgBot.answerCallbackQuery(query.id); }
     if(data && data.startsWith('privates_')) { const page=parseInt(data.split('_')[1])||0; await sendChatList(chatId,false,page,query.message.message_id); return tgBot.answerCallbackQuery(query.id); }
     if(data === 'refresh_privates') { await sendChatList(chatId,false,0,query.message.message_id); return tgBot.answerCallbackQuery(query.id); }
-    if(data === 'close_list') { const keyboard=[[{text:'/groups',callback_data:'cmd_groups'}],[{text:'/privates',callback_data:'cmd_privates'}],[{text:'/manage',callback_data:'cmd_manage'}],[{text:'/status',callback_data:'cmd_status'}]]; tgBot.editMessageText('בחר פקודה:',{chat_id:chatId,message_id:query.message.message_id,reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
+    if(data === 'close_list') { const keyboard=[[{text:'/groups',callback_data:'cmd_groups'}],[{text:'/privates',callback_data:'cmd_privates'}],[{text:'/manage',callback_data:'cmd_manage'}],[{text:'/merge',callback_data:'cmd_merge'}],[{text:'/revert',callback_data:'cmd_revert'}],[{text:'/status',callback_data:'cmd_status'}]]; tgBot.editMessageText('בחר פקודה:',{chat_id:chatId,message_id:query.message.message_id,reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
     if(data === 'cmd_manage') { const keyboard=[[{text:'קבוצות',callback_data:'manage_groups'}],[{text:"צ'אטים פרטיים",callback_data:'manage_privates'}]]; tgBot.sendMessage(chatId,'מה תרצה לנהל?',{reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
+    if(data === 'cmd_merge') { await sendMergeOptions(chatId); return tgBot.answerCallbackQuery(query.id); }
+    if(data === 'cmd_revert') { await sendRevertOptions(chatId); return tgBot.answerCallbackQuery(query.id); }
     if(data === 'cmd_status') { const load=os.loadavg()[0].toFixed(2); const mem=((os.totalmem()-os.freemem())/1024/1024).toFixed(0); exec('df -h /',(e,out)=>{const disk=e?'N/A':out.split('\n')[1]; tgBot.sendMessage(chatId,`CPU load: ${load}\nRAM used: ${mem}MB\nDisk: ${disk}`);}); return tgBot.answerCallbackQuery(query.id); }
 
     if (data.startsWith('chat_')) {
@@ -1296,6 +1356,77 @@ tgBot.on('callback_query', async (query) => {
         return tgBot.answerCallbackQuery(query.id);
     }
 
+    if (data.startsWith('mergepr_')) {
+        const idx = Number(data.split('_')[1]);
+        const state = tgStates.get(chatId);
+        const pr = state?.prs?.[idx];
+        if (!pr) { await tgBot.sendMessage(chatId, 'PR לא נמצא.'); return tgBot.answerCallbackQuery(query.id); }
+        tgStates.set(chatId, { action: 'merge_confirm', pr });
+        const keyboard = [[{ text: 'כן', callback_data: 'merge_yes' }, { text: 'לא', callback_data: 'merge_no' }]];
+        tgBot.sendMessage(chatId, `האם למזג PR #${pr.number}?`, { reply_markup: { inline_keyboard: keyboard } });
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    if (data === 'merge_yes') {
+        const state = tgStates.get(chatId);
+        const pr = state?.pr;
+        if (!pr) { await tgBot.sendMessage(chatId, 'אין PR לביצוע.'); return tgBot.answerCallbackQuery(query.id); }
+        try {
+            await execPromise(`gh pr merge ${pr.number} --merge`);
+            const kb = [[{ text: '🔄 Restart', callback_data: 'gh_restart' }]];
+            await tgBot.sendMessage(chatId, 'המיזוג הושלם.', { reply_markup: { inline_keyboard: kb } });
+        } catch (err) {
+            console.error('[merge_yes]', err);
+            await tgBot.sendMessage(chatId, 'שגיאה במיזוג.');
+        }
+        tgStates.delete(chatId);
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    if (data === 'merge_no') {
+        tgBot.sendMessage(chatId, 'הפעולה בוטלה.');
+        tgStates.delete(chatId);
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    if (data.startsWith('revertpr_')) {
+        const idx = Number(data.split('_')[1]);
+        const state = tgStates.get(chatId);
+        const pr = state?.prs?.[idx];
+        if (!pr) { await tgBot.sendMessage(chatId, 'PR לא נמצא.'); return tgBot.answerCallbackQuery(query.id); }
+        tgStates.set(chatId, { action: 'revert_confirm', pr });
+        const keyboard = [[{ text: 'כן', callback_data: 'revert_yes' }, { text: 'לא', callback_data: 'revert_no' }]];
+        tgBot.sendMessage(chatId, `האם לשחזר PR #${pr.number}?`, { reply_markup: { inline_keyboard: keyboard } });
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    if (data === 'revert_yes') {
+        const state = tgStates.get(chatId);
+        const pr = state?.pr;
+        if (!pr) { await tgBot.sendMessage(chatId, 'אין PR לשחזור.'); return tgBot.answerCallbackQuery(query.id); }
+        try {
+            await execPromise(`gh pr revert ${pr.number}`);
+            const kb = [[{ text: '🔄 Restart', callback_data: 'gh_restart' }]];
+            await tgBot.sendMessage(chatId, 'בוצע revert.', { reply_markup: { inline_keyboard: kb } });
+        } catch (err) {
+            console.error('[revert_yes]', err);
+            await tgBot.sendMessage(chatId, 'שגיאה בביצוע revert.');
+        }
+        tgStates.delete(chatId);
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    if (data === 'revert_no') {
+        tgBot.sendMessage(chatId, 'הפעולה בוטלה.');
+        tgStates.delete(chatId);
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    if (data === 'gh_restart') {
+        restartBotViaTG(chatId);
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
 
     if (data === 'manage_groups' || data === 'manage_privates') {
         const isGroup = data === 'manage_groups';
@@ -1371,6 +1502,8 @@ tgBot.on('message', async (msg) => {
             [{text:'/groups',callback_data:'cmd_groups'}],
             [{text:'/privates',callback_data:'cmd_privates'}],
             [{text:'/manage',callback_data:'cmd_manage'}],
+            [{text:'/merge',callback_data:'cmd_merge'}],
+            [{text:'/revert',callback_data:'cmd_revert'}],
             [{text:'/status',callback_data:'cmd_status'}]
         ];
         tgBot.sendMessage(msg.chat.id, 'בחר פקודה:', {reply_markup:{inline_keyboard:keyboard}});
@@ -11972,6 +12105,26 @@ client.on('message_create', async (msg) => {
     // --- Check if the message sender IS the owner ---
     if (messageSenderBaseId && ownerBaseId && messageSenderBaseId === ownerBaseId) {
         const isCommand = incoming.startsWith('/'); // Basic check if it looks like a command
+
+        if (!isCommand && incoming === '!merge-latest') {
+            commandHandled = true;
+            await msg.reply('ממזג את ה-PR האחרון...');
+            try {
+                const { stdout } = await execPromise('gh pr list --author hillelkingqt --state open --json number --limit 1 --sort created');
+                const prs = JSON.parse(stdout.trim() || '[]');
+                if (prs.length === 0) {
+                    await msg.reply('לא נמצא Pull Request פתוח.');
+                } else {
+                    const prNum = prs[0].number;
+                    await execPromise(`gh pr merge ${prNum} --merge`);
+                    await msg.reply(`בוצע merge ל-PR #${prNum}.`);
+                }
+            } catch (err) {
+                console.error('[!merge-latest]', err);
+                await msg.reply('שגיאה בביצוע merge.');
+            }
+            return;
+        }
 
         if (isCommand) {
             commandHandled = true; // Assume handled if it starts with '/', reset in default
