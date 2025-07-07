@@ -1547,8 +1547,10 @@ async function runGeminiUpdate(promptText, sendFn) {
         console.error('[Gemini Update] Failed to update .bashrc:', err);
     }
     return new Promise((resolve, reject) => {
-        const env = { ...process.env, GEMINI_API_KEY: DEFAULT_GEMINI_API_KEY };
-        const gemini = spawn('gemini', ['-i', promptText], { cwd: __dirname, env });
+const gemini = spawn('gemini', ['-i'], { cwd: __dirname });
+gemini.stdin.write(promptText);
+gemini.stdin.end();
+
         let output = '';
         gemini.stdout.on('data', data => {
             const chunk = data.toString();
