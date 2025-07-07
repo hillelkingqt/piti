@@ -911,6 +911,39 @@ const qr = require('qrcode');
 // יצירת טלגרם בוט חדש
 const tgBot = new TelegramBot('7523859217:AAER9lMnc1EWzlWildSZXhM9JjU3zTGyx-U', { polling: true });
 
+// Helper functions to send Telegram messages without crashing on errors
+async function safeTgSendMessage(chatId, text, options = {}) {
+    try {
+        await tgBot.sendMessage(chatId, text, options);
+    } catch (err) {
+        console.error('Failed to send message to Telegram bot:', err?.message || err);
+    }
+}
+
+async function safeTgSendPhoto(chatId, photo, options = {}) {
+    try {
+        await tgBot.sendPhoto(chatId, photo, options);
+    } catch (err) {
+        console.error('Failed to send photo to Telegram bot:', err?.message || err);
+    }
+}
+
+async function safeTgSendDocument(chatId, document, options = {}) {
+    try {
+        await tgBot.sendDocument(chatId, document, options);
+    } catch (err) {
+        console.error('Failed to send document to Telegram bot:', err?.message || err);
+    }
+}
+
+async function safeTgEditMessageText(text, options = {}) {
+    try {
+        await safeTgEditMessageText(text, options);
+    } catch (err) {
+        console.error('Failed to edit Telegram message:', err?.message || err);
+    }
+}
+
 client.on('qr', async (qrCode) => {
     console.log('🔲 QR Code received, generating image...');
 
@@ -921,7 +954,7 @@ client.on('qr', async (qrCode) => {
         await QRCode.toFile(filePath, qrCode); // שים לב: QRCode עם Q גדול
 
         // שליחת התמונה לטלגרם לפי chat_id
-        await tgBot.sendPhoto(7547836101, fs.readFileSync(filePath), {
+        await safeTgSendPhoto(7547836101, fs.readFileSync(filePath), {
             caption: '📱 סרוק את הברקוד כדי להתחבר לבוט הוואטסאפ'
         });
 
@@ -949,9 +982,9 @@ async function sendChatList(tgChatId, isGroup, page = 0, messageId = null) {
     const emptyText = isGroup ? 'אין קבוצות זמינות.' : "אין צ'אטים פרטיים זמינים.";
     if (list.length === 0) {
         if (messageId) {
-            await tgBot.editMessageText(emptyText, { chat_id: tgChatId, message_id: messageId });
+            await safeTgEditMessageText(emptyText, { chat_id: tgChatId, message_id: messageId });
         } else {
-            await tgBot.sendMessage(tgChatId, emptyText);
+            await safeTgSendMessage(tgChatId, emptyText);
         }
         return;
     }
@@ -980,9 +1013,9 @@ async function sendChatList(tgChatId, isGroup, page = 0, messageId = null) {
     const title = isGroup ? 'בחר קבוצה:' : "בחר צ'אט פרטי:";
 
     if (messageId) {
-        await tgBot.editMessageText(title, { chat_id: tgChatId, message_id: messageId, reply_markup: options.reply_markup });
+        await safeTgEditMessageText(title, { chat_id: tgChatId, message_id: messageId, reply_markup: options.reply_markup });
     } else {
-        await tgBot.sendMessage(tgChatId, title, options);
+        await safeTgSendMessage(tgChatId, title, options);
     }
 }
 
@@ -1029,16 +1062,16 @@ async function sendMergeOptions(chatId) {
         const { stdout } = await execPromise('gh pr list --state open --json number,title,author --limit 100');
         const prs = JSON.parse(stdout.trim() || '[]');
         if (prs.length === 0) {
-            await tgBot.sendMessage(chatId, 'אין Pull Requests פתוחים.');
+            await safeTgSendMessage(chatId, 'אין Pull Requests פתוחים.');
             return;
         }
         tgStates.set(chatId, { action: 'merge_select', prs });
         const keyboard = prs.slice(0, 10).map((pr, idx) => [{ text: `#${pr.number} ${pr.title.slice(0, 30)}`, callback_data: `mergepr_${idx}` }]);
         keyboard.push([{ text: '❌ ביטול', callback_data: 'merge_cancel' }]);
-        await tgBot.sendMessage(chatId, 'בחר Pull Request למיזוג:', { reply_markup: { inline_keyboard: keyboard } });
+        await safeTgSendMessage(chatId, 'בחר Pull Request למיזוג:', { reply_markup: { inline_keyboard: keyboard } });
     } catch (err) {
         console.error('[sendMergeOptions] failed:', err);
-        await tgBot.sendMessage(chatId, 'שגיאה בקבלת רשימת ה-PR.');
+        await safeTgSendMessage(chatId, 'שגיאה בקבלת רשימת ה-PR.');
     }
 }
 
@@ -1047,16 +1080,16 @@ async function sendRevertOptions(chatId) {
         const { stdout } = await execPromise('gh pr list --state merged --json number,title,author,mergedAt --limit 100');
         const prs = JSON.parse(stdout.trim() || '[]');
         if (prs.length === 0) {
-            await tgBot.sendMessage(chatId, 'לא נמצאו PR ממוזגים.');
+            await safeTgSendMessage(chatId, 'לא נמצאו PR ממוזגים.');
             return;
         }
         tgStates.set(chatId, { action: 'revert_select', prs });
         const keyboard = prs.slice(0, 10).map((pr, idx) => [{ text: `#${pr.number} ${pr.title.slice(0, 30)}`, callback_data: `revertpr_${idx}` }]);
         keyboard.push([{ text: '❌ ביטול', callback_data: 'revert_cancel' }]);
-        await tgBot.sendMessage(chatId, 'בחר Pull Request לשחזור:', { reply_markup: { inline_keyboard: keyboard } });
+        await safeTgSendMessage(chatId, 'בחר Pull Request לשחזור:', { reply_markup: { inline_keyboard: keyboard } });
     } catch (err) {
         console.error('[sendRevertOptions] failed:', err);
-        await tgBot.sendMessage(chatId, 'שגיאה בקבלת רשימת ה-PR.');
+        await safeTgSendMessage(chatId, 'שגיאה בקבלת רשימת ה-PR.');
     }
 }
 
@@ -1066,12 +1099,12 @@ function restartBotViaTG(chatId) {
     const nodeScript = process.argv[1];
 
     if (!fs.existsSync(restartScriptPath)) {
-        tgBot.sendMessage(chatId, 'לא נמצא סקריפט הפעלה.');
+        safeTgSendMessage(chatId, 'לא נמצא סקריפט הפעלה.');
         return;
     }
 
     if (!nodeScript) {
-        tgBot.sendMessage(chatId, 'שגיאה: לא ניתן לקבוע את נתיב סקריפט הבוט.');
+        safeTgSendMessage(chatId, 'שגיאה: לא ניתן לקבוע את נתיב סקריפט הבוט.');
         return;
     }
 
@@ -1079,7 +1112,7 @@ function restartBotViaTG(chatId) {
         detached: true,
         stdio: 'ignore'
     }).unref();
-    tgBot.sendMessage(chatId, 'מפעיל מחדש את הבוט...');
+    safeTgSendMessage(chatId, 'מפעיל מחדש את הבוט...');
 
     setTimeout(() => {
         process.exit(1);
@@ -1099,7 +1132,7 @@ tgBot.onText(/\/manage/, async (msg) => {
         [{ text: 'קבוצות', callback_data: 'manage_groups' }],
         [{ text: 'צ\'אטים פרטיים', callback_data: 'manage_privates' }]
     ];
-    tgBot.sendMessage(msg.chat.id, 'מה תרצה לנהל?', { reply_markup: { inline_keyboard: keyboard } });
+    safeTgSendMessage(msg.chat.id, 'מה תרצה לנהל?', { reply_markup: { inline_keyboard: keyboard } });
 });
 
 tgBot.onText(/\/merge/, async (msg) => {
@@ -1119,7 +1152,7 @@ tgBot.onText(/\/status/, async (msg) => {
     const mem = ((os.totalmem()-os.freemem())/1024/1024).toFixed(0);
     exec('df -h /', (err, stdout) => {
         const disk = err ? 'N/A' : stdout.split('\n')[1];
-        tgBot.sendMessage(msg.chat.id, `CPU load: ${load}\nRAM used: ${mem}MB\nDisk: ${disk}`);
+        safeTgSendMessage(msg.chat.id, `CPU load: ${load}\nRAM used: ${mem}MB\nDisk: ${disk}`);
     });
 });
 
@@ -1128,7 +1161,7 @@ tgBot.onText(/\/allowuser (.+)/, (msg, match) => {
     if (num) {
         allowedNumbers.add(num);
         saveAllowedUsers();
-        tgBot.sendMessage(msg.chat.id, `המשתמש ${num} נוסף לרשימת המורשים.`);
+        safeTgSendMessage(msg.chat.id, `המשתמש ${num} נוסף לרשימת המורשים.`);
     }
 });
 
@@ -1136,7 +1169,7 @@ tgBot.onText(/\/unallowuser (.+)/, (msg, match) => {
     const num = (match[1]||'').trim();
     if (allowedNumbers.delete(num)) {
         saveAllowedUsers();
-        tgBot.sendMessage(msg.chat.id, `המשתמש ${num} הוסר מרשימת המורשים.`);
+        safeTgSendMessage(msg.chat.id, `המשתמש ${num} הוסר מרשימת המורשים.`);
     }
 });
 
@@ -1144,22 +1177,22 @@ tgBot.onText(/\/setvoice (.+)/, (msg, match) => {
     const v = (match[1]||'').trim();
     if (v) {
         defaultTtsVoice = v;
-        tgBot.sendMessage(msg.chat.id, `עודכן קול ברירת המחדל ל-${v}`);
+        safeTgSendMessage(msg.chat.id, `עודכן קול ברירת המחדל ל-${v}`);
     }
 });
 
 tgBot.onText(/\/backupmems/, (msg) => {
     const memPath = path.join(__dirname, 'memories.json');
     if (fs.existsSync(memPath)) {
-        tgBot.sendDocument(msg.chat.id, memPath);
+        safeTgSendDocument(msg.chat.id, memPath);
     } else {
-        tgBot.sendMessage(msg.chat.id, 'קובץ memories.json לא נמצא.');
+        safeTgSendMessage(msg.chat.id, 'קובץ memories.json לא נמצא.');
     }
 });
 
 tgBot.onText(/\/restoremems/, (msg) => {
     tgStates.set(msg.chat.id, { action: 'restore_mems' });
-    tgBot.sendMessage(msg.chat.id, 'שלח את קובץ memories.json כעת.');
+    safeTgSendMessage(msg.chat.id, 'שלח את קובץ memories.json כעת.');
 });
 
 tgBot.onText(/\/schedule (\S+) (\S+) (.+)/, (msg, match) => {
@@ -1170,9 +1203,9 @@ tgBot.onText(/\/schedule (\S+) (\S+) (.+)/, (msg, match) => {
         const actions = loadPendingActions();
         actions.push({ chatId: chat, executionTime: when.toISOString(), actionData: { action: 'text', message: text } });
         savePendingActions(actions);
-        tgBot.sendMessage(msg.chat.id, 'הודעה תוזמנה בהצלחה.');
+        safeTgSendMessage(msg.chat.id, 'הודעה תוזמנה בהצלחה.');
     } else {
-        tgBot.sendMessage(msg.chat.id, 'פורמט זמן שגוי.');
+        safeTgSendMessage(msg.chat.id, 'פורמט זמן שגוי.');
     }
 });
 
@@ -1185,12 +1218,12 @@ tgBot.on('callback_query', async (query) => {
     if(data && data.startsWith('groups_')) { const page=parseInt(data.split('_')[1])||0; await sendChatList(chatId,true,page,query.message.message_id); return tgBot.answerCallbackQuery(query.id); }
     if(data && data.startsWith('privates_')) { const page=parseInt(data.split('_')[1])||0; await sendChatList(chatId,false,page,query.message.message_id); return tgBot.answerCallbackQuery(query.id); }
     if(data === 'refresh_privates') { await sendChatList(chatId,false,0,query.message.message_id); return tgBot.answerCallbackQuery(query.id); }
-    if(data === 'close_list') { const keyboard=[[{text:'/groups',callback_data:'cmd_groups'}],[{text:'/privates',callback_data:'cmd_privates'}],[{text:'/manage',callback_data:'cmd_manage'}],[{text:'/merge',callback_data:'cmd_merge'}],[{text:'/revert',callback_data:'cmd_revert'}],[{text:'/status',callback_data:'cmd_status'}]]; tgBot.editMessageText('בחר פקודה:',{chat_id:chatId,message_id:query.message.message_id,reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
-    if(data === 'merge_cancel' || data === 'revert_cancel') { const keyboard=[[{text:'/groups',callback_data:'cmd_groups'}],[{text:'/privates',callback_data:'cmd_privates'}],[{text:'/manage',callback_data:'cmd_manage'}],[{text:'/merge',callback_data:'cmd_merge'}],[{text:'/revert',callback_data:'cmd_revert'}],[{text:'/status',callback_data:'cmd_status'}]]; tgStates.delete(chatId); tgBot.editMessageText('בחר פקודה:',{chat_id:chatId,message_id:query.message.message_id,reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
-    if(data === 'cmd_manage') { const keyboard=[[{text:'קבוצות',callback_data:'manage_groups'}],[{text:"צ'אטים פרטיים",callback_data:'manage_privates'}]]; tgBot.sendMessage(chatId,'מה תרצה לנהל?',{reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
+    if(data === 'close_list') { const keyboard=[[{text:'/groups',callback_data:'cmd_groups'}],[{text:'/privates',callback_data:'cmd_privates'}],[{text:'/manage',callback_data:'cmd_manage'}],[{text:'/merge',callback_data:'cmd_merge'}],[{text:'/revert',callback_data:'cmd_revert'}],[{text:'/status',callback_data:'cmd_status'}]]; safeTgEditMessageText('בחר פקודה:',{chat_id:chatId,message_id:query.message.message_id,reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
+    if(data === 'merge_cancel' || data === 'revert_cancel') { const keyboard=[[{text:'/groups',callback_data:'cmd_groups'}],[{text:'/privates',callback_data:'cmd_privates'}],[{text:'/manage',callback_data:'cmd_manage'}],[{text:'/merge',callback_data:'cmd_merge'}],[{text:'/revert',callback_data:'cmd_revert'}],[{text:'/status',callback_data:'cmd_status'}]]; tgStates.delete(chatId); safeTgEditMessageText('בחר פקודה:',{chat_id:chatId,message_id:query.message.message_id,reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
+    if(data === 'cmd_manage') { const keyboard=[[{text:'קבוצות',callback_data:'manage_groups'}],[{text:"צ'אטים פרטיים",callback_data:'manage_privates'}]]; safeTgSendMessage(chatId,'מה תרצה לנהל?',{reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
     if(data === 'cmd_merge') { await sendMergeOptions(chatId); return tgBot.answerCallbackQuery(query.id); }
     if(data === 'cmd_revert') { await sendRevertOptions(chatId); return tgBot.answerCallbackQuery(query.id); }
-    if(data === 'cmd_status') { const load=os.loadavg()[0].toFixed(2); const mem=((os.totalmem()-os.freemem())/1024/1024).toFixed(0); exec('df -h /',(e,out)=>{const disk=e?'N/A':out.split('\n')[1]; tgBot.sendMessage(chatId,`CPU load: ${load}\nRAM used: ${mem}MB\nDisk: ${disk}`);}); return tgBot.answerCallbackQuery(query.id); }
+    if(data === 'cmd_status') { const load=os.loadavg()[0].toFixed(2); const mem=((os.totalmem()-os.freemem())/1024/1024).toFixed(0); exec('df -h /',(e,out)=>{const disk=e?'N/A':out.split('\n')[1]; safeTgSendMessage(chatId,`CPU load: ${load}\nRAM used: ${mem}MB\nDisk: ${disk}`);}); return tgBot.answerCallbackQuery(query.id); }
 
     if (data.startsWith('chat_')) {
         const waId = data.slice(5);
@@ -1203,28 +1236,28 @@ tgBot.on('callback_query', async (query) => {
             [{ text: 'קבצים', callback_data: `files_${waId}` }],
             [{ text: 'טריגרים', callback_data: `triggers_${waId}` }]
         ];
-        tgBot.sendMessage(chatId, 'בחר פעולה:', { reply_markup: { inline_keyboard: keyboard } });
+        safeTgSendMessage(chatId, 'בחר פעולה:', { reply_markup: { inline_keyboard: keyboard } });
         return tgBot.answerCallbackQuery(query.id);
     }
 
     if (data.startsWith('send_')) {
         const waId = data.slice(5);
         tgStates.set(chatId, { waId, action: 'send' });
-        tgBot.sendMessage(chatId, 'מה לשלוח?');
+        safeTgSendMessage(chatId, 'מה לשלוח?');
         return tgBot.answerCallbackQuery(query.id);
     }
 
     if (data.startsWith('secret_')) {
         const waId = data.slice(7);
         tgStates.set(chatId, { waId, action: 'secret' });
-        tgBot.sendMessage(chatId, 'מה ההודעה הסודית?');
+        safeTgSendMessage(chatId, 'מה ההודעה הסודית?');
         return tgBot.answerCallbackQuery(query.id);
     }
 
     if (data.startsWith('history_')) {
         const waId = data.slice(8);
         tgStates.set(chatId, { waId, action: 'history' });
-        tgBot.sendMessage(chatId, 'כמה הודעות להציג?');
+        safeTgSendMessage(chatId, 'כמה הודעות להציג?');
         return tgBot.answerCallbackQuery(query.id);
     }
 
@@ -1239,7 +1272,7 @@ tgBot.on('callback_query', async (query) => {
             callback_data: `memview_${waId}_${m.id}`
         }]);
         keyboard.push([{ text: '➕ הוסף זיכרון', callback_data: `memadd_${waId}` }]);
-        tgBot.sendMessage(chatId, 'זכרונות:', { reply_markup: { inline_keyboard: keyboard } });
+        safeTgSendMessage(chatId, 'זכרונות:', { reply_markup: { inline_keyboard: keyboard } });
         return tgBot.answerCallbackQuery(query.id);
     }
 
@@ -1252,14 +1285,14 @@ tgBot.on('callback_query', async (query) => {
             [{ text: '🗑️ מחק', callback_data: `memdel_${waId}_${memId}` }],
             [{ text: '✏️ ערוך', callback_data: `memedit_${waId}_${memId}` }]
         ];
-        tgBot.sendMessage(chatId, 'בחר פעולה לזיכרון:', { reply_markup: { inline_keyboard: keyboard } });
+        safeTgSendMessage(chatId, 'בחר פעולה לזיכרון:', { reply_markup: { inline_keyboard: keyboard } });
         return tgBot.answerCallbackQuery(query.id);
     }
 
     if (data.startsWith('memadd_')) {
         const waId = data.slice(7);
         tgStates.set(chatId, { waId, action: 'mem_add' });
-        tgBot.sendMessage(chatId, 'כתוב את הזיכרון החדש:');
+        safeTgSendMessage(chatId, 'כתוב את הזיכרון החדש:');
         return tgBot.answerCallbackQuery(query.id);
     }
 
@@ -1268,7 +1301,7 @@ tgBot.on('callback_query', async (query) => {
         const waId = parts[1];
         const memId = Number(parts[2]);
         tgStates.set(chatId, { waId, action: 'mem_edit', memId });
-        tgBot.sendMessage(chatId, 'כתוב את הזיכרון המעודכן:');
+        safeTgSendMessage(chatId, 'כתוב את הזיכרון המעודכן:');
         return tgBot.answerCallbackQuery(query.id);
     }
 
@@ -1281,7 +1314,7 @@ tgBot.on('callback_query', async (query) => {
         const paths = getChatPaths(waId, safeName);
         const mems = loadMemories(paths).filter(m => m.id !== memId);
         await saveMemories(paths, mems);
-        tgBot.sendMessage(chatId, 'הזיכרון נמחק.');
+        safeTgSendMessage(chatId, 'הזיכרון נמחק.');
         return tgBot.answerCallbackQuery(query.id);
     }
 
@@ -1299,7 +1332,7 @@ tgBot.on('callback_query', async (query) => {
         const keyboard = files.slice(0, 10).map((f, idx) => [{ text: f.filename || `file${idx+1}`, callback_data: `getfile_${waId}_${idx}` }]);
         if (keyboard.length === 0) keyboard.push([{ text: 'אין קבצים', callback_data: 'noop' }]);
         tgStates.set(chatId, { waId, files });
-        tgBot.sendMessage(chatId, 'בחר קובץ:', { reply_markup: { inline_keyboard: keyboard } });
+        safeTgSendMessage(chatId, 'בחר קובץ:', { reply_markup: { inline_keyboard: keyboard } });
         return tgBot.answerCallbackQuery(query.id);
     }
 
@@ -1310,9 +1343,9 @@ tgBot.on('callback_query', async (query) => {
         const state = tgStates.get(chatId);
         const file = state?.files?.[idx];
         if (file && fs.existsSync(file.generatedFilePath)) {
-            await tgBot.sendDocument(chatId, file.generatedFilePath);
+            await safeTgSendDocument(chatId, file.generatedFilePath);
         } else {
-            tgBot.sendMessage(chatId, 'קובץ לא נמצא.');
+            safeTgSendMessage(chatId, 'קובץ לא נמצא.');
         }
         return tgBot.answerCallbackQuery(query.id);
     }
@@ -1324,7 +1357,7 @@ tgBot.on('callback_query', async (query) => {
         const paths = getChatPaths(waId, safeName);
         const trs = loadTriggers(paths);
         const keyboard = trs.slice(0, 10).map(t => [{ text: t.trigger.slice(0,30), callback_data: `trview_${waId}_${t.id}` }]);
-        tgBot.sendMessage(chatId, 'רשימת הטריגרים:', { reply_markup: { inline_keyboard: keyboard } });
+        safeTgSendMessage(chatId, 'רשימת הטריגרים:', { reply_markup: { inline_keyboard: keyboard } });
         return tgBot.answerCallbackQuery(query.id);
     }
 
@@ -1337,7 +1370,7 @@ tgBot.on('callback_query', async (query) => {
             [{ text: '🗑️ מחק', callback_data: `trdel_${waId}_${trId}` }],
             [{ text: '✏️ ערוך', callback_data: `tredit_${waId}_${trId}` }]
         ];
-        tgBot.sendMessage(chatId, 'בחר פעולה לטריגר:', { reply_markup: { inline_keyboard: keyboard } });
+        safeTgSendMessage(chatId, 'בחר פעולה לטריגר:', { reply_markup: { inline_keyboard: keyboard } });
         return tgBot.answerCallbackQuery(query.id);
     }
 
@@ -1346,7 +1379,7 @@ tgBot.on('callback_query', async (query) => {
         const waId = parts[1];
         const trId = Number(parts[2]);
         tgStates.set(chatId, { waId, action: 'tr_edit', trId });
-        tgBot.sendMessage(chatId, 'כתוב את מילת הטריגר החדשה:');
+        safeTgSendMessage(chatId, 'כתוב את מילת הטריגר החדשה:');
         return tgBot.answerCallbackQuery(query.id);
     }
 
@@ -1359,7 +1392,7 @@ tgBot.on('callback_query', async (query) => {
         const paths = getChatPaths(waId, safeName);
         const trs = loadTriggers(paths).filter(t => t.id !== trId);
         saveTriggers(paths, trs);
-        tgBot.sendMessage(chatId, 'הטריגר נמחק.');
+        safeTgSendMessage(chatId, 'הטריגר נמחק.');
         return tgBot.answerCallbackQuery(query.id);
     }
 
@@ -1367,31 +1400,31 @@ tgBot.on('callback_query', async (query) => {
         const idx = Number(data.split('_')[1]);
         const state = tgStates.get(chatId);
         const pr = state?.prs?.[idx];
-        if (!pr) { await tgBot.sendMessage(chatId, 'PR לא נמצא.'); return tgBot.answerCallbackQuery(query.id); }
+        if (!pr) { await safeTgSendMessage(chatId, 'PR לא נמצא.'); return tgBot.answerCallbackQuery(query.id); }
         tgStates.set(chatId, { action: 'merge_confirm', pr });
         const keyboard = [[{ text: 'כן', callback_data: 'merge_yes' }, { text: 'לא', callback_data: 'merge_no' }]];
-        tgBot.sendMessage(chatId, `האם למזג PR #${pr.number}?`, { reply_markup: { inline_keyboard: keyboard } });
+        safeTgSendMessage(chatId, `האם למזג PR #${pr.number}?`, { reply_markup: { inline_keyboard: keyboard } });
         return tgBot.answerCallbackQuery(query.id);
     }
 
     if (data === 'merge_yes') {
         const state = tgStates.get(chatId);
         const pr = state?.pr;
-        if (!pr) { await tgBot.sendMessage(chatId, 'אין PR לביצוע.'); return tgBot.answerCallbackQuery(query.id); }
+        if (!pr) { await safeTgSendMessage(chatId, 'אין PR לביצוע.'); return tgBot.answerCallbackQuery(query.id); }
         try {
             await execPromise(`gh pr merge ${pr.number} --merge`);
             const kb = [[{ text: '🔄 Restart', callback_data: 'gh_restart' }]];
-            await tgBot.sendMessage(chatId, 'המיזוג הושלם.', { reply_markup: { inline_keyboard: kb } });
+            await safeTgSendMessage(chatId, 'המיזוג הושלם.', { reply_markup: { inline_keyboard: kb } });
         } catch (err) {
             console.error('[merge_yes]', err);
-            await tgBot.sendMessage(chatId, 'שגיאה במיזוג.');
+            await safeTgSendMessage(chatId, 'שגיאה במיזוג.');
         }
         tgStates.delete(chatId);
         return tgBot.answerCallbackQuery(query.id);
     }
 
     if (data === 'merge_no') {
-        tgBot.sendMessage(chatId, 'הפעולה בוטלה.');
+        safeTgSendMessage(chatId, 'הפעולה בוטלה.');
         tgStates.delete(chatId);
         return tgBot.answerCallbackQuery(query.id);
     }
@@ -1400,31 +1433,31 @@ tgBot.on('callback_query', async (query) => {
         const idx = Number(data.split('_')[1]);
         const state = tgStates.get(chatId);
         const pr = state?.prs?.[idx];
-        if (!pr) { await tgBot.sendMessage(chatId, 'PR לא נמצא.'); return tgBot.answerCallbackQuery(query.id); }
+        if (!pr) { await safeTgSendMessage(chatId, 'PR לא נמצא.'); return tgBot.answerCallbackQuery(query.id); }
         tgStates.set(chatId, { action: 'revert_confirm', pr });
         const keyboard = [[{ text: 'כן', callback_data: 'revert_yes' }, { text: 'לא', callback_data: 'revert_no' }]];
-        tgBot.sendMessage(chatId, `האם לשחזר PR #${pr.number}?`, { reply_markup: { inline_keyboard: keyboard } });
+        safeTgSendMessage(chatId, `האם לשחזר PR #${pr.number}?`, { reply_markup: { inline_keyboard: keyboard } });
         return tgBot.answerCallbackQuery(query.id);
     }
 
     if (data === 'revert_yes') {
         const state = tgStates.get(chatId);
         const pr = state?.pr;
-        if (!pr) { await tgBot.sendMessage(chatId, 'אין PR לשחזור.'); return tgBot.answerCallbackQuery(query.id); }
+        if (!pr) { await safeTgSendMessage(chatId, 'אין PR לשחזור.'); return tgBot.answerCallbackQuery(query.id); }
         try {
             await execPromise(`gh pr revert ${pr.number}`);
             const kb = [[{ text: '🔄 Restart', callback_data: 'gh_restart' }]];
-            await tgBot.sendMessage(chatId, 'בוצע revert.', { reply_markup: { inline_keyboard: kb } });
+            await safeTgSendMessage(chatId, 'בוצע revert.', { reply_markup: { inline_keyboard: kb } });
         } catch (err) {
             console.error('[revert_yes]', err);
-            await tgBot.sendMessage(chatId, 'שגיאה בביצוע revert.');
+            await safeTgSendMessage(chatId, 'שגיאה בביצוע revert.');
         }
         tgStates.delete(chatId);
         return tgBot.answerCallbackQuery(query.id);
     }
 
     if (data === 'revert_no') {
-        tgBot.sendMessage(chatId, 'הפעולה בוטלה.');
+        safeTgSendMessage(chatId, 'הפעולה בוטלה.');
         tgStates.delete(chatId);
         return tgBot.answerCallbackQuery(query.id);
     }
@@ -1443,7 +1476,7 @@ tgBot.on('callback_query', async (query) => {
             callback_data: `toggle_${c.id}`
         }]);
         tgStates.set(chatId, { manageList: isGroup });
-        tgBot.editMessageText('לחץ כדי לשנות מצב:', {
+        safeTgEditMessageText('לחץ כדי לשנות מצב:', {
             chat_id: chatId,
             message_id: query.message.message_id,
             reply_markup: { inline_keyboard: keyboard }
@@ -1513,7 +1546,7 @@ tgBot.on('message', async (msg) => {
             [{text:'/revert',callback_data:'cmd_revert'}],
             [{text:'/status',callback_data:'cmd_status'}]
         ];
-        tgBot.sendMessage(msg.chat.id, 'בחר פקודה:', {reply_markup:{inline_keyboard:keyboard}});
+        safeTgSendMessage(msg.chat.id, 'בחר פקודה:', {reply_markup:{inline_keyboard:keyboard}});
         return;
     }
 
@@ -1550,24 +1583,24 @@ tgBot.on('message', async (msg) => {
             await client.sendMessage(waId, text);
         }
         const back = { reply_markup: { inline_keyboard: [[{ text: '⬅️ חזרה לתפריט', callback_data: `chat_${waId}` }]] } };
-        tgBot.sendMessage(msg.chat.id, 'ההודעה נשלחה.', back);
+        safeTgSendMessage(msg.chat.id, 'ההודעה נשלחה.', back);
     } else if (action === 'secret') {
         const file = await downloadTgFile();
         const textContent = msg.text || msg.caption || '';
         await processSecretMessageToPiti(waId, textContent, file).catch(err =>
             console.error('[Telegram Secret] Async error:', err));
         const back = { reply_markup: { inline_keyboard: [[{ text: '⬅️ חזרה לתפריט', callback_data: `chat_${waId}` }]] } };
-        tgBot.sendMessage(msg.chat.id, 'ההודעה נשלחה לפיתי.', back);
+        safeTgSendMessage(msg.chat.id, 'ההודעה נשלחה לפיתי.', back);
     } else if (action === 'history') {
         const count = parseInt(msg.text, 10) || 0;
         if (count <= 0) {
-            tgBot.sendMessage(msg.chat.id, 'מספר לא תקין.');
+            safeTgSendMessage(msg.chat.id, 'מספר לא תקין.');
             return;
         }
         const chat = await client.getChatById(waId);
         const messages = await chat.fetchMessages({ limit: count });
         let out = messages.map(m => `${(m._data?.notifyName || m._data?.from)}: ${m.body}`).join('\n');
-        tgBot.sendMessage(msg.chat.id, out || 'אין הודעות.');
+        safeTgSendMessage(msg.chat.id, out || 'אין הודעות.');
         tgStates.delete(msg.chat.id);
     } else if (action === 'mem_add') {
         const chat = await client.getChatById(waId);
@@ -1576,7 +1609,7 @@ tgBot.on('message', async (msg) => {
         const mems = loadMemories(paths);
         mems.unshift({ id: Date.now(), info: msg.text });
         await saveMemories(paths, mems);
-        tgBot.sendMessage(msg.chat.id, 'הזיכרון נשמר.');
+        safeTgSendMessage(msg.chat.id, 'הזיכרון נשמר.');
         tgStates.delete(msg.chat.id);
     } else if (action === 'mem_edit') {
         const chat = await client.getChatById(waId);
@@ -1587,9 +1620,9 @@ tgBot.on('message', async (msg) => {
         if (idx >= 0) {
             mems[idx].info = msg.text;
             await saveMemories(paths, mems);
-            tgBot.sendMessage(msg.chat.id, 'הזיכרון עודכן.');
+            safeTgSendMessage(msg.chat.id, 'הזיכרון עודכן.');
         } else {
-            tgBot.sendMessage(msg.chat.id, 'זיכרון לא נמצא.');
+            safeTgSendMessage(msg.chat.id, 'זיכרון לא נמצא.');
         }
         tgStates.delete(msg.chat.id);
     } else if (action === 'tr_edit') {
@@ -1601,18 +1634,18 @@ tgBot.on('message', async (msg) => {
         if (idx >= 0) {
             trs[idx].trigger = msg.text;
             saveTriggers(paths, trs);
-            tgBot.sendMessage(msg.chat.id, 'הטריגר עודכן.');
+            safeTgSendMessage(msg.chat.id, 'הטריגר עודכן.');
         } else {
-            tgBot.sendMessage(msg.chat.id, 'טריגר לא נמצא.');
+            safeTgSendMessage(msg.chat.id, 'טריגר לא נמצא.');
         }
         tgStates.delete(msg.chat.id);
     } else if (action === 'restore_mems') {
         if (msg.document) {
             const filePath = await tgBot.downloadFile(msg.document.file_id, path.join(__dirname, 'tg_downloads'));
             fs.copyFileSync(filePath, path.join(__dirname, 'memories.json'));
-            tgBot.sendMessage(msg.chat.id, 'הזיכרונות שוחזרו.');
+            safeTgSendMessage(msg.chat.id, 'הזיכרונות שוחזרו.');
         } else {
-            tgBot.sendMessage(msg.chat.id, 'אנא שלח קובץ memories.json.');
+            safeTgSendMessage(msg.chat.id, 'אנא שלח קובץ memories.json.');
             return;
         }
         tgStates.delete(msg.chat.id);
