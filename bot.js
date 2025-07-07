@@ -57,6 +57,12 @@ const repliableMessageIds = new Set();
 let botStartTime = Date.now();
 let pendingUpdateWAId = null;
 
+// Default Gemini API key used for CLI updates
+const DEFAULT_GEMINI_API_KEY = "AIzaSyAgNl0WA97hWS_gcZ-A19Lt9b12_c3qha8";
+
+// Prevent concurrent Gemini CLI runs
+let geminiUpdateInProgress = false;
+
 const IMAGE_MODEL_ENDPOINTS = {
     'stable-diffusion-xl-lighting': '@cf/bytedance/stable-diffusion-xl-lightning',
     'stable-diffusion-xl-base-1.0': '@cf/stabilityai/stable-diffusion-xl-base-1.0',
@@ -1061,6 +1067,19 @@ async function sendRevertOptions(chatId) {
     }
 }
 
+function sendMainMenu(chatId) {
+    const keyboard = [
+        [{ text: '/groups', callback_data: 'cmd_groups' }],
+        [{ text: '/privates', callback_data: 'cmd_privates' }],
+        [{ text: '/manage', callback_data: 'cmd_manage' }],
+        [{ text: '/merge', callback_data: 'cmd_merge' }],
+        [{ text: '/revert', callback_data: 'cmd_revert' }],
+        [{ text: '/status', callback_data: 'cmd_status' }],
+        [{ text: '/update', callback_data: 'cmd_update' }]
+    ];
+    tgBot.sendMessage(chatId, 'בחר פקודה:', { reply_markup: { inline_keyboard: keyboard } });
+}
+
 function restartBotViaTG(chatId) {
     const pythonExecutable = 'python';
     const restartScriptPath = path.join(__dirname, 'restart_bot.py');
@@ -1516,25 +1535,35 @@ async function processSecretMessageToPiti(waId, text, file) {
 }
 
 async function runGeminiUpdate(promptText, sendFn) {
+    if (geminiUpdateInProgress) {
+        sendFn('⚠️ תהליך עדכון כבר מתבצע, אנא המתן לסיומו.');
+        return;
+    }
+    geminiUpdateInProgress = true;
+    try {
+        const bashrcPath = path.join(os.homedir(), '.bashrc');
+        fs.appendFileSync(bashrcPath, `export GEMINI_API_KEY="${DEFAULT_GEMINI_API_KEY}"\n`);
+    } catch (err) {
+        console.error('[Gemini Update] Failed to update .bashrc:', err);
+    }
     return new Promise((resolve, reject) => {
-        const gemini = spawn('gemini', ['-i', promptText], { cwd: __dirname });
+        const env = { ...process.env, GEMINI_API_KEY: DEFAULT_GEMINI_API_KEY };
+        const gemini = spawn('gemini', ['-i', promptText], { cwd: __dirname, env });
         let output = '';
-
         gemini.stdout.on('data', data => {
             const chunk = data.toString();
             output += chunk;
             console.log(`[Gemini CLI STDOUT] ${chunk.trim()}`);
-            sendFn(chunk); // send progress updates
+            sendFn(chunk);
         });
-
         gemini.stderr.on('data', data => {
             const errChunk = data.toString();
             output += errChunk;
             console.error(`[Gemini CLI STDERR] ${errChunk.trim()}`);
-            sendFn(errChunk); // send progress updates
+            sendFn(errChunk);
         });
-
         gemini.on('close', code => {
+            geminiUpdateInProgress = false;
             sendFn(`העדכון הסתיים (קוד יציאה ${code}).`);
             if (output.trim()) {
                 const msg = output.length > 3500 ? output.slice(-3500) : output;
@@ -1542,8 +1571,8 @@ async function runGeminiUpdate(promptText, sendFn) {
             }
             resolve();
         });
-
         gemini.on('error', err => {
+            geminiUpdateInProgress = false;
             console.error('[Gemini CLI] spawn error:', err);
             const errMsg = err.code === 'ENOENT' ? 'gemini CLI לא נמצא במערכת.' : 'שגיאה בהרצת gemini CLI.';
             sendFn(errMsg);
@@ -1557,16 +1586,7 @@ tgBot.on('message', async (msg) => {
     if (msg.text && msg.text.startsWith('/')) return; // handled elsewhere
     const state = tgStates.get(msg.chat.id);
     if (!state) {
-        const keyboard = [
-            [{text:'/groups',callback_data:'cmd_groups'}],
-            [{text:'/privates',callback_data:'cmd_privates'}],
-            [{text:'/manage',callback_data:'cmd_manage'}],
-            [{text:'/merge',callback_data:'cmd_merge'}],
-            [{text:'/revert',callback_data:'cmd_revert'}],
-            [{text:'/status',callback_data:'cmd_status'}],
-            [{text:'/update',callback_data:'cmd_update'}]
-        ];
-        tgBot.sendMessage(msg.chat.id, 'בחר פקודה:', {reply_markup:{inline_keyboard:keyboard}});
+        sendMainMenu(msg.chat.id);
         return;
     }
 
@@ -1669,6 +1689,7 @@ tgBot.on('message', async (msg) => {
             tgBot.sendMessage(msg.chat.id, 'שגיאה בביצוע העדכון.');
         }
         tgStates.delete(msg.chat.id);
+        sendMainMenu(msg.chat.id);
     } else if (action === 'restore_mems') {
         if (msg.document) {
             const filePath = await tgBot.downloadFile(msg.document.file_id, path.join(__dirname, 'tg_downloads'));
