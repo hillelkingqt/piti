@@ -1,0 +1,62 @@
+<svg width="400" height="500" viewBox="0 0 400 500" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Arrow pointing up (North) -->
+    <g id="arrow">
+      <line x1="0" y1="15" x2="0" y2="-15" stroke="black" stroke-width="3"/>
+      <polygon points="0, -20 -7, -10 7, -10" fill="black"/>
+    </g>
+  </defs>
+  <style>
+    .grid { stroke: #ccc; stroke-width: 1; }
+    .text { font-family: Arial, sans-serif; font-size: 18px; text-anchor: middle; font-weight: bold; }
+    .title { font-size: 24px; font-weight: bold; text-anchor: middle; }
+    .q-mark { font-family: Arial, sans-serif; font-size: 40px; font-weight: bold; fill: red; text-anchor: middle; }
+  </style>
+  
+  <text x="200" y="30" class="title">מהי הצורה החסרה?</text>
+  
+  <!-- The Grid -->
+  <rect x="50" y="50" width="300" height="300" fill="none" stroke="black" stroke-width="2"/>
+  <line x1="150" y1="50" x2="150" y2="350" class="grid"/>
+  <line x1="250" y1="50" x2="250" y2="350" class="grid"/>
+  <line x1="50" y1="150" x2="350" y2="150" class="grid"/>
+  <line x1="50" y1="250" x2="350" y2="250" class="grid"/>
+  
+  <!-- Row 1 -->
+  <use href="#arrow" x="100" y="100" transform="rotate(0 100 100)"/>      <!-- N -->
+  <use href="#arrow" x="200" y="100" transform="rotate(45 200 100)"/>     <!-- NE -->
+  <use href="#arrow" x="300" y="100" transform="rotate(90 300 100)"/>     <!-- E -->
+  
+  <!-- Row 2 -->
+  <use href="#arrow" x="100" y="200" transform="rotate(90 100 200)"/>     <!-- E -->
+  <use href="#arrow" x="200" y="200" transform="rotate(135 200 200)"/>    <!-- SE -->
+  <use href="#arrow" x="300" y="200" transform="rotate(180 300 200)"/>    <!-- S -->
+  
+  <!-- Row 3 -->
+  <use href="#arrow" x="100" y="300" transform="rotate(180 100 300)"/>    <!-- S -->
+  <use href="#arrow" x="200" y="300" transform="rotate(225 200 300)"/>    <!-- SW -->
+  <text x="300" y="315" class="q-mark">?</text>
+  
+  <!-- Answer Choices -->
+  <g id="answers" transform="translate(0, 370)">
+    <!-- Choice A (Correct) -->
+    <rect x="25" y="20" width="60" height="60" fill="#f0f0f0" stroke="black"/>
+    <use href="#arrow" x="55" y="50" transform="rotate(270 55 50)"/> <!-- W -->
+    <text x="55" y="105" class="text">א</text>
+    
+    <!-- Choice B (Distractor) -->
+    <rect x="120" y="20" width="60" height="60" fill="#f0f0f0" stroke="black"/>
+    <use href="#arrow" x="150" y="50" transform="rotate(180 150 50)"/> <!-- S -->
+    <text x="150" y="105" class="text">ב</text>
+    
+    <!-- Choice C (Distractor) -->
+    <rect x="215" y="20" width="60" height="60" fill="#f0f0f0" stroke="black"/>
+    <use href="#arrow" x="245" y="50" transform="rotate(315 245 50)"/> <!-- NW -->
+    <text x="245" y="105" class="text">ג</text>
+
+    <!-- Choice D (Distractor) -->
+    <rect x="310" y="20" width="60" height="60" fill="#f0f0f0" stroke="black"/>
+    <use href="#arrow" x="340" y="50" transform="rotate(0 340 50)"/> <!-- N -->
+    <text x="340" y="105" class="text">ד</text>
+  </g>
+</svg>

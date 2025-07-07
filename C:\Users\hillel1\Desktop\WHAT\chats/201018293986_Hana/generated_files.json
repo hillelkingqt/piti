@@ -1,0 +1,76 @@
+[
+  {
+    "timestamp": "2025-06-26T20:37:56.813Z",
+    "originalMessageId": "true_201018293986@c.us_E91921E2BEEFA7BE8F41ACF09A526B02",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/201018293986_Hana/files/true_201018293986@c.us_E91921E2BEEFA7BE8F41ACF09A526B02.webp",
+    "filename": "true_201018293986@c.us_E91921E2BEEFA7BE8F41ACF09A526B02.webp",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (הלל (Owner))",
+    "type": "image/webp"
+  },
+  {
+    "timestamp": "2025-06-26T20:38:31.217Z",
+    "originalMessageId": "true_201018293986@c.us_76FF9E8CBF7EB7978EF66D5FE0D2FCCE",
+    "refAudioMessageId": null,
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/201018293986_Hana/files/ace_music_life_ reflective_ emotion_1750970307413.mpga",
+    "filename": "ace_music_life_ reflective_ emotion_1750970307413.mpga",
+    "description": "ACE-Step Music. Tags: \"life, reflective, emotional, pop, acoustic guitar, piano, warm, uplifting\". Lyrics: Yes. Duration: -1",
+    "type": "audio/mpeg",
+    "modelUsed": "ACE-Step/ACE-Step"
+  },
+  {
+    "timestamp": "2025-06-26T20:38:32.107Z",
+    "originalMessageId": "true_201018293986@c.us_3EB0A5115E1350B42ADFA2",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/201018293986_Hana/files/true_201018293986@c.us_3EB0A5115E1350B42ADFA2.mpeg",
+    "filename": "true_201018293986@c.us_3EB0A5115E1350B42ADFA2.mpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (פיתי)",
+    "type": "audio/mpeg"
+  },
+  {
+    "timestamp": "2025-06-27T09:28:44.077Z",
+    "originalMessageId": "true_201018293986@c.us_F5A484799044C94CC5288DFC43CC4150",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/201018293986_Hana/files/true_201018293986@c.us_F5A484799044C94CC5288DFC43CC4150.webp",
+    "filename": "true_201018293986@c.us_F5A484799044C94CC5288DFC43CC4150.webp",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (הלל (Owner))",
+    "type": "image/webp"
+  },
+  {
+    "timestamp": "2025-06-28T20:38:06.009Z",
+    "originalMessageId": "true_201018293986@c.us_3F913775F8257F1682E8",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/201018293986_Hana/files/profile_201018293986_c_us.jpg",
+    "filename": "profile_201018293986_c_us.jpg",
+    "description": "Profile picture of 201018293986@c.us",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-06-28T20:38:06.408Z",
+    "originalMessageId": "true_201018293986@c.us_3EB0DC2847ED0EDA8B19A7",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/201018293986_Hana/files/true_201018293986@c.us_3EB0DC2847ED0EDA8B19A7.jpeg",
+    "filename": "true_201018293986@c.us_3EB0DC2847ED0EDA8B19A7.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (הלל (Owner))",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-07-01T22:41:31.724Z",
+    "originalMessageId": "false_201018293986@c.us_3A0EE3EEDCADD985D26D",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/201018293986_Hana/files/false_201018293986@c.us_3A0EE3EEDCADD985D26D.jpeg",
+    "filename": "false_201018293986@c.us_3A0EE3EEDCADD985D26D.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (Hana)",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-07-01T22:41:32.156Z",
+    "originalMessageId": "false_201018293986@c.us_3A1EF3ED38E614089111",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/201018293986_Hana/files/false_201018293986@c.us_3A1EF3ED38E614089111.mp4",
+    "filename": "false_201018293986@c.us_3A1EF3ED38E614089111.mp4",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (Hana)",
+    "type": "video/mp4"
+  },
+  {
+    "timestamp": "2025-07-02T20:59:25.292Z",
+    "originalMessageId": "true_201018293986@c.us_3F32201A6DAA4E6FE27C",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/201018293986_Hana/files/true_201018293986@c.us_3F32201A6DAA4E6FE27C.pdf",
+    "filename": "true_201018293986@c.us_3F32201A6DAA4E6FE27C.pdf",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (הלל (Owner))",
+    "type": "application/pdf"
+  }
+]

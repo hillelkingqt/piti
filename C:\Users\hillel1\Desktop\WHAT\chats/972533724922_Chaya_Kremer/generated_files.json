@@ -1,0 +1,67 @@
+[
+  {
+    "timestamp": "2025-06-27T22:16:12.688Z",
+    "originalMessageId": "true_972533724922@c.us_3EB030E324E4DD26BE38EB",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/972533724922_Chaya_Kremer/files/true_972533724922@c.us_3EB030E324E4DD26BE38EB.ogg__codecs_opus",
+    "filename": "true_972533724922@c.us_3EB030E324E4DD26BE38EB.ogg__codecs_opus",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (הלל (Owner))",
+    "type": "audio/ogg; codecs=opus"
+  },
+  {
+    "timestamp": "2025-06-27T22:17:30.561Z",
+    "originalMessageId": "false_972533724922@c.us_84DCA0FD59880468CDC57A8E0E6B7451",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/972533724922_Chaya_Kremer/files/image_flux-1-schnell_1751062650560.jpeg",
+    "filename": "image_flux-1-schnell_1751062650560.jpeg",
+    "description": "A cat",
+    "type": "image/jpeg",
+    "modelUsed": "flux-1-schnell"
+  },
+  {
+    "timestamp": "2025-06-27T22:17:31.301Z",
+    "originalMessageId": "true_972533724922@c.us_3EB03F5E7A0F30B8AEC508",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/972533724922_Chaya_Kremer/files/true_972533724922@c.us_3EB03F5E7A0F30B8AEC508.jpeg",
+    "filename": "true_972533724922@c.us_3EB03F5E7A0F30B8AEC508.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (פיתי)",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-06-27T22:27:19.442Z",
+    "originalMessageId": "false_972533724922@c.us_3A03AF94D59CC7FFB12D6EB04917655D",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/972533724922_Chaya_Kremer/files/sticker_1751063238651.webp",
+    "filename": "sticker_1751063238651.webp",
+    "description": "Sticker. Source: ai_generated_image. Elements: 0.",
+    "type": "image/webp"
+  },
+  {
+    "timestamp": "2025-06-27T22:27:19.649Z",
+    "originalMessageId": "true_972533724922@c.us_3EB0E68CB38E94BB8EAFD1",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/972533724922_Chaya_Kremer/files/true_972533724922@c.us_3EB0E68CB38E94BB8EAFD1.webp",
+    "filename": "true_972533724922@c.us_3EB0E68CB38E94BB8EAFD1.webp",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (הלל (Owner))",
+    "type": "image/webp"
+  },
+  {
+    "timestamp": "2025-06-27T22:27:53.319Z",
+    "originalMessageId": "false_972533724922@c.us_9AB041C777EE2DCF3403C01423007487",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/972533724922_Chaya_Kremer/files/false_972533724922@c.us_9AB041C777EE2DCF3403C01423007487.jpeg",
+    "filename": "false_972533724922@c.us_9AB041C777EE2DCF3403C01423007487.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (Chaya Kremer)",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-06-27T22:28:55.415Z",
+    "originalMessageId": "false_972533724922@c.us_9D765DDE363DCB7E9DA435A77E49D9A2",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/972533724922_Chaya_Kremer/files/sticker_1751063334900.webp",
+    "filename": "sticker_1751063334900.webp",
+    "description": "Sticker. Source: ai_generated_image. Elements: 0.",
+    "type": "image/webp"
+  },
+  {
+    "timestamp": "2025-06-27T22:28:56.046Z",
+    "originalMessageId": "true_972533724922@c.us_3EB02986F0B8814D56F816",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/972533724922_Chaya_Kremer/files/true_972533724922@c.us_3EB02986F0B8814D56F816.webp",
+    "filename": "true_972533724922@c.us_3EB02986F0B8814D56F816.webp",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (הלל (Owner))",
+    "type": "image/webp"
+  }
+]

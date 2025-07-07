@@ -1,0 +1,293 @@
+<!-- filename: electricity_experience_v4.html -->
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>חוויה מחשמלת V4 - רמת על</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #000411;
+            --primary: #00f6ff;
+            --secondary: #fef08a;
+            --accent: #ff00f2;
+            --text-color: #dbeafe;
+            --card-bg: rgba(10, 20, 45, 0.6);
+            --border-color: rgba(0, 246, 255, 0.3);
+        }
+
+        body {
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Heebo', sans-serif;
+            margin: 0;
+            overflow: hidden;
+            perspective: 1500px;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="%23dbeafe" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>'), auto;
+        }
+        .electric-cursor { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="%23fef08a" stroke="%23000411" stroke-width="1" d="M13 2L3 14h9l-1 8L21 10h-9z"/><circle cx="12" cy="12" r="10" fill="none" stroke="%2300f6ff" stroke-width="2" stroke-dasharray="2 4"><animate attributeName="stroke-dashoffset" from="0" to="6" dur="0.2s" repeatCount="indefinite"/></circle></svg>'), auto; }
+        .dead-cursor { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="%236b7280" d="M13 2L3 14h9l-1 8L21 10h-9z"/></svg>'), auto; }
+
+        #spark-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .background-layers {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            transform-style: preserve-3d;
+        }
+        .bg-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+        #bg-grid { background-image: radial-gradient(var(--border-color) 1px, transparent 1px); background-size: 30px 30px; transform: translateZ(-100px); opacity: 0.1; }
+        #bg-stars { background-image: radial-gradient(white 1px, transparent 1px); background-size: 100px 100px; transform: translateZ(-400px); opacity: 0.3; animation: zoomStars 60s infinite linear; }
+
+        .container {
+            padding: 2rem;
+            transform-style: preserve-3d;
+        }
+
+        header {
+            text-align: center;
+            animation: fadeInDown 1.5s ease-out;
+        }
+        h1 {
+            font-size: clamp(2.5rem, 10vw, 5rem);
+            font-weight: 900;
+            color: transparent;
+            background-image: linear-gradient(45deg, var(--primary), var(--accent));
+            background-clip: text;
+            -webkit-background-clip: text;
+            text-shadow: 0 0 25px rgba(0, 246, 255, 0.4);
+            animation: textFlicker 3s infinite linear;
+        }
+
+        .control-panel {
+            display: flex; justify-content: center; align-items: center; gap: 20px; margin-block: 20px; animation: fadeInUp 1.5s 0.5s ease-out backwards; 
+        }
+        .switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #1f2937; transition: .4s; border-radius: 34px;
+            border: 1px solid var(--border-color);
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--primary); box-shadow: 0 0 15px var(--primary); }
+        input:checked + .slider:before { transform: translateX(26px); }
+        
+        .grid-container {
+            transform-style: preserve-3d;
+            transform: rotateX(15deg);
+            margin-top: 50px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            transition: transform 0.5s ease;
+        }
+        .grid.tilted { transform: rotateY(-5deg) rotateX(20deg) scale(0.95); }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px) saturate(1.5);
+            -webkit-backdrop-filter: blur(10px) saturate(1.5);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            opacity: 0;
+            transform: translateY(100px);
+            animation: cardRise 1s forwards;
+        }
+        .card.electrify:hover {
+            transform: translateY(-20px) scale(1.05) rotateZ(2deg);
+            box-shadow: 0 0 20px var(--primary), 0 0 40px var(--accent), inset 0 0 15px rgba(0, 246, 255, 0.2);
+        }
+        .card h2 {
+            margin-top: 0; font-size: 1.8rem; font-weight: 700; color: var(--primary);
+        }
+
+        .ocean {
+            height: 150px; width: 100%; position: fixed; bottom: 0; left: 0; z-index: 500; pointer-events: auto; transform: translateZ(100px);
+        }
+        .wave { background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAwIDg2Ij48cGF0aCBkPSJNMCAzMy4zQzI1IDIzLjUgNDcuOCA2LjcgODUuMyA0LjJjNDQuMi0zIDgzLjggMTIgMTMxLjQgMjMuMUMyOTQuMiA0MS4xIDM1NS41IDUwIDQ1NC4xIDUwYzE0Mi4xIDAgMjU5LjYtMjEuNiAzNjUuNS0zMy45QzkyNS4xIDQuOCAxMDQ1IDAgMTIwMCAwVjg2SDBWMzMuM3oiIGZpbGw9InJnYmEoMCwgMjQ2LCAyNTUsIDAuMykiLz48L3N2Zz4=') repeat-x; position: absolute; bottom: 0; width: 6400px; height: 150px; animation: wave 10s cubic-bezier(.36,.45,.63,.53) infinite; }
+        .wave:nth-of-type(2) { animation: wave 12s cubic-bezier(.36,.45,.63,.53) -.125s infinite; opacity: 0.5; }
+
+        .glitch-effect {
+            animation: glitch 0.8s forwards;
+        }
+        .glitch-effect::before, .glitch-effect::after {
+            content: attr(data-text);
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-color);
+            overflow: hidden;
+            clip: rect(0, 900px, 0, 0);
+        }
+        .glitch-effect::before { left: 2px; text-shadow: -2px 0 var(--accent); animation: glitch-anim-1 1s infinite linear alternate-reverse; }
+        .glitch-effect::after { left: -2px; text-shadow: -2px 0 var(--primary), 2px 2px var(--accent); animation: glitch-anim-2 1s infinite linear alternate-reverse; }
+
+        /* Keyframes */
+        @keyframes cardRise { to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInDown { 0% { opacity: 0; transform: translateY(-50px); } 100% { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { 0% { opacity: 0; transform: translateY(50px); } 100% { opacity: 1; transform: translateY(0); } }
+        @keyframes textFlicker { 0%, 100% { text-shadow: 0 0 25px rgba(0,246,255,0.4); } 50% { text-shadow: 0 0 30px rgba(0,246,255,0.6), 0 0 5px rgba(255,0,242,0.8); } }
+        @keyframes zoomStars { from { transform: translateZ(-400px) scale(1); } to { transform: translateZ(-400px) scale(1.5); } }
+        @keyframes wave { 0% { margin-left: 0; } 100% { margin-left: -1600px; } }
+        @keyframes glitch { 0% { clip: rect(42px, 9999px, 44px, 0); } 10% { clip: rect(81px, 9999px, 100px, 0); } 20% { clip: rect(33px, 9999px, 42px, 0); } 30% { clip: rect(93px, 9999px, 98px, 0); } 40% { clip: rect(10px, 9999px, 15px, 0); } 50% { clip: rect(50px, 9999px, 55px, 0); } 60% { clip: rect(70px, 9999px, 75px, 0); } 70% { clip: rect(20px, 9999px, 25px, 0); } 80% { clip: rect(85px, 9999px, 90px, 0); } 90% { clip: rect(45px, 9999px, 50px, 0); } 100% { clip: rect(0, 9999px, 9999px, 0); } }
+        @keyframes glitch-anim-1 { 0% { clip: rect(20px, 9999px, 80px, 0); } 100% { clip: rect(30px, 9999px, 40px, 0); } }
+        @keyframes glitch-anim-2 { 0% { clip: rect(5px, 9999px, 95px, 0); } 100% { clip: rect(80px, 9999px, 60px, 0); } }
+    </style>
+</head>
+<body>
+    <canvas id="spark-canvas"></canvas>
+    <div class="background-layers">
+        <div class="bg-layer" id="bg-grid"></div>
+        <div class="bg-layer" id="bg-stars"></div>
+    </div>
+    
+    <div class="container">
+        <header data-text="חוויה מחשמלת V4"><h1>חוויה מחשמלת V4</h1></header>
+
+        <div class="control-panel">
+            <span style="font-size: 1.2rem; font-weight: 700;">מצב כוח-על</span>
+            <label class="switch">
+                <input type="checkbox" id="power-mode">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="grid-container">
+            <div class="grid">
+                <div class="card electrify" style="animation-delay: 0.8s;"><h2>חוק קולון</h2><p>האינטראקציה הבסיסית ביותר. מטענים מנוגדים נמשכים, זהים דוחים. כמו מגנטים, אבל לחלקיקים טעונים.</p></div>
+                <div class="card electrify" style="animation-delay: 0.9s;"><h2>שדה חשמלי</h2><p>כל מטען יוצר סביבו "הילה" של השפעה. זה לא קסם, זו פיזיקה. השדה מגדיר את הכוח על מטעני בוחן.</p></div>
+                <div class="card electrify" style="animation-delay: 1.0s;"><h2>חוק אוהם</h2><p>המשוואה שמנהלת כל מעגל: V=IR. מתח דוחף, התנגדות בולמת, והזרם הוא התוצאה. פשוט, אלגנטי, חיוני.</p></div>
+                <div class="card electrify" style="animation-delay: 1.1s;"><h2>פוטנציאל חשמלי (מתח)</h2><p>האנרגיה הפוטנציאלית ליחידת מטען. ההפרש בפוטנציאל (מתח) הוא מה שגורם לאלקטרונים לזרום ולנורות לדלוק.</p></div>
+                <div class="card electrify" style="animation-delay: 1.2s;"><h2>מעגל חשמלי</h2><p>מסלול סגור המאפשר זרימת חשמל. פתח אותו, והזרימה נעצרת. קצר אותו, וצפה בזיקוקים.</p></div>
+                <div class="card electrify" style="animation-delay: 1.3s;"><h2>אלקטרומגנטיות</h2><p>האיחוד הגדול. חשמל בתנועה יוצר מגנטיות, ומגנטיות משתנה יוצרת חשמל. כל הטכנולוגיה המודרנית בנויה על העיקרון הזה.</p></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="ocean"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const body = document.body;
+            const header = document.querySelector('header');
+            const water = document.querySelector('.ocean');
+            const canvas = document.getElementById('spark-canvas');
+            const ctx = canvas.getContext('2d');
+            const grid = document.querySelector('.grid');
+            const cards = document.querySelectorAll('.card.electrify');
+            const powerToggle = document.getElementById('power-mode');
+
+            let isElectrified = false;
+            let isDead = false;
+            let mouse = { x: 0, y: 0 };
+            let sparks = [];
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+
+            class Spark {
+                constructor(x, y) {
+                    this.x = x;
+                    this.y = y;
+                    this.size = Math.random() * 4 + 2;
+                    this.speedX = Math.random() * 3 - 1.5;
+                    this.speedY = Math.random() * 3 - 1.5;
+                    this.color = `hsl(${Math.random() * 60 + 200}, 100%, 70%)`;
+                    this.life = 1;
+                    this.maxLife = Math.random() * 50 + 20;
+                }
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    this.life++;
+                }
+                draw() {
+                    ctx.fillStyle = this.color;
+                    ctx.globalAlpha = 1 - this.life / this.maxLife;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                }
+            }
+
+            function handleSparks() {
+                for (let i = 0; i < sparks.length; i++) {
+                    sparks[i].update();
+                    sparks[i].draw();
+                    if (sparks[i].life >= sparks[i].maxLife) {
+                        sparks.splice(i, 1);
+                        i--;
+                    }
+                }
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                handleSparks();
+                requestAnimationFrame(animate);
+            }
+            animate();
+
+            document.addEventListener('mousemove', (e) => {
+                mouse.x = e.clientX;
+                mouse.y = e.clientY;
+                if(isElectrified) {
+                    for(let i=0; i< (powerToggle.checked ? 5 : 2) ; i++) {
+                        sparks.push(new Spark(mouse.x, mouse.y));
+                    }
+                }
+                const tiltX = (mouse.y / window.innerHeight - 0.5) * -30;
+                const tiltY = (mouse.x / window.innerWidth - 0.5) * 30;
+                grid.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+            });
+
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    if (!isDead) {
+                        isElectrified = true;
+                        body.classList.add('electric-cursor');
+                    }
+                });
+                card.addEventListener('mouseleave', () => {
+                    isElectrified = false;
+                    body.classList.remove('electric-cursor');
+                });
+            });
+
+            water.addEventListener('mouseenter', () => {
+                if (isElectrified && !isDead) {
+                    isElectrified = false;
+                    isDead = true;
+                    body.classList.add('dead-cursor');
+                    body.classList.remove('electric-cursor');
+                    header.classList.add('glitch-effect');
+                    cards.forEach(c => c.classList.remove('electrify'));
+                    setTimeout(() => header.classList.remove('glitch-effect'), 800);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

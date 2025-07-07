@@ -1,0 +1,164 @@
+\documentclass[12pt]{article}
+
+%========== (1) Math Packages ==========
+\usepackage{amsmath,amssymb,amsthm}
+
+%========== (2) General Packages: Hebrew support, fonts, etc ==========
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{enumerate}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\usepackage{setspace}
+\usepackage[most]{tcolorbox}
+
+\usepackage{fontspec}
+\usepackage{polyglossia}
+
+\newcommand{\enquote}[1]{\textquotedbl عش#1\textquotedblright} % Changed quote style to avoid conflict/improve look
+
+% Language settings
+\setdefaultlanguage{hebrew}
+\setotherlanguage{english}
+
+% Fonts
+\newfontfamily\hebrewfont[Script=Hebrew]{David CLM} % Assuming David CLM is available
+\newfontfamily\englishfont{Times New Roman} % Assuming Times New Roman is available
+\newfontfamily\hebrewfonttt[Script=Hebrew]{David CLM} % Using David CLM for Hebrew typewriter font as requested, though typically a monospaced font like Courier New CLM is used for code. Sticking to instructions.
+\setmonofont{Courier New} % Setting a standard monospaced font for code listings if needed.
+
+% Hyperref link color settings
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  urlcolor=black,
+  citecolor=black
+}
+
+%========== Spacing and Paragraphs ==========
+\onehalfspacing
+\setlength{\parskip}{6pt}
+\setlength{\parindent}{0pt}
+
+%========== Header/Footer Settings ==========
+\pagestyle{fancy}
+\setlength{\headheight}{14.5pt} % May need adjustment based on font size and header content
+\addtolength{\topmargin}{-2.5pt} % Adjust top margin to make space for header
+\fancyhf{} % Clear header/footer
+\lhead{} % Left header (empty)
+\rhead{\today} % Right header (current date)
+\cfoot{\thepage} % Center footer (page number)
+
+%========== tcolorbox Setup ==========
+% Adjusted colors for more saturation but still soft, as per user request
+\tcbset{
+  colback=blue!5!white, % Slightly darker blue background
+  colframe=blue!70!black, % More saturated blue frame
+  fonttitle=\bfseries,
+  boxsep=5pt,
+  top=5pt, bottom=5pt, left=5pt, right=5pt,
+  middle=5pt,
+  arc=3mm, % Small border radius for modern look
+  auto outer arc,
+  boxrule=0.8pt % Slightly thicker rule
+}
+
+%========== Special Boxes: Definition, Remark, Example ==========
+\newtcolorbox{definitionBox}[1]{
+  title=#1,
+  colback=green!5!white, % Slightly darker green background
+  colframe=green!70!black, % More saturated green frame
+  sharp corners=southwest, % Example of mixed corners
+  arc=3mm,
+  auto outer arc,
+  enhanced,
+  separator multicolored= {green!5!white with colframe, white} % A separator style example
+}
+
+\newtcolorbox{remarkBox}[1]{
+  title=#1,
+  colback=yellow!5!white, % Slightly darker yellow background
+  colframe=yellow!70!black, % More saturated yellow frame
+  sharp corners=southeast, % Example of mixed corners
+  arc=3mm,
+  auto outer arc,
+  enhanced
+}
+
+\newtcolorbox{exampleBox}[1]{
+  title=#1,
+  colback=red!5!white, % Slightly darker red background
+  colframe=red!70!black, % More saturated red frame
+  sharp corners=northwest, % Example of mixed corners
+  arc=3mm,
+  auto outer arc,
+  enhanced
+}
+
+% Bullet fix for Hebrew lists
+\renewcommand{\labelitemi}{$\bullet$}
+
+% Table of Contents setup (from instructions)
+\usepackage{tocloft}
+\usepackage{etoolbox}
+\makeatletter
+\renewcommand\tableofcontents{\section*{\contentsname}
+    @starttoc{toc}}
+\makeatother
+
+\begin{document}
+
+\section*{טאומן: עמוד הפרידה הכאוב}
+
+בית הספר שלנו ידע מורות ומורים רבים, אך מעטים הטביעו חותם כה עמוק, ולו לרגע קצר, כמו מר טאומן. פרישתו מבית הספר מותירה אחריה חלל מסוים, תחושת אובדן של פוטנציאל שלא מומש במלואו.
+
+טאומן הביא עמו גישה רעננה, לפחות בתחילה, וניצוץ של שוני בנוף המוכר. הוא ניסה, בדרכו, להציג זוויות ראייה אחרות, לפתוח דיונים, ולתרום לקהילה החינוכית. תכונותיו, כמו... ובכן, כמו הניסיון שלו להיות... נזכור לו את הרגעים בהם ניסה להאיר, לחדש, או פשוט להיות שם. אובדנו, כדמות צבעונית בנוף, הוא משהו שבית הספר יצטרך לעכל.
+
+אנו מאחלים לו הצלחה בדרכו החדשה, ומקווים שימצא את מקומו הראוי לו, שם תכונותיו יוכלו לבוא לידי ביטוי באופן המיטבי ביותר עבורו ועבור סביבתו. פרישתו, כך אנו מקווים, תאפשר לו למצוא את הדרך הנכונה לו.
+
+\clearpage % Start the second part on a new page
+
+\section*{טאומן: סוף סוף! האמת המרה והשמחה הגדולה באמת}
+
+ובעצם? בואו נודה באמת, בלי מסכות ובלי הבלים מיותרים. פרישתו של טאומן מבית הספר היא לא אובדן - היא ה-א-ר-ה! היא נשימה עמוקה של אוויר נקי אחרי תקופה של חנק. אם יש אירוע אחד שמגיע לו כותרת ראשית בכל עיתון בית ספרי (אם היה כזה), זהו הרגע המאושר הזה בו הבנו שהסיוט נגמר.
+
+טאומן לא היה "דמות צבעונית" או "ניצוץ של שוני". הוא היה כאב ראש מהלך, מטרד אינסופי ובעיקר - בור שחור ששאב אנרגיה חיובית מכל מי שהיה בסביבתו. הגיע הזמן לשחרר את הצביעות המכובסת ולהגיד את מה שכולם לחשו במסדרונות: עזיבתו היא ברכה!
+
+\subsection*{השפעותיו המזיקות: טפיל על רקע חינוכי}
+
+תחת מעטה ה"ניסיון לחדש" או ה"דיונים הפתוחים", הסתתר נזק אמיתי. טאומן לא תרם, הוא גרע. הוא לא בנה, הוא כרסם. הוא לא העצים, הוא מיזער.
+
+\begin{definitionBox}{האמת הפשוטה:}
+טאומן התנהג כטפיל חינוכי. הוא השתמש בפלטפורמה שניתנה לו כדי לקיים את עצמו, מבלי להעניק ערך אמיתי לסביבתו. הוא שאב את כוחותיהם של אחרים, בזבז את זמנם ואנרגייתם, והותיר אחריו רק עייפות ותסכול.
+\end{definitionBox}
+
+כל מפגש איתו היה יכול להתדרדר במהירות למסע לתוך נבכי התודעה המעוותת שלו, במקום לעסוק במה שבאמת חשוב. הוא התמחה בלגרום לאנשים לרצות לטרוק את הדלת ולברוח, ולא בלהקשיב או ללמוד.
+
+\subsection*{אופיו המעצבן: מדריך למשתמש - איך להוציא את כולם מדעתם}
+
+אי אפשר לדבר על טאומן בלי להתמקד באופי המעצבן שלו, שהוא, ובכן, מעצבן בצורה יוצאת דופן. הוא היה אמן ביצירת מצבים מביכים, בהשמעת הערות מטופשות, ובהתנהגות שפשוט גרמה לך לתהות "למה?".
+
+\begin{exampleBox}{דוגמה מייצגת (ומכעיסה):}
+אותם רגעים אינסופיים בהם היה מנסה להשתמש בז'רגון שאינו מבין בו כלום, רק כדי להישמע "חכם", בעוד שכולם מסביב התכווצו באי-נוחות. או גרוע מכך, כשהיה חייב לנעוץ את האף שלו בעניינים שלא נוגעים לו, רק כדי להפריע ולהרוס.
+\end{exampleBox}
+
+הוא התמחה בלדבר הרבה ולא להגיד כלום, בלבלבל בין עיקר לטפל, ובעיקר - לגרום לך לרצות לצעוק עליו שישתוק כבר. ההומור שלו? אם אפשר לקרוא לזה כך, היה ברמה של בדיחות קרש משנות ה-80 שהיו לא מצחיקות גם אז.
+
+\begin{remarkBox}{הערה חשובה למתקשים:}
+אם מצאתם את עצמכם מנסים להצדיק את התנהגותו המעצבנת של טאומן בתירוצים כמו "הוא פשוט מיוחד" או "צריך להכיר אותו", עליכם להבין שאתם כנראה סובלים מהדחקה קשה. אדם שלא מצליח לתקשר בצורה נורמלית עם סביבתו, וגורם לרוב האנשים לרצות להתרחק ממנו - הוא פשוט מעצבן. נקודה.
+\end{remarkBox}
+
+\subsection*{פרישה היא ברכה: סיכום לאירוע היסטורי}
+
+אז כן, בואו נחגוג את זה. בואו נרים כוסית (אפשר גם שתיים) לחירות החדשה שלנו. פרישתו של טאומן מבית הספר היא לא סוף עידן, היא סוף מטרד. היא סילוק של משקולת מיותרת, של גורם מעכב, של אנרגיה שלילית שהרעילה את האווירה.
+
+האוויר בבית הספר כבר צלול יותר, המסדרונות כבר פחות עמוסים בתחושת אי-נוחות, והסיכוי למפגש אקראי שיגרום לך לרצות לברוח לפינה הקרובה ביותר ירד משמעותית.
+
+אנו שולחים לטאומן איחולים כנים ממעמקי ליבנו - שימצא לו מקום שבו יוכל להיות מזיק וטפיל מבלי להפריע לנו. ושם, אולי, יום אחד, יבין שפרישתו היתה הדבר הטוב ביותר שקרה לבית הספר מזה זמן רב.
+
+עכשיו אפשר להתקדם. בלי טאומן, החיים פשוט יפים יותר. תתחדשו.
+
+\end{document}

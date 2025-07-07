@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1751798738821,
+    "trigger": "מפגש במד\"ר",
+    "actionData": {
+      "action": "text",
+      "message": "📣 סטודנטיות וסטודנטים יקרים ויקרות 💙✨\n\nשלום רב לכם 😄🌟\n\nאנחנו שמחים להזמין אתכם למפגש הקרוב במסגרת הקורס \"משוואות דיפרנציאליות רגילות\" 🧮📘 – מפגש שבו נצלול לעולם המרתק של פתרונות, אינטואיציה מתמטית ורעיונות שישנו את הדרך שבה אתם חושבים על פונקציות ודינמיקה 📈🔁💭\n\n📅 המפגש ייערך מחר (יום שני)\n🕕 בשעה 18:00 בדיוק – נשמח לראות אתכם מחוברים בזמן ⏰💻\n\n🧑‍🏫 המפגש יתקיים באופן מקוון ב־Zoom\n📍 הנה הקישור להתחברות:\n🔗 https://biu-ac-il.zoom.us/j/5530186424?omn=84751428652&jst=3\n\n📌 המלצה חמה: היכנסו כמה דקות מראש כדי לוודא שהכול עובד חלק 🎧📡\n\nבהצלחה רבה לכולכם, ומחכים לכם עם חיוך 😄🍀\nצוות הקורס 💬📚",
+      "wait": false
+    },
+    "timestamp": 1751798738821,
+    "creator": "דן"
+  },
+  {
+    "id": 1751283614791,
+    "trigger": "טאומר",
+    "actionData": {
+      "action": "image",
+      "imageModel": "stable-diffusion-xl-base-1.0",
+      "imagePrompt": "A photorealistic image of a man named Tauman, depicted with a potato for a head. The word 'Tauman' must be clearly and legibly written on the potato head in English. The image should be a portrait or half-body shot, perhaps in a neutral or simple background. Focus on the potato head with the text.",
+      "message": "הנה התמונה של טאומן הבטטה המגעיל 🤮",
+      "wait": false
+    },
+    "timestamp": 1751283614791,
+    "creator": "דן"
+  }
+]

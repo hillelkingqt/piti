@@ -1,0 +1,8 @@
+\selectlanguage *[]{hebrew}
+\contentsline {section}{\numberline {1}מבוא}{2}{section.1}%
+\contentsline {section}{\numberline {2}מקור וגידול}{2}{section.2}%
+\contentsline {section}{\numberline {3}מראה חיצוני}{2}{section.3}%
+\contentsline {section}{\numberline {4}ערך תזונתי ויתרונות בריאותיים}{2}{section.4}%
+\contentsline {section}{\numberline {5}שימושים נפוצים}{3}{section.5}%
+\contentsline {section}{\numberline {6}הערות נוספות}{4}{section.6}%
+\contentsline {section}{\numberline {7}סיכום}{4}{section.7}%

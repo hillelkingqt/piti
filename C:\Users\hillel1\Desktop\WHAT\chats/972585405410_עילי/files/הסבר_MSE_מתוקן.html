@@ -1,0 +1,224 @@
+<!-- filename: הסבר_MSE_מתוקן.html -->
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הסבר מקיף על MSE</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&display=swap');
+
+        body {
+            font-family: 'Assistant', sans-serif;
+            background-color: #0c0a1e;
+            color: #e0e0e0;
+            line-height: 1.8;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1, h2 {
+            color: #9f86ff;
+            text-align: center;
+            border-bottom: 2px solid #9f86ff;
+            padding-bottom: 10px;
+            animation: fadeInDown 1s ease-in-out;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+        }
+
+        .card {
+            background-color: #1a182f;
+            border: 1px solid #3c3a5e;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeInUp 0.5s ease-out forwards;
+            opacity: 0;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(159, 134, 255, 0.2);
+        }
+
+        .card:nth-of-type(1) { animation-delay: 0.2s; }
+        .card:nth-of-type(2) { animation-delay: 0.4s; }
+        .card:nth-of-type(3) { animation-delay: 0.6s; }
+        .card:nth-of-type(4) { animation-delay: 0.8s; }
+
+        p {
+            font-size: 1.1em;
+        }
+
+        .math-block {
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 1.4em;
+            overflow-x: auto;
+        }
+        
+        .math {
+            direction: ltr; 
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #5a588a;
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #9f86ff;
+            color: #1a182f;
+        }
+
+        tr:nth-child(even) {
+            background-color: #25233e;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #888;
+            font-size: 0.9em;
+        }
+        
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>הכנה לקרב: כל מה שצריך לדעת על MSE</h1>
+
+        <div class="card">
+            <h2>אקספוזיציה: מה הסיפור?</h2>
+            <p>
+                דמיינו שאתם מנסים לחזות את הטמפרטורה מחר. אתם בונים מודל מתוחכם שאומר "מחר יהיו 25 מעלות". בפועל, היו 27 מעלות. פספסתם ב-2 מעלות. זהו, על קצה המזלג, הרעיון של <strong>שגיאה (Error)</strong>.
+            </p>
+            <p>
+                בעולם של למידת מכונה וסטטיסטיקה, אנחנו כל הזמן בונים מודלים שמנסים לחזות דברים: מחיר של דירה, סיכוי של לקוח לעזוב, מספר המכירות בחודש הבא. כדי לדעת כמה המודל שלנו "טוב", אנחנו צריכים דרך למדוד את סך כל הפספוסים שלו. כאן נכנס לתמונה מדד ה-<strong>MSE (Mean Squared Error)</strong>, או בעברית: <strong>שגיאה ריבועית ממוצעת</strong>. זה אחד המדדים הפופולריים והחשובים ביותר להערכת מודלים.
+            </p>
+        </div>
+
+        <div class="card">
+            <h2>פירוק לגורמים: למה "ריבועית" ו"ממוצעת"?</h2>
+            <p><strong>שגיאה (Error):</strong> זה החלק הפשוט. על כל נקודת מידע, מחשבים את ההפרש בין הערך האמיתי לערך שהמודל חזה. אם מחיר דירה אמיתי הוא 2 מיליון ₪ והמודל חזה 1.9, השגיאה היא 0.1 מיליון.</p>
+            <p><strong>ריבועית (Squared):</strong> כאן זה נהיה מעניין. למה להעלות את השגיאה בריבוע? שתי סיבות עיקריות:
+                <ol>
+                    <li><strong>ביטול המינוס:</strong> אם פעם אחת המודל חזה גבוה מדי (שגיאה חיובית) ופעם שנייה נמוך מדי (שגיאה שלילית), השגיאות עלולות לקזז אחת את השנייה ונקבל תחושה שהמודל מדויק, למרות שהוא טועה לשני הכיוונים. העלאה בריבוע הופכת את כל השגיאות לחיוביות.</li>
+                    <li><strong>"קנס" על טעויות גדולות:</strong> העלאה בריבוע נותנת "עונש" גדול הרבה יותר לשגיאות גדולות. שגיאה של 2 הופכת ל-4, אבל שגיאה של 10 הופכת ל-100! זה גורם למודל "לפחד" מטעויות גדולות מאוד.</li>
+                </ol>
+            </p>
+            <p><strong>ממוצעת (Mean):</strong> אחרי שהעלינו את כל השגיאות בריבוע, אנחנו פשוט מחשבים את הממוצע שלהן. זה נותן לנו מספר אחד ויחיד שמייצג את "רמת הטעות הממוצעת" של המודל על כל הדוגמאות שבדקנו.
+            </p>
+        </div>
+
+        <div class="card">
+            <h2>ההגדרה הפורמלית</h2>
+            <p>הנוסחה המתמטית של MSE נראית כך:</p>
+            <div class="math-block">
+                <div class="math" dir="ltr">$$ MSE = \frac{1}{n} \sum_{i=1}^{n} (Y_i - \hat{Y}_i)^2 $$</div>
+            </div>
+            <ul>
+                <li><span class="math" dir="ltr">\( n \)</span> - מספר הדוגמאות (התצפיות) שיש לנו.</li>
+                <li><span class="math" dir="ltr">\( Y_i \)</span> - הערך האמיתי (הנכון) של דוגמה מספר <span class="math" dir="ltr">\( i \)</span>.</li>
+                <li><span class="math" dir="ltr">\( \hat{Y}_i \)</span> - הערך שהמודל שלנו חזה עבור דוגמה מספר <span class="math" dir="ltr">\( i \)</span>.</li>
+            </ul>
+        </div>
+        
+        <div class="card">
+            <h2>דוגמה מעשית</h2>
+            <p>נניח שבנינו מודל לחיזוי מחירי דירות, ובדקנו אותו על 3 דירות:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>דירה</th>
+                        <th>מחיר אמיתי (<span class="math" dir="ltr">\(Y_i\)</span>)</th>
+                        <th>מחיר חזוי (<span class="math" dir="ltr">\(\hat{Y}_i\)</span>)</th>
+                        <th>שגיאה (<span class="math" dir="ltr">\(Y_i - \hat{Y}_i\)</span>)</th>
+                        <th>שגיאה ריבועית (<span class="math" dir="ltr">\((Y_i - \hat{Y}_i)^2\)</span>)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>2.0 מיליון</td>
+                        <td>1.9 מיליון</td>
+                        <td>0.1</td>
+                        <td>0.01</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>3.5 מיליון</td>
+                        <td>3.7 מיליון</td>
+                        <td>-0.2</td>
+                        <td>0.04</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>2.8 מיליון</td>
+                        <td>2.8 מיליון</td>
+                        <td>0.0</td>
+                        <td>0.00</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                כעת נחשב את ה-MSE:
+            </p>
+            <div class="math-block">
+                <div class="math" dir="ltr">$$ MSE = \frac{0.01 + 0.04 + 0.00}{3} = \frac{0.05}{3} \approx 0.0167 $$</div>
+            </div>
+            <p>
+                ה-MSE של המודל שלנו הוא בערך 0.0167. ככל שהערך הזה נמוך יותר, כך המודל שלנו נחשב למדויק יותר!
+            </p>
+        </div>
+        
+        <div class="footer">
+            נוצר באהבה על ידי פיתי ❤️
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "\\(", right: "\\)", display: false}
+                ],
+                throwOnError : false
+            });
+        });
+    </script>
+</body>
+</html>

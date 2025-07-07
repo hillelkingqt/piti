@@ -1,0 +1,91 @@
+<svg width="800" height="450" viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+    <defs>
+        <style>
+            .question { font-size: 30px; text-anchor: middle; font-weight: bold; fill: #333; }
+            .option-label { font-size: 28px; text-anchor: middle; font-weight: bold; fill: #333; }
+            .shape { stroke-width: 6; fill: none; }
+            .dot { fill: #000; }
+            .question-box { stroke: #888; stroke-width: 4; stroke-dasharray: 10 5; fill: #f0f0f0; }
+            .question-mark { font-size: 100px; fill: #aaa; text-anchor: middle; }
+        </style>
+    </defs>
+
+    <!-- Question Text -->
+    <text x="400" y="40" class="question">?מהי הצורה המשלימה את הסדרה</text>
+
+    <!-- Sequence Items -->
+    <!-- Item 1: Red Triangle, 1 dot -->
+    <g transform="translate(100, 150) scale(0.9)">
+        <polygon class="shape" style="stroke: #D32F2F;" points="0,-60 52,30 -52,30" />
+        <circle class="dot" cx="0" cy="-60" r="8"/>
+    </g>
+
+    <!-- Item 2: Green Square, 2 dots -->
+    <g transform="translate(300, 150) scale(0.9)">
+        <rect class="shape" style="stroke: #388E3C;" x="-50" y="-50" width="100" height="100" />
+        <circle class="dot" cx="-50" cy="-50" r="8"/>
+        <circle class="dot" cx="50" cy="-50" r="8"/>
+    </g>
+
+    <!-- Item 3: Blue Pentagon, 3 dots -->
+    <g transform="translate(500, 150) scale(0.9)">
+        <polygon class="shape" style="stroke: #1976D2;" points="0,-60 57, -18.5 35.2, 48.5 -35.2, 48.5 -57, -18.5" />
+        <circle class="dot" cx="0" cy="-60" r="8"/>
+        <circle class="dot" cx="57" cy="-18.5" r="8"/>
+        <circle class="dot" cx="35.2" cy="48.5" r="8"/>
+    </g>
+
+    <!-- Item 4: Question Mark -->
+    <g transform="translate(700, 150) scale(0.9)">
+        <rect class="question-box" x="-60" y="-60" width="120" height="120" rx="10" />
+        <text class="question-mark" x="0" y="25">?</text>
+    </g>
+
+    <!-- Answer Options -->
+    <!-- Option A (Correct Answer): Red Hexagon, 4 dots -->
+    <g transform="translate(100, 350)">
+        <text y="100" x="0" class="option-label">א</text>
+        <g transform="scale(0.8)">
+            <polygon class="shape" style="stroke: #D32F2F;" points="60,0 30,52 -30,52 -60,0 -30,-52 30,-52" />
+            <circle class="dot" cx="30" cy="-52" r="10"/> <!-- top-right -->
+            <circle class="dot" cx="60" cy="0" r="10"/> <!-- right -->
+            <circle class="dot" cx="30" cy="52" r="10"/> <!-- bottom-right -->
+            <circle class="dot" cx="-30" cy="52" r="10"/> <!-- bottom-left -->
+        </g>
+    </g>
+
+    <!-- Option B (Distractor: Wrong shape - Pentagon) -->
+    <g transform="translate(300, 350)">
+        <text y="100" x="0" class="option-label">ב</text>
+        <g transform="scale(0.8)">
+             <polygon class="shape" style="stroke: #D32F2F;" points="0,-60 57, -18.5 35.2, 48.5 -35.2, 48.5 -57, -18.5" />
+            <circle class="dot" cx="0" cy="-60" r="10"/>
+            <circle class="dot" cx="57" cy="-18.5" r="10"/>
+            <circle class="dot" cx="35.2" cy="48.5" r="10"/>
+            <circle class="dot" cx="-35.2" cy="48.5" r="10"/>
+        </g>
+    </g>
+
+    <!-- Option C (Distractor: Wrong color - green) -->
+    <g transform="translate(500, 350)">
+        <text y="100" x="0" class="option-label">ג</text>
+        <g transform="scale(0.8)">
+            <polygon class="shape" style="stroke: #388E3C;" points="60,0 30,52 -30,52 -60,0 -30,-52 30,-52" />
+            <circle class="dot" cx="30" cy="-52" r="10"/>
+            <circle class="dot" cx="60" cy="0" r="10"/>
+            <circle class="dot" cx="30" cy="52" r="10"/>
+            <circle class="dot" cx="-30" cy="52" r="10"/>
+        </g>
+    </g>
+
+    <!-- Option D (Distractor: Wrong number of dots) -->
+    <g transform="translate(700, 350)">
+        <text y="100" x="0" class="option-label">ד</text>
+        <g transform="scale(0.8)">
+            <polygon class="shape" style="stroke: #D32F2F;" points="60,0 30,52 -30,52 -60,0 -30,-52 30,-52" />
+            <circle class="dot" cx="30" cy="-52" r="10"/>
+            <circle class="dot" cx="60" cy="0" r="10"/>
+            <circle class="dot" cx="30" cy="52" r="10"/>
+        </g>
+    </g>
+</svg>

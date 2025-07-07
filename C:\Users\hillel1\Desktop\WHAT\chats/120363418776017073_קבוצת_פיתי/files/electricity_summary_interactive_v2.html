@@ -1,0 +1,245 @@
+<!-- filename: electricity_summary_interactive_v2.html -->
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>סיכום אינטראקטיבי: חשמל 2.0</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --border-color: #30363d;
+            --primary-text: #c9d1d9;
+            --secondary-text: #8b949e;
+            --electric-blue: #38bdf8;
+            --electric-yellow: #facc15;
+            --water-color-dark: #1e3a8a;
+            --water-color-light: #3b82f6;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--primary-text);
+            font-family: 'Heebo', sans-serif;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+            overflow-x: hidden;
+            padding-bottom: 100px; /* Space for water */
+        }
+        
+        .electric-cursor {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="%23facc15" stroke="black" stroke-width="1"><path d="M13 2L3 14h9l-1 8L21 10h-9z"/></svg>'), auto !important;
+        }
+        .dead-cursor {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="%23333333" stroke="black" stroke-width="1"><path d="M13 2L3 14h9l-1 8L21 10h-9z"/></svg>'), auto !important;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        h1 {
+            color: var(--electric-blue);
+            font-size: 2.5rem;
+            text-shadow: 0 0 10px var(--electric-blue), 0 0 20px var(--electric-blue);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 25px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            user-select: none;
+        }
+        
+        .card:hover {
+             transform: translateY(-5px);
+             box-shadow: 0 10px 20px rgba(0,0,0,0.2), 0 0 15px var(--electric-blue);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            color: var(--electric-blue);
+            font-size: 1.5rem;
+        }
+        
+        .card p {
+            color: var(--secondary-text);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        /* Zap effect styles */
+        .zap-line {
+             position: fixed;
+             height: 2px;
+             background: linear-gradient(90deg, rgba(250,204,21,0), var(--electric-yellow), rgba(250,204,21,0));
+             pointer-events: none;
+             transform-origin: left;
+             animation: zap-fade 0.3s forwards;
+             z-index: 9999;
+        }
+
+        @keyframes zap-fade {
+            0% { opacity: 0.8; } 100% { opacity: 0; }
+        }
+        
+        /* Water styles */
+        #water {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(to top, var(--water-color-dark), var(--water-color-light));
+            z-index: 100;
+            pointer-events: auto;
+            border-top: 3px solid #93c5fd;
+            overflow: hidden;
+        }
+        #water::after {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200px;
+            background: rgba(255,255,255,0.15);
+            top: -150px;
+            left: -50%;
+            border-radius: 40%;
+            animation: wave 10s linear infinite;
+        }
+
+        @keyframes wave {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>סיכום אינטראקטיבי: חשמל ⚡</h1>
+        <p style="color: var(--secondary-text);">גע באחד הכרטיסים כדי להתחשמל, והיזהר מהמים!</p>
+
+        <div class="grid">
+             <div class="card"><h2>חוק קולון</h2><p>מתאר את הכוח החשמלי הפועל בין שני מטענים חשמליים נקודתיים.</p></div>
+             <div class="card"><h2>שדה חשמלי</h2><p>תכונה של המרחב סביב מטען חשמלי. כל מטען אחר ירגיש את השפעתו.</p></div>
+             <div class="card"><h2>חוק אוהם</h2><p>קובע את הקשר בין מתח, זרם והתנגדות במעגל חשמלי: V = IR.</p></div>
+             <div class="card"><h2>פוטנציאל חשמלי</h2><p>האנרגיה הפוטנציאלית החשמלית ליחידת מטען. הפרש פוטנציאלים הוא מתח.</p></div>
+             <div class="card"><h2>מעגל חשמלי</h2><p>מסלול סגור המאפשר זרימה של זרם חשמלי, מורכב ממקור, מוליכים וצרכנים.</p></div>
+             <div class="card"><h2>אלקטרומגנטיות</h2><p>התחום המאחד חשמל ומגנטיות. זרם יוצר שדה מגנטי ולהיפך.</p></div>
+        </div>
+    </div>
+    
+    <div id="water"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.card');
+            const water = document.getElementById('water');
+            const body = document.body;
+
+            let isElectrified = false;
+            let isDead = false;
+            let canZap = true;
+
+            const createZapEffect = (x, y) => {
+                let lastX = x;
+                let lastY = y;
+
+                for (let i = 0; i < 5; i++) {
+                    const angle = Math.random() * 2 * Math.PI;
+                    const length = Math.random() * 30 + 15;
+                    const newX = lastX + length * Math.cos(angle);
+                    const newY = lastY + length * Math.sin(angle);
+
+                    const line = document.createElement('div');
+                    line.className = 'zap-line';
+                    body.appendChild(line);
+                    
+                    const deltaX = newX - lastX;
+                    const deltaY = newY - lastY;
+                    const lineLength = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
+                    const lineAngle = Math.atan2(deltaY, deltaX) * 180 / Math.PI;
+
+                    line.style.width = lineLength + 'px';
+                    line.style.left = lastX + 'px';
+                    line.style.top = lastY + 'px';
+                    line.style.transform = `rotate(${lineAngle}deg)`;
+
+                    lastX = newX;
+                    lastY = newY;
+
+                    setTimeout(() => line.remove(), 300);
+                }
+            };
+
+            document.addEventListener('mousemove', e => {
+                if (isElectrified && canZap) {
+                    createZapEffect(e.clientX, e.clientY);
+                    canZap = false;
+                    setTimeout(() => { canZap = true; }, 60); // Throttle zaps
+                }
+            });
+
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    if (isDead) return;
+                    if (!isElectrified) {
+                        isElectrified = true;
+                        body.classList.add('electric-cursor');
+                    }
+                });
+            });
+
+            water.addEventListener('mouseenter', (e) => {
+                if (isElectrified) {
+                    isElectrified = false;
+                    isDead = true;
+                    body.classList.remove('electric-cursor');
+                    body.classList.add('dead-cursor');
+
+                    // Sizzle effect
+                    for(let i=0; i<30; i++) {
+                        const sizzle = document.createElement('div');
+                        sizzle.style.position = 'fixed';
+                        sizzle.style.left = e.clientX + (Math.random() - 0.5) * 50 + 'px';
+                        sizzle.style.top = e.clientY + (Math.random() - 0.5) * 50 + 'px';
+                        sizzle.style.width = (Math.random() * 3 + 2) + 'px';
+                        sizzle.style.height = sizzle.style.width;
+                        sizzle.style.background = '#ddd';
+                        sizzle.style.borderRadius = '50%';
+                        sizzle.style.opacity = '1';
+                        sizzle.style.pointerEvents = 'none';
+                        sizzle.style.zIndex = '1001';
+                        sizzle.style.transition = 'opacity 0.5s, transform 0.5s';
+                        body.appendChild(sizzle);
+                        setTimeout(() => {
+                            sizzle.style.opacity = '0';
+                            sizzle.style.transform = `translateY(-30px)`;
+                        }, 10);
+                        setTimeout(() => sizzle.remove(), 600);
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

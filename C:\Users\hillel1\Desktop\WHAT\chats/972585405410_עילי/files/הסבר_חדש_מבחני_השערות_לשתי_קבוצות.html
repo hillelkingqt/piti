@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <!-- filename: הסבר_חדש_מבחני_השערות_לשתי_קבוצות.html -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הצלילה העמוקה: איך משווים בין שתי קבוצות?</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU07RT5GzZJp2BBYzuLExlDGMHNo+xwGhbXoQAysuhIcnTIpovopvsC" crossorigin="anonymous">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&display=swap');
+
+        :root {
+            --bg-color: #1a1a2e;
+            --primary-color: #e94560;
+            --secondary-color: #16213e;
+            --text-color: #e0e0e0;
+            --header-color: #f0f0f0;
+            --accent-color: #0f3460;
+            --border-color: #e94560;
+            --box-shadow: 0 4px 15px rgba(233, 69, 96, 0.2);
+        }
+
+        body {
+            font-family: 'Assistant', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.8;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: var(--secondary-color);
+            border-radius: 15px;
+            box-shadow: var(--box-shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        h1, h2, h3 {
+            color: var(--header-color);
+            font-weight: 700;
+            text-shadow: 1px 1px 5px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            font-size: 2.8em;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        h2 {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-top: 2.5rem;
+            font-size: 2.2em;
+        }
+        
+        h3 {
+            font-size: 1.6em;
+            color: #c0c0e0;
+        }
+
+        .math {
+            direction: ltr;
+            padding: 1.5em;
+            margin: 1.5em 0;
+            background-color: var(--accent-color);
+            border-radius: 8px;
+            border-left: 5px solid var(--primary-color);
+            overflow-x: auto;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .math:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 20px rgba(233, 69, 96, 0.3);
+        }
+        
+        p, li {
+            font-size: 1.1em;
+            font-weight: 300;
+        }
+
+        .nav-menu {
+            background-color: var(--accent-color);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .nav-menu a {
+            color: var(--text-color);
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 600;
+            transition: color 0.3s, text-shadow 0.3s;
+        }
+
+        .nav-menu a:hover {
+            color: var(--primary-color);
+            text-shadow: 0 0 10px var(--primary-color);
+        }
+
+        .box {
+            background-color: rgba(233, 69, 96, 0.1);
+            border: 1px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            box-shadow: var(--box-shadow);
+        }
+
+        .box h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .content-section {
+             animation: fadeInUp 1.2s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>הצלילה העמוקה: איך משווים בין שתי קבוצות?</h1>
+        <p>בסטטיסטיקה, אנחנו כל הזמן רוצים להשוות. האם תרופה חדשה יעילה יותר מהישנה? האם קמפיין שיווקי א' הצליח יותר מקמפיין ב'? עמוד 14 בסיכום שלך עוסק בדיוק בזה: הכלים שמאפשרים לנו להשוות ממוצעים של שתי קבוצות. בוא נפרק את זה מחדש, בדרך קצת שונה.</p>
+
+        <nav class="nav-menu">
+            <a href="#independent">מדגמים בלתי תלויים</a>
+            <a href="#paired">מדגמים מזווגים</a>
+            <a href="#bonferroni">בעיית ההשוואות המרובות</a>
+        </nav>
+
+        <section id="independent" class="content-section">
+            <h2>1. מדגמים בלתי תלויים: הקרב בין הזרים</h2>
+            <p>דמיין שאתה רוצה לדעת אם סטודנטים שנה א' גבוהים בממוצע מסטודנטים שנה ד'. אתה דוגם קבוצה אחת של סטודנטים משנה א' וקבוצה *שונה לחלוטין* של סטודנטים משנה ד'. אין קשר בין הסטודנטים בשתי הקבוצות - הם 'בלתי תלויים'.</p>
+            <p>המטרה שלנו היא לבדוק את ההשערה שההפרש בין הממוצעים באוכלוסייה שווה ל-0 (כלומר, אין הבדל בגובה הממוצע).<br>השערת האפס (אין הבדל): <span class="math" dir="ltr">H_0: \mu_1 = \mu_2</span> או <span class="math" dir="ltr">H_0: \mu_1 - \mu_2 = 0</span><br>השערה אלטרנטיבית (יש הבדל): <span class="math" dir="ltr">H_1: \mu_1 \neq \mu_2</span></p>
+
+            <h3>מבחן T לשני מדגמים בלתי תלויים</h3>
+            <p>ברוב המקרים בעולם האמיתי, אנחנו לא יודעים את השונות של האוכלוסיות, ולכן נשתמש במבחן T. הנוסחה נראית מאיימת, אבל הרעיון פשוט: אנחנו לוקחים את ההפרש שמצאנו במדגם שלנו, ומחלקים אותו בטעות התקן של ההפרש הזה, כדי לראות כמה 'מובהק' או 'קיצוני' הוא.</p>
+            <div class="math">$$ t = \frac{(\bar{x}_1 - \bar{x}_2) - (\mu_1 - \mu_2)}{s_{p} \sqrt{\frac{1}{n_1} + \frac{1}{n_2}}} $$</div>
+            <p>כאשר:</p>
+            <ul>
+                <li><span class="math" dir="ltr">\bar{x}_1, \bar{x}_2</span> הם ממוצעי המדגמים.</li>
+                <li><span class="math" dir="ltr">n_1, n_2</span> הם גדלי המדגמים.</li>
+                <li><span class="math" dir="ltr">s_p</span> היא סטיית התקן המאוחדת (pooled standard deviation) - דרך 'לשלב' את השונויות של שני המדגמים לאומדן אחד משותף. זה מבוסס על ההנחה שהשונויות באוכלוסייה שוות. אם אי אפשר להניח זאת, משתמשים במבחן קצת שונה (מבחן וולש).</li>
+            </ul>
+        </section>
+
+        <section id="paired" class="content-section">
+            <h2>2. מדגמים מזווגים: המבחן של 'לפני ואחרי'</h2>
+            <p>עכשיו דמיין תרחיש אחר: אתה רוצה לבדוק אם דיאטה חדשה באמת עובדת. אתה לוקח קבוצה של אנשים, שוקל אותם (*לפני*), נותן להם את הדיאטה למשך חודש, ושוקל אותם *שוב* (*אחרי*). כאן, כל מדידה שנייה קשורה ישירות לראשונה - היא נלקחה מאותו אדם. אלו מדגמים מזווגים (או תלויים).</p>
+            <p>הטריק הגאוני כאן הוא להפוך את הבעיה מבעיה של שני מדגמים לבעיה של מדגם אחד! איך? פשוט יוצרים משתנה חדש: ההפרש (D) בין ה'אחרי' ל'לפני' עבור כל משתתף.</p>
+            <div class="math">D_i = X_{after, i} - X_{before, i}</div>
+            <p>עכשיו, כל מה שאנחנו צריכים לעשות זה לבדוק אם הממוצע של ההפרשים הזה שונה באופן מובהק מאפס. אנחנו מבצעים מבחן T פשוט למדגם יחיד על סדרת ההפרשים D.</p>
+            <p>השערת האפס (אין שינוי): <span class="math" dir="ltr">H_0: \mu_D = 0</span><br>השערה אלטרנטיבית (יש שינוי): <span class="math" dir="ltr">H_1: \mu_D \neq 0</span></p>
+            <div class="math">$$ t = \frac{\bar{D} - \mu_D}{\frac{s_D}{\sqrt{n}}} $$</div>
+             <p>כאשר:</p>
+            <ul>
+                <li><span class="math" dir="ltr">\bar{D}</span> הוא ממוצע ההפרשים במדגם.</li>
+                <li><span class="math" dir="ltr">s_D</span> היא סטיית התקן של ההפרשים במדגם.</li>
+                <li><span class="math" dir="ltr">n</span> הוא מספר הזוגות.</li>
+            </ul>
+        </section>
+        
+        <section id="bonferroni" class="content-section">
+            <h2>3. בעיית ההשוואות המרובות: איך לא לרמות את עצמנו</h2>
+            <div class="box">
+                <h3>אנלוגיית ארוחת הערב המשפחתית</h3>
+                <p>דמיין שאתה מארגן ארוחה משפחתית ורוצה לבדוק איזו מ-5 עוגות שונות היא האהובה ביותר. אתה מחליט להשוות כל זוג עוגות בנפרד (עוגה 1 מול 2, 1 מול 3, ... 4 מול 5). בסך הכל, יש 10 השוואות כאלה. </p>
+                <p>אם קבעת רמת מובהקות (אלפא) של 5%, אתה בעצם 'מסכים' לסיכוי של 5% לטעות *בכל השוואה בודדת*. אבל מה הסיכוי שתטעה בלפחות אחת מתוך 10 ההשוואות? הסיכוי הזה מצטבר והופך להיות הרבה יותר גבוה מ-5%! זה נקרא 'ניפוח טעות מסוג I'. אתה עלול להכריז שעוגת הגבינה טובה יותר מעוגת השוקולד רק במקרה, בגלל שעשית כל כך הרבה השוואות.</p>
+            </div>
+            <h3>תיקון בונפרוני: הפתרון המחמיר</h3>
+            <p>תיקון בונפרוני הוא דרך פשוטה ואינטואיטיבית להילחם בבעיה הזו. הוא אומר: 'רגע, אם אתה עושה הרבה השוואות, אתה צריך להיות הרבה יותר מחמיר עם כל אחת מהן'.</p>
+            <p>השיטה פשוטה: קח את רמת המובהקות המקורית שלך (נניח <span class="math" dir="ltr">\alpha = 0.05</span>) וחלק אותה במספר ההשוואות שאתה מבצע (k).</p>
+            <div class="math">\alpha_{new} = \frac{\alpha_{original}}{k}</div>
+            <p>בדוגמת העוגות, אם ביצענו 10 השוואות, רמת המובהקות החדשה והמחמירה שלנו תהיה: <br><span class="math" dir="ltr">0.05 / 10 = 0.005</span>.</p>
+            <p>כעת, נכריז על הבדל בין שתי עוגות כ'מובהק' רק אם ערך ה-p שקיבלנו בהשוואה קטן מ-0.005. זה מקשה הרבה יותר על קבלת תוצאה מובהקת, ובכך מגן עלינו מפני טעויות מקריות ושומר על רמת המובהקות הכוללת של הניסוי קרוב ל-5% המקוריים.</p>
+        </section>
+
+    </div>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzOKEleOLrqcv5IsuLAUNCHyVI6AXKoTxvoX" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+        onload="renderMathInElement(document.body);"></script>
+</body>
+</html>

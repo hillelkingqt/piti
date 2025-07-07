@@ -1,0 +1,176 @@
+% Suggested filename: התפלגות_t.tex
+\documentclass[12pt]{article}
+
+%========== (1) Math Packages ==========
+\usepackage{amsmath,amssymb,amsthm}
+
+%========== (2) General Packages: Hebrew support, fonts, etc ==========
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{enumerate}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\usepackage{setspace}
+\usepackage[most]{tcolorbox}
+
+\usepackage{fontspec}
+\usepackage{polyglossia}
+
+\newcommand{\enquote}[1]{\textquotedblleft #1\textquotedblright}
+
+% Language settings
+\setdefaultlanguage{hebrew}
+\setotherlanguage{english}
+
+% Fonts
+\newfontfamily\hebrewfont[Script=Hebrew]{David CLM} % Using David CLM as requested
+\newfontfamily\englishfont{Times New Roman}
+\newfontfamily\hebrewfonttt[Script=Hebrew]{David CLM} % Using David CLM for tt as well, as per example
+
+% Hyperref link color settings
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black, % Changed to black for a cleaner look
+  urlcolor=black,  % Changed to black
+  citecolor=black  % Changed to black
+}
+
+%========== Spacing and Paragraphs ==========
+\onehalfspacing % 1.5 line spacing
+\setlength{\parskip}{6pt} % Space between paragraphs
+\setlength{\parindent}{0pt} % No paragraph indentation
+
+%========== Header/Footer Settings ==========
+\pagestyle{fancy}
+\setlength{\headheight}{14.5pt} % Ensure enough space for the header
+\fancyhf{} % Clear default header/footer
+\lhead{} % Clear left header
+\rhead{\today} % Date on the right header
+\cfoot{\thepage} % Page number centered footer
+
+%========== tcolorbox Setup ==========
+\tcbset{
+  colback=blue!1!white, % Light blue background
+  colframe=blue!50!black, % Darker blue frame
+  fonttitle=\bfseries, % Bold title font
+  boxsep=5pt, % Space between content and frame
+  top=5pt, bottom=5pt, left=5pt, right=5pt, % Padding inside the box
+  middle=5pt, % Space between title and content
+  sharp corners, % Sharp corners as requested
+  enhanced % Needed for some features
+}
+
+%========== Special Boxes: Definition, Remark, Example ==========
+\newtcolorbox{definitionBox}[1]{
+  title=#1,
+  colback=green!5!white, % Slightly more saturated green background
+  colframe=green!60!black, % Darker green frame
+  sharp corners,
+  enhanced
+}
+
+\newtcolorbox{remarkBox}[1]{
+  title=#1,
+  colback=yellow!5!white, % Slightly more saturated yellow background
+  colframe=yellow!60!black, % Darker yellow frame
+  sharp corners,
+  enhanced
+}
+
+\newtcolorbox{exampleBox}[1]{
+  title=#1,
+  colback=red!5!white, % Slightly more saturated red background
+  colframe=red!60!black, % Darker red frame
+  sharp corners,
+  enhanced
+}
+
+% Custom box for Laws/Theorems/Results
+\newtcolorbox{keyconceptBox}[1]{
+  title=#1,
+  colback=teal!5!white, % Light teal background
+  colframe=teal!60!black, % Darker teal frame
+  sharp corners,
+  enhanced
+}
+
+
+% Bullet fix for itemize in RTL context
+\renewcommand{\labelitemi}{$\bullet$}
+
+% Adjust contents name for RTL
+\usepackage{tocloft}
+\usepackage{etoolbox}
+
+\makeatletter
+\renewcommand\tableofcontents{\section*{\contentsname}
+    \@starttoc{toc}}
+\makeatother
+
+% Fix issue with polyglossia and figure/table captions in RTL
+\usepackage{caption}
+\captionsetup{justification=raggedright,singlelinecheck=false}
+
+
+\begin{document}
+
+\begin{center}
+    \fontsize{24pt}{28pt}\selectfont
+    \textbf{התפלגות \(t\) (התפלגות סטודנט)} \\
+    \vspace{12pt}
+    \fontsize{16pt}{18pt}\selectfont
+    הגדרה פורמלית ופונקציית צפיפות ההסתברות \\
+\end{center}
+
+\vspace{24pt} % Add some space after the title
+
+\section*{מבוא}
+התפלגות \(t\), המכונה גם התפלגות סטודנט, היא התפלגות הסתברות המשמשת בעיקר בהסקה סטטיסטית, ובפרט במבחני השערות וברווחי סמך, כאשר גודל המדגם קטן או שסטיית התקן של האוכלוסייה אינה ידועה. במצבים אלו, התפלגות \(t\) מהווה חלופה להתפלגות הנורמלית הסטנדרטית.
+
+\vspace{12pt}
+
+התפלגות \(t\) דומה בצורתה להתפלגות הנורמלית הסטנדרטית (עקומת פעמון סימטרית סביב האפס), אך יש לה "זנבות שמנים" יותר. המשמעות היא שההסתברות לקבלת ערכים קיצוניים גבוהה יותר בהתפלגות \(t\) מאשר בהתפלגות הנורמלית. צורתה המדויקת של התפלגות \(t\) נקבעת על ידי פרמטר יחיד: \enquote{דרגות החופש}. ככל שמספר דרגות החופש גדל, התפלגות \(t\) מתקרבת יותר ויותר להתפלגות הנורמלית הסטנדרטית.
+
+\section*{ההגדרה המתמטית הפורמלית}
+
+התפלגות \(t\) מוגדרת באמצעות מנה של שני משתנים מקריים בלתי תלויים: משתנה מקרי נורמלי סטנדרטי ומשתנה מקרי בעל התפלגות חי-בריבוע.
+
+\begin{definitionBox}{הגדרה: התפלגות \(t\)}
+יהי \(Z\) משתנה מקרי המתפלג נורמלית סטנדרטית, כלומר \(Z \sim N(0, 1)\). \\
+יהי \(V\) משתנה מקרי המתפלג חי-בריבוע עם \(\nu\) דרגות חופש, כלומר \(V \sim \chi^2(\nu)\). \\
+כאשר \(Z\) ו-\(V\) בלתי תלויים, המשתנה המקרי \(T\), המוגדר על ידי:
+\[ T = \frac{Z}{\sqrt{V/\nu}} \]
+מתפלג התפלגות \(t\) עם \(\nu\) דרגות חופש. מסמנים זאת \(T \sim t(\nu)\).
+\end{definitionBox}
+
+\section*{פונקציית צפיפות ההסתברות (PDF)}
+
+פונקציית צפיפות ההסתברות (PDF) של התפלגות \(t\) מתארת את ההסתברות היחסית לקבלת ערך מסוים. זוהי הנוסחה המתארת את צורת ה"פעמון" הייחודית של ההתפלגות.
+
+\begin{keyconceptBox}{נוסחה: פונקציית צפיפות ההסתברות של התפלגות \(t\)}
+פונקציית צפיפות ההסתברות \(f(t; \nu)\) של התפלגות \(t\) עם \(\nu\) דרגות חופש נתונה על ידי:
+\[ f(t; \nu) = \frac{\Gamma\left(\frac{\nu+1}{2}\right)}{\sqrt{\pi\nu}\,\Gamma\left(\frac{\nu}{2}\right)}\left(1 + \frac{t^2}{\nu}\right)^{-\frac{\nu+1}{2}} \]
+עבור כל ערך ממשי \(t\).
+\end{keyconceptBox}
+
+\section*{פירוט רכיבי הנוסחה}
+
+הבה נפרט את המשמעות של כל רכיב בנוסחת פונקציית צפיפות ההסתברות:
+
+\begin{itemize}
+    \item \textbf{\(t\)}: זהו הערך הממשי עבורו אנו מחשבים את צפיפות ההסתברות. הוא מייצג נקודה מסוימת על הציר האופקי של ההתפלגות (בדומה לערך \(z\) בהתפלגות נורמלית).
+
+    \item \textbf{\(\nu\)}: זהו מספר \textbf{דרגות החופש}. זהו הפרמטר היחיד של התפלגות \(t\), והוא קובע באופן מוחלט את צורתה. ברוב המקרים בסטטיסטיקה מעשית, כאשר התפלגות \(t\) משמשת להסקה על ממוצע או הבדל בין ממוצעים המבוססים על מדגם בגודל \(n\), מספר דרגות החופש הוא \(\nu = n-1\). ככל ש-\(\nu\) גדל, עקומת התפלגות \(t\) הופכת להיות גבוהה וצרה יותר ומתקרבת לצורת ההתפלגות הנורמלית הסטנדרטית.
+
+    \item \textbf{\(\Gamma(\cdot)\)}: זוהי \textbf{פונקציית גמא}. פונקציה זו מהווה הרחבה של פונקציית העצרת (\(n!\) המוגדרת למספרים טבעיים) למספרים מרוכבים וממשיים (מלבד מספרים שלמים שליליים או אפס). עבור מספר שלם חיובי \(n\), \(\Gamma(n) = (n-1)!\). פונקציית גמא מופיעה בנוסחה כחלק מ\enquote{קבוע נרמול} - גורם שמוודא שהשטח הכולל מתחת לעקומת צפיפות ההסתברות שווה בדיוק ל-1, כפי שנדרש מכל פונקציית צפיפות הסתברות חוקית. אין צורך לחשב את ערכי פונקציית גמא באופן ידני ברוב היישומים המעשיים, שכן ערכיה מחושבים אוטומטית על ידי תוכנות סטטיסטיות.
+\end{itemize}
+
+\begin{remarkBox}{הערה על שימוש מעשי}
+בפועל, בעת שימוש בהתפלגות \(t\) לצורך מבחני השערות או בניית רווחי סמך, אין צורך לחשב את ערכי פונקציית הצפיפות \(f(t; \nu)\) באופן ישיר. במקום זאת, משתמשים בטבלאות \(t\) או במחשבונים סטטיסטיים/תוכנות כדי למצוא ערכים קריטיים או ערכי \(p\) בהתאם לערך \(t\) הנצפה ולמספר דרגות החופש \(\nu\).
+\end{remarkBox}
+
+
+\end{document}

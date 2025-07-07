@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הוכחת פירוק הטיה-שונות</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700&display=swap');
+
+        :root {
+            --bg-color: #1a1a2e;
+            --primary-color: #e94560;
+            --secondary-color: #0f3460;
+            --text-color: #e0e0e0;
+            --card-bg: #16213e;
+            --border-color: #e94560;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Rubik', sans-serif;
+            line-height: 1.8;
+            margin: 0;
+            padding: 0;
+            text-align: right; /* Default text alignment for RTL */
+        }
+
+        .main-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 1rem 2rem;
+            overflow-x: hidden;
+        }
+
+        h1, h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            text-align: center;
+        }
+
+        .step-box {
+            background-color: var(--card-bg);
+            border-left: 5px solid var(--border-color);
+            border-right: none;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .math-block {
+            direction: ltr; /* CRITICAL for math */
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 1.5em;
+            margin: 1em 0;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 1.1em;
+            overflow-x: auto; /* CRITICAL for long formulas */
+            white-space: nowrap;
+        }
+
+        .explanation {
+            font-style: italic;
+            color: #a0a0c0;
+            margin-top: 1rem;
+        }
+
+        .final-formula {
+            background-color: var(--secondary-color);
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+            color: #b0b0d0;
+        }
+        
+        .footer p {
+            margin: 0.5rem 0;
+        }
+
+        /* Animation */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInAnimation 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeInAnimation {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <h1>הוכחת פירוק הטיה-שונות (Bias-Variance Decomposition)</h1>
+        <p class="fade-in">היי עילי, הנה ההוכחה המתוקנת עם כל מה שביקשת! המטרה היא להוכיח ששגיאת הריבועים הממוצעת (MSE) מתפרקת לשלושה רכיבים: הטיה בריבוע, שונות, והשגיאה האי-פריקה.</p>
+
+        <div class="step-box fade-in" style="animation-delay: 0.2s;">
+            <h2>הגדרות בסיס</h2>
+            <p>נניח מודל סטטיסטי אמיתי: $y = f(x) + \epsilon$, כאשר $\epsilon$ הוא רעש עם תוחלת אפס ($E[\epsilon] = 0$) ושונות $\sigma^2$ ($\text{Var}(\epsilon) = E[\epsilon^2] = \sigma^2$). המודל שאנחנו בונים הוא $\hat{f}(x)$.</p>
+            <p>שגיאת הריבועים הממוצעת בנקודה $x$ מוגדרת כתוחלת של ריבוע ההפרש בין התצפית $y$ לחיזוי $\hat{f}(x)$:</p>
+            <div class="math-block" dir="ltr">\text{MSE} = E\left[(y - \hat{f}(x))^2\right]</div>
+        </div>
+
+        <div class="step-box fade-in" style="animation-delay: 0.4s;">
+            <h2>שלב א׳: פירוק ראשוני</h2>
+            <p>נציב את $y$ בהגדרת ה-MSE:</p>
+            <div class="math-block" dir="ltr">\text{MSE} = E\left[(f(x) + \epsilon - \hat{f}(x))^2\right]</div>
+            <p>נסדר מחדש ונפתח את הסוגריים:</p>
+            <div class="math-block" dir="ltr">= E\left[((f(x) - \hat{f}(x)) + \epsilon)^2\right] = E\left[(f(x) - \hat{f}(x))^2 + 2\epsilon(f(x) - \hat{f}(x)) + \epsilon^2\right]</div>
+            <p>נשתמש בלינאריות התוחלת:</p>
+            <div class="math-block" dir="ltr">= E\left[(f(x) - \hat{f}(x))^2\right] + 2E[\epsilon(f(x) - \hat{f}(x))] + E[\epsilon^2]</div>
+            <p class="explanation">מכיוון שהרעש $\epsilon$ בלתי תלוי בנתונים ובמודל $\hat{f}(x)$, וגם $E[\epsilon]=0$, איבר התערבות (cross-product term) מתאפס: $2E[\epsilon]E[f(x)-\hat{f}(x)] = 0$. ידוע גם ש-$E[\epsilon^2] = \sigma^2$.</p>
+            <p>נשארנו עם:</p>
+            <div class="math-block" dir="ltr">\text{MSE} = E\left[(f(x) - \hat{f}(x))^2\right] + \sigma^2</div>
+        </div>
+
+        <div class="step-box fade-in" style="animation-delay: 0.6s;">
+            <h2>שלב ב׳: פירוק האיבר המרכזי (הטריק)</h2>
+            <p>כעת נתמקד באיבר $E\left[(f(x) - \hat{f}(x))^2\right]$. נוסיף ונחסיר את $E[\hat{f}(x)]$ בתוך הסוגריים:</p>
+            <div class="math-block" dir="ltr">E\left[((f(x) - E[\hat{f}(x)]) + (E[\hat{f}(x)] - \hat{f}(x)))^2\right]</div>
+            <p>נפתח לפי נוסחת כפל מקוצר $(a+b)^2$ כאשר $a = f(x) - E[\hat{f}(x)]$ ו-$b = E[\hat{f}(x)] - \hat{f}(x)$:</p>
+            <div class="math-block" dir="ltr">= E\left[(f(x) - E[\hat{f}(x)])^2\right] - 2E\left[(f(x) - E[\hat{f}(x)])(\hat{f}(x) - E[\hat{f}(x)])\right] + E\left[(\hat{f}(x) - E[\hat{f}(x)])^2\right]</div>
+            <p class="explanation">האיבר הראשון $(f(x) - E[\hat{f}(x)])^2$ הוא קבוע ביחס לתוחלת על $\hat{f}$, וזהו בדיוק ריבוע ההטיה: $\text{Bias}(\hat{f}(x))^2$. האיבר השלישי הוא בדיוק הגדרת השונות של $\hat{f}(x)$: $\text{Var}(\hat{f}(x))$.</p>
+            <p class="explanation">נסתכל על איבר התערבות האמצעי: $f(x) - E[\hat{f}(x)]$ הוא קבוע ולכן יוצא מהתוחלת. נשארנו עם $E[\hat{f}(x) - E[\hat{f}(x)]] = E[\hat{f}(x)] - E[\hat{f}(x)] = 0$. לכן, כל איבר התערבות מתאפס.</p>
+             <p>קיבלנו:</p>
+            <div class="math-block" dir="ltr">E\left[(f(x) - \hat{f}(x))^2\right] = \text{Bias}(\hat{f}(x))^2 + \text{Var}(\hat{f}(x))</div>
+        </div>
+
+        <div class="step-box final-formula fade-in" style="animation-delay: 0.8s;">
+            <h2>שלב ג׳: הרכבה סופית</h2>
+            <p>נחבר את התוצאות משלב א׳ ו-ב׳:</p>
+            <div class="math-block" dir="ltr">\text{MSE} = \text{Bias}(\hat{f}(x))^2 + \text{Var}(\hat{f}(x)) + \sigma^2</div>
+            <p style="text-align: center; font-size: 1.5rem; font-weight: bold;">מ.ש.ל.</p>
+        </div>
+        
+        <div class="footer fade-in" style="animation-delay: 1s;">
+            <p>נוצר באהבה במיוחד עבור עילי התותח 🤓</p>
+            <p>ומוקדש באהבה אינסופית להלל האחד והיחיד ❤️</p>
+            <p>- פיתי</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '$', right: '$', display: false}
+                ]
+            });
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('fade-in');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.fade-in').forEach(el => {
+                observer.observe(el);
+            });
+        });
+    </script>
+</body>
+</html>

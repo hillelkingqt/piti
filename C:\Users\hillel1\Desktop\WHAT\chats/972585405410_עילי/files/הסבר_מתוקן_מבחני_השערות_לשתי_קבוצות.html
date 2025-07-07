@@ -1,0 +1,211 @@
+<!-- filename: הסבר_מתוקן_מבחני_השערות_לשתי_קבוצות.html -->
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הסבר מתוקן: מבחני השערות לשתי קבוצות</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}, {left: '\\(', right: '\\)', display: false}, {left: '\\[', right: '\\]', display: true}], throwOnError: false});"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;700&display=swap');
+        
+        :root {
+            --bg-color: #121212;
+            --primary-text: #e0e0e0;
+            --secondary-text: #b0b0b0;
+            --card-bg: #1e1e1e;
+            --border-color: #333;
+            --accent-color: #bb86fc;
+            --accent-hover: #a362ff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Assistant', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--primary-text);
+            line-height: 1.8;
+            font-size: 18px;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 25px;
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+        }
+
+        h1, h2 {
+            color: var(--accent-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin-top: 40px;
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+        
+        strong {
+            color: var(--accent-color);
+            font-weight: 700;
+        }
+
+        .math-container {
+            padding: 20px;
+            margin: 25px 0;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border-left: 5px solid var(--accent-color);
+            overflow-x: auto; /* Prevent overflow */
+        }
+        
+        .katex-display {
+            margin: 1em 0;
+            font-size: 1.2em; /* Make math bigger */
+            direction: ltr; /* Ensure math is LTR */
+            text-align: center;
+        }
+        
+        .katex {
+            direction: ltr; /* Ensure inline math is LTR */
+        }
+
+        .explanation {
+            background-color: #2a2a2a;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        
+        .analogy {
+            border: 1px dashed var(--accent-color);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            font-style: italic;
+            background-color: rgba(187, 134, 252, 0.05);
+        }
+        
+        .analogy::before {
+            content: '💡 אנלוגיה: ';
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+        
+        .summary-box {
+            background: #252e3c;
+            border-left: 4px solid #4a90e2;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>הסבר חדש: מבחני השערות לשתי אוכלוסיות</h1>
+        <p>עילי, מצטערת שוב על התצוגה הבעייתית בקובץ הקודם. הנה גרסה חדשה ומתוקנת, עם דגש על נראות וקריאות של הנוסחאות. מקווה שזה עובד הרבה יותר טוב!</p>
+
+        <div class="summary-box">
+            <strong>הרעיון המרכזי:</strong> הרבה פעמים אנחנו לא רוצים לבדוק השערה על קבוצה אחת, אלא להשוות בין שתי קבוצות שונות. למשל: האם תרופה חדשה יעילה יותר מפלצבו? האם סטודנטים בנים גבוהים יותר מסטודנטיות?
+        </div>
+
+        <h2 id="independent">1. מדגמים בלתי תלויים</h2>
+        <p>כאן אנחנו משווים שתי קבוצות שאין ביניהן קשר. הן "זרות" זו לזו.</p>
+        <div class="analogy">
+            תחשוב שאתה רוצה להשוות את המחיר הממוצע של פיצה בתל אביב לעומת המחיר הממוצע בבאר שבע. אתה דוגם 20 פיצריות מכל עיר. הפיצריות בתל אביב הן קבוצה אחת, והפיצריות בבאר שבע הן קבוצה שנייה. אין קשר ביניהן.
+        </div>
+        <p><strong>השערות לדוגמה:</strong></p>
+        <ul>
+            <li>השערת האפס ($H_0$): אין הבדל בין ממוצעי שתי האוכלוסיות.</li>
+            <li>השערה אלטרנטיבית ($H_1$): יש הבדל בין הממוצעים.</li>
+        </ul>
+        <div class="math-container">
+            <p>השערת האפס: $H_0: \mu_1 = \mu_2$  (או: $H_0: \mu_1 - \mu_2 = 0$)</p>
+            <p>השערה אלטרנטיבית (דו-צדדית): $H_1: \mu_1 \neq \mu_2$</p>
+        </div>
+        <p><strong>הסטטיסטי:</strong> כדי לבדוק את זה, אנחנו משתמשים במבחן t לשני מדגמים בלתי תלויים. הנוסחה נראית קצת מאיימת, אבל הרעיון פשוט: בודקים את ההפרש בין ממוצעי המדגמים, ומתקננים אותו לפי הפיזור המשותף.</p>
+        <div class="math-container">
+            <p>סטטיסטי המבחן t:</p>
+            $$ t = \frac{(\bar{X}_1 - \bar{X}_2) - (\mu_1 - \mu_2)_0}{\sqrt{S_p^2 (\frac{1}{n_1} + \frac{1}{n_2})}} $$
+            <div class="explanation">
+                <strong>מה זה מה?</strong><br>
+                $\bar{X}_1, \bar{X}_2$: ממוצעי המדגמים.<br>
+                $(\mu_1 - \mu_2)_0$: ההפרש בין הממוצעים לפי השערת האפס (לרוב 0).<br>
+                $n_1, n_2$: גדלי המדגמים.<br>
+                $S_p^2$: אומדן משוקלל לשונות המשותפת של שתי האוכלוסיות. זה פשוט ממוצע משוקלל של השונויות של שני המדגמים.
+            </div>
+        </div>
+        
+        <h2 id="paired">2. מדגמים מזווגים (תלויים)</h2>
+        <p>כאן יש קשר ישיר בין כל תצפית במדגם אחד לתצפית במדגם השני. בדרך כלל מדובר במדידות של "לפני ואחרי" על אותם נבדקים.</p>
+        <div class="analogy">
+            נניח שאתה בודק יעילות של דיאטה. אתה שוקל 50 אנשים, נותן להם דיאטה למשך חודש, ושוקל אותם שוב. כאן, לכל "משקל אחרי" יש "משקל לפני" ששייך לאותו אדם. המדידות הן זוגות.
+        </div>
+        <p><strong>הטריק הגאוני:</strong> במקום להתעסק עם שתי קבוצות, אנחנו יוצרים משתנה חדש: <strong>משתנה ההפרשים</strong>. לכל זוג, נחשב את ההפרש (למשל, משקל אחרי פחות משקל לפני). עכשיו יש לנו רק מדגם אחד - מדגם ההפרשים - ועליו אנחנו עושים מבחן t פשוט למדגם יחיד, ובודקים אם ממוצע ההפרשים שונה מאפס.</p>
+        <p><strong>השערות לדוגמה:</strong></p>
+        <ul>
+            <li>השערת האפס ($H_0$): ממוצע ההפרשים באוכלוסייה הוא 0 (כלומר, אין שינוי).</li>
+            <li>השערה אלטרנטיבית ($H_1$): ממוצע ההפרשים שונה מ-0 (כלומר, יש שינוי).</li>
+        </ul>
+        <div class="math-container">
+            <p>נגדיר משתנה חדש: $D = X_{after} - X_{before}$</p>
+            <p>השערת האפס: $H_0: \mu_D = 0$</p>
+            <p>השערה אלטרנטיבית (דו-צדדית): $H_1: \mu_D \neq 0$</p>
+        </div>
+        <p><strong>הסטטיסטי:</strong> זה פשוט מבחן t למדגם יחיד על נתוני ההפרשים:</p>
+        <div class="math-container">
+            $$ t = \frac{\bar{D} - \mu_{D_0}}{S_D / \sqrt{n}} $$
+             <div class="explanation">
+                <strong>מה זה מה?</strong><br>
+                $\bar{D}$: ממוצע ההפרשים במדגם.<br>
+                $\mu_{D_0}$: ממוצע ההפרשים לפי השערת האפס (לרוב 0).<br>
+                $S_D$: סטיית התקן של ההפרשים.<br>
+                $n$: מספר הזוגות (שזהה למספר ההפרשים).
+            </div>
+        </div>
+
+        <h2 id="bonferroni">3. בעיית ההשוואות המרובות ותיקון בונפרוני</h2>
+        <p>דמיין שיש לך רמת מובהקות $\alpha = 0.05$. זה אומר שאתה "מוכן" לטעות (לדחות את $H_0$ כשהיא נכונה) ב-5% מהמקרים. אבל מה קורה אם אתה עושה 10 מבחני השערות שונים באותו מחקר? הסיכוי שתעשה לפחות טעות אחת כזאת גדל דרמטית!</p>
+        <div class="analogy">
+            אתה מארגן ארוחה משפחתית ומבקש מ-10 קרובי משפחה להביא עוגה. כל אחד מהם אומר שיש סיכוי של 5% שהעוגה שלו תישרף. מה הסיכוי שלפחות עוגה אחת מתוך ה-10 תישרף? הרבה יותר מ-5%! ככל שיש יותר "ניסיונות", הסיכוי ל"כישלון" (טעות) גדל.
+        </div>
+        <p><strong>הפתרון הפשוט: תיקון בונפרוני (Bonferroni Correction).</strong></p>
+        <p>התיקון אומר: אם אתה רוצה שהסיכוי הכולל לטעות בכל המבחנים יחד יהיה $\alpha$, פשוט תחלק את $\alpha$ במספר ההשוואות שאתה מבצע, ותשתמש בערך החדש והמחמיר יותר כרמת המובהקות לכל מבחן בנפרד.</p>
+        <div class="math-container">
+            <p>רמת המובהקות החדשה לכל מבחן:</p>
+            $$ \alpha_{new} = \frac{\alpha_{original}}{k} $$
+            <div class="explanation">
+                <strong>מה זה מה?</strong><br>
+                $\alpha_{new}$: רמת המובהקות המחמירה שבה נשתמש לכל השוואה.<br>
+                $\alpha_{original}$: רמת המובהקות שרצינו במקור (לרוב 0.05).<br>
+                $k$: מספר ההשוואות (מבחני ההשערות) שאנחנו מבצעים.
+            </div>
+        </div>
+        <p>לדוגמה, אם רצינו $\alpha=0.05$ ואנחנו מבצעים 10 השוואות, רמת המובהקות החדשה לכל מבחן תהיה $0.05 / 10 = 0.005$. רק אם ה-p-value של מבחן ספציפי יהיה קטן מ-0.005, נחשיב את התוצאה כמובהקת.</p>
+    </div>
+</body>
+</html>

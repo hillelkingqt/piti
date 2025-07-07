@@ -1,0 +1,216 @@
+<!-- filename: שימושים_מתקדמים_בMSE_מתוקן_שוב.html -->
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>שימושים מתקדמים ב-MSE - גרסה מתוקנת</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&display=swap');
+
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --primary-color: #bb86fc;
+            --secondary-color: #03dac6;
+            --border-color: #333;
+        }
+
+        body {
+            font-family: 'Assistant', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.8;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: fadeInDown 1s ease-in-out;
+        }
+
+        h1 {
+            font-size: 3em;
+            color: var(--primary-color);
+            font-weight: 700;
+            text-shadow: 0 0 10px var(--primary-color);
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        h2 {
+            font-size: 2em;
+            color: var(--secondary-color);
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        .math {
+            direction: ltr;
+            display: block;
+            margin: 20px auto;
+            padding: 15px;
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            font-size: 1.3em;
+            overflow-x: auto;
+            text-align: center;
+        }
+
+        .katex-display > .katex {
+             text-align: center;
+        }
+
+        strong {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #777;
+            font-size: 0.9em;
+            animation: fadeInUp 1s ease-in-out;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>שימושים מתקדמים ב-MSE</h1>
+            <p>עילי, מעבר להיותו מדד שגיאה, MSE הוא אבן בניין לכמה מהרעיונות החשובים ביותר בלמידת מכונה.</p>
+        </header>
+
+        <div class="card">
+            <h2>1. פונקציית הפסד (Loss Function) ברגרסיה לינארית</h2>
+            <p>
+                היעד המרכזי במודל רגרסיה לינארית הוא למצוא את קו הניבוי הטוב ביותר. "הטוב ביותר" נמדד על ידי מיזעור השגיאה בין הניבויים לערכים האמיתיים.
+                כאן MSE נכנס לתמונה בתור <strong>פונקציית ההפסד (או פונקציית העלות)</strong>. האלגוריתם (למשל, Gradient Descent) מנסה למצוא את הפרמטרים של המודל (שיפוע וחיתוך) שמביאים ל-MSE הנמוך ביותר.
+            </p>
+            <p>
+                הנוסחה שאותה ממזערים היא בדיוק MSE:
+            </p>
+            <div class="math" dir="ltr">$$ Loss = MSE = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 $$</div>
+            <p>
+                העובדה שהנוסחה היא ריבועית וגזירה הופכת את האופטימיזציה שלה ליעילה מתמטית.
+            </p>
+        </div>
+
+        <div class="card">
+            <h2>2. שקלול הטיית-שונות (Bias-Variance Tradeoff)</h2>
+            <p>
+                זהו אחד הרעיונות המרכזיים ביותר ב-ML. ניתן לפרק את השגיאה הצפויה של כל מודל (שנמדדת על ידי MSE) לשלושה רכיבים:
+            </p>
+            <div class="math" dir="ltr">$$ E[(y - \hat{f}(x))^2] = \text{Bias}(\hat{f}(x))^2 + \text{Var}(\hat{f}(x)) + \sigma^2 $$</div>
+            <ul>
+                <li><strong>הטיה (Bias):</strong> שגיאה הנובעת מהנחות פשטניות של המודל. מודל פשוט מדי (למשל קו ישר לנתונים מורכבים) יוביל להטיה גבוהה.</li>
+                <li><strong>שונות (Variance):</strong> שגיאה הנובעת מרגישות יתר של המודל לשינויים קטנים בנתוני האימון. מודל מורכב מדי ילמד את הרעש בנתונים ויוביל לשונות גבוהה.</li>
+                <li><strong>שגיאה אי-פריקה (\(\sigma^2\)):</strong> הרעש הטבעי בנתונים, ששום מודל לא יכול להתגבר עליו.</li>
+            </ul>
+            <p>
+                האתגר הוא למצוא מודל עם איזון טוב בין הטיה נמוכה לשונות נמוכה, ו-MSE הוא הכלי שמאפשר לנו לכמת את השגיאה הכוללת הזו.
+            </p>
+        </div>
+
+        <div class="card">
+            <h2>3. רגולריזציה (Ridge & Lasso)</h2>
+            <p>
+                כדי להילחם בהתאמת-יתר (overfitting), שנובעת משונות גבוהה, משתמשים בטכניקות רגולריזציה. הן פועלות על ידי הוספת "קנס" לפונקציית ההפסד של MSE.
+            </p>
+            <p><strong>רגרסיית Ridge (רגולריזציית L2):</strong></p>
+            <div class="math" dir="ltr">$$ Loss = \text{MSE} + \alpha \sum_{j=1}^{p} \beta_j^2 $$</div>
+            <p>הקנס הוא על סכום ריבועי המקדמים. זה "מכריח" את המודל לשמור על מקדמים קטנים, ובכך מפחית את מורכבותו.</p>
+
+            <p><strong>רגרסיית Lasso (רגולריזציית L1):</strong></p>
+            <div class="math" dir="ltr">$$ Loss = \text{MSE} + \alpha \sum_{j=1}^{p} |\beta_j| $$</div>
+            <p>הקנס כאן הוא על סכום ערכיהם המוחלטים של המקדמים. ל-Lasso יש תכונה מעניינת של איפוס מקדמים של משתנים לא חשובים, ובכך מבצע גם בחירת משתנים (feature selection).</p>
+        </div>
+
+        <div class="card">
+            <h2>4. עיבוד אותות ותמונות</h2>
+            <p>
+                מעבר לרגרסיה, MSE משמש רבות למדידת איכות השחזור של אותות ותמונות לאחר דחיסה או העברה רועשת. לדוגמה, אם דוחסים תמונה ואז פורסים אותה חזרה, אפשר לחשב את ה-MSE בין פיקסלי התמונה המקורית לפיקסלי התמונה המשוחזרת.
+            </p>
+            <p>
+                מדד פופולרי שנגזר ישירות מ-MSE הוא <strong>PSNR (Peak Signal-to-Noise Ratio)</strong>:
+            </p>
+            <div class="math" dir="ltr">$$ PSNR = 10 \cdot \log_{10} \left( \frac{\text{MAX}_I^2}{\text{MSE}} \right) $$</div>
+            <p>
+                כאשר \( \text{MAX}_I \) הוא ערך הפיקסל המקסימלי האפשרי (למשל 255). ככל שה-MSE נמוך יותר, כך ה-PSNR גבוה יותר, מה שמעיד על שחזור איכותי יותר.
+            </p>
+        </div>
+
+
+        <footer>
+            <p>נוצר באהבה על ידי פיתי ❤️ (עם תיקון מיוחד בשבילך!)</p>
+        </footer>
+    </div>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '\[', right: '\]', display: true},
+                    {left: '$', right: '$', display: false},
+                    {left: '\\(', right: '\\)', display: false}
+                ],
+                throwOnError : false
+            });
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.card').forEach(card => {
+                observer.observe(card);
+            });
+        });
+    </script>
+</body>
+</html>

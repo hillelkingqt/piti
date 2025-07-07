@@ -1,0 +1,14 @@
+\selectlanguage *[]{hebrew}
+\contentsline {section}{\numberline {1}מבוא: שליפת מידע מ-Mongoose}{2}{section.1}%
+\contentsline {section}{\numberline {2}שליפת כל המשתמשים באמצעות \(\englishfont {User.find(\{\})}\)}{2}{section.2}%
+\contentsline {section}{\numberline {3}עיבוד המשתמשים שנשלפו}{2}{section.3}%
+\contentsline {subsection}{\numberline {3.1}איטרציה באמצעות \(\englishfont {forEach()}\)}{2}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}איטרציה באמצעות \(\englishfont {map()}\)}{2}{subsection.3.2}%
+\contentsline {section}{\numberline {4}קוד דוגמה מפורט}{3}{section.4}%
+\contentsline {section}{\numberline {5}הסבר מפורט של הקוד}{5}{section.5}%
+\contentsline {subsection}{\numberline {5.1}הגדרת פונקציה אסינכרונית (\(\englishfont {async function}\))}{5}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}טיפול בשגיאות (\(\englishfont {try...catch}\))}{5}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}ביצוע השאילתה האסינכרונית (\(\englishfont {await User.find(\{\})}\))}{5}{subsection.5.3}%
+\contentsline {subsection}{\numberline {5.4}בדיקה ואיטרציה על המשתמשים}{5}{subsection.5.4}%
+\contentsline {subsection}{\numberline {5.5}קריאה לפונקציה על אובייקט המשתמש (\(\englishfont {user.showinfo()}\))}{5}{subsection.5.5}%
+\contentsline {section}{\numberline {6}סיכום}{5}{section.6}%

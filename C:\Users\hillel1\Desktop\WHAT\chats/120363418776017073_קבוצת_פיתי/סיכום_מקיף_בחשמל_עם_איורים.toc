@@ -1,0 +1,9 @@
+\selectlanguage *[]{hebrew}
+\contentsline {section}{\numberline {1}מטען חשמלי וחוק קולון}{2}{section.1}%
+\contentsline {section}{\numberline {2}שדה חשמלי וקווי שדה}{3}{section.2}%
+\contentsline {section}{\numberline {3}פוטנציאל חשמלי ומתח}{5}{section.3}%
+\contentsline {section}{\numberline {4}חוק אוהם והתנגדות חשמלית}{6}{section.4}%
+\contentsline {section}{\numberline {5}מעגלים חשמליים (טורי ומקבילי)}{8}{section.5}%
+\contentsline {subsection}{\numberline {5.1}מעגל טורי}{8}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}מעגל מקבילי}{9}{subsection.5.2}%
+\contentsline {section}{\numberline {6}אלקטרומגנטיות וחוק פאראדיי}{10}{section.6}%

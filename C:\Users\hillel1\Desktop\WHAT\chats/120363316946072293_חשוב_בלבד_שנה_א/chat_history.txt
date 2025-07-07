@@ -1,0 +1,490 @@
+[2025-06-26 12:50:24] [ID: false_120363316946072293@g.us_3A5869C54D8A75E97930_206334624587813@lid] Ori Lovinger: סטודנטים וסטודנטיות שלום רב,
+היום ניפגש לתרגול מקוון דרך הזום, בשעה 19:00.
+התרגול יהיה על הנושאים חוק פאראדיי ולנץ.
+
+התרגול מיועד לשתי הקבוצות ויועבר על ידי המתרגל טל.
+
+קישור: https://biu-ac-il.zoom.us/j/6464217755?omn=85878950835
+
+סופ"ש נעים מטל ויובל.
+[2025-06-26 12:50:37] [ID: false_120363316946072293@g.us_3AB1D72AD998F4FCD60D_206334624587813@lid] Ori Lovinger: התרגול בחשמל היום 👆
+[2025-06-26 13:41:57] [ID: false_120363316946072293@g.us_77C4F76D9DB4B237F891200A5B6D0BD8_192393143947448@lid] Dvir: לפי הנחיית סגן הרקטור, מתכונת השעורים בשבוע האחרון של הסמסטר היא על פי החלטת המרצה, ללא חובת נוכחות.
+לבקשת כמה סטודנטים, וכדי למנוע בלגן, השעור שלנו ביום ראשון יהיה *בזום*. אני אשלח קישור לקראת השעור.
+
+(בחינת מועד א' נקבעה ל-16/7. כפי שהודעתי, בקורס שלנו יהיו שלושה מועדי בחינה; כל סטודנט יוכל להבחן פעמיים, והציון הקובע יהיה הטוב מהשניים. התאריך של מועד ג' טרם נקבע).
+[2025-06-26 13:42:39] [ID: false_120363316946072293@g.us_5E60F0E65E48CBEFAB10E734A8B57E28_192393143947448@lid] Dvir: הודעה מעוזי לגבי מתכונת השיעור בראשון + מתכונת המבחן
+[2025-06-27 9:49:11] [ID: false_120363316946072293@g.us_3A27F6E6835F00A59586_203216511873074@lid] :): אם יש כאן אנשים עם מעל 90 באינפי1 שמעוניינים לבדוק שב דברו איתי צבאן מחפש בודקים
+[2025-06-27 10:04:16] [ID: false_120363316946072293@g.us_3A932BCB70B2136BC128_203216511873074@lid] :): נתפס🙏🏻
+[2025-06-27 16:17:50] [ID: false_120363316946072293@g.us_152F54C83D70B9EAF66F99493943EC64_192393143947448@lid] Dvir: שלום לכם,
+
+שמתי 10 קבצים של חומר למבחן במודל, אחרי קבצי השיעורים. לא כל השאלות למדנו (חלק מקורסים למדעי המחשב, שם לומדים בקורס המקביל לשלנו גם פונקציות של שני משתנים). שאלות אילו כמובן לא בחומר. ניפגש בזום ביום ראשון.
+
+שבת שלום,
+
+שחר
+[2025-06-27 16:20:20] [ID: false_120363316946072293@g.us_7E727EEB8058B3AD95659CB55F767FD6_192393143947448@lid] Dvir: עדכון לגבי הלמידה למבחן בקורס אינפי 2 עם שחר נבו
+[2025-06-27 21:43:02] [ID: false_120363316946072293@g.us_3AA7C60AE8730C970E2E_39754334744810@lid] עילי: הקורסים שנשארו למי שעושה מדמח מתמטיקה בשנה ב:
+ *קורסי חובה שנותרו:*
+מבנה מחשב
+מודלים חישוביים
+מבנים בדידים
+שיטות סטטיסטיות במדעי המחשב
+מערכות הפעלה
+אלגוריתמים 1
+אלגוריתמים מתקדמים
+חישוביות וסיבוכיות
+למידת מכונה
+חזית המחקר במדעי המחשב
+תורת החבורות
+חשבון אינפיטסימלי 3
+אנליזה מודרנית
+מבוא לטופולוגיה 
+פונקציות מרוכבות 1.
+גיאומטריה אנליטית ודיפרנציאלית
+בסך הכל 16 קורסים.
+
+*אשכול א׳ מדעי המחשב*
+עושים 3 קורסים מתוך 4:
+שפות תכנות
+תכנות מערכות מתקדם
+תכנות מערכות מקבילות
+מערכות מסדי נתונים
+*אשכול ב׳ מדעי המחשב*
+עושים 2 קורסים מתוך 3:
+מבוא לקריפטוגרפיה
+מבוא לסייבר
+בינה מלאכותית
+
+מתמטיקה עושים עוד 15 נ״ז של בחירה, 7 נ״ז מתוך הרשימה ועוד 8 מכל מקום (רשימה או לא).
+אם נאמר שבממוצע קורס כזה הוא 5 נ״ז ( בפועל מאוד תלוי בקורס אבל הם בדרך כלל קצת פחות) אז תעשו מכאן 3 קורסים. יש כאלה שיעשו כבר עכשיו נומריות כלומר לפחות 2 קורסים
+
+זה 23 קורסים במתמטיקה ומדעי המחשב 
+
+ועוד יהדות כמה שנותר כאשר בדרך כלל קורס שווה בין 2 ל3 נ״ז אז זה עוד 4 קורסים לפחות.
+
+בקיצור, לרובכם המוחלט לפחות 27 קורסים.
+[2025-06-29 7:18:37] [ID: false_120363316946072293@g.us_392A0C788A4877087D435C0125E6D97E_215538722697365@lid] אורי גלנץ: למי שלא הספיק להגיש אתמול את תרגיל 10 בהסתברות ההגשה נפתחה עד היום ב15:00
+[2025-06-29 12:15:59] [ID: false_120363316946072293@g.us_ADB34216F320D5F2B9BF510ADF08430D_192393143947448@lid] Dvir: https://biu-ac-il.zoom.us/j/83187518779
+קישור לזום של עוזי
+[2025-06-29 14:44:12] [ID: false_120363316946072293@g.us_3F6E76124CDECE76F951_192393143947448@lid] Dvir: קישור להרצאה של שחר היום ב18 - https://biu-ac-il.zoom.us/j/9897253931?omn=82116804875
+[2025-06-29 15:05:54] [ID: false_120363316946072293@g.us_65904619676E61232D058015E41F494E_192393143947448@lid] Dvir: בשל בקשות חוזרות מכל מי ומי שלא ראו לא שמעו לא ידעו:
+
+תרגיל 10 נמצא כעת להגשה עד *היום בשעה 22:00* ולא שנייה מאוחר יותר.
+[2025-06-29 15:06:15] [ID: false_120363316946072293@g.us_BEBB7E254738C6EF9D0575398D0B4D31_192393143947448@lid] Dvir: (↩️ ל-ID:false_120363316946072293@g.us_65904619676E61232D058015E41F494E_972535230984@c.us "בשל בקשות חוזרות מכל מי ו...")
+תרגיל 10 בהסתברות הוארך להיום ב22
+[2025-06-29 20:09:36] [ID: true_120363316946072293@g.us_3F113A58414401C069D1_200644128440439@lid] הלל (Owner): למי שרוצה, אם מישהו מוצא טעות, או רואה שחסר משהו אשמח שיעדכן
+[2025-06-29 20:09:57] [ID: false_120363316946072293@g.us_3AFA116F2E2AD75293C7_29373348499620@lid] Yonatan Rozen: כל מי שחושב שהילל מלך על הסיכומים שיתן לייק להודעה
+[2025-06-29 20:56:12] [ID: false_120363316946072293@g.us_72CC7AE9315938865A1E56CB1B32E70E_192393143947448@lid] Dvir: [הודעה ארוכה, התוכן קוצץ]
+ציוני תרגיל בקורס
+כאן (בלמדה) הציונים של תרגילי הבית, 7 הטובים ביותר מבין ה-9 שנבדקו עד כה. 
+
+הציוני...
+[2025-06-29 20:56:36] [ID: false_120363316946072293@g.us_1AEF68DB76C7D3D32525ED8C9F604998_192393143947448@lid] Dvir: העלו ללמדה קובץ עם הציוני תרגילים. שימו לב להנחיות לגבי הגשת התרגילים הבאים
+[2025-06-29 20:59:01] [ID: false_120363316946072293@g.us_736AA1D6D671563BE939B759C0DFEE80_192393143947448@lid] Dvir: 88165_rec_grades_shortID_86988f719619e6b4a97c2e821d833aae.csv
+[2025-06-30 8:28:00] [ID: false_120363316946072293@g.us_35BDD4745A8D868C434A8D3051F51E97_192393143947448@lid] Dvir: שלום לכולןם,
+
+מבנה המבחן יהיה כבשנים עברו:
+
+ארבע שאלות + שאלת בונוס. 
+
+כל החומר שנלמד הוא למבחן. 
+
+
+
+בהצלחה,
+
+צוות הקורס
+[2025-06-30 8:28:12] [ID: false_120363316946072293@g.us_E5B8124FCCE2FCB10A6965E617391DD1_192393143947448@lid] Dvir: מבנה המבחן בקורס *מבני נתונים*
+[2025-06-30 9:49:52] [ID: false_120363316946072293@g.us_3A5C1CE5907795D0CD63_206334624587813@lid] Ori Lovinger: אני אופק, אני המרצה לסמסטר קיץ במבוא לפיסיקה מודרנית.
+
+המתרגלים הם יהוא ויהונתן - ובאתר הלמדה של הקורס (https://lemida.biu.ac.il/course/view.php?id=97248) כבר מופיעים כל פרטי הקשר והקואורדינטות (בזמן ובמרחב) של ההרצאות והתרגולים. אפשר להעלות שאלות בפורום שבאתר הקורס (בו כולם יכולים לשאול ולענות), או לפנות פרטנית אל כל אחד מאיתנו במייל, או לקבוע שעות קבלה.
+
+שימו לב שקצב הקורס מהיר, במיוחד בקיץ, ואנחנו סוקרים הרבה נושאים - אז כדי להיות תמיד חדים ומוכנים על החומר של השיעורים הקודמים, וכמובן על החומר של מכניקה, חשמל ומגנטיות, הבסיס אליו נתייחס כל הזמן.
+
+בדיקת התרגילים בקורס תתנהל ב"בדיקת עמיתים" - כלומר בכל מטלה (2 בשבוע) כל סטודנט/ית י/תצטרך גם להגיש פתרון (80% מהציון) וגם לבדוק פתרון של סטודנט/ית אחר/ת (20% מהציון), בהתאם לפתרונות הרשמיים שהמתרגלים יעלו. עקב כך:
+
+  1. לא תתקבלנה הגשות באיחור
+
+  2. אין לרשום שם או פרטים מזהים בתרגילים המוגשים (ההגשה והבדיקה אנונימיות)
+
+בהצלחה!
+[2025-06-30 9:50:07] [ID: false_120363316946072293@g.us_3A90E45957DA0FB30DA5_206334624587813@lid] Ori Lovinger: עדכון מהקורס מבוא לפיזיקה מודרנית
+[2025-06-30 14:28:57] [ID: false_120363316946072293@g.us_172D8CDD5A9B4D6E5F8831584FF24C89_192393143947448@lid] Dvir: שימו לב שתרגיל 7 באינפי 2 *עם שחר נבו* הוקדם ל3.7 בשעה 00:00 לעומת תרגיל 8 שיהיה להגשה ב3.7 בשעה 23:59
+[2025-07-01 10:52:51] [ID: true_120363316946072293@g.us_3FB96B42EAED09555B88_200644128440439@lid] הלל (Owner): למי שרוצה, אם מישהו מוצא טעות, או רואה שחסר משהו אשמח שיעדכן
+[2025-07-01 10:53:08] [ID: true_120363316946072293@g.us_3FB96B42EAED09555B88_200644128440439@lid] פיתי (media content): This document is a summary of topics covered in an Infinitesimal Calculus 2 course, authored by Hillel Ben Hanokh and based on lectures by Shahar Shenbo. It covers a wide range of subjects typically found in a second-semester or second-year calculus course.
+
+The summary is structured into seven main sections:
+
+1.  **Indefinite Integral:** Defines the indefinite integral and antiderivative, discusses integration methods (immediate integrals, integration by parts, substitution), introduces the differential, and covers integration of rational functions and special substitutions.
+2.  **Definite Integral:** Defines the Riemann integral, explains Darboux sums and integrability conditions, presents the Fundamental Theorem of Calculus (both parts), outlines properties and methods for definite integrals (linearity, additivity, monotonicity, inequality, mean value theorem, integration by parts, substitution).
+3.  **Applications of the Definite Integral:** Provides formulas and methods for calculating areas (under curves, between curves), volumes of solids of revolution (disk/washer and shell methods), arc length, and surface area of revolution.
+4.  **Improper Integrals:** Describes Type I (infinite intervals) and Type II (unbounded functions) improper integrals, discusses how to handle multiple singularities, and presents convergence tests for non-negative integrands (Comparison Test, Limit Comparison Test, p-test), as well as concepts of absolute and conditional convergence (including Dirichlet's Test and Cauchy Criterion).
+5.  **Series of Functions:** Defines and compares pointwise and uniform convergence, provides criteria for uniform convergence (Cauchy Criterion, Weierstrass M-test, Dirichlet's Test), and discusses properties of uniformly convergent series (continuity, term-by-term integration and differentiation).
+6.  **Power Series:** Defines power series, introduces the radius of convergence (Cauchy-Hadamard formula, ratio test), discusses uniform convergence properties, covers term-by-term differentiation and integration, and defines Taylor and Maclaurin series (including the Lagrange remainder and a table of common Maclaurin series expansions).
+7.  **Selected Examples and Applications:** Provides detailed step-by-step examples illustrating various techniques discussed in previous sections, such as a "boomerang" integral, reduction formulas, trigonometric substitution for area/volume calculations, improper integral convergence analysis, uniform convergence of a series, and finding power series expansions.
+
+The document is written in Hebrew and appears to be a comprehensive set of study notes summarizing key definitions, theorems, methods, and examples for the course.
+[2025-07-01 13:14:26] [ID: false_120363316946072293@g.us_808F4F7CB1B831470FC436113D81DB5E_192393143947448@lid] Dvir: שלום וברכה
+הסמסטר נגמר, אין עוד תרגולים הרבה הצלחה וזה :)
+מחילה ממש ממי שהגיע לכיתה סליחה על ההודעה המאוחרת מאוד
+מתן
+[2025-07-01 13:14:43] [ID: false_120363316946072293@g.us_90598ECACCA61F479CC5175D0A175790_192393143947448@lid] Dvir: לכל מי שרצה לדעת אם יש היום תרגולים במבנת. אז....אין
+[2025-07-01 14:36:03] [ID: false_120363316946072293@g.us_2E29EE0021B55A0EB268EE6CB7EBE29A_192393143947448@lid] Dvir: שלום לכולם,
+
+כידוע מחר התרגול האחרון שלנו יחדיו, וכיאה לתרגול אחרון הוא יהיה תרגול חזרה (ובו נפתור ביחד מבחן עבר- את המבחן שאני עשיתי כסטודנט :)
+
+אני אעביר את השיעור מהכיתה (אנסה לסדר זום אם המערכת תאפשר- אם לא יש כבר הקלטה של התרגול המקביל של קטי שבו היא פותרת את אותו מבחן לדוגמה), ולכן ליתר בטחון אני ממליץ גם לכם להגיע לכיתה מחר לתרגול אחרון
+
+נתראה :)
+[2025-07-01 14:36:41] [ID: false_120363316946072293@g.us_8740A13BEBF72D22889E9B2CC17E816D_192393143947448@lid] Dvir: מחר התרגול של יואל פרונטלי. פותרים מבחן
+[2025-07-01 15:42:59] [ID: true_120363316946072293@g.us_3FB8C42F4FD2F1B26A49_200644128440439@lid] הלל (Owner): בשעה טובה סיימנו לעבוד על ההרצאות של שחר, למי שרוצה:
+https://docs.google.com/document/d/1KinmLcqWos_Ev04x1p4GBkRsq9p8m8n93Y_OlEGnYoI/edit?usp=drive_link
+[2025-07-02 5:46:59] [ID: false_120363316946072293@g.us_942E1B08C566A88398AF0D1557FCA50B_192393143947448@lid] Dvir: הקורס קיץ  8840 של פ' ראובן כהן יתקיים בין התאריכים 13/7-24/8/25
+
+ימי צום לא לומדים
+
+בימי ראשון וחמישי 8-11 כיתה 604/12
+[2025-07-02 5:47:00] [ID: false_120363316946072293@g.us_2A10C09BE5D11BA7999DF4BC3BF712BE_192393143947448@lid] Dvir: הודעה לגבי הקורס מדר למתמטיקאים בקיץ
+[2025-07-02 7:06:20] [ID: false_120363316946072293@g.us_A49CE45F646C25FE70BF864EB68EF31E_215538722697365@lid] אורי גלנץ: קורס קיץ 886960 מבוא לפייתון של מר דורון פרלמן יתקיים 
+
+13/7-24/8/25
+
+ימי ראושן וחמישי 15-19
+
+כיתה 604/61
+[2025-07-02 7:07:32] [ID: false_120363316946072293@g.us_F5A2B92028BC19812759ABE618778B31_215538722697365@lid] אורי גלנץ: (↩️ ל-ID:false_120363316946072293@g.us_A49CE45F646C25FE70BF864EB68EF31E_972546863268@c.us "קורס קיץ 886960 מבוא לפיי...")
+זה קורס קיץ של המתמטיקאים
+[2025-07-02 7:07:48] [ID: false_120363316946072293@g.us_E4F21FE89298B942F9561C93CD54AFE0_215538722697365@lid] אורי גלנץ: הקורס קיץ 88376 של פ' מנחם לזר יתקיים בין התאריכים 13/7-24/8/25
+
+ימי צום לא לומדים
+
+בימי ראשון וחמישי 11-15 כיתה 604/61
+[2025-07-02 7:08:12] [ID: false_120363316946072293@g.us_0593E428014C142B0355D0F1DF18D687_215538722697365@lid] אורי גלנץ: (↩️ ל-ID:false_120363316946072293@g.us_E4F21FE89298B942F9561C93CD54AFE0_972546863268@c.us "הקורס קיץ 88376 של פ' מנח...")
+למי שלוקח נומריות הקיץ
+[2025-07-02 7:08:24] [ID: false_120363316946072293@g.us_EA5C3E86E3AF813C071026D8CEF4E2D0_215538722697365@lid] אורי גלנץ: קרדיט ל@218863010599059
+[2025-07-02 8:47:56] [ID: false_120363316946072293@g.us_D2AEC44DF449EFA1759E36667B799A1D_192393143947448@lid] Dvir: מכיוון שהיום ההרצאות יתקיימו באופן הבא:
+שחר מ15 עד 16.45 בזום
+יואל מ17 עד 18.30 פרונטלית + זום
+ואושרית מ19 עד 21 בסוף
+
+חשבנו שאם יש ביקוש אפשר אולי להקרין את ההרצאה של שחר והתרגול של אושרית בכיתות למי שרוצה לבוא פרונטלית. בשביל זה צריך לדאוג למחשב וכבל. יש ביקוש? אפתח סקר ואשמח אם רק מי שזה רלוונטי אליו יענה בשביל שלא יגיעו סתם ויטרחו ובסוף לא יהיה אף אחד...
+[2025-07-02 8:47:56] [ID: false_120363316946072293@g.us_79037F71A99B7846BC7FA51F2FD9E407_192393143947448@lid] Dvir: אני מתכוון לבוא פרונטלית היום
+[2025-07-02 8:59:27] [ID: false_120363316946072293@g.us_D9282CD522A367075A16672FC5201CEF_192393143947448@lid] Dvir: הבהרה: הכוונה לכן ולא (אי אפשר לערוך סקרים🥲)
+[2025-07-02 9:14:25] [ID: false_120363316946072293@g.us_3A762A8A7E6F34AF7751_206334624587813@lid] Ori Lovinger: סטודנטים וסטודנטיות שלום,
+לאור השאלות והבקשות שלכם מהתרגול האחרון אני שולח מייל זה לעדכונים.
+
+- עלה לאתר למידה מבחן לדוגמה לקראת הבחינה.
+
+- במחבן אי אפשר לצבור נקודות, כלומר שרק ה - 20 השאלות הראשונות נבדקות.
+
+- להלן החומרים שירדו במיקוד השנה *ולא* יופיעו בבחינה: 
+
+1) חומרים מגנטיים
+
+ 2) שנאי מתח
+
+3) מעגלי RLC
+
+- בנוסף אני מתזכר שאמיר שלח לכם מייל שמה שילמד בשבוע האחרון (השבוע) בנושאים השראות עצמית וחוקי מקסוול יופיעו במבחן אך כשאלות רשות. זאת אומרת יהיו יותר שאלות בחירה ולכן כדאי ומומלץ ללמוד את החומר הזה.
+[2025-07-02 9:14:40] [ID: false_120363316946072293@g.us_3AA3EED11724775CDC9E_206334624587813@lid] Ori Lovinger: הבהרה לגבי המבחן בחשמל
+[2025-07-02 9:56:22] [ID: false_120363316946072293@g.us_C5DC469FBE9C54022011C811B95085D8_238542567530627@lid] עדן: ש.ב 8 באינפי אצל שחר נבו נדחו עד למבחן (מאושרית)🥳🥳🥳🥳
+[2025-07-02 9:57:29] [ID: false_120363316946072293@g.us_5F1233AE2A5495AC10DFAA5E98291065_238542567530627@lid] עדן: נאריך את הגשות עד למועד המבחן.
+בהצלחה!
+[2025-07-02 11:58:22] [ID: false_120363316946072293@g.us_DD23476426162A2DC9744B315A039358_192393143947448@lid] Dvir: (↩️ ל-ID:false_120363316946072293@g.us_3F6E76124CDECE76F951_972535230984@c.us "קישור להרצאה של שחר היום ...")
+הלינק להיום
+[2025-07-02 14:02:58] [ID: false_120363316946072293@g.us_1A7E3E18B1307C1A6C142EE83A418B8E_192393143947448@lid] Dvir: (↩️ ל-ID:false_120363316946072293@g.us_3F555C34A56E0BB20420_972535230984@c.us "שלום לכולם,  לאלו מכם שלא...")
+אותו קישור
+[2025-07-02 16:05:22] [ID: false_120363316946072293@g.us_3C3DE6A9994C5B7B940B93B719E4C0E4_238542567530627@lid] עדן: הדחיה היא *גם*  לתרגיל 7 וגם לתרגיל 8 עד למבחן🙏🏻
+[2025-07-02 16:05:24] [ID: false_120363316946072293@g.us_6534498F579A6977F4A517FBAE9B27F0_192393143947448@lid] Dvir: https://biu-ac-il.zoom.us/j/5333429352
+קישור לזום של אושרית
+[2025-07-02 17:26:56] [ID: true_120363316946072293@g.us_3F2E6D5999F6A38F0156_200644128440439@lid] הלל (Owner): למי שרוצה, אם למישהו יש הצעות מה להוסיף או שהוא רואה טעות שיגיד לי בפרטי
+[2025-07-02 17:27:10] [ID: true_120363316946072293@g.us_3F2E6D5999F6A38F0156_200644128440439@lid] פיתי (media content): This PDF is a formula sheet or set of notes for Ordinary Differential Equations (ODEs), authored by Hillel Ben Hanokh. It is structured into sections covering various types of ODEs and methods for solving them.
+
+The document includes:
+
+1.  **General Definitions and Concepts:** Definitions of ODEs, order, degree, linearity, types of solutions (general, particular, singular), and the Existence and Uniqueness Theorem (Picard).
+2.  **First-Order ODEs:** Descriptions and solution methods for Separable Equations, Homogeneous Equations, Nearly Homogeneous Equations, Exact Equations (including the concept of integrating factors), and Linear First-Order Equations.
+3.  **Second-Order ODEs:** A method for reducing the order for specific types of second-order ODEs where one variable is missing.
+4.  **Linear ODEs with Constant Coefficients:** How to find the homogeneous solution based on the roots of the characteristic equation (real distinct, real repeated, complex conjugate). For nonhomogeneous equations, it outlines the Method of Undetermined Coefficients (including how to form the initial guess and handle resonance) and mentions the Annihilator Method.
+5.  **Linear ODEs with General Coefficients:** Discusses finding the homogeneous solution (mentioning finding one solution and then reducing order to find the second) and solving the nonhomogeneous part using the Method of Variation of Parameters.
+6.  **Specific Equation Types:** Covers the Euler-Cauchy equation and Clairaut's equation.
+7.  **Solving with Series:** Describes the method for finding series solutions around an ordinary point (Taylor series method), including setting up the recurrence relation.
+8.  **Mathematical Reference Tools:** Includes tables of common integrals, useful Taylor series expansions (for functions like e^x, sin(x), cos(x), ln(1+x), etc.), and fundamental trigonometric identities. It also briefly mentions integration techniques like Integration by Parts, Substitution, and Partial Fraction Decomposition, which are often needed when solving ODEs.
+
+The document provides formulas, solution structures, and step-by-step guides for applying various solution techniques. It is intended as a quick reference for students studying ODEs.
+[2025-07-02 18:16:37] [ID: false_120363316946072293@g.us_3F4596DD212038A3F017_192393143947448@lid] Dvir: אושרית אמרה בתרגול שאם מישהו חשב בהתחלה שיהיה מותר לא להגיש 2 תרגילים ולא הגיש שישלח לה מייל והיא תפתח לו את ההגשה.
+תודה ל- @972584032100 שבדק
+[2025-07-02 18:55:24] [ID: false_120363316946072293@g.us_B2F02D22F4705F7670E04277A3F655E9_215538722697365@lid] אורי גלנץ: בגלל שיש כל מיני קורסים שבהם אנחנו צריכים להכין דפי נוסחאות או חומרי עזר לעצמנו אז @6751789281504 יצר קבוצה שבה אפשר יהיה לשלוח דפי נוסחאות כדי שאחרים יוכלו להשתמש בהם גם 
+https://chat.whatsapp.com/JmV3QBMHPoz2bVBKwGDkL2?mode=ac_c
+[2025-07-02 20:02:24] [ID: false_120363316946072293@g.us_3EB0D7BC87C7548427F763_246926377259067@lid] מרוכבים > וקטורים: סטודנטיות וסטודנטים יקרים,
+
+הסמסטר המאתגר הולך ומסתיים ואנחנו עומדים בפתחה של תקופת הבחינות. אנחנו מאחלים לכם הצלחה רבה !
+
+כמה עדכונים:
+
+א. הקלטות מפגשים פרונטליים - הועלו לאתר הקורס, יחד עם החומרים הרלוונטיים.
+
+ב. מבחנים לדוגמא - תשפד, תשפג, בחינה לדוגמא - כולם באתר הקורס.
+
+ג. תרגילים - נא לסיים את הגשת כל התרגילים במועד.
+
+ד. הלימוד בקמפוס - יש לסיים את הלימוד ואת כל התרגילים הנלווים עד מועד הבחינה.
+
+ה.  הבחינה - הבחינה תכלול 5-6 שאלות ראשיות, הכוללות סה"כ 25 סעיפים אמריקאיים. משך הבחינה 3 שעות.
+
+     חומר עזר מותר בבחינה - מחשבון מדעי פשוט + דף נוסחאות A4 דו-צידי אישי.
+
+     על הדף תוכלו לכתוב כל מה שתרצו.  הכנת הדף האישי היא מרכיב משמעותי בהכנה לבחינה. תשקיעו בזה !
+
+ו.  מפגש פרונטלי מסכם יתקיים אי"ה ביום שלישי, 8.7, בשעות 14:00-10:00 בבניין פיסיקה, חדר 301.
+
+    במפגש נפתור שאלות בחינה לדוגמה, ונענה על שאלות - גם במסגרת כיתתית וגם בקבוצות קטנות.
+
+    אנא העבירו מבעוד מועד שאלות בחינה שאתם מעוניינים שנפתור בכיתה ו/או שאלות אחרות.
+
+לסיום, נשמח מאד לקבל מכם משוב על חווית הלמידה בקורס.
+
+בברכת הצלחה רבה,
+
+צוות הקורס - יעל, נחלה, רוני, חיים
+[2025-07-03 8:39:31] [ID: false_120363316946072293@g.us_3ABD1E50B5BB977FACC1_206334624587813@lid] Ori Lovinger: שלום לכולם,
+
+היום ניפגש בשעה 19:00 בזום לתרגול האחרון של הסמסטר. מצורפים פה שני הקישורים לתרגול שלי ושל טל.
+
+
+
+קישור לקבוצה שלי:
+
+https://biu-ac-il.zoom.us/j/6464217755?omn=84244611837
+
+Meeting ID: 646 421 7755
+
+
+
+קישור לקבוצה של טל:
+
+https://biu-ac-il.zoom.us/j/8044323719?omn=82641620753
+
+
+
+נתראה בערב,
+
+יובל וטל
+[2025-07-03 8:39:52] [ID: false_120363316946072293@g.us_3A6A0B50ECC1B22DF699_206334624587813@lid] Ori Lovinger: התרגולים בחשמל היום 👆
+[2025-07-03 9:00:52] [ID: false_120363316946072293@g.us_3FB42066C04D36C530BF8DA72566D988_192393143947448@lid] Dvir: שלום לכולם!
+
+פורסם פורמס שבו תוכלו להצביע להגשות של התחרות
+
+
+
+אסגור אותו בעוד שבוע - ב10.7
+
+
+
+בהצחה!!
+יסמין
+[2025-07-03 9:01:00] [ID: false_120363316946072293@g.us_A386568D5E56A30E4DDEC98A30C40F5A_192393143947448@lid] Dvir: ניתן להצביע לתחרות בקורס *תכנות מונחה עצמים*
+[2025-07-03 10:56:38] [ID: false_120363316946072293@g.us_3A744B6DD20D2941B486_206334624587813@lid] Ori Lovinger: שלום לכולם,
+
+לצערי יש לי בלת״ם ולא אוכל להעביר היום את ההרצאה בזום.
+
+במקום זה אני אקליט בשעה 14:00 את ההרצאה ואעלה אותה לאתר.
+
+אם מישהו במקרה זמין ומעוניין להצטרף - מוזמנים בקישור הזה.
+
+כל טוב,
+
+אמיר
+[2025-07-03 10:57:04] [ID: false_120363316946072293@g.us_3AC5E878AF98DF6C4F1A_206334624587813@lid] Ori Lovinger: עדכון לגבי ההרצאה היום בחשמל 👆
+[2025-07-03 11:01:46] [ID: true_120363316946072293@g.us_3F42A417993A6604210F_200644128440439@lid] הלל (Owner): (↩️ ל-ID:false_120363316946072293@g.us_3A744B6DD20D2941B486_206334624587813@lid "שלום לכולם,  לצערי יש לי ...")
+https://biu-ac-il.zoom.us/j/88915576896
+[2025-07-03 13:26:36] [ID: true_120363316946072293@g.us_3FD83BB798C0FCA01B1C_200644128440439@lid] הלל (Owner): למי שרוצה, מבוסס על הרשימה ששחר נתן אתמול (תודה ל @972545518606 )
+[2025-07-03 13:26:48] [ID: true_120363316946072293@g.us_3FD83BB798C0FCA01B1C_200644128440439@lid] פיתי (media content): Based on the provided OCR text for pages 1 and 2, the document is a collection of theorems and their proofs from a course on Infinitesimal Calculus 2 (Infinitesimal Calculus 2).
+
+The first page introduces the document, listing the author (Hillel Ben Hanoch) and providing credits. It includes introductory notes on the notation and structure used within the document, defining terms like "Theorem," "Assertion," and "Lemma." An "Emphasis" section explains that the proofs aim to refresh memory and clarify core concepts, assuming prior mathematical background, while striving for clarity and completeness. A "Clarification" notes that most proofs are based on lectures by Shahar Senevo, with one specific proof (volume of revolution around the y-axis) being modified for clarity.
+
+The second page contains the table of contents, outlining the main topics covered:
+
+1.  **Riemann Integral:** Including necessary conditions for integrability (boundedness), existence of Darboux sums, refinement of partitions, integrability of monotonic functions, properties of integrals of continuous, non-negative functions, and the Integral Mean Value Theorem.
+2.  **Geometric Calculations using Integrals:** Covering the volume of solids of revolution (around both the x and y axes, using disk and cylindrical shell methods) and arc length of a curve.
+3.  **Sequences and Series of Functions:** Discussing properties of uniformly convergent sequences of functions, specifically the continuity of the limit function and the integrability of the limit function (and convergence of integrals).
+4.  **Taylor Series:** Focusing on the Peano remainder term.
+
+In summary, the document presents key theorems and proofs from a second course in calculus, organized into sections covering integration theory, geometric applications, properties of function sequences, and aspects of Taylor series.
+[2025-07-03 17:12:31] [ID: false_120363316946072293@g.us_B2E1A4892CABB6D6648C749A51654E0C_192393143947448@lid] Dvir: שלום לכולם,
+
+לאור הצפה של מיילים על פתיחת שיעורי בית קודמים בשל אי ידיעה שצריך להגיש את כל התרגילי בית בציון הגשה. 
+
+אני אפתח את שיעורי הבית 1-6 לשבוע הקרוב כדי לאפשר הגשות למי שפספס.
+
+אז אתם יכולים להפסיק לשלוח לי מיילים פרטניים.
+
+יש לציין - כי לא יינתנו הארכות נוספות לתרגילים האלה משום סיבה שהיא, אז תהיו ערניים:)
+
+בהצלחה!
+
+אושרית
+[2025-07-03 17:16:41] [ID: false_120363316946072293@g.us_3F4E23DEABF018D455C2_192393143947448@lid] Dvir: עדכונים לגבי השיעורי בית בקורס אינפי 2 עם שחר נבו
+[2025-07-04 8:19:08] [ID: false_120363316946072293@g.us_3AE2CBF60BEB1ED1105D_39754334744810@lid] עילי (0585405410): עלו ציונים למטלה 5 במונחצ🥳
+[2025-07-04 10:17:21] [ID: false_120363316946072293@g.us_3FEE45B53EF4D0D28534_192393143947448@lid] Dvir (0535230984): שחר העלה את רשימת המשפטים שצריך לדעת להוכיח למבחן בקורס אינפי 2 איתו
+[2025-07-04 10:17:47] [ID: false_120363316946072293@g.us_3FEE45B53EF4D0D28534_192393143947448@lid] פיתי (media content): This is a page of handwritten notes in Hebrew, listing key theorems and formulas from a course in mathematical analysis or advanced calculus. The page appears to have been scanned using the CamScanner app.
+
+The content is structured as a numbered list from 1 to 11, with each item representing a specific concept or theorem. The topics covered include:
+
+*   **Properties of integrable functions:** Conditions for a function to be integrable (e.g., being bounded).
+*   **The Riemann Lemma** and continuity of related functions.
+*   **The Mean Value Theorem for Integrals** and its application in calculating volumes of solids of revolution (both around the x-axis and y-axis).
+*   **Uniform convergence:** Theorems about the properties of the limit function when a sequence of functions converges uniformly (e.g., the limit of continuous functions is continuous, and the limit and integral can be interchanged).
+*   **Power series:** The formula for the radius of convergence (the Cauchy-Hadamard theorem).
+*   **Taylor's theorem:** The definition of a Taylor polynomial using the Peano form of the remainder.
+
+Many of the items include parenthetical references, likely pointing to pages or section numbers in a textbook or course materials.
+[2025-07-04 14:04:32] [ID: false_120363316946072293@g.us_878912F80559E23360377751687E3A1D_192393143947448@lid] Dvir (0535230984): [הודעה ארוכה, התוכן קוצץ]
+*מבני וזמני המבחנים הסמסטר - נכון לעכשיו:*
+
+*אינפי 2 - שחר:*
+מבנה המבחן: 5 שאלות בוחרים 4
+* שאלת הוכ...
+[2025-07-04 14:04:36] [ID: false_120363316946072293@g.us_8A1F89E8F2092CA64509BDA3E1B1AEF6_192393143947448@lid] Dvir (0535230984): קרדיט ל- @77365313065081 המלך
+[2025-07-04 16:23:19] [ID: false_120363316946072293@g.us_DAAB68903C4110ACAEA68A934C7895EA_192393143947448@lid] Dvir (0535230984): שלום לכולם,
+
+שמתי רשימת המועמדים כשאלת הוכחה בסוף יחידת הוראה 1 במודל. בנוגע למס' 9 שם, סידרת אינטגרביליות שמתכנסת במ"ש מתכנסת לאנטגרבילית, אז נדרש שם גם להוכיח את התכנסות האינטגרלים, כלומר אותו חלק של ההוכחה שהוכח  עבור המשפט הפשוט יותר- כשהפונקציות רציפות. באופן כללי אם יש ספק מה צריך לגבי הוכחת משפט/למה מסויים החמירו בגבולות הסביר.
+
+כל טוב ושבת שלום,
+
+שחר
+[2025-07-04 16:23:46] [ID: false_120363316946072293@g.us_4D39EB93274E69412C988C80CAC9A7AD_192393143947448@lid] Dvir (0535230984): עדכון משחר באינפי 2 איתו לגבי החומר לשאלת הוכחת משפט במבחן
+[2025-07-05 19:04:36] [ID: true_120363316946072293@g.us_3FFE17DD8530BA4228D5_200644128440439@lid] הלל (Owner) (0532752474): (↩️ ל-ID:false_120363316946072293@g.us_3FEE45B53EF4D0D28534_192393143947448@lid "שחר העלה את רשימת המשפטים...")
+קובץ מעודכן, למי שרוצה
+[2025-07-05 19:05:13] [ID: true_120363316946072293@g.us_3FFE17DD8530BA4228D5_200644128440439@lid] פיתי (media content): Of course. This is a Hebrew document titled **"Theorems from Infinitesimal Calculus 2 and their Proofs"** by Hillel Ben Hanoch. It appears to be a set of lecture notes or a study guide, compiling key theorems and their detailed proofs for a second-semester calculus course (often called "Infi 2" in Israeli universities).
+
+The document is structured into four main chapters, each covering a major topic in calculus.
+
+### **Document Structure and Preamble**
+
+*   **Introduction:** The author explains the purpose of the document is to refresh memory and clarify the main ideas behind the proofs. It assumes the reader has prior familiarity with the subject.
+*   **Definitions:** It defines the terms it will use:
+    *   **Theorem (משפט):** A fully proven mathematical result.
+    *   **Claim (טענה):** A statement used as an assumption or a step in a main proof.
+    *   **Lemma (למה):** An auxiliary result proven to help with parts of a main proof.
+*   **Clarification:** The author notes that all proofs are faithful to the lectures they are based on, with one exception: the proof for the volume of a solid of revolution around the y-axis has been rewritten for better clarity.
+
+### **Contents by Chapter**
+
+Here's a breakdown of the mathematical content in each chapter:
+
+**Chapter 1: Riemann Integral (אינטגרל רימן)**
+This chapter lays the theoretical foundation for Riemann integration.
+*   **Necessary Condition for Integrability:** Proves that if a function is Riemann integrable on a closed interval, it must be bounded on that interval.
+*   **Darboux Sums:** Proves that for any two partitions of an interval, the lower Darboux sum of the first is less than or equal to the upper Darboux sum of the second.
+*   **Refinement of Partitions:** Shows how refining a partition (adding points) causes the lower Darboux sum to increase and the upper Darboux sum to decrease.
+*   **Integrability of Monotonic Functions:** Proves that any monotonic function on a closed interval is Riemann integrable.
+*   **Integral of a Non-Negative Function:** Proves that the integral of a continuous, non-negative function that is not identically zero is strictly positive.
+*   **Mean Value Theorem for Integrals:** Proves the theorem stating that for a continuous function `f` and a non-negative integrable function `g`, the integral of their product `f*g` is equal to `f(c)` times the integral of `g` for some point `c` in the interval.
+
+**Chapter 2: Geometric Calculations using Integrals (חישובים גיאומטריים באמצעות אינטגרלים)**
+This chapter deals with the practical application of integrals to find geometric properties.
+*   **Volume of a Solid of Revolution:**
+    *   **Around the x-axis (Disk Method):** Derives the formula V = π∫[f(x)]²dx.
+    *   **Around the y-axis (Cylindrical Shells Method):** Derives the formula V = 2π∫x*f(x)dx.
+*   **Arc Length:** Derives the formula for the length of a curve, L = ∫√(1 + [f'(x)]²)dx, by approximating the curve with straight line segments.
+
+**Chapter 3: Sequences and Series of Functions (סדרות וטורים של פונקציות)**
+This chapter moves to the analysis of function sequences and series.
+*   **Uniform Convergence and Continuity:** Proves that the limit function of a uniformly convergent sequence of continuous functions is also continuous.
+*   **Uniform Convergence and Integration:** Proves that one can swap the limit and integral signs for a uniformly convergent sequence of integrable functions (i.e., lim ∫fₙ = ∫lim fₙ).
+*   **Radius of Convergence (Cauchy-Hadamard Formula):** Proves the formula for finding the radius of convergence of a power series, R = 1 / (lim sup |aₙ|^(1/n)).
+
+**Chapter 4: Taylor Series (טורי טיילור)**
+The final chapter focuses on Taylor series approximations.
+*   **Peano's Form of the Remainder:** Proves that the remainder term of a Taylor expansion, Rₙ(x), goes to zero faster than (x - x₀)ⁿ. This is proven using induction and L'Hôpital's rule.
+
+In summary, the document is a rigorous and well-organized compilation of proofs for fundamental theorems in a second-semester calculus course, covering Riemann integration, its applications, sequences/series of functions, and Taylor series.
+[2025-07-05 20:29:21] [ID: false_120363316946072293@g.us_7689064D1893192DF913E292D4DA17A0_218863010599059@lid] א (0543682180): לכל מי שניגש לינארית 2 עם הבוגרים
+
+קישור לתיקיית הקורס:
+https://drive.google.com/drive/folders/1-BO8Mk4v7-_g0lEI4lHhQkhxw5vXV7A5?usp=sharing
+
+מבנה המבחן:
+- בוחרים 4 מתוך 5 שאלות
+
+- משך המבחן הוא 3 שעות
+
+- ללא חומר עזר
+
+- הקלה: אין שאלות על משפט זורדן
+
+- מבנה השאלות יהיה בסגנון הבא (לא בהכרח, אך המרצה אמר שרוב הסיכויים): שאלה על דטרמיננטה (הגדרה, תמורות, לפלס, מטריצה נלוות וכו'), שאלה על מרחב מכפלה פנימית, שאלה על העתקות לינאריות, שאלה על ליכסון מטריצה (רגיל ואורתוגונלי), ושאלה כללית יותר (כמו דמיון מטריצות וכו').
+
+- לשים לב - ישנם מספר דברים שלא התעמקנו הרבה עם ארז אך יכול להיות שהבוגרים כן התעמקו בזה
+
+בתיקייה, יש מבחן לדוגמא וגם את הסילבוס (אשלח פה גם) ובהרצאה 27 הם פותרים את המבחן לדוגמא ומסבירים על המבחן.
+
+מועדי הבחינה:
+- 22.07.25
+- 18.08.25
+
+כל מה שרשום זה לפי מה שהמרצה אמר אך ייתכן שיהיו שינויים. כל מי שנרשם למבחן ואישרו לו אמור להיות מצורף גם ללמדה של קבוצת הקורס וכל המידע הרלוונטי נמצאת גם שם
+[2025-07-05 20:29:34] [ID: false_120363316946072293@g.us_661F5C79AA791E16525ED921DC755EC7_218863010599059@lid] א (0543682180): מבחן לדוגמה 88-113.pdf
+[2025-07-05 20:29:36] [ID: false_120363316946072293@g.us_595C6B56E13131039F32FB0141A2267A_218863010599059@lid] א (0543682180): סילבוס אלגברה לינארית 2 88-113.pdf
+[2025-07-05 20:29:49] [ID: false_120363316946072293@g.us_595C6B56E13131039F32FB0141A2267A_218863010599059@lid] פיתי (media content): This document is a detailed syllabus for a university course titled **Linear Algebra 2 (88-113)**.
+
+The syllabus is in Hebrew and outlines the following information:
+*   **Instructor and Term:** The lecturer is Yonatan Bek, and the course is for the Spring semester of the academic year 2024-2025 (תשפ"ה, סמסטר ב').
+*   **Course Topics:** A detailed list of 14 topics to be covered, including:
+    *   Linear transformations, isomorphisms, and their matrix representations.
+    *   Change of basis, kernel, and image (Rank-Nullity Theorem).
+    *   Permutations and determinants.
+    *   Eigenvalues, eigenvectors, eigenspaces, and diagonalization.
+    *   Polynomials, the Cayley-Hamilton theorem, and the Jordan canonical form.
+    *   Inner product spaces, the Gram-Schmidt process, and orthonormal bases.
+    *   Normal, Hermitian, unitary, and symmetric matrices and transformations.
+*   **Course Requirements:**
+    *   **Prerequisite:** Linear Algebra 1.
+    *   **Assignments:** A final exam and homework assignments are required. Students must submit at least 80% of the homework.
+    *   **Grading:** The final grade is composed of 90% for the final exam and 10% for the homework assignments.
+*   **Textbooks and References:**
+    *   A Hebrew textbook from The Open University ("אלגברה לינארית (האוניברסיטה הפתוחה)").
+    *   The English textbook "Linear Algebra" by Hoffman and Kunz.
+[2025-07-05 20:30:08] [ID: false_120363316946072293@g.us_661F5C79AA791E16525ED921DC755EC7_218863010599059@lid] פיתי (media content): This document is a sample exam for a Linear Algebra course (88-113) from the second semester.
+
+**General Information:**
+*   **Course:** Linear Algebra (88-113)
+*   **Instructor:** Dr. Yonatan Beck
+*   **Duration:** Three hours
+*   **Allowed Materials:** None
+*   **Instructions:** Answer 4 out of 5 questions. All solutions must be justified.
+
+Here is a summary of the questions:
+
+**Question 1:** Deals with properties of a specific 3x3 matrix `A`.
+*   **a.** Asks to identify the single permutation `σ` for which the term in the Leibniz formula for the determinant (`sgn(σ)a₁σ(₁)a₂σ(₂)a₃σ(₃)`) is non-zero, and to state the values of `σ(1), σ(2), σ(3)`.
+*   **b.** Asks to calculate the adjugate matrix of `A`.
+*   **c.** Asks to use the result from part (b) to find the inverse of `A`.
+
+**Question 2:** Focuses on inner product spaces, specifically `Cⁿ` with the standard inner product.
+*   **a.** Asks for the definition of an orthonormal set of vectors.
+*   **b.** Asks for a proof that any orthonormal set of vectors is linearly independent.
+*   **c.** Gives two specific vectors in `C²` and asks to find an orthonormal basis `{u₁, u₂}` for `C²` such that the span of `u₁` is the same as the span of one of the given vectors (an application of the Gram-Schmidt process).
+
+**Question 3:** A theoretical question about a linear transformation `T: V → V` on an n-dimensional vector space `V`, with the given property that the dimension of its image is 1 (`dim Im T = 1`).
+*   **a.** Asks for the degree of the minimal polynomial of `T`.
+*   **b.** Asks to prove that `T` is either diagonalizable or nilpotent (i.e., `Tᵏ = 0` for some `k > 0`).
+*   **c.** In the case where `T` is not diagonalizable, it asks for the minimal `k` such that `Tᵏ` is the zero transformation.
+
+**Question 4:** Concerns the diagonalization of a specific 3x3 real symmetric matrix `A`.
+*   **a.** Find the eigenvalues of `A`.
+*   **b.** Find an orthogonal matrix `P` that diagonalizes `A` (i.e., `A = PDPᵀ` where `D` is diagonal).
+*   **c.** Find the characteristic polynomial of `A`.
+
+**Question 5:** This is a "find an example" question. For each part, one must provide a 2x2 real matrix `A` where all four entries are non-zero, satisfying a given property.
+*   **a.** Find an `A` that is not diagonalizable but is triangularizable.
+*   **b.** Find an `A` that is neither diagonalizable nor triangularizable.
+*   **c.** Find an `A` such that `A² = 0`.
+[2025-07-06 10:02:21] [ID: false_120363316946072293@g.us_43265C5DFC4B1D8ECACABE7810499772_192393143947448@lid] Dvir (0535230984): ציוני בוחן 2.xlsx
+[2025-07-06 10:02:24] [ID: false_120363316946072293@g.us_75BE4EABAC16E9B54EDF2E4D802DB713_192393143947448@lid] Dvir (0535230984): עלו ציונים לבוחן השני בחשמל
+[2025-07-06 10:03:55] [ID: false_120363316946072293@g.us_3A438AF14397B51345F5_206334624587813@lid] Ori Lovinger (0507880177): (↩️ ל-ID:false_120363316946072293@g.us_75BE4EABAC16E9B54EDF2E4D802DB713_192393143947448@lid "עלו ציונים לבוחן השני בחש...")
+*מהמתרגל:*
+ניתן לבוא לקחת את הבחנים במשך השבוע (החל מהיום) מבניין רזניק (209) חדר 011. 
+
+חלק מהסטודנטים רשמו את מספר תעודת הזהות שלהם באופן לא קריא. לכן, יש לשים לב שהזנתי את המספר הנכון, ובמידה ויש טעויות, לעדכן אותי.

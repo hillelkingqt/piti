@@ -1,0 +1,90 @@
+[2025-06-26 23:05:27] [ID: false_972555531816@c.us_9C1084D5088524E70A364F15146F51E9] שחר: למה הוצאת אותו
+[2025-06-26 23:05:28] [ID: false_972555531816@c.us_55742322F0970FADCB242824C463035A] שחר: אותי
+[2025-06-26 23:06:19] [ID: true_972555531816@c.us_E3E8D8263D3CF345769ABE8EC695CB5F] הלל (Owner): בגלל זה 💔
+[2025-06-26 23:06:23] [ID: true_972555531816@c.us_AF7CCFAA0C3CEB60B9D3D52BEC7A11C5] הלל (Owner): סתם
+[2025-06-26 23:06:25] [ID: true_972555531816@c.us_E3E8D8263D3CF345769ABE8EC695CB5F] פיתי (media content): The image displays a mobile phone screen showing a conversation in a messaging application, likely WhatsApp, given the interface elements. The screen is dark-themed.
+
+The top status bar shows the time (02:06), notification icons (WhatsApp, message, airplane mode), network strength, Wi-Fi status, battery level (15%), and a battery charging indicator.
+
+Below the status bar is the app's header. On the left is a back arrow, followed by a circular profile picture of a person. Next to the profile picture is the contact's name in Hebrew: "שחר הבת". On the right side of the header are icons for video call, voice call, and a three-dot menu.
+
+Below the header, a date separator shows "September 23, 2024". Following this is a dark gray box with a lock icon and text in yellow explaining that messages and calls are end-to-end encrypted.
+
+Next, a "Today" separator appears.
+
+The conversation area shows several messages. Two green bubbles on the right (sent messages) contain text in Hebrew: "שחר" and a crying face emoji below it. Both green messages have a timestamp "00:30" and a single checkmark icon, indicating they were sent but not yet delivered to the recipient.
+
+A dark gray bubble in the center indicates "2 unread messages".
+
+Below this, two dark gray bubbles on the left (received messages) contain text in Hebrew: "למה הוצאת אותו" and "אותי". Both have a timestamp "02:05". These appear to be the unread messages.
+
+Below the conversation area is the message input field. It contains a smiley face icon on the left, followed by the text "Message", and then icons for attachment (paperclip), camera, and a large green microphone icon on the right, suggesting it's ready for voice recording.
+
+Below the message input field is the on-screen Hebrew keyboard. It shows three rows of Hebrew letters and numbers, and a bottom row with special keys and a language selector ("עברית").
+
+The very bottom of the screen shows a navigation bar with a back arrow (chevron left), a home indicator line, and a multi-tasking/recent apps icon (grid). A globe icon is also visible on the right side of the navigation bar.
+
+**Extracted text via OCR:**
+
+02:06
+0
+15%
+שחר הבת
+September 23, 2024
+Messages and calls are end-to-end encrypted.
+Only people in this chat can read, listen to, or share
+them. Learn more.
+Today
+שחר
+00:30
+00:30
+2 unread messages
+למה הוצאת אותו
+02:05
+אותי
+02:05
+Message
+@
+GIF
+1
+2
+3
+4
+6
+7
+8
+9
+0
+ק
+ר
+א
+ט
+פ
+ס
+ד
+ג
+כ
+ע
+ח
+ל
+ר
+ף
+ת
+צ
+מ
+נ
+ה
+ב
+ס
+ד
+עברית
+?123
+•
+ע
+>
+[2025-06-26 23:06:30] [ID: true_972555531816@c.us_AED1FCEEF8C2D5781D98241BFDE7B514] הלל (Owner): שחר היה מאוד כיף לדבר איתך שוב
+[2025-06-26 23:06:36] [ID: true_972555531816@c.us_7E213E79700B0CBD963B24CA85B805E7] הלל (Owner): אבל אין טעם למשוך את זה
+[2025-06-26 23:06:45] [ID: false_972555531816@c.us_42E943F4F14EC9550EB93DF765948894] שחר: טוב
+[2025-06-26 23:07:03] [ID: true_972555531816@c.us_80ECDA0D439A86EFE3EE90A3AD57FEE3] הלל (Owner): 🫡
+[2025-06-26 23:07:05] [ID: true_972555531816@c.us_0AFADF89ACD168771857A89FE7C88CB1] הלל (Owner): לילה טוב
+[2025-06-26 23:07:10] [ID: false_972555531816@c.us_CEE4C77F4EF0D8F48471AC478529FD29] שחר: לילה טוב

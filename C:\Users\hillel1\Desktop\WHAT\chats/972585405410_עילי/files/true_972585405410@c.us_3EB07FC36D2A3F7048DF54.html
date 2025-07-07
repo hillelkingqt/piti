@@ -1,0 +1,203 @@
+<!-- filename: מבחני_השערות_מתוקן_סופית.html -->
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>המדריך השלם למבחני השערות</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #12121e;
+            color: #f0f0f0;
+            font-family: 'Rubik', sans-serif;
+            line-height: 1.8;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background-color: #1e1e3f;
+            border-radius: 15px;
+            padding: 25px 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        h1, h2, h3 {
+            color: #ffffff;
+            border-bottom: 2px solid #e94560;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        h1 { font-size: 2.5em; text-align: center; }
+        h2 { font-size: 2em; }
+        .step-box {
+            background-color: rgba(42, 42, 74, 0.7);
+            border: 1px solid #4a4a70;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .step-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(233, 69, 96, 0.2);
+        }
+        .katex-display {
+            margin: 1em 0;
+            text-align: center;
+        }
+        .katex {
+            font-size: 1.2em !important;
+            direction: ltr;
+        }
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .summary-table th, .summary-table td {
+            border: 1px solid #4a4a70;
+            padding: 12px;
+            text-align: center;
+        }
+        .summary-table th {
+            background-color: #e94560;
+            color: #ffffff;
+        }
+        .summary-table td {
+            background-color: #3a3a5a;
+        }
+        .final-dedication {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 1.2em;
+            color: #e94560;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>המדריך השלם למבחני השערות: זנב ימני, שמאלי ודו-צדדי</h1>
+
+        <div class="step-box">
+            <h2>שלב 0: מה זה בכלל מבחן השערות?</h2>
+            <p>בפשטות, מבחן השערות הוא כלי סטטיסטי שמאפשר לנו לקבל החלטות לגבי אוכלוסייה שלמה על סמך נתונים ממדגם. אנחנו מתחילים עם שתי טענות מנוגדות:</p>
+            <ul>
+                <li><strong>השערת האפס (\(H_0\)):</strong> זו ברירת המחדל, המצב הקיים. אנחנו מניחים שהיא נכונה עד שיוכח אחרת.</li>
+                <li><strong>השערה אלטרנטיבית (\(H_1\)):</strong> זו הטענה החדשה שאנחנו רוצים לבדוק. זו הטענה שנאמץ אם נדחה את השערת האפס.</li>
+            </ul>
+            <p>המטרה היא להחליט אם יש לנו מספיק ראיות במדגם כדי לדחות את \(H_0\) לטובת \(H_1\).</p>
+        </div>
+
+        <div class="step-box">
+            <h2>שלב 1: ההכנות למבחן</h2>
+            <p>לפני שצוללים לחישובים, צריך להכין את הקרקע:</p>
+            <ol>
+                <li><strong>ניסוח השערות:</strong> נגדיר בבירור את \(H_0\) ו-\(H_1\). זה החלק הכי חשוב, כי הוא קובע את סוג המבחן שנבצע.</li>
+                <li><strong>קביעת רמת מובהקות (\(\alpha\)):</strong> זהו סף הטעות שאנחנו מוכנים לקבל. בדרך כלל משתמשים ב-\(alpha=0.05\) (5%), \(alpha=0.01\) (1%) או \(alpha=0.1\) (10%). זו ההסתברות לדחות את \(H_0\) למרות שהיא נכונה.</li>
+                <li><strong>בחירת סטטיסטי המבחן:</strong> נקבע באיזה מבחן נשתמש (למשל, מבחן Z, מבחן T) בהתאם לנתונים שלנו (האם שונות האוכלוסייה ידועה? מה גודל המדגם?).</li>
+            </ol>
+        </div>
+        
+        <div class="step-box">
+            <h2>שלב 2: הכרת שלושת סוגי המבחנים</h2>
+            <p>ההבדל בין סוגי המבחנים נובע ישירות מההשערה האלטרנטיבית (\(H_1\)):</p>
+            
+            <h3>א. מבחן חד-צדדי (זנב ימני)</h3>
+            <p><strong>מתי משתמשים?</strong> כשרוצים לבדוק אם פרמטר (כמו ממוצע) <strong>גדול יותר</strong> מערך מסוים.</p>
+            <p><strong>השערות:</strong></p>
+            $$ H_0: \mu \le \mu_0 $$
+            $$ H_1: \mu > \mu_0 $$
+            <p><strong>היגיון:</strong> אנחנו מחפשים ראיות חזקות לכך שהממוצע "זז" ימינה על ציר המספרים. לכן, כל אזור הדחייה שלנו מרוכז בזנב הימני של ההתפלגות.</p>
+
+            <h3>ב. מבחן חד-צדדי (זנב שמאלי)</h3>
+            <p><strong>מתי משתמשים?</strong> כשרוצים לבדוק אם פרמטר <strong>קטן יותר</strong> מערך מסוים.</p>
+            <p><strong>השערות:</strong></p>
+            $$ H_0: \mu \ge \mu_0 $$
+            $$ H_1: \mu < \mu_0 $$
+            <p><strong>היגיון:</strong> אנחנו מחפשים ראיות לכך שהממוצע "זז" שמאלה. אזור הדחייה נמצא כולו בזנב השמאלי.</p>
+            
+            <h3>ג. מבחן דו-צדדי</h3>
+            <p><strong>מתי משתמשים?</strong> כשרוצים לבדוק אם פרמטר פשוט <strong>שונה</strong> מערך מסוים (יכול להיות גדול יותר או קטן יותר).</p>
+            <p><strong>השערות:</strong></p>
+            $$ H_0: \mu = \mu_0 $$
+            $$ H_1: \mu \ne \mu_0 $$
+            <p><strong>היגיון:</strong> אנחנו פתוחים לשני הכיוונים. לכן, מחלקים את אזור הדחייה (\(\alpha\)) באופן שווה בין שני הזנבות של ההתפלגות (\(\alpha/2\) בכל צד).</p>
+        </div>
+
+        <div class="step-box">
+            <h2>שלב 3: דוגמה מלאה מהחיים</h2>
+            <p><strong>תרחיש:</strong> יצרן סוללות טוען שחיי הסוללה הממוצעים שלו הם 40 שעות. אנחנו חושדים שהיצרן מגזים וחיי הסוללה בפועל <strong>קצרים יותר</strong>. דגמנו 30 סוללות ומצאנו אורך חיים ממוצע של 37.5 שעות, עם סטיית תקן ידועה של האוכלוסייה של 5 שעות. נבדוק את הטענה ברמת מובהקות של \(\alpha=0.05\).</p>
+            <p><strong>פתרון:</strong></p>
+            <ol>
+                <li><strong>סוג המבחן:</strong> אנחנו רוצים לבדוק אם חיי הסוללה "קצרים יותר", לכן נשתמש במבחן <strong>חד-צדדי שמאלי</strong>.</li>
+                <li><strong>השערות:</strong>
+                    <ul>
+                        <li>\(H_0: \mu \ge 40\) (חיי הסוללה הם 40 שעות או יותר)</li>
+                        <li>\(H_1: \mu < 40\) (חיי הסוללה קצרים מ-40 שעות)</li>
+                    </ul>
+                </li>
+                <li><strong>חישוב סטטיסטי המבחן (Z):</strong>
+                    $$ Z = \frac{\bar{x} - \mu_0}{\sigma / \sqrt{n}} = \frac{37.5 - 40}{5 / \sqrt{30}} = \frac{-2.5}{0.9128} \approx -2.74 $$
+                </li>
+                <li><strong>מציאת הערך הקריטי:</strong> במבחן זנב-שמאלי עם \(\alpha=0.05\), הערך הקריטי (שמתחתיו נמצא אזור הדחייה) הוא \(Z_{\alpha} = -1.645\).</li>
+                <li><strong>החלטה:</strong> מכיוון שה-Z שחישבנו (\(-2.74\)) קטן מהערך הקריטי (\(-1.645\)), הוא נופל באזור הדחייה.</li>
+                <li><strong>מסקנה:</strong> ברמת מובהקות של 5%, יש לנו מספיק ראיות סטטיסטיות כדי לדחות את טענת היצרן ולהסיק שחיי הסוללה אכן קצרים מ-40 שעות בממוצע.</li>
+            </ol>
+        </div>
+
+        <div class="step-box">
+            <h2>שלב 4: טבלת סיכום</h2>
+            <table class="summary-table">
+                <thead>
+                    <tr>
+                        <th>מאפיין</th>
+                        <th>מבחן זנב-ימני</th>
+                        <th>מבחן זנב-שמאלי</th>
+                        <th>מבחן דו-צדדי</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>סימן ב-\(H_1\)</strong></td>
+                        <td>\(>\)</td>
+                        <td>\(<\)</td>
+                        <td>\(\ne\)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>אזור הדחייה</strong></td>
+                        <td>בצד הימני</td>
+                        <td>בצד השמאלי</td>
+                        <td>בשני הצדדים</td>
+                    </tr>
+                    <tr>
+                        <td><strong>שאלת מחקר לדוגמה</strong></td>
+                        <td>האם התרופה החדשה <strong>יעילה יותר</strong> מהישנה?</td>
+                        <td>האם זמן התגובה <strong>התקצר</strong>?</td>
+                        <td>האם יש <strong>הבדל</strong> בין שתי הקבוצות?</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="final-dedication">
+            נוצר באהבה עבור עילי, מקווה שהפעם הכל ברור! ❤️
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '\\(', right: '\\)', display: false}
+                ],
+                throwOnError: false
+            });
+        });
+    </script>
+</body>
+</html>

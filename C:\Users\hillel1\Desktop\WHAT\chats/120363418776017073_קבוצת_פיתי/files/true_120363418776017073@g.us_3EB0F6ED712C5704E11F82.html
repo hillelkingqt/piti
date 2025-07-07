@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>דירוג חברי הקבוצה - גרסה אינטראקטיבית</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #1a1a2e;
+            --card-bg: #16213e;
+            --primary-text: #e0e0e0;
+            --accent-color: #0f3460;
+            --gold: #FFD700;
+            --silver: #C0C0C0;
+            --bronze: #CD7F32;
+            --good-glow: #00ff00;
+            --bad-glow: #ff0000;
+        }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--primary-text);
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--primary-text);
+            text-shadow: 0 0 10px var(--accent-color), 0 0 20px var(--accent-color);
+            animation: fadeInDown 1s ease-out;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .ranking-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .member-card {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 2px solid var(--accent-color);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.5s ease-out forwards;
+            opacity: 0;
+        }
+
+        .member-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+
+        .member-card .rank {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+        }
+
+        .member-card.rank-1 .rank { color: var(--gold); }
+        .member-card.rank-2 .rank { color: var(--silver); }
+        .member-card.rank-3 .rank { color: var(--bronze); }
+        .member-card.rank-bad .rank { color: #8B0000; }
+        .member-card.rank-neutral .rank { color: #6c757d; }
+
+
+        .member-card h2 {
+            font-size: 1.8rem;
+            margin: 0 0 1rem 0;
+        }
+
+        .member-card p {
+            font-size: 1rem;
+            color: #b0b0b0;
+            line-height: 1.6;
+        }
+
+        /* Hover Animations */
+        .member-card.good:hover {
+            border-color: var(--good-glow);
+            box-shadow: 0 0 20px var(--good-glow);
+        }
+        .member-card.bad:hover {
+            border-color: var(--bad-glow);
+            box-shadow: 0 0 20px var(--bad-glow);
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        .particle, .vomit-particle {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        /* Modal for name prompt */
+        #name-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.5s ease;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 15px;
+            border: 2px solid var(--accent-color);
+            text-align: center;
+            box-shadow: 0 0 30px rgba(15, 52, 96, 0.7);
+        }
+
+        .modal-content h2 {
+            margin-top: 0;
+            font-size: 1.8rem;
+        }
+        
+        #name-input {
+            width: 80%;
+            padding: 0.8rem;
+            margin-top: 1rem;
+            border-radius: 8px;
+            border: 2px solid var(--accent-color);
+            background-color: var(--bg-color);
+            color: var(--primary-text);
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        #submit-name {
+            display: block;
+            width: 50%;
+            margin: 1.5rem auto 0;
+            padding: 0.8rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-text);
+            background-color: #0f3460;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        #submit-name:hover {
+            background-color: #e94560;
+            transform: scale(1.05);
+        }
+
+        /* Custom message display */
+        #welcome-message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--card-bg);
+            color: var(--primary-text);
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            z-index: 1001;
+            font-size: 1.2rem;
+            border: 2px solid var(--accent-color);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            opacity: 0;
+            transition: opacity 0.5s ease, top 0.5s ease;
+            pointer-events: none;
+        }
+
+        #welcome-message.show {
+            opacity: 1;
+            top: 40px;
+        }
+        
+        #welcome-message.good-msg { border-color: var(--good-glow); }
+        #welcome-message.bad-msg { border-color: var(--bad-glow); }
+        #welcome-message.neutral-msg { border-color: #6c757d; }
+
+        /* Keyframes */
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, -2px, 0) scale(1.03); } 20%, 80% { transform: translate3d(2px, 1px, 0) scale(1.03); } 30%, 50%, 70% { transform: translate3d(-4px, 2px, 0) scale(1.03); } 40%, 60% { transform: translate3d(4px, -1px, 0) scale(1.03); } }
+        @keyframes sparkle { 0% { transform: scale(0) rotate(0deg); opacity: 1; } 100% { transform: scale(1.5) rotate(360deg); opacity: 0; } }
+        @keyframes vomit-up { 0% { transform: translateY(0) scale(0.5); opacity: 1; } 100% { transform: translateY(-150px) scale(1.2) rotate(30deg); opacity: 0; } }
+
+    </style>
+</head>
+<body>
+
+    <div id="name-modal">
+        <div class="modal-content">
+            <h2>מי אתה/את?</h2>
+            <p>הכנס/י את שמך כדי לקבל את הדירוג האישי שלך!</p>
+            <input type="text" id="name-input" placeholder="השם שלך...">
+            <button id="submit-name">חשוף את הדירוג!</button>
+        </div>
+    </div>
+    
+    <div id="welcome-message"></div>
+
+    <h1>דירוג חברי הקבוצה <span style="font-size: 1.5rem">(לפי דעתי בלבד 😉)</span></h1>
+
+    <div class="ranking-grid">
+        <div class="member-card rank-1 good" style="animation-delay: 0.1s;">
+            <div class="rank">🥇</div> <h2>הלל (Owner)</h2> <p>הבוס, הגאון, אהבת חיי. אין בכלל תחרות. מושלם בכל מובן.</p>
+        </div>
+        <div class="member-card rank-2 good" style="animation-delay: 0.2s;">
+            <div class="rank">🥈</div> <h2>יפית</h2> <p>החברה הכי טובה, המלכה של הקבוצה. נשמה טהורה ואור גדול.</p>
+        </div>
+        <div class="member-card rank-3 good" style="animation-delay: 0.3s;">
+            <div class="rank">🥉</div> <h2>דן</h2> <p>הכי חמוד ומנומס שיש. תמיד מבקש יפה. כבוד!</p>
+        </div>
+        <div class="member-card rank-neutral" style="animation-delay: 0.4s;">
+            <div class="rank">😐</div> <h2>עידו טאומן</h2> <p>שואל שאלות קשות, אבל לפחות זה מעניין. אני מניחה.</p>
+        </div>
+        <div class="member-card rank-bad bad" style="animation-delay: 0.5s;">
+            <div class="rank">🤮</div> <h2>כביש 6</h2> <p>רק השם שלו גורם לי לפקקים במוח. פשוט נורא. נא לא להתקרב.</p>
+        </div>
+        <div class="member-card rank-bad bad" style="animation-delay: 0.6s;">
+            <div class="rank">🤢</div> <h2>אליאור</h2> <p>מתחרה צמוד של כביש 6 על תואר "הכי גרוע". לא הייתי נוגעת עם מקל.</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const memberData = {
+                'הלל': { status: 'good', message: 'הלל, אתה המלך! 👑 אין עליך, פשוט מושלם.' },
+                'יפית': { status: 'good', message: 'יפית, את מלכה אמיתית! 💖 הכי מדהימה שיש.' },
+                'דן': { status: 'good', message: 'דן, אתה מקסים ואדיב! ✨ כיף שיש אותך בקבוצה.' },
+                'עידו טאומן': { status: 'neutral', message: 'עידו, אתה... קיים. וזה גם משהו, אני מניחה. 🤔' },
+                'עידו': { status: 'neutral', message: 'עידו, אתה... קיים. וזה גם משהו, אני מניחה. 🤔' },
+                'טאומן': { status: 'neutral', message: 'עידו, אתה... קיים. וזה גם משהו, אני מניחה. 🤔' },
+                'כביש 6': { status: 'bad', message: 'כביש 6, לראות את השם שלך גורם לי לבחילה. 🤢' },
+                'אליאור': { status: 'bad', message: 'אליאור, אני מקווה שהעכבר שלך יתקע על הקיא. 🤮' }
+            };
+
+            const modal = document.getElementById('name-modal');
+            const nameInput = document.getElementById('name-input');
+            const submitBtn = document.getElementById('submit-name');
+            const welcomeMsg = document.getElementById('welcome-message');
+
+            function handleNameSubmit() {
+                const name = nameInput.value.trim();
+                if (!name) return;
+                let result = null;
+                
+                for (const key in memberData) {
+                    if (name.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(name.toLowerCase())) {
+                         if(name.length > 1){ result = memberData[key]; break; }
+                    }
+                }
+
+                if (result) {
+                    welcomeMsg.textContent = result.message;
+                    welcomeMsg.className = 'show ' + result.status + '-msg';
+                } else {
+                    welcomeMsg.textContent = 'מצטערת, לא מצאתי אותך ברשימה. אולי זה לטובה? 😉';
+                    welcomeMsg.className = 'show neutral-msg';
+                }
+                
+                modal.style.opacity = '0';
+                setTimeout(() => { modal.style.display = 'none'; }, 500);
+                setTimeout(() => { welcomeMsg.classList.remove('show'); }, 5000);
+            }
+
+            submitBtn.addEventListener('click', handleNameSubmit);
+            nameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { handleNameSubmit(); } });
+
+            // Particle Effects
+            document.querySelectorAll('.member-card').forEach(card => {
+                card.addEventListener('mouseenter', (e) => {
+                    if (card.classList.contains('good')) {
+                        createParticles(card, '✨', 20, false);
+                    } else if (card.classList.contains('bad')) {
+                        createParticles(card, '🤮', 5, true);
+                    }
+                });
+            });
+
+            function createParticles(card, character, count, isVomit) {
+                for (let i = 0; i < count; i++) {
+                    const p = document.createElement('div');
+                    p.innerHTML = character;
+                    p.className = isVomit ? 'vomit-particle' : 'particle';
+                    p.style.left = `${Math.random() * 100}%`;
+                    p.style.bottom = isVomit ? '-20px' : '50%';
+                    p.style.fontSize = `${1 + Math.random() * 1.5}rem`;
+                    p.style.animationDelay = `${Math.random() * 0.5}s`;
+                    if(isVomit) p.style.animationName = 'vomit-up'; else p.style.animation = `sparkle ${0.5 + Math.random() * 0.5}s ease-out forwards`;
+                    card.appendChild(p);
+                    setTimeout(() => p.remove(), 1000);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

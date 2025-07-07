@@ -1,0 +1,54 @@
+[
+  {
+    "timestamp": "2025-06-28T21:08:47.570Z",
+    "originalMessageId": "true_120363422334373342@g.us_3F3D42B52C0CCF2E8D20_200644128440439@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363422334373342_אליאור_גבר_מלך/files/image_flux-1-schnell_1751144927569.jpeg",
+    "filename": "image_flux-1-schnell_1751144927569.jpeg",
+    "description": "An ant",
+    "type": "image/jpeg",
+    "modelUsed": "flux-1-schnell"
+  },
+  {
+    "timestamp": "2025-06-28T21:08:48.018Z",
+    "originalMessageId": "true_120363422334373342@g.us_3EB0310B18B4F5338A80FC",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363422334373342_אליאור_גבר_מלך/files/true_120363422334373342@g.us_3EB0310B18B4F5338A80FC.jpeg",
+    "filename": "true_120363422334373342@g.us_3EB0310B18B4F5338A80FC.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (פיתי)",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-06-28T21:09:26.556Z",
+    "originalMessageId": "false_120363422334373342@g.us_9BFC274F183702865EA810E1C6BF6604_104900432232513@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363422334373342_אליאור_גבר_מלך/files/false_120363422334373342@g.us_9BFC274F183702865EA810E1C6BF6604_104900432232513@lid.webp",
+    "filename": "false_120363422334373342@g.us_9BFC274F183702865EA810E1C6BF6604_104900432232513@lid.webp",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (אליאור גולן)",
+    "type": "image/webp"
+  },
+  {
+    "timestamp": "2025-06-28T21:12:41.208Z",
+    "originalMessageId": "false_120363422334373342@g.us_7AB835A2E56D0ADC95561129CEDA526B_104900432232513@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363422334373342_אליאור_גבר_מלך/files/gradio_image_FLUX.1-dev_1751145161207.webp",
+    "filename": "gradio_image_FLUX.1-dev_1751145161207.webp",
+    "description": "A close-up portrait photo of a young man with light brown hair, round glasses, and dental braces. He has visible acne on his forehead and cheeks and is smirking slightly. He is wearing a light-colored shirt. The background is blurry, with some green foliage on the right side. Photorealistic, detailed.",
+    "type": "image/webp",
+    "modelUsed": "black-forest-labs/FLUX.1-dev",
+    "seedUsed": 1992382766,
+    "params": {
+      "prompt": "A close-up portrait photo of a young man with light brown hair, round glasses, and dental braces. He has visible acne on his forehead and cheeks and is smirking slightly. He is wearing a light-colored shirt. The background is blurry, with some green foliage on the right side. Photorealistic, detailed.",
+      "seed": 0,
+      "randomize_seed": true,
+      "width": 1024,
+      "height": 1024,
+      "guidance_scale": 3.5,
+      "num_inference_steps": 28
+    }
+  },
+  {
+    "timestamp": "2025-06-28T21:12:41.692Z",
+    "originalMessageId": "true_120363422334373342@g.us_3EB01EAFAD6DD63D53F6F1",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363422334373342_אליאור_גבר_מלך/files/true_120363422334373342@g.us_3EB01EAFAD6DD63D53F6F1.jpeg",
+    "filename": "true_120363422334373342@g.us_3EB01EAFAD6DD63D53F6F1.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (פיתי)",
+    "type": "image/jpeg"
+  }
+]

@@ -1,0 +1,6 @@
+\selectlanguage *[]{hebrew}
+\contentsline {section}{\numberline {1}מבוא}{2}{section.1}%
+\contentsline {section}{\numberline {2}חלק 1: ניקוי נתונים בדפדפן כרום (Chrome) במחשב}{2}{figure.1}%
+\contentsline {section}{\numberline {3}חלק 2: ניקוי נתונים בדפדפן כרום (Chrome) באנדרואיד}{3}{figure.2}%
+\contentsline {section}{\numberline {4}חלק 3: ניקוי נתונים בדפדפן ספארי (Safari) באייפון}{4}{figure.3}%
+\contentsline {section}{\numberline {5}סיכום}{4}{section.5}%

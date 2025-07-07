@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>שימושים מתקדמים ב-MSE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/contrib/auto-render.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-color: #1c1e21;
+            --header-color: #1877f2;
+            --accent-color: #e6005c;
+            --border-color: #dddfe2;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Assistant', sans-serif;
+            line-height: 1.8;
+            direction: rtl;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            padding: 20px;
+        }
+        .title-header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+        }
+        .title-header h1 {
+            font-size: 2.8em;
+            color: var(--header-color);
+            margin: 0;
+            font-weight: 700;
+        }
+        .title-header p {
+            font-size: 1.2em;
+            color: var(--text-color);
+            margin-top: 10px;
+        }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .card h2 {
+            color: var(--accent-color);
+            font-size: 1.8em;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        .math {
+            font-size: 1.3em;
+            padding: 15px;
+            background-color: #f7f7f7;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow-x: auto;
+            text-align: center;
+            border: 1px solid #eee;
+        }
+        strong {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 0.9em;
+            color: #606770;
+        }
+        code {
+            background-color: #eef0f2;
+            color: #333;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: 'Courier New', Courier, monospace;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title-header">
+            <h1>לאן ממשיכים עם MSE?</h1>
+            <p>מושגים ונוסחאות מתקדמים שנבנים על שגיאה ריבועית ממוצעת</p>
+        </div>
+
+        <div class="card">
+            <h2>מבוא: יותר מסתם מדד</h2>
+            <p>עילי היקר, כפי שראינו, MSE הוא מדד נהדר לכמת את הטעות של מודל. אבל הכוח האמיתי שלו הוא לא רק בלהגיד לנו \"כמה טעינו\", אלא בהיותו <strong>אבן בניין יסודית</strong> באלגוריתמים ובתאוריות המרכזיות ביותר בלמידת מכונה. הוא לא רק המטרה, הוא לעיתים קרובות גם הדרך.</p>
+            <p>בדף זה נחקור איך MSE משמש כבסיס לכמה מהרעיונות החשובים בתחום.</p>
+        </div>
+        
+        <div class="card">
+            <h2>1. פונקציית הפסד (Loss Function) ברגרסיה לינארית</h2>
+            <p>ברגרסיה לינארית, המטרה שלנו היא למצוא את קו הניבוי הטוב ביותר שמתאר את הקשר בין המשתנים. אבל מה זה אומר \"הטוב ביותר\"? ובכן, \"הטוב ביותר\" הוא הקו שבו ה-MSE הוא <strong>הנמוך ביותר</strong>.</p>
+            <p>במילים אחרות, אנחנו מגדירים את ה-MSE כ\"פונקציית ההפסד\" (או \"פונקציית העלות\") שלנו, והאלגוריתם עובד קשה כדי למצוא את הפרמטרים (שיפוע ונקודת חיתוך) שממזערים את הערך של הפונקציה הזו.</p>
+            <div class="math" dir="ltr">L(\beta) = \frac{1}{n}\sum_{i=1}^{n}(y_i - \hat{y}_i)^2</div>
+            <p>כאשר המטרה היא למצוא את ה- <code dir="ltr">\(\beta\)</code> -ים (הפרמטרים של המודל) עבורם <code dir="ltr">\(L(\beta)\)</code> מינימלי.</p>
+        </div>
+
+        <div class="card">
+            <h2>2. פירוק הטיה-שונות (The Bias-Variance Tradeoff)</h2>
+            <p>זהו אחד המושגים התיאורטיים החשובים והיפים ביותר בלמידת מכונה. הוא אומר שהשגיאה הצפויה של מודל (שנמדדת, ניחשתם נכון, באמצעות MSE) ניתנת לפירוק לשלושה מרכיבים:</p>
+            <ul>
+                <li><strong>הטיה (Bias²):</strong> הטעות הנובעת מהנחות שגויות של המודל. מודל פשוט מדי (כמו קו ישר לנתונים מורכבים) יסבול מהטיה גבוהה.</li>
+                <li><strong>שונות (Variance):</strong> הטעות הנובעת מרגישות יתר של המודל לשינויים קטנים בנתוני האימון. מודל מורכב מדי ילמד את \"הרעש\" בנתונים ויסבול משונות גבוהה.</li>
+                <li><strong>שגיאה אי-פריקה (Irreducible Error <code dir="ltr">\(\sigma_\epsilon^2\)</code>):</strong> הרעש הטבעי בנתונים, ששום מודל לא יכול לבטל.</li>
+            </ul>
+            <p>הנוסחה המפורסמת היא:</p>
+            <div class="math" dir="ltr">\text{EPE}(x_0) = \text{Bias}(\hat{f}(x_0))^2 + \text{Var}(\hat{f}(x_0)) + \sigma_\epsilon^2</div>
+            <p>כאשר <code dir="ltr">\(\text{EPE}\)</code> (Expected Prediction Error) הוא למעשה ה-MSE הצפוי עבור נקודה חדשה. המשפט הזה מראה לנו שיש \"שמיכה קצרה\": כשאנחנו מנסים להקטין את ההטיה (על ידי שימוש במודל מורכב יותר), אנחנו לרוב מגדילים את השונות, ולהיפך. האתגר הוא למצוא את האיזון המושלם.</p>
+        </div>
+
+        <div class="card">
+            <h2>3. רגולריזציה (Regularization)</h2>
+            <p>כדי להילחם בבעיית השונות הגבוהה (התאמת יתר - Overfitting), פותחו טכניקות רגולריזציה כמו <strong>Ridge (L2)</strong> ו-<strong>Lasso (L1)</strong>. הטכניקות האלה פועלות על ידי הוספת \"עונש\" לפונקציית ההפסד של ה-MSE.</p>
+            <p>הרעיון הוא לאלץ את המודל לשמור על מקדמים (פרמטרים) קטנים, מה שהופך אותו לפחות מורכב ופחות רגיש לרעשים.</p>
+            <p><strong>ברגולריזציית Ridge (L2):</strong></p>
+            <div class="math" dir="ltr">\text{Loss}_{\text{Ridge}} = \text{MSE} + \lambda \sum_{j=1}^{p} \beta_j^2</div>
+            <p><strong>ברגולריזציית Lasso (L1):</strong></p>
+            <div class="math" dir="ltr">\text{Loss}_{\text{Lasso}} = \text{MSE} + \lambda \sum_{j=1}^{p} |\beta_j|</div>
+            <p>בשני המקרים, המודל מנסה למזער את הסכום הכולל. <code dir="ltr">\(\lambda\)</code> הוא היפר-פרמטר שקובע כמה חזק יהיה ה\"עונש\". שימו לב שה-MSE הוא עדיין הלב של פונקציית ההפסד!</p>
+        </div>
+        
+        <div class="card">
+            <h2>4. עיבוד אותות ותמונות</h2>
+            <p>בתחומים כמו עיבוד תמונה ודחיסת וידאו, MSE הוא כלי מרכזי למדידת איכות השחזור. לדוגמה, כאשר דוחסים תמונה, חלק מהמידע הולך לאיבוד. כדי למדוד כמה התמונה הדחוסה שונה מהמקור, מחשבים את ה-MSE בין ערכי הפיקסלים של שתי התמונות.</p>
+            <p>מדד פופולרי בשם <strong>PSNR (Peak Signal-to-Noise Ratio)</strong> מבוסס ישירות על MSE ומשמש להערכת איכות של שחזור תמונה או וידאו. ככל שה-MSE נמוך יותר, ה-PSNR גבוה יותר, מה שמעיד על שחזור איכותי יותר.</p>
+            <div class="math" dir="ltr">\text{PSNR} = 10 \cdot \log_{10}\left(\frac{\text{MAX}_I^2}{\text{MSE}}\right)</div>
+        </div>
+
+        <div class="footer">
+            <p>נוצר באהבה על ידי פיתי ❤️</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '$', right: '$', display: false},
+                    {left: '\\(', right: '\\)', display: false},
+                    {left: '\\[', right: '\\]', display: true}
+                ],
+                throwOnError: false
+            });
+
+            const cards = document.querySelectorAll('.card');
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+
+            cards.forEach(card => {
+                observer.observe(card);
+            });
+        });
+    </script>
+</body>
+</html>

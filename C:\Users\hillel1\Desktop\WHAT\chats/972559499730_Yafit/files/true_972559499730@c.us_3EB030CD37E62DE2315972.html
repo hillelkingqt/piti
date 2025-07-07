@@ -1,0 +1,211 @@
+<!-- filename: electricity_experience_v4.html -->
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>חוויה מחשמלת V4 - האולטימטיבית</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #000411;
+            --primary: #00f6ff;
+            --secondary: #fcee0a;
+            --text-color: #dbeeff;
+            --border-color: #005a7a;
+            --card-bg: rgba(0, 20, 41, 0.75);
+            --water-deep: #002c40;
+            --water-shallow: #007cad;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Heebo', sans-serif;
+            margin: 0;
+            padding: 2rem;
+            text-align: center;
+            overflow-x: hidden;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .electric-cursor { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><path fill="%23fcee0a" stroke="%2300f6ff" stroke-width="0.5" d="M13 2L3 14h9l-1 8L21 10h-9z"/><g filter="url(%23glow)"><path fill="%23fcee0a" stroke="%2300f6ff" stroke-width="0.5" d="M13 2L3 14h9l-1 8L21 10h-9z"/></g><defs><filter id="glow"><feGaussianBlur stdDeviation="1.5" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs></svg>') 16 16, auto; }
+        .dead-cursor { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="%236b7280" stroke="%23111827" stroke-width="1" d="M13 2L3 14h9l-1 8L21 10h-9z"/></svg>'), auto; }
+
+        #matrix-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            opacity: 0.5;
+        }
+
+        .container { max-width: 1600px; margin: auto; position: relative; z-index: 10; }
+
+        h1 {
+            font-weight: 900;
+            font-size: clamp(2.5rem, 10vw, 6rem);
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px var(--primary), 0 0 30px var(--secondary), 0 0 50px rgba(0, 246, 255, 0.5);
+            animation: flicker 3s infinite alternate, fadeIn 2s ease-out;
+        }
+        p.subtitle { font-size: 1.5rem; color: var(--text-color); opacity: 0; animation: fadeIn 2s 0.5s ease-out forwards; max-width: 800px; margin: 1rem auto; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+            perspective: 2000px;
+        }
+
+        .card-container { transition: transform 0.3s ease; }
+        .card-container:hover { transform: scale(1.05); }
+        .card {
+            width: 100%; height: 220px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+            animation: riseUp 0.8s forwards;
+        }
+        .card.is-flipped { transform: rotateY(180deg); }
+
+        .card-face {
+            position: absolute;
+            width: 100%; height: 100%;
+            -webkit-backface-visibility: hidden; backface-visibility: hidden;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow: auto;
+        }
+        .card-face-front { z-index: 2; }
+        .card-face-back { transform: rotateY(180deg); }
+        .card h2 { margin-top: 0; color: var(--primary); font-size: 2rem; }
+        .card p { font-size: 1.1rem; }
+
+        .ocean { height: 150px; width:100%; position: fixed; bottom: 0; left: 0; z-index: 50; pointer-events: auto; }
+        .wave { background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAwIDg2Ij48cGF0aCBmaWxsPSJodHRwOi8vd3d3Lnc1Lm9yZy8yMDAwL3N2ZyIvPjxwYXRoIGQ9Ik0xMjAwIDM2LjRsLTIuOC0uMUMxMDYyLjYgMjggOTU2LjQgMjEuMyA4MzkuMiAyOS43Yy01MC4zIDMuNS0xMDYuMyAxNC0xNzAuMiAyNC44QzU0Mi4xIDY1LjMgNDM0LjMgNzcgMzM5LjYgNzkuOGMtNzQuMSAxLjktMTM5LTguNy0yMTguMy0yOC4xQzQ3LjggMzQuNSAyNSA3LjggMCAwbDEuMiA4NmgxMjAwbC0xLjItNTAuNnoiIGZpbGw9InJnYmEoMCwgMTI0LCAxNzMsIDAuNikiLz48L3N2Zz4=) repeat-x; position: absolute; bottom: 0; width: 6400px; height: 150px; animation: wave 10s cubic-bezier( 0.36, 0.45, 0.63, 0.53) infinite; transform: translate3d(0, 0, 0); }
+        .wave:nth-of-type(2) { bottom: 5px; animation: wave 12s cubic-bezier( 0.36, 0.45, 0.63, 0.53) -.125s infinite, swell 7s ease -1.25s infinite; opacity: 0.8; }
+
+        .short-circuit-effect { animation: screenShake 0.5s ease; }
+
+        @keyframes fadeIn { to { opacity: 1; } }
+        @keyframes riseUp { to { transform: translateY(0); opacity: 1; } }
+        @keyframes flicker { 0%, 100% { filter: drop-shadow(0 0 25px var(--primary));} 50% { filter: drop-shadow(0 0 5px var(--primary)) drop-shadow(0 0 10px var(--secondary)); } }
+        @keyframes wave { 0% { margin-left: 0; } 100% { margin-left: -1600px; } }
+        @keyframes swell { 0%, 100% { transform: translate3d(0,-25px,0); } 50% { transform: translate3d(0,5px,0); } }
+        @keyframes screenShake { 0%, 100% { transform: translate(0, 0) rotate(0); } 10%, 30%, 50%, 70%, 90% { transform: translate(-5px, 5px) rotate(-1deg); } 20%, 40%, 60%, 80% { transform: translate(5px, -5px) rotate(1deg); } }
+    </style>
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    <div class="container">
+        <h1>חוויה מחשמלת V4</h1>
+        <p class="subtitle">היקום החשמלי במלוא הדרו. הפוך את הקלפים כדי לגלות את סודותיו. רק תזכור, למים יש זיכרון והם לא סולחים.</p>
+
+        <div class="grid">
+            <div class="card-container" style="animation-delay: 0.2s;"><div class="card"><div class="card-face card-face-front"><h2>חוק קולון</h2></div><div class="card-face card-face-back"><p>הכוח החשמלי בין שני מטענים נקודתיים פרופורציונלי למכפלת גודל המטענים וביחס הפוך לריבוע המרחק ביניהם. משיכה ודחייה.</p></div></div></div>
+            <div class="card-container" style="animation-delay: 0.3s;"><div class="card"><div class="card-face card-face-front"><h2>שדה חשמלי</h2></div><div class="card-face card-face-back"><p>אזור במרחב שבו מטען חשמלי ירגיש כוח. הוא מתואר על ידי קווי שדה היוצאים ממטענים חיוביים ונכנסים לשליליים.</p></div></div></div>
+            <div class="card-container" style="animation-delay: 0.4s;"><div class="card"><div class="card-face card-face-front"><h2>חוק אוהם</h2></div><div class="card-face card-face-back"><p>מגדיר את הקשר V=IR. המתח (V) שווה למכפלת הזרם (I) בהתנגדות (R). עמוד התווך של כל מעגל חשמלי.</p></div></div></div>
+            <div class="card-container" style="animation-delay: 0.5s;"><div class="card"><div class="card-face card-face-front"><h2>פוטנציאל חשמלי</h2></div><div class="card-face card-face-back"><p>האנרגיה הפוטנציאלית ליחידת מטען. הפרש הפוטנציאלים (מתח) הוא מה שגורם לזרם לזרום ממקום גבוה לנמוך.</p></div></div></div>
+            <div class="card-container" style="animation-delay: 0.6s;"><div class="card"><div class="card-face card-face-front"><h2>קיבול וקבלים</h2></div><div class="card-face card-face-back"><p>היכולת של רכיב לאגור מטען חשמלי. קבל הוא רכיב שעושה זאת, כמו סוללה נטענת זעירה ומהירה.</p></div></div></div>
+            <div class="card-container" style="animation-delay: 0.7s;"><div class="card"><div class="card-face card-face-front"><h2>השראות ומשרנים</h2></div><div class="card-face card-face-back"><p>התנגדות לשינוי בזרם. משרן אוגר אנרגיה בשדה מגנטי ומתנגד לשינויים פתאומיים בזרם הזורם דרכו.</p></div></div></div>
+            <div class="card-container" style="animation-delay: 0.8s;"><div class="card"><div class="card-face card-face-front"><h2>מעגל חשמלי</h2></div><div class="card-face card-face-back"><p>מסלול סגור המאפשר זרימת אלקטרונים. יכול להיות פשוט (סוללה ונורה) או מורכב כמו שבב מחשב.</p></div></div></div>
+            <div class="card-container" style="animation-delay: 0.9s;"><div class="card"><div class="card-face card-face-front"><h2>אלקטרומגנטיות</h2></div><div class="card-face card-face-back"><p>איחוד תופעות החשמל והמגנטיות. זרם חשמלי יוצר שדה מגנטי, ושינוי בשדה מגנטי יוצר זרם חשמלי.</p></div></div></div>
+            <div class="card-container" style="animation-delay: 1.0s;"><div class="card"><div class="card-face card-face-front"><h2>זרם חילופין (AC)</h2></div><div class="card-face card-face-back"><p>הזרם משנה את כיוונו באופן מחזורי, כמו גל סינוס. זהו סוג הזרם המגיע לשקעים בביתנו.</p></div></div></div>
+            <div class="card-container" style="animation-delay: 1.1s;"><div class="card"><div class="card-face card-face-front"><h2>זרם ישר (DC)</h2></div><div class="card-face card-face-back"><p>הזרם זורם בכיוון אחד קבוע. זהו הזרם המופק מסוללות ומשמש במכשירים אלקטרוניים רבים.</p></div></div></div>
+            <div class="card-container" style="animation-delay: 1.2s;"><div class="card"><div class="card-face card-face-front"><h2>הספק חשמלי</h2></div><div class="card-face card-face-back"><p>קצב העברת האנרגיה החשמלית, נמדד בוואט. מחושב כמכפלת המתח בזרם (P=VI).</p></div></div></div>
+            <div class="card-container" style="animation-delay: 1.3s;"><div class="card"><div class="card-face card-face-front"><h2>משוואות מקסוול</h2></div><div class="card-face card-face-back"><p>ארבע משוואות המהוות את הבסיס לתיאוריית האלקטרומגנטיות הקלאסית. הן שירה מתמטית.</p></div></div></div>
+        </div>
+    </div>
+    
+    <div class="ocean"></div>
+
+    <script>
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
+        const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const nums = '0123456789';
+        const alphabet = katakana + latin + nums;
+
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        const rainDrops = [];
+
+        for (let x = 0; x < columns; x++) {
+            rainDrops[x] = 1;
+        }
+
+        const draw = () => {
+            ctx.fillStyle = 'rgba(0, 4, 17, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#00f6ff';
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < rainDrops.length; i++) {
+                const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+
+                if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    rainDrops[i] = 0;
+                }
+                rainDrops[i]++;
+            }
+        };
+
+        setInterval(draw, 30);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const body = document.body;
+            const water = document.querySelector('.ocean');
+            const cards = document.querySelectorAll('.card');
+            
+            let isElectrified = false;
+            let isDead = false;
+
+            cards.forEach(card => {
+                card.addEventListener('click', () => {
+                    card.classList.toggle('is-flipped');
+                });
+
+                card.addEventListener('mouseover', () => {
+                    if(!isDead) {
+                        if (!isElectrified) {
+                            isElectrified = true;
+                            body.classList.add('electric-cursor');
+                        }
+                    }
+                });
+            });
+
+            water.addEventListener('mouseenter', () => {
+                if (isElectrified) {
+                    isElectrified = false;
+                    isDead = true;
+                    body.classList.remove('electric-cursor');
+                    body.classList.add('dead-cursor');
+                    body.classList.add('short-circuit-effect');
+                    setTimeout(() => body.classList.remove('short-circuit-effect'), 500);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

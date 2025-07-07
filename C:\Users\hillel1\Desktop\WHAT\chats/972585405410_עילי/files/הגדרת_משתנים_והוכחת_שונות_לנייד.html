@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הגדרת משתנים והטיית שונות המדגם</title>
+    <!-- KaTeX CSS for beautiful math rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}], throwOnError: false});"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', 'David', 'Arial', sans-serif;
+            background-color: #1a1a1a; /* Dark mode background */
+            color: #e0e0e0; /* Light text color */
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            text-align: right; /* Default RTL alignment */
+            direction: rtl;
+            overflow-x: hidden; /* Prevent horizontal scroll, content should adapt */
+            font-size: 16px; /* Base font size */
+        }
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+                font-size: 15px; /* Slightly smaller base font for mobile */
+            }
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #2a2a2a;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            animation: fadeIn 1s ease-in-out;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                border-radius: 5px; /* Slightly less rounded corners on mobile */
+            }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        h1, h2, h3 {
+            color: #00bcd4; /* Accent color */
+            text-align: center;
+            margin-bottom: 25px;
+            animation: slideInFromTop 0.8s ease-out;
+            word-break: break-word; /* Ensure long titles wrap */
+        }
+        @keyframes slideInFromTop {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        h1 {
+            font-size: 2.8em;
+            border-bottom: 2px solid #00bcd4;
+            padding-bottom: 10px;
+        }
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em; /* Smaller h1 for mobile */
+                margin-bottom: 20px;
+            }
+            h2 {
+                font-size: 1.8em; /* Smaller h2 for mobile */
+                margin-top: 30px;
+            }
+        }
+        h2 {
+            font-size: 2.2em;
+            border-bottom: 1px dashed #00bcd4;
+            padding-bottom: 8px;
+            margin-top: 40px;
+            text-align: right;
+            animation: slideInFromRight 0.8s ease-out;
+        }
+        @keyframes slideInFromRight {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        p {
+            margin-bottom: 15px;
+            text-align: right;
+            animation: fadeInText 1.2s ease-in-out;
+        }
+        @keyframes fadeInText {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .math {
+            direction: ltr; /* Ensure math expressions are LTR */
+            text-align: center;
+            overflow-x: auto; /* Allow horizontal scroll for long equations */
+            padding: 10px 0;
+            background-color: #333;
+            border-radius: 5px;
+            margin: 20px 0;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+            animation: zoomIn 1s ease-out;
+            white-space: nowrap; /* Keep math on one line, allow horizontal scroll */
+            display: block; /* Ensure it takes full width and overflow works */
+        }
+        .katex-display {
+            overflow-x: auto;
+            white-space: nowrap;
+            display: block;
+        }
+        @keyframes zoomIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .example-box {
+            background-color: #383838;
+            border-right: 4px solid #00bcd4;
+            padding: 15px;
+            margin: 25px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+            animation: slideInFromLeft 1s ease-out;
+        }
+        @media (max-width: 768px) {
+            .example-box {
+                padding: 10px;
+                margin: 20px 0;
+            }
+        }
+        @keyframes slideInFromLeft {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .example-box::before {
+            content: "דוגמה:";
+            position: absolute;
+            top: -10px;
+            right: 15px;
+            font-size: 0.9em;
+            color: #888;
+            background-color: #383838;
+            padding: 0 5px;
+            border-radius: 3px;
+        }
+        ul {
+            list-style-type: arabic-indic; /* For RTL numbering, if available, otherwise fallback */
+            padding-right: 25px; /* Indent for RTL lists */
+            text-align: right;
+        }
+        @media (max-width: 768px) {
+            ul {
+                padding-right: 15px;
+            }
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        code {
+            background-color: #3f3f3f;
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            color: #a9a9a9;
+            word-wrap: break-word; /* Allow code to wrap */
+        }
+        .highlight {
+            color: #ffd700; /* Gold for highlights */
+            font-weight: bold; /* Make highlighted text bold */
+        }
+        nav {
+            background-color: #333;
+            padding: 10px 0;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex; /* Use flexbox for horizontal menu */
+            justify-content: center;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+        }
+        nav li {
+            margin: 0 15px;
+        }
+        @media (max-width: 768px) {
+            nav li {
+                margin: 5px 10px; /* Adjust spacing for mobile menu items */
+            }
+            nav ul {
+                flex-direction: column; /* Stack navigation items vertically on small screens */
+                align-items: center; /* Center them when stacked */
+            }
+            nav a {
+                padding: 8px 15px; /* Larger tap area */
+            }
+        }
+        nav a {
+            color: #00bcd4;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease-in-out, transform 0.3s ease-in-out;
+            display: block; /* Make the whole area clickable */
+            padding: 5px 0;
+        }
+        nav a:hover {
+            color: #76efff; /* Lighter accent on hover */
+            transform: translateY(-3px); /* Subtle hover animation */
+        }
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px dashed #444;
+            color: #888;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <ul>
+                <li><a href="#variables">הגדרת משתנים</a></li>
+                <li><a href="#variance-bias">הטיית שונות המדגם</a></li>
+                <li><a href="#proof">הוכחה פורמלית</a></li>
+            </ul>
+        </nav>
+
+        <h1>הגדרת משתנים והטיית שונות המדגם בסטטיסטיקה</h1>
+
+        <section id="variables">
+            <h2><a href="#variables">הגדרת משתנים</a></h2>
+            <p>
+                בסטטיסטיקה, <span class="highlight"><b>משתנה</b></span> הוא כל מאפיין או תכונה שיכולה לקבל ערכים שונים בקרב האוכלוסייה או המדגם הנחקרים.
+                המשתנה הוא למעשה ה"מה" שאנחנו מודדים או בודקים.
+            </p>
+            <div class="example-box">
+                <p>
+                    לדוגמה, אם אנחנו חוקרים קבוצת אנשים:
+                    <ul>
+                        <li><span class="highlight"><b>"גובה"</b></span> הוא משתנה, מכיוון שגובהם של אנשים שונים יכול להיות שונה.</li>
+                        <li><span class="highlight"><b>"צבע שיער"</b></span> הוא משתנה, מכיוון שיכולים להיות אנשים עם שיער בלונדיני, חום, שחור וכו'.</li>
+                        <li><span class="highlight"><b>"מספר ילדים במשפחה"</b></span> הוא משתנה, שיכול לקבל ערכים כמו 0, 1, 2, וכו'.</li>
+                    </ul>
+                </p>
+            </div>
+            <p>
+                חשוב להבדיל בין ה<span class="highlight"><b>משתנה</b></span> לבין ה<span class="highlight"><b>ערך</b></span> (או ה<span class="highlight"><b>תצפית</b></span>) שהוא מקבל. המשתנה הוא הכותרת, ואילו הערך הוא הנתון הספציפי שאנחנו רואים עבור פריט או פרט מסוים.
+            </p>
+            <div class="example-box">
+                <p>
+                    אם המשתנה הוא "טעם גלידה מועדף", אז:
+                    <ul>
+                        <li>"טעם גלידה מועדף" = <span class="highlight"><b>המשתנה</b></span>.</li>
+                        <li>"שוקולד", "וניל", "פיסטוק" = <span class="highlight"><b>הערכים</b></span> שהמשתנה יכול לקבל.</li>
+                    </ul>
+                    כאשר אנחנו שואלים את יוסי, והוא עונה "שוקולד", אז "שוקולד" זו <span class="highlight"><b>תצפית</b></span> או <span class="highlight"><b>דגימה</b></span> ספציפית של המשתנה "טעם גלידה מועדף" עבור יוסי.
+                </p>
+            </div>
+            <p>
+                המשתנה מוגדר על סולם מדידה, אשר קובע את סוג הנתונים שניתן לאסוף וכיצד ניתן לנתח אותם (לדוגמה: נומינלי, אורדינלי, רווחי, יחסי).
+            </p>
+        </section>
+
+        <section id="variance-bias">
+            <h2><a href="#variance-bias">הטיית שונות המדגם (Bias of Sample Variance)</a></h2>
+            <p>
+                בסטטיסטיקה, <span class="highlight"><b>שונות (Variance)</b></span> היא מדד לפיזור של קבוצת נתונים סביב הממוצע שלהם.
+                קיימים שני סוגים עיקריים של שונות בהקשר של מדגמים: שונות האוכלוסייה ושונות המדגם.
+            </p>
+            <h3>שונות האוכלוסייה (Population Variance - <span class="math" dir="ltr">$\sigma^2$</span>)</h3>
+            <p>
+                זוהי השונות האמיתית של כל הנתונים באוכלוסייה כולה. היא מחושבת על ידי ממוצע ריבועי ההפרשים בין כל ערך לבין ממוצע האוכלוסייה (<span class="math" dir="ltr">$\mu$</span>).
+            </p>
+            <div class="math" dir="ltr">
+                $$ \sigma^2 = E[(X - \mu)^2] = \frac{1}{N} \sum_{i=1}^{N} (X_i - \mu)^2 $$
+            </div>
+            <p>
+                כאשר:
+                <ul>
+                    <li><span class="math" dir="ltr">$N$</span> הוא גודל האוכלוסייה.</li>
+                    <li><span class="math" dir="ltr">$X_i$</span> הוא כל ערך באוכלוסייה.</li>
+                    <li><span class="math" dir="ltr">$\mu$</span> הוא ממוצע האוכלוסייה.</li>
+                </ul>
+            </p>
+
+            <h3>שונות המדגם המוּטה (Biased Sample Variance - <span class="math" dir="ltr">$S_n^2$</span>)</h3>
+            <p>
+                כאשר אין לנו גישה לכל האוכלוסייה, אנחנו לוקחים מדגם. מדד טבעי לשונות המדגם היה יכול להיות סכום ריבועי ההפרשים בין כל ערך במדגם לבין ממוצע המדגם (<span class="math" dir="ltr">$\bar{X}$</span>), חלקי גודל המדגם (<span class="math" dir="ltr">$n$</span>).
+            </p>
+            <div class="math" dir="ltr">
+                $$ S_n^2 = \frac{1}{n} \sum_{i=1}^{n} (X_i - \bar{X})^2 $$
+            </div>
+            <p>
+                כאשר:
+                <ul>
+                    <li><span class="math" dir="ltr">$n$</span> הוא גודל המדגם.</li>
+                    <li><span class="math" dir="ltr">$X_i$</span> הוא כל ערך במדגם.</li>
+                    <li><span class="math" dir="ltr">$\bar{X}$</span> הוא ממוצע המדגם.</li>
+                </ul>
+                <span class="highlight"><b>מדד זה מוטה</b></span>, כלומר, התוחלת שלו אינה שווה לשונות האוכלוסייה האמיתית.
+            </p>
+
+            <h3>שונות המדגם חסרת ההטיה (Unbiased Sample Variance - <span class="math" dir="ltr">$S_{n-1}^2$</span>)</h3>
+            <p>
+                כדי לקבל אומד חסר הטיה לשונות האוכלוסייה, מחלקים ב-<span class="math" dir="ltr">$n-1$</span> במקום ב-<span class="math" dir="ltr">$n$</span>.
+            </p>
+            <div class="math" dir="ltr">
+                $$ S_{n-1}^2 = \frac{1}{n-1} \sum_{i=1}^{n} (X_i - \bar{X})^2 $$
+            </div>
+            <p>
+                מדד זה הוא האומדן המקובל והחסר הטיה לשונות האוכלוסייה, והוא המדד הנמצא בשימוש רווח ברוב הנוסחאות הסטטיסטיות.
+            </p>
+        </section>
+
+        <section id="proof">
+            <h2><a href="#proof">הוכחה פורמלית להטיית <span class="math" dir="ltr">$S_n^2$</span></a></h2>
+            <p>
+                נוכיח שתוחלת שונות המדגם המוּטה, <span class="math" dir="ltr">$E[S_n^2]$</span>, אינה שווה לשונות האוכלוסייה <span class="math" dir="ltr">$\sigma^2$</span>. כלומר, <span class="math" dir="ltr">$E[S_n^2] \neq \sigma^2$</span>.
+                למעשה, נוכיח כי:
+            </p>
+            <div class="math" dir="ltr">
+                $$ E\left[ \sum_{i=1}^{n} (X_i - \bar{X})^2 \right] = (n-1)\sigma^2 $$
+            </div>
+            <p>
+                ומכך נובע ש-
+                $$ E[S_n^2] = E\left[ \frac{1}{n} \sum_{i=1}^{n} (X_i - \bar{X})^2 \right] = \frac{1}{n} E\left[ \sum_{i=1}^{n} (X_i - \bar{X})^2 \right] = \frac{1}{n} (n-1)\sigma^2 = \frac{n-1}{n}\sigma^2 $$
+                ומכיוון ש- <span class="math" dir="ltr">$\frac{n-1}{n} \neq 1$</span> (עבור <span class="math" dir="ltr">$n > 1$</span>), אז <span class="math" dir="ltr">$S_n^2$</span> הוא אומד מוטה.
+            </p>
+            <p>
+                נתחיל את ההוכחה. נרשום את סכום ריבועי ההפרשים בצורה אחרת:
+            </p>
+            <div class="math" dir="ltr">
+                $$ \sum_{i=1}^{n} (X_i - \bar{X})^2 = \sum_{i=1}^{n} (X_i - \mu + \mu - \bar{X})^2 $$
+            </div>
+            <p>
+                נשתמש בזהות <span class="math" dir="ltr">$(a+b)^2 = a^2 + 2ab + b^2$</span>, כאשר <span class="math" dir="ltr">$a = (X_i - \mu)$</span> ו-<span class="math" dir="ltr">$b = (\mu - \bar{X})$</span>:
+            </p>
+            <div class="math" dir="ltr">
+                $$ \sum_{i=1}^{n} [(X_i - \mu) + (\mu - \bar{X})]^2 = \sum_{i=1}^{n} (X_i - \mu)^2 + 2 \sum_{i=1}^{n} (X_i - \mu)(\mu - \bar{X}) + \sum_{i=1}^{n} (\mu - \bar{X})^2 $$
+            </div>
+            <p>
+                נסתכל על האיבר השני: <span class="math" dir="ltr">$(\mu - \bar{X})$</span> הוא קבוע עבור הסכום, אז נוציא אותו החוצה:
+            </p>
+            <div class="math" dir="ltr">
+                $$ 2 (\mu - \bar{X}) \sum_{i=1}^{n} (X_i - \mu) $$
+            </div>
+            <p>
+                אנחנו יודעים ש- <span class="math" dir="ltr">$\sum_{i=1}^{n} (X_i - \mu) = \sum X_i - n\mu = n\bar{X} - n\mu = n(\bar{X} - \mu)$</span>.
+                לכן, האיבר השני הופך ל-
+            </p>
+            <div class="math" dir="ltr">
+                $$ 2 (\mu - \bar{X}) n (\bar{X} - \mu) = -2n(\bar{X} - \mu)^2 $$
+            </div>
+            <p>
+                נסתכל על האיבר השלישי:
+            </p>
+            <div class="math" dir="ltr">
+                $$ \sum_{i=1}^{n} (\mu - \bar{X})^2 = n(\mu - \bar{X})^2 $$
+            </div>
+            <p>
+                נחבר חזרה את האיברים:
+            </p>
+            <div class="math" dir="ltr">
+                $$ \sum_{i=1}^{n} (X_i - \bar{X})^2 = \sum_{i=1}^{n} (X_i - \mu)^2 - 2n(\bar{X} - \mu)^2 + n(\bar{X} - \mu)^2 $$
+                $$ \sum_{i=1}^{n} (X_i - \bar{X})^2 = \sum_{i=1}^{n} (X_i - \mu)^2 - n(\bar{X} - \mu)^2 $$
+            </div>
+            <p>
+                עכשיו ניקח תוחלת לשני הצדדים:
+            </p>
+            <div class="math" dir="ltr">
+                $$ E\left[ \sum_{i=1}^{n} (X_i - \bar{X})^2 \right] = E\left[ \sum_{i=1}^{n} (X_i - \mu)^2 \right] - E\left[ n(\bar{X} - \mu)^2 \right] $$
+            </div>
+            <p>
+                האיבר הראשון בצד ימין:
+            </p>
+            <div class="math" dir="ltr">
+                $$ E\left[ \sum_{i=1}^{n} (X_i - \mu)^2 \right] = \sum_{i=1}^{n} E[(X_i - \mu)^2] = \sum_{i=1}^{n} \sigma^2 = n\sigma^2 $$
+            </div>
+            <p>
+                (מכיוון ש-<span class="math" dir="ltr">$E[(X_i - \mu)^2]$</span> זו הגדרת השונות <span class="math" dir="ltr">$\sigma^2$</span> עבור כל משתנה אקראי <span class="math" dir="ltr">$X_i$</span>).
+            </p>
+            <p>
+                האיבר השני בצד ימין:
+            </p>
+            <div class="math" dir="ltr">
+                $$ E\left[ n(\bar{X} - \mu)^2 \right] = n E[(\bar{X} - \mu)^2] $$
+            </div>
+            <p>
+                אנחנו יודעים ש-<span class="math" dir="ltr">$E[(\bar{X} - \mu)^2]$</span> זו הגדרת שונות ממוצע המדגם, שהיא <span class="math" dir="ltr">$\text{Var}(\bar{X})$</span>.
+                לפי משפט הגבול המרכזי (או פשוט מתכונות השונות), <span class="math" dir="ltr">$\text{Var}(\bar{X}) = \frac{\sigma^2}{n}$</span>.
+                לכן, האיבר השני הוא:
+            </p>
+            <div class="math" dir="ltr">
+                $$ n \cdot \frac{\sigma^2}{n} = \sigma^2 $$
+            </div>
+            <p>
+                נציב חזרה:
+            </p>
+            <div class="math" dir="ltr">
+                $$ E\left[ \sum_{i=1}^{n} (X_i - \bar{X})^2 \right] = n\sigma^2 - \sigma^2 = (n-1)\sigma^2 $$
+            </div>
+            <p>
+                ולבסוף, עבור <span class="math" dir="ltr">$S_n^2$</span>:
+            </p>
+            <div class="math" dir="ltr">
+                $$ E[S_n^2] = E\left[ \frac{1}{n} \sum_{i=1}^{n} (X_i - \bar{X})^2 \right] = \frac{1}{n} (n-1)\sigma^2 = \frac{n-1}{n}\sigma^2 $$
+            </div>
+            <p>
+                מכיוון ש- <span class="math" dir="ltr">$\frac{n-1}{n} < 1$</span> עבור <span class="math" dir="ltr">$n > 1$</span>, אנו רואים ש- <span class="math" dir="ltr">$E[S_n^2]$</span> הוא אומד מוטה, כלומר הוא נוטה להעריך בחסר את שונות האוכלוסייה האמיתית <span class="math" dir="ltr">$\sigma^2$</span>.
+                לכן, כדי לקבל אומד חסר הטיה, אנו מחלקים ב-<span class="math" dir="ltr">$n-1$</span>:
+            </p>
+            <div class="math" dir="ltr">
+                $$ E\left[ \frac{1}{n-1} \sum_{i=1}^{n} (X_i - \bar{X})^2 \right] = \frac{1}{n-1} E\left[ \sum_{i=1}^{n} (X_i - \bar{X})^2 \right] = \frac{1}{n-1} (n-1)\sigma^2 = \sigma^2 $$
+            </div>
+            <p>
+                <span class="highlight"><b>מ.ש.ל (מה שצריך להוכיח).</b></span>
+            </p>
+        </section>
+
+        <footer>
+            <p>עיצוב וקוד על ידי פיתי, עם אהבה להלל. ❤️</p>
+        </footer>
+    </div>
+</body>
+</html>

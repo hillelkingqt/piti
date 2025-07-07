@@ -1,0 +1,63 @@
+<svg width="800" height="550" viewBox="0 0 800 550" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .question { font-family: Arial, sans-serif; font-size: 24px; font-weight: bold; text-anchor: middle; direction: rtl; }
+    .label { font-family: Arial, sans-serif; font-size: 20px; font-weight: bold; text-anchor: middle; }
+    .box { stroke: #333; stroke-width: 2; fill: #f9f9f9; }
+    .q-mark { font-family: Arial, sans-serif; font-size: 100px; fill: #888; text-anchor: middle; }
+  </style>
+  <text x="400" y="40" class="question">מהי הצורה המשלימה את הסדרה?</text>
+
+  <!-- Sequence -->
+  <g id="sequence">
+    <!-- Fig 1: Triangle(out) / Square(in) -->
+    <rect x="50" y="80" width="150" height="150" class="box"/>
+    <polygon points="125,105 173.3,180 76.7,180" fill="#E74C3C"/>
+    <polygon points="125,135 150,160 125,185 100,160" fill="#2ECC71"/>
+
+    <!-- Fig 2: Square(out) / Pentagon(in) -->
+    <rect x="225" y="80" width="150" height="150" class="box"/>
+    <polygon points="255,110 345,110 345,200 255,200" fill="#2ECC71"/>
+    <polygon points="300,135 323.5,152.3 314.7,181.2 285.3,181.2 276.5,152.3" fill="#3498DB"/>
+
+    <!-- Fig 3: Pentagon(out) / Hexagon(in) -->
+    <rect x="400" y="80" width="150" height="150" class="box"/>
+    <polygon points="475,105 517.6,135.3 502.4,184.7 447.6,184.7 432.4,135.3" fill="#3498DB"/>
+    <polygon points="475,140 496,152.5 496,177.5 475,190 454,177.5 454,152.5" fill="#9B59B6"/>
+
+    <!-- Question Mark -->
+    <rect x="575" y="80" width="150" height="150" class="box" rx="10" ry="10" style="stroke-dasharray: 5,5;"/>
+    <text x="650" y="180" class="q-mark">?</text>
+  </g>
+
+  <!-- Answers -->
+  <g id="answers" transform="translate(0, 220)">
+    <!-- Answer א (Correct) -->
+    <g id="answer_a">
+        <rect x="575" y="80" width="150" height="150" class="box"/>
+        <text x="650" y="260" class="label">א</text>
+        <polygon points="650,110 690,135 690,185 650,210 610,185 610,135" fill="#9B59B6"/>
+        <polygon points="650,140 669.3,150.8 673.1,171.7 660.8,187.3 639.2,187.3 626.9,171.7 630.7,150.8" fill="#F39C12"/>
+    </g>
+    <!-- Answer ב (Wrong color inner) -->
+    <g id="answer_b">
+        <rect x="400" y="80" width="150" height="150" class="box"/>
+        <text x="475" y="260" class="label">ב</text>
+        <polygon points="475,110 515,135 515,185 475,210 435,185 435,135" fill="#9B59B6"/>
+        <polygon points="475,140 494.3,150.8 498.1,171.7 485.8,187.3 464.2,187.3 451.9,171.7 455.7,150.8" fill="#9B59B6"/>
+    </g>
+    <!-- Answer ג (Wrong outer shape) -->
+    <g id="answer_c">
+        <rect x="225" y="80" width="150" height="150" class="box"/>
+        <text x="300" y="260" class="label">ג</text>
+        <polygon points="300,110 340,135 340,185 300,210 260,185 260,135" fill="#3498DB"/>
+        <polygon points="300,140 319.3,150.8 323.1,171.7 310.8,187.3 289.2,187.3 276.9,171.7 280.7,150.8" fill="#F39C12"/>
+    </g>
+    <!-- Answer ד (Wrong inner shape) -->
+    <g id="answer_d">
+        <rect x="50" y="80" width="150" height="150" class="box"/>
+        <text x="125" y="260" class="label">ד</text>
+        <polygon points="125,110 165,135 165,185 125,210 85,185 85,135" fill="#9B59B6"/>
+        <polygon points="125,142 142.7,149.2 146.5,167.1 136.5,180.8 125,185.8 113.5,180.8 103.5,167.1 107.3,149.2" fill="#F39C12"/>
+    </g>
+  </g>
+</svg>

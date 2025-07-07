@@ -1,0 +1,280 @@
+<!-- filename: הסבר_התפלגות_t.html -->
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הכל על התפלגות t</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&display=swap');
+
+        :root {
+            --bg-color: #1a1a2e;
+            --primary-color: #e94560;
+            --secondary-color: #0f3460;
+            --text-color: #e0e0e0;
+            --card-bg: #16213e;
+            --header-color: #f0f0f0;
+            --highlight: #53a8b6;
+            --katex-text-color: #f1f1f1;
+        }
+
+        body {
+            font-family: 'Assistant', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.8;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s, color 0.3s;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1, h2, h3 {
+            color: var(--header-color);
+            font-weight: 700;
+            text-align: center;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-bottom: 1.5rem;
+            animation: slideIn 0.8s forwards;
+            opacity: 0;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            animation-delay: 0.2s;
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            color: var(--highlight);
+            border-color: var(--highlight);
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        p, li {
+            font-size: 1.1rem;
+            font-weight: 400;
+            animation: fadeInText 1s ease-in-out;
+            animation-fill-mode: both;
+            animation-delay: 0.6s;
+        }
+
+        .math-container {
+            background-color: rgba(15, 52, 96, 0.5);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 2rem 0;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.4);
+            overflow-x: auto;
+            animation: zoomIn 0.7s ease-out;
+            animation-delay: 0.8s;
+            animation-fill-mode: both;
+        }
+        
+        @keyframes zoomIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .math {
+            font-size: 1.3rem !important;
+            color: var(--katex-text-color);
+            text-align: center;
+            display: block;
+        }
+        
+        /* Ensure KaTeX renders LTR */
+        .math, .katex-display, .katex {
+            direction: ltr;
+        }
+
+        .info-box {
+            background-color: var(--secondary-color);
+            border-left: 5px solid var(--primary-color);
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .info-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(233, 69, 96, 0.3);
+        }
+
+        .toc {
+            background: var(--card-bg);
+            border: 1px solid var(--secondary-color);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+        .toc h3 {
+            border: none;
+            text-align: right;
+            margin-top: 0;
+            font-size: 1.5rem;
+        }
+        .toc ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .toc li a {
+            text-decoration: none;
+            color: var(--highlight);
+            transition: color 0.3s;
+            font-weight: 600;
+        }
+        .toc li a:hover {
+            color: var(--primary-color);
+        }
+
+        strong {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>התפלגות t (התפלגות Student)</h1>
+        
+        <nav class="toc">
+            <h3>תוכן עניינים</h3>
+            <ul>
+                <li><a href="#intro">מה זה בכלל התפלגות t? (ההסבר האינטואיטיבי)</a></li>
+                <li><a href="#definition">ההגדרה הפורמלית</a></li>
+                <li><a href="#pdf">נוסחת פונקציית הצפיפות (הנוסחה "המפחידה")</a></li>
+                <li><a href="#table">ומה עם הטבלה למבחן?</a></li>
+            </ul>
+        </nav>
+
+        <section id="intro">
+            <h2>מה זה בכלל התפלגות t? (ההסבר האינטואיטיבי)</h2>
+            <p>
+                היי עילי, אני שמחה ששאלת! הרבה סטודנטים מסתבכים עם זה בהתחלה.
+                תחשוב על <strong>התפלגות t</strong> כעל "בת הדודה" הגמישה והמציאותית יותר של <span class="math" dir="ltr">ההתפלגות הנורמלית</span> (עקומת הפעמון המפורסמת).
+                אנחנו משתמשים בה בעיקר בשני מצבים מאוד נפוצים במחקר אמיתי:
+            </p>
+            <div class="info-box">
+                <ol>
+                    <li>כשיש לנו <strong>מדגם קטן</strong> (בדרך כלל, פחות מ-30 תצפיות).</li>
+                    <li>כשאנחנו <strong>לא יודעים</strong> את סטיית התקן של כלל האוכלוסייה (שזה כמעט תמיד המצב).</li>
+                </ol>
+            </div>
+            <p>
+                בגלל שהמדגם קטן, יש לנו יותר אי-ודאות. התפלגות t לוקחת את אי-הוודאות הזו בחשבון. איך? יש לה "זנבות שמנים" יותר מההתפלגות הנורמלית. זה אומר שהיא נותנת סיכוי גבוה יותר לתוצאות קיצוניות, וזה בדיוק מה שאנחנו צריכים כשאנחנו לא בטוחים בנתונים שלנו.
+                ככל שגודל המדגם (<span class="math" dir="ltr">n</span>) גדל, אי-הוודאות קטנה, והתפלגות t הופכת להיות דומה יותר ויותר להתפלגות הנורמלית.
+            </p>
+        </section>
+
+        <section id="definition">
+            <h2>ההגדרה הפורמלית</h2>
+            <p>
+                עכשיו בוא נצלול להגדרה המתמטית. היא אולי נראית קצת מופשטת, אבל היא הבסיס להכל.
+                התפלגות t מוגדרת באמצעות שני משתנים מקריים אחרים שאנחנו כבר מכירים (או נכיר):
+            </p>
+            <ul>
+                <li><strong>Z</strong>: משתנה מקרי שמתפלג <strong>נורמלית סטנדרטית</strong> (<span class="math" dir="ltr">Z \sim N(0,1)</span>).</li>
+                <li><strong>V</strong>: משתנה מקרי שמתפלג <strong>חי-בריבוע (Chi-squared)</strong> עם <span class="math" dir="ltr">\nu</span> דרגות חופש (<span class="math" dir="ltr">V \sim \chi^2_{(\nu)}</span>).</li>
+            </ul>
+            <p>
+                בהנחה ש-Z ו-V הם בלתי תלויים, המשתנה המקרי <strong>T</strong>, שמוגדר כך, יתפלג t עם <span class="math" dir="ltr">\nu</span> דרגות חופש:
+            </p>
+            <div class="math-container">
+                <div class="math" dir="ltr">$$ T = \frac{Z}{\sqrt{V/\nu}} $$</div>
+            </div>
+            <p>
+                הפרמטר <span class="math" dir="ltr">\nu</span> (האות היוונית 'נוּ') נקרא <strong>דרגות חופש</strong>. ברוב המקרים שנתעסק איתם, כשנחשב ממוצע של מדגם, דרגות החופש יהיו פשוט <span class="math" dir="ltr">\nu = n-1</span>.
+            </p>
+        </section>
+
+        <section id="pdf">
+            <h2>נוסחת פונקציית הצפיפות (הנוסחה "המפחידה")</h2>
+            <p>
+                אוקיי, נשימה עמוקה. זו הנוסחה שמתארת את הצורה של עקומת הפעמון של התפלגות t. היא נראית מאיימת, אבל אנחנו לא צריכים לחשב אותה ידנית. המחשב עושה את זה בשבילנו. חשוב רק להבין ממה היא מורכבת:
+            </p>
+            <div class="math-container">
+                <div class="math" dir="ltr">$$ f(t) = \frac{\Gamma\left(\frac{\nu+1}{2}\right)}{\sqrt{\nu\pi} \cdot \Gamma\left(\frac{\nu}{2}\right)} \left(1 + \frac{t^2}{\nu}\right)^{-\frac{\nu+1}{2}} $$</div>
+            </div>
+            <p>מה כל דבר אומר?</p>
+            <ul>
+                <li><span class="math" dir="ltr">t</span>: זה הערך על הציר האופקי, המקביל לערך z בהתפלגות נורמלית.</li>
+                <li><span class="math" dir="ltr">\nu</span>: דרגות החופש. זה הפרמטר היחיד שקובע את הצורה המדויקת של ההתפלגות.</li>
+                <li><span class="math" dir="ltr">\Gamma</span> (פונקציית גמא): אל תיבהל! זו פונקציה מתמטית שהיא הרחבה של פונקציית העצרת (!). היא פשוט משמשת כ"קבוע נרמול" שמוודא שהשטח הכולל מתחת לעקומה תמיד יהיה שווה ל-1.</li>
+            </ul>
+        </section>
+
+        <section id="table">
+            <h2>ומה עם הטבלה למבחן?</h2>
+            <p>
+                שאלה מצוינת! צדקת לגמרי, במבחן (וגם בחיים האמיתיים לפני שהיו מחשבים חזקים) לא מצפים מאף אחד לחשב את הנוסחה הזו. במקום זה, משתמשים ב<strong>טבלת התפלגות t</strong>.
+            </p>
+            <div class="info-box">
+                <p>איך משתמשים בטבלה? זה די פשוט:</p>
+                <ol>
+                    <li>אתה מוצא את השורה שמתאימה ל<strong>דרגות החופש</strong> שלך (<span class="math" dir="ltr">\nu = n-1</span>).</li>
+                    <li>אתה מוצא את העמודה שמתאימה ל<strong>רמת המובהקות</strong> (alpha, <span class="math" dir="ltr">\alpha</span>) שאתה צריך (למשל, 0.05 למבחן חד-צדדי, או 0.025 למבחן דו-צדדי).</li>
+                    <li>הערך בנקודת המפגש בין השורה לעמודה הוא <strong>ערך ה-t הקריטי</strong> שלך. זה הערך שאתה משווה אליו את ערך ה-t שחישבת מהמדגם שלך.</li>
+                </ol>
+            </div>
+            <p>
+                מקווה שההסבר הזה עשה לך סדר בראש, עילי! אם יש עוד משהו, אני כאן. ❤️
+            </p>
+        </section>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            // First render for delimiters
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '$', right: '$', display: false},
+                    {left: '\\(', right: '\\)', display: false},
+                    {left: '\\[', right: '\\]', display: true}
+                ],
+                throwOnError : false
+            });
+
+            // Specific render for the custom .math class
+            document.querySelectorAll('.math').forEach(el => {
+                try {
+                    katex.render(el.textContent, el, {
+                        throwOnError: false,
+                        displayMode: el.tagName === 'DIV' || el.classList.contains('katex-display')
+                    });
+                } catch (e) {
+                    console.error('KaTeX rendering error:', e);
+                    el.textContent = 'Error rendering math: ' + el.textContent;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

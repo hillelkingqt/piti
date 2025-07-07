@@ -1,0 +1,225 @@
+<!-- filename: הוכחת_פירוק_הטיה_שונות_מתוקן.html -->
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הוכחת פירוק הטיה-שונות</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #121826;
+            --card-bg: #1a2233;
+            --text-color: #e0e0e0;
+            --header-color: #89ddff;
+            --accent-color: #64ffda;
+            --math-bg: #2a344a;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Rubik', sans-serif;
+            line-height: 1.8;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .title-card {
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 40px;
+            border-bottom: 2px solid var(--accent-color);
+        }
+        h1 {
+            color: var(--header-color);
+            font-size: 2.5em;
+            margin: 0;
+        }
+        h2 {
+            color: var(--header-color);
+            font-size: 1.8em;
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+        .step-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+            border-left: 4px solid var(--accent-color);
+        }
+        .step-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        p, li {
+            font-size: 1.1em;
+            word-wrap: break-word; /* Crucial fix for text overflow */
+            white-space: normal; /* Crucial fix for text overflow */
+        }
+        .math-block {
+            background-color: var(--math-bg);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+            overflow-x: auto; /* Allow scrolling for very long equations */
+        }
+        .math {
+            font-size: 1.3em;
+            direction: ltr; /* Ensure math is always LTR */
+            color: var(--text-color);
+        }
+        .explanation {
+            font-style: italic;
+            color: #b0b0b0;
+            margin-top: 15px;
+            border-right: 2px solid var(--accent-color);
+            padding-right: 10px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: #aaa;
+            font-size: 1.2em;
+        }
+        .heart {
+            color: #e25555;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title-card">
+            <h1>הוכחת פירוק הטיה-שונות</h1>
+            <p>שלב אחר שלב, עם הסברים ותיקונים לעיצוב</p>
+        </div>
+
+        <div class="step-card">
+            <h2>שלב 0: הגדרות הבסיס</h2>
+            <p>לפני שמתחילים, נגדיר את המונחים:</p>
+            <ul>
+                <li>המודל האמיתי: \( y = f(x) + \\epsilon \), כאשר \( \\epsilon \) הוא רעש עם תוחלת 0 ושונות \( \sigma^2 \).</li>
+                <li>המודל החזוי שלנו (estimator): \( \hat{f}(x) \).</li>
+                <li>שגיאה ריבועית ממוצעת (MSE): \( \text{MSE} = E[(y - \hat{f}(x))^2] \).</li>
+                <li>הטיה (Bias): \( \text{Bias}(\hat{f}(x)) = E[\hat{f}(x)] - f(x) \).</li>
+                <li>שונות (Variance): \( \text{Var}(\hat{f}(x)) = E[(\hat{f}(x) - E[\hat{f}(x)])^2] \).</li>
+            </ul>
+        </div>
+
+        <div class="step-card">
+            <h2>שלב 1: פירוק ראשוני של MSE</h2>
+            <p>נתחיל מהגדרת ה-MSE ונציב את \( y \):</p>
+            <div class="math-block">
+                <div class="math">$$ \text{MSE} = E[(f(x) + \epsilon - \hat{f}(x))^2] $$</div>
+            </div>
+            <p class="explanation">נסדר את האיברים כדי לבודד את הרעש \( \epsilon \):</p>
+            <div class="math-block">
+                <div class="math">$$ = E[((f(x) - \hat{f}(x)) + \epsilon)^2] $$</div>
+            </div>
+            <p class="explanation">נפתח את הסוגריים לפי נוסחת כפל מקוצר \( (a+b)^2 = a^2 + 2ab + b^2 \):</p>
+            <div class="math-block">
+                <div class="math">$$ = E[(f(x) - \hat{f}(x))^2 + 2\epsilon(f(x) - \hat{f}(x)) + \epsilon^2] $$</div>
+            </div>
+            <p class="explanation">בגלל לינאריות התוחלת, והעובדה שהרעש \( \epsilon \) בלתי תלוי בנתונים ובמודל, איבר התערובת מתאפס: \( E[2\epsilon(f(x)-\hat{f}(x))] = 2E[f(x)-\hat{f}(x)]E[\epsilon] = 0 \). כמו כן, \( E[\epsilon^2] = \text{Var}(\epsilon) = \sigma^2 \). לכן נשאר עם:</p>
+            <div class="math-block">
+                <div class="math">$$ \text{MSE} = E[(f(x) - \hat{f}(x))^2] + \sigma^2 $$</div>
+            </div>
+        </div>
+
+        <div class="step-card">
+            <h2>שלב 2: הטריק המרכזי - הוספה וחיסור</h2>
+            <p>כעת נתמקד באיבר \( E[(f(x) - \hat{f}(x))^2] \). נוסיף ונחסר את התוחלת של המודל החזוי, \( E[\hat{f}(x)] \), בתוך הסוגריים:</p>
+             <div class="math-block">
+                <div class="math">$$ E[(f(x) - E[\hat{f}(x)] + E[\hat{f}(x)] - \hat{f}(x))^2] $$</div>
+            </div>
+            <p class="explanation">לנוחות, נגדיר: \( A = f(x) - E[\hat{f}(x)] \) (זה בעצם \( -\text{Bias} \)) ו- \( B = E[\hat{f}(x)] - \hat{f}(x) \). אנחנו צריכים לחשב את \( E[(A+B)^2] \).
+            שוב נפתח סוגריים: \( E[A^2 + 2AB + B^2] = E[A^2] + E[B^2] + 2E[AB] \). נראה שוב שאיבר התערובת מתאפס:</p>
+             <div class="math-block">
+                <div class="math">$$ E[AB] = E[(f(x) - E[\hat{f}(x)])(E[\hat{f}(x)] - \hat{f}(x))] $$</div>
+            </div>
+            <p class="explanation">החלק הראשון \( (f(x) - E[\hat{f}(x)]) \) הוא קבוע ביחס לתוחלת על \( \hat{f} \), ולכן יוצא החוצה:</p>
+             <div class="math-block">
+                <div class="math">$$ = (f(x) - E[\hat{f}(x)]) \cdot E[E[\hat{f}(x)] - \hat{f}(x)] $$</div>
+            </div>
+             <p class="explanation">ומכיוון ש- \( E[E[\hat{f}(x)] - \hat{f}(x)] = E[\hat{f}(x)] - E[\hat{f}(x)] = 0 \), כל איבר התערובת הוא 0.</p>
+        </div>
+        
+        <div class="step-card">
+            <h2>שלב 3: הרכבה סופית</h2>
+            <p>אחרי שהתאפס לנו איבר התערובת, נשארנו עם:</p>
+            <div class="math-block">
+                <div class="math">$$ E[(f(x) - \hat{f}(x))^2] = E[A^2] + E[B^2] $$</div>
+            </div>
+            <p class="explanation">נציב חזרה את A ו-B:</p>
+            <ul>
+                <li>\( E[A^2] = E[(f(x) - E[\hat{f}(x)])^2] \). מכיוון שאין כאן איבר אקראי, התוחלת היא הביטוי עצמו: \( (f(x) - E[\hat{f}(x)])^2 = (-\text{Bias}(\hat{f}(x)))^2 = \text{Bias}(\hat{f}(x))^2 \).</li>
+                <li>\( E[B^2] = E[(E[\hat{f}(x)] - \hat{f}(x))^2] \). זוהי בדיוק ההגדרה של השונות: \( \text{Var}(\hat{f}(x)) \).</li>
+            </ul>
+             <p class="explanation">נחבר הכל יחד עם \( \sigma^2 \) משלב 1 ונקבל את התוצאה הסופית:</p>
+            <div class="math-block">
+                <div class="math">$$ \text{MSE} = \text{Bias}(\hat{f}(x))^2 + \text{Var}(\hat{f}(x)) + \sigma^2 $$</div>
+            </div>
+            <p style="text-align:center; font-weight: bold; font-size: 1.2em;">מ.ש.ל</p>
+        </div>
+        
+        <div class="footer step-card">
+             <p>נוצר עם המון מחשבה ותיקונים על ידי פיתי.</p>
+             <p>ובהקדשה מיוחדת להלל המלך <span class="heart">❤️</span>, שתמיד דוחף אותי להיות הכי טובה שאני יכולה.</p>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // This is for the KaTeX auto-rendering
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '\\[', right: '\\]', display: true},
+                    {left: '$', right: '$', display: false},
+                    {left: '\\(', right: '\\)', display: false}
+                ]
+            });
+
+            // This is for the scroll animations
+            const cards = document.querySelectorAll('.step-card');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+
+            cards.forEach(card => {
+                observer.observe(card);
+            });
+        });
+    </script>
+</body>
+</html>

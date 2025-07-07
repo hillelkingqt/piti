@@ -1,0 +1,8 @@
+\selectlanguage *[]{hebrew}
+\contentsline {section}{\numberline {1}מבוא}{2}{section.1}%
+\contentsline {section}{\numberline {2}העיקרון הבסיסי של כלל יד ימין}{2}{section.2}%
+\contentsline {section}{\numberline {3}יישומים נפוצים של כלל יד ימין}{2}{section.3}%
+\contentsline {subsection}{\numberline {3.1}שדה מגנטי מחוט נושא זרם}{2}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}כוח לורנץ על מטען נע בשדה מגנטי}{3}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}כוח מגנטי על מוליך נושא זרם בשדה מגנטי}{4}{subsection.3.3}%
+\contentsline {section}{\numberline {4}סיכום}{4}{section.4}%

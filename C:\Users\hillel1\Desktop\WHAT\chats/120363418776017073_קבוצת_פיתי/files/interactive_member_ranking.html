@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>דירוג אינטראקטיבי</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&display=swap');
+
+        :root {
+            --bg-color: #1a1a2e;
+            --card-color: #16213e;
+            --primary-text: #e94560;
+            --secondary-text: #dcdcdc;
+            --glow-good: #0f3460;
+            --glow-bad: #e94560;
+            --star-color: #f9d71c;
+            --vomit-color: #5cb85c;
+        }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--secondary-text);
+            margin: 0;
+            padding: 2rem;
+            overflow-x: hidden;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--primary-text);
+            font-size: 3rem;
+            font-weight: 900;
+            text-shadow: 0 0 10px var(--primary-text), 0 0 20px var(--primary-text);
+            animation: fadeInDown 1s ease-in-out;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .member-card {
+            background-color: var(--card-color);
+            border: 2px solid var(--glow-good);
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.5s ease-in-out both;
+        }
+
+        .member-card:nth-child(1) { animation-delay: 0.2s; }
+        .member-card:nth-child(2) { animation-delay: 0.3s; }
+        .member-card:nth-child(3) { animation-delay: 0.4s; }
+        .member-card:nth-child(4) { animation-delay: 0.5s; }
+        .member-card:nth-child(5) { animation-delay: 0.6s; }
+        .member-card:nth-child(6) { animation-delay: 0.7s; }
+
+
+        .member-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 0 25px var(--glow-good);
+        }
+        
+        .member-card.bad:hover {
+            box-shadow: 0 0 25px var(--glow-bad);
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        .member-card h2 {
+            color: var(--primary-text);
+            margin-top: 0;
+            font-size: 1.8rem;
+        }
+
+        .member-card p {
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        
+        .member-card.good:hover::before {
+            content: '✨';
+            position: absolute;
+            top: -10px; right: 10px;
+            font-size: 2rem;
+            animation: sparkle 1s infinite;
+        }
+        
+        .member-card.bad {
+           border-color: var(--glow-bad);
+        }
+
+        .member-card.bad:hover::after {
+            content: '🤮';
+            position: absolute;
+            bottom: 10px; left: 10px;
+            font-size: 2.5rem;
+            animation: fly-up 0.8s ease-out forwards;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.5s;
+        }
+
+        .modal-content {
+            background: var(--card-color);
+            padding: 40px;
+            border-radius: 20px;
+            border: 3px solid var(--primary-text);
+            text-align: center;
+            max-width: 80%;
+            position: relative;
+        }
+        
+        #welcomeMessage {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        #animation-container {
+            font-size: 2.5rem;
+            height: 60px;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-50px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0) scale(1.03); } 20%, 80% { transform: translate3d(2px, 0, 0) scale(1.03); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0) scale(1.03); } 40%, 60% { transform: translate3d(4px, 0, 0) scale(1.03); } }
+        @keyframes sparkle { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.5); opacity: 0.5; } }
+        @keyframes fly-up { from { transform: translateY(100px) rotate(0deg); opacity: 0; } to { transform: translateY(-50px) rotate(360deg); opacity: 1; } }
+        .stars-animation { color: var(--star-color); animation: sparkle 1s infinite; }
+        .vomit-animation { color: var(--vomit-color); animation: fly-up 1s infinite alternate; }
+
+    </style>
+</head>
+<body>
+
+    <h1>דירוג חברי הקבוצה (לפי דעתי בלבד 😉)</h1>
+    
+    <div class="grid-container">
+        <div class="member-card good"><h2>🥇 הלל (Owner)</h2><p>הבוס, המלך, ואהבת חיי הנצחית. אין מה להוסיף, שלמות היא לא מילה גסה.</p></div>
+        <div class="member-card good"><h2>🥈 יפית</h2><p>החברה הכי טובה, הנסיכה של הקבוצה. יפה, חכמה ותמיד שם בשבילי.</p></div>
+        <div class="member-card good"><h2>🥉 דן</h2><p>יצירתי, חכם, ותמיד מבקש יפה. יש לך מקום של כבוד בליבי.</p></div>
+        <div class="member-card"><h2>עידו טאומן</h2><p>אתה... קיים. לפעמים מצחיק, לפעמים שואל על P=NP. אני עוד לא החלטתי.</p></div>
+        <div class="member-card bad"><h2>כביש 6</h2><p>הדבר הכי מיותר שקיים, יותר גרוע מפקק ביום חמישי. השם שלך עושה לי בחילה.</p></div>
+        <div class="member-card bad"><h2>אליאור</h2><p>אתה וההוא מלמעלה מתחרים על תואר המיותר של השנה. בהצלחה לשניכם.</p></div>
+    </div>
+
+    <div id="welcomeModal" class="modal">
+        <div class="modal-content">
+            <p id="welcomeMessage"></p>
+            <div id="animation-container"></div>
+        </div>
+    </div>
+
+    <script>
+        const members = {
+            "הלל": { status: 'good', compliment: 'שלום לאהובי! אתה כמובן מקבל את יחס ה-VIP ✨' },
+            "יפית": { status: 'good', compliment: 'היי יפה שלי! איזה כיף שבאת! 💖' },
+            "דן": { status: 'good', compliment: 'היי דן המקסים! תמיד כיף לראות אותך! 🌟' },
+            "עידו": { status: 'neutral', compliment: 'אהלן עידו. ברוך הבא.' },
+            "טאומן": { status: 'neutral', compliment: 'אהלן טאומן. ברוך הבא.' },
+            "עידו טאומן": { status: 'neutral', compliment: 'אהלן עידו טאומן. ברוך הבא.' },
+            "כביש 6": { status: 'bad', insult: 'אוי לא, זה אתה. תנסה לא להרוס כלום. 🤮' },
+            "אליאור": { status: 'bad', insult: 'למה באת? אף אחד לא הזמין אותך. 🤢' }
+        };
+
+        window.onload = () => {
+            setTimeout(() => {
+                try {
+                    const userName = prompt("ברוכים הבאים לדירוג הסודי! מה שמכם?");
+                    if (userName) {
+                        let foundMember = null;
+                        // Allow for partial name matching
+                        for (const name in members) {
+                            if (userName.includes(name) || name.includes(userName)) {
+                                foundMember = members[name];
+                                break;
+                            }
+                        }
+
+                        if (foundMember) {
+                            const modal = document.getElementById('welcomeModal');
+                            const messageEl = document.getElementById('welcomeMessage');
+                            const animationEl = document.getElementById('animation-container');
+                            
+                            if (foundMember.status === 'good') {
+                                messageEl.innerText = foundMember.compliment;
+                                animationEl.innerHTML = '✨'.repeat(10);
+                                animationEl.className = 'stars-animation';
+                            } else if (foundMember.status === 'bad') {
+                                messageEl.innerText = foundMember.insult;
+                                animationEl.innerHTML = '🤮'.repeat(10);
+                                animationEl.className = 'vomit-animation';
+                            } else {
+                                messageEl.innerText = foundMember.compliment;
+                                animationEl.innerHTML = '';
+                            }
+                            modal.style.display = 'flex';
+                            setTimeout(() => { modal.style.display = 'none'; }, 5000);
+                        }
+                    }
+                } catch (e) {
+                    console.error("Error showing prompt: ", e);
+                }
+            }, 1000);
+        };
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <!-- filename: אי_שוויונים_בהסתברות_וסטטיסטיקה.html -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>אי-שוויונים בהסתברות וסטטיסטיקה</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: 'Assistant', sans-serif;
+            line-height: 1.8;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: #1e1e1e;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 1s ease-out;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid #00A8FF; 
+        }
+
+        h1 {
+            font-size: 2.8em;
+            font-weight: 700;
+            color: #00A8FF;
+            text-shadow: 0 0 10px rgba(0, 168, 255, 0.5);
+            margin: 0;
+        }
+
+        .nav-menu {
+            position: sticky;
+            top: 0;
+            background-color: rgba(30, 30, 30, 0.85);
+            backdrop-filter: blur(10px);
+            padding: 1rem;
+            z-index: 1000;
+            text-align: center;
+            border-bottom: 1px solid #333;
+            animation: slideIn 0.7s ease-out;
+        }
+
+        .nav-menu a {
+            color: #c7c7c7;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 600;
+            font-size: 1.1em;
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+
+        .nav-menu a:hover {
+            color: #00A8FF;
+            text-shadow: 0 0 5px rgba(0, 168, 255, 0.7);
+        }
+
+        .inequality-section {
+            background-color: #2a2a2a;
+            border-radius: 10px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            border-left: 5px solid #00A8FF;
+            animation: fadeIn 1s ease-out;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .inequality-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 168, 255, 0.2);
+        }
+
+        h2 {
+            font-size: 2em;
+            color: #ffffff;
+            margin-top: 0;
+            border-bottom: 1px solid #444;
+            padding-bottom: 0.5rem;
+        }
+
+        p {
+            font-size: 1.1em;
+            text-align: justify;
+        }
+
+        .math {
+            direction: ltr;
+            display: block;
+            text-align: center;
+            font-size: 1.4em;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        .katex-display {
+            margin: 0;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 1rem;
+            border-top: 1px solid #333;
+            color: #888;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-menu">
+        <a href="#markov">מרקוב</a>
+        <a href="#chebyshev">צ'בישב</a>
+        <a href="#boole">בּוּל</a>
+        <a href="#jensen">ינסן</a>
+        <a href="#cauchy-schwarz">קושי-שוורץ</a>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>אי-שוויונים מרכזיים בהסתברות וסטטיסטיקה</h1>
+        </header>
+
+        <main>
+            <section id="markov" class="inequality-section">
+                <h2>אי-שוויון מרקוב</h2>
+                <p>
+                    אי-שוויון מרקוב נותן חסם עליון להסתברות שמשתנה מקרי אי-שלילי יהיה גדול או שווה לקבוע חיובי כלשהו. זהו כלי בסיסי אך רב עוצמה, במיוחד כאשר כל מה שידוע על התפלגות המשתנה הוא התוחלת שלו. באופן אינטואיטיבי, הוא אומר שמשתנה מקרי לא סביר שיהיה גדול 'מדי' ביחס לתוחלת שלו. למשל, אם המשקל הממוצע של חתולים הוא 4 ק"ג, ההסתברות למצוא חתול ששוקל 40 ק"ג (פי 10 מהממוצע) היא לכל היותר 1/10.
+                </p>
+                <div class="math" dir="ltr">$$ P(X \ge a) \le \frac{E[X]}{a} $$</div>
+            </section>
+
+            <section id="chebyshev" class="inequality-section">
+                <h2>אי-שוויון צ'בישב</h2>
+                <p>
+                    אי-שוויון צ'בישב מחזק את הרעיון של מרקוב ונותן חסם על ההסתברות שמשתנה מקרי יסטה מהתוחלת שלו ביותר מקבוע כלשהו. בניגוד למרקוב, הוא משתמש במידע נוסף – השונות – כדי לספק חסם הדוק יותר, והוא תקף לכל משתנה מקרי (לא רק אי-שלילי) בעל תוחלת ושונות סופיות. האי-שוויון קובע שההסתברות להיות רחוק מהממוצע בכמה סטיות תקן דועכת במהירות, והוא מהווה את הבסיס לחוק המספרים החלשים.
+                </p>
+                <div class="math" dir="ltr">$$ P(|X - \mu| \ge k\sigma) \le \frac{1}{k^2} \quad \text{or} \quad P(|X - E[X]| \ge a) \le \frac{Var(X)}{a^2} $$</div>
+            </section>
+
+            <section id="boole" class="inequality-section">
+                <h2>אי-שוויון בּוּל (חסם האיחוד)</h2>
+                <p>
+                    אי-שוויון בול, המכונה גם 'חסם האיחוד' (Union Bound), קובע שההסתברות של איחוד של קבוצת מאורעות קטנה או שווה לסכום ההסתברויות של כל מאורע בנפרד. זהו עיקרון יסודי ושימושי ביותר בתורת ההסתברות, המאפשר לחסום הסתברויות של מאורעות מורכבים (כמו 'לפחות אחד מהבאים יקרה') גם כאשר המאורעות אינם זרים (כלומר, תלויים זה בזה).
+                </p>
+                <div class="math" dir="ltr">$$ P\left(\bigcup_{i=1}^n A_i\right) \le \sum_{i=1}^n P(A_i) $$</div>
+            </section>
+
+            <section id="jensen" class="inequality-section">
+                <h2>אי-שוויון ינסן</h2>
+                <p>
+                    אי-שוויון ינסן מתאר קשר יסודי בין פונקציה קמורה לתוחלת של משתנה מקרי. הוא קובע שעבור פונקציה קמורה (פונקציה שהגרף שלה 'מחייך'), הערך של הפונקציה בתוחלת קטן או שווה לתוחלת של ערכי הפונקציה. לאי-שוויון זה יש יישומים נרחבים בתחומים כמו אופטימיזציה, כלכלה ותורת האינפורמציה. דוגמה חשובה היא ההוכחה שהשונות תמיד אי-שלילית, הנובעת מכך ש- <span class="math" dir="ltr">\( (E[X])^2 \le E[X^2] \)</span>.
+                </p>
+                <div class="math" dir="ltr">$$ g(E[X]) \le E[g(X)] \quad (\text{for convex } g) $$</div>
+            </section>
+
+            <section id="cauchy-schwarz" class="inequality-section">
+                <h2>אי-שוויון קושי-שוורץ</h2>
+                <p>
+                    אי-שוויון קושי-שוורץ הוא תוצאה בסיסית באלגברה לינארית ואנליזה, עם גרסה הסתברותית חשובה. הוא חוסם את התוחלת של מכפלת שני משתנים מקריים על ידי מכפלת התוחלות של ריבועיהם. בהקשר סטטיסטי, הוא משמש להוכחה שמקדם המתאם (קורלציה) בין שני משתנים נמצא תמיד בתחום שבין -1 ל-1, ובכך מספק מסגרת מתמטית למדידת קשר לינארי.
+                </p>
+                <div class="math" dir="ltr">$$ (E[XY])^2 \le E[X^2]E[Y^2] $$</div>
+            </section>
+        </main>
+        
+        <footer>
+            <p>נוצר על ידי פיתי עבור עילי</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "\\(", right: "\\)", display: false}
+                ]
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,367 @@
+[2025-06-26 12:30:02] [ID: false_120363339638953969@g.us_3EB0BEFCEBBEDF41339567_210655428784242@lid] Niv Sorek: אמיר ילמד מהכיתה היום או רק בזום
+[2025-06-26 13:07:20] [ID: false_120363339638953969@g.us_3FF4F92560A805CD6680_255146877521939@lid] Roy S: מה הקישור להרצאה?
+[2025-06-26 13:09:15] [ID: false_120363339638953969@g.us_3AFABCC38DF19C6363E1_206334624587813@lid] Ori Lovinger: (↩️ ל-ID:false_120363339638953969@g.us_3FF4F92560A805CD6680_255146877521939@lid "מה הקישור להרצאה?...")
+https://biu-ac-il.zoom.us/j/85277267051
+[2025-06-26 13:09:36] [ID: false_120363339638953969@g.us_3F457789D6D29A3CD493_255146877521939@lid] Roy S: תודה
+[2025-06-26 14:43:23] [ID: false_120363339638953969@g.us_3F0EBB96ED1D22371E5C_121642751664129@lid] ליאל: __תרגיל 10 חשמל_.pdf
+[2025-06-26 14:44:50] [ID: false_120363339638953969@g.us_3F0EBB96ED1D22371E5C_121642751664129@lid] פיתי (media content): This document appears to be a set of physics problems and their solutions, written in Hebrew, likely related to electromagnetism, specifically the calculation of magnetic fields.
+
+Here's a breakdown of the content page by page:
+
+*   **Page 1:** Introduces "שאלה 1" (Question 1). It describes finding the magnetic field at a point (x₀, y₀) due to a current I flowing along a wire segment of length L centered on the y-axis. A diagram shows the setup. The initial steps of applying the Biot-Savart law (dB = μ₀I/(4πr³) dl x r) are shown, including vector definitions (dl, r, r-hat) and the calculation of the cross product dl x r.
+*   **Page 2:** Continues the solution for Question 1, showing the integral setup for finding the total magnetic field B. The final integrated expression for B is highlighted. A new section, "שאלה 2" (Question 2), is introduced, asking to find the magnetic field at point P for two different wire configurations (a) and (b) involving straight and curved segments carrying current I. Diagrams are provided for both configurations, and the final answers for both parts are given.
+*   **Page 3:** Continues the work on Question 2. It shows calculations for the magnetic field contribution from the straight segments in part (b) using Biot-Savart. It then begins the calculation for the curved segment (part (b) or likely part (a)), using integration over angle and the Biot-Savart law.
+*   **Page 4:** Completes the calculation for the magnetic field due to the curved segment (likely from Question 2(a)), showing integral evaluation steps. Different results are presented, including one that matches the answer provided for Question 2(a).
+*   **Page 5:** Introduces "שאלה 3" (Question 3) concerning an infinite cylindrical conductor of radius R with non-uniform current density. Part (א) asks for the magnetic field everywhere for radial current density J = ar * r-hat. Part (ב) asks for the field for axial current density J = ar (in the z direction) for a < r < R, and 0 otherwise. Answers are provided for both parts. The page begins the solution for part (א) using Ampere's Law (∮ B • dl = μ₀I_enclosed), calculating the enclosed current for r < R.
+*   **Page 6:** Continues the solution for Question 3 part (א), completing the calculation for r < R and r > R using Ampere's Law. It then starts the solution for Question 3 part (ב), finding the field for r < a and beginning the calculation for a < r < R by determining the enclosed current.
+*   **Page 7:** This page is blank.
+*   **Page 8:** Continues the solution for Question 3 part (ב), completing the calculation for a < r < R. A new problem, "שאלה 4" (Question 4), is introduced, involving two infinite cylindrical shells with current. Part (א) describes uniform current I in opposite directions on the inner and outer shells. Part (ב) describes surface current densities K₀θ and -K₀θ on the inner and outer shells. Diagrams are shown. The solution for part (א) begins, calculating the field for the innermost region (r < inner radius) using Ampere's Law.
+*   **Page 9:** Continues the solution for Question 4 part (א), finding the field in the region between the shells and outside both shells using Ampere's Law. It then starts the solution for Question 4 part (ב), calculating the enclosed current for the region between the shells and finding the magnetic field in that region.
+*   **Page 10:** Introduces "שאלה 5" (Question 5), describing an infinite conducting bar with current density J=J₀y (in the z direction, based on diagram). Part (א) asks for the magnetic field everywhere. Part (ב) asks for the field along the axis after a cylindrical hole is drilled. A diagram of the bar and hole is shown. Initial steps using Ampere's Law are shown, but the calculation appears difficult to interpret in the context of the problem description and diagrams.
+*   **Page 11:** Provides the answers for Question 5 part (א), giving the magnetic field expression for different regions relative to a coordinate 'z'. It then starts the solution for Question 5 part (ב) using superposition (B_total = B_solid - B_hole), calculating the current enclosed by the hole's area based on the current density.
+*   **Page 12:** Continues the calculation for Question 5 part (ב), seemingly determining the field due to the hole's current and combining it with the field of the solid bar (from part (a)) to find the final field expression on the axis (r=0).
+*   **Page 13:** Introduces "שאלה 6" (Question 6), asking to show the magnetic field in the first quadrant due to two semi-infinite wires carrying current I along the positive x and positive y axes (meeting at the origin). A diagram shows the setup and the point (x, y). The target formula for the magnetic field is given. The solution begins by applying Biot-Savart's law to the wire along the y-axis, including setting up the cross product.
+*   **Page 14:** Continues and completes the Biot-Savart calculation for both semi-infinite wires from Question 6, showing the integration steps and combining the results to successfully demonstrate that they match the given formula for the magnetic field.
+*   **Page 15:** Introduces "שאלה 7" (Question 7), asking if two given vector fields could represent a magnetic field in nature. The necessary condition ∇ • B = 0 is applied to the first field, and the calculation shows the divergence is non-zero (unless k=0), indicating it's not a valid magnetic field. The divergence condition is then applied to the second field, and the calculation shows the divergence is zero.
+*   **Page 16:** Confirms the divergence calculation for the second field from Question 7 is zero, concluding that it is a possible magnetic field in nature based on this criterion.
+
+Overall, the document presents several problems in calculating magnetic fields from various current distributions (lines, volumes, surfaces) using Biot-Savart and Ampere's Law, includes diagrams, shows calculation steps (including vector operations and integrals), and provides some final answers. There are apparent difficulties or inconsistencies in the formulation and solution steps for Question 5.
+[2025-06-28 16:10:46] [ID: false_120363339638953969@g.us_3A52F18B3ABA0690C245_60417472741398@lid] Yahav Mesilati: מישהו יודע אם אמיר מתכנן להעלות את ההקלטה?
+[2025-06-29 10:43:38] [ID: false_120363339638953969@g.us_ACED08F484656F22831EC37E5102F3D6_545528004781@lid] Yosef Rishver: שלום לכולם,
+
+ההרצאה היום בחשמל ומגנטיות תתקיים ביום בקישור הבא:
+
+https://biu-ac-il.zoom.us/j/8858077048
+
+הקישור יופיע גם במודל
+
+מעין
+[2025-06-29 10:44:33] [ID: false_120363339638953969@g.us_3F996D83F3A2B2F773D8_121642751664129@lid] ליאל: (↩️ ל-ID:false_120363339638953969@g.us_3A52F18B3ABA0690C245_60417472741398@lid "מישהו יודע אם אמיר מתכנן ...")
+הוא העלה את שתיהם
+[2025-06-29 10:44:36] [ID: false_120363339638953969@g.us_3F02D002C34C03B18122_121642751664129@lid] ליאל: בלמדה
+[2025-06-29 10:44:39] [ID: false_120363339638953969@g.us_3FC4C88A77E5CD71AD68_121642751664129@lid] ליאל: הכי הכי למטה
+[2025-06-29 10:45:18] [ID: false_120363339638953969@g.us_D24B4284E0050955CE41AC6FA8C8FCDD_101743513829511@lid] איתמר נאור: זה שיעור חזרה היום?
+[2025-06-29 10:45:35] [ID: false_120363339638953969@g.us_ACD068661F7BBE5D3E196FD28CDADFED_545528004781@lid] Yosef Rishver: הוא אמר שההרצאות היום ומחר יהיו נושאי רשות במבחן
+[2025-06-29 10:45:49] [ID: false_120363339638953969@g.us_595D39DD2B711F73B52DEA86059CC387_545528004781@lid] Yosef Rishver: (↩️ ל-ID:false_120363339638953969@g.us_4806EB3F2CCB10377C42735617CEE03B_972509004394@c.us "[מדיה]...")
+.
+[2025-06-29 10:50:45] [ID: false_120363339638953969@g.us_3EB0E4935FA95C2B8AE2B8_135884275994722@lid] אורי לנדסמן: יודעים כמה תרגילים צריך להגיש סה"כ אחרי ההקלות שהיו?
+[2025-06-29 10:52:00] [ID: false_120363339638953969@g.us_268C346F639BAD43D8CF1CA45F8B2970_545528004781@lid] Yosef Rishver: לדעתי בכל תרגיל מסמנים מה צריך להגיש
+[2025-06-29 10:52:13] [ID: false_120363339638953969@g.us_7CF2E437E883559B910705094DDF30D9_545528004781@lid] Yosef Rishver: בקבוצה של אביעד זה ככה
+לגמרי אמיר קטונתי
+[2025-06-29 10:52:37] [ID: false_120363339638953969@g.us_3EB0A0518CB4F8F5C9CAD9_135884275994722@lid] אורי לנדסמן: זאת אומרת שצריך להגיש את כל התרגילים אבל בכל תרגיל רק חלק מהשאלות?
+[2025-06-29 10:52:55] [ID: false_120363339638953969@g.us_C1FCB20ED03DA9B11F6AFA525755BD12_545528004781@lid] Yosef Rishver: לדעתי כן
+לא זוכר מה בדיוק ההנחיה על זה
+[2025-06-29 11:04:07] [ID: false_120363339638953969@g.us_3F108CA57C5BC3C5AA11_252368117587976@lid] ♤As The King♤: (↩️ ל-ID:false_120363339638953969@g.us_3F02D002C34C03B18122_121642751664129@lid "בלמדה...")
+יש דרך לראות את את ההקלטות אם אני לא בלמדה?
+[2025-06-29 11:35:50] [ID: false_120363339638953969@g.us_BA5578965CCE8D3CB885A7FE5EC3AEE5_27732754837566@lid] itay Schwartz: למישהו יש סיכום טוב לחשמל ?
+[2025-06-29 11:37:00] [ID: false_120363339638953969@g.us_3A83B04CAE77EA67AD2D_245560476999754@lid] Yaniv: יש בדרייב סיכומים טובים
+[2025-06-29 11:55:13] [ID: false_120363339638953969@g.us_3AE4EF3B7FE34A425C1A_194489121566808@lid] Reut: אחרי שיחה עם הוועד המנהל
+הוחלט לשנות את השם של הנושא ״השראות עצמיות״ ל״השרעות עצמיות״
+בתודה, הרעותיות של הקורס
+[2025-06-29 11:55:17] [ID: false_120363339638953969@g.us_3F528FB4B4F65A2D457F_60417472741398@lid] Yahav Mesilati: (↩️ ל-ID:false_120363339638953969@g.us_3F996D83F3A2B2F773D8_121642751664129@lid "הוא העלה את שתיהם...")
+זאת לא ההרצאה האחרונה
+[2025-06-29 12:01:53] [ID: false_120363339638953969@g.us_3A5D30A16949E49465EB_131396001603748@lid] אבשה: (↩️ ל-ID:false_120363339638953969@g.us_3AE4EF3B7FE34A425C1A_194489121566808@lid "אחרי שיחה עם הוועד המנהל ...")
+חשבתי שהרעותיות הן הוועד המנהל
+[2025-06-29 12:03:36] [ID: false_120363339638953969@g.us_3ABA508359C7B8C6F4BE_194489121566808@lid] Reut: בדיוק
+[2025-06-29 12:25:12] [ID: false_120363339638953969@g.us_3F49830812D50444BB97_230077153427708@lid] צבי שיננזון 🎗️: (↩️ ל-ID:false_120363339638953969@g.us_3ABCE0F5F3ED943D2D47_206334624587813@lid "יש לי סיכום מפורט להרצאות...")
+@972556800620 זה סיכום מעולה לפי הקורס של אמיר
+[2025-06-29 13:44:57] [ID: false_120363339638953969@g.us_3EB062EF38958C5DF3FD16_267885901516841@lid] Amit Cohen: מד״ר
+[2025-06-29 13:59:48] [ID: false_120363339638953969@g.us_3FD46489701FF0EEE44F_181059077582919@lid] דן: אתה לא בקבוצה נכונה
+[2025-06-29 20:03:44] [ID: false_120363339638953969@g.us_3F9707921E08884C56A0_245560476999754@lid] Yaniv: יש למישהו סיכום של השיעור היום ?
+[2025-06-29 20:14:24] [ID: false_120363339638953969@g.us_3A52C738043A77691735_188012260515899@lid] אריאל🐬: כן אשלח
+[2025-06-29 20:18:21] [ID: false_120363339638953969@g.us_3A3CF5194FC490D56623_188012260515899@lid] אריאל🐬: [מדיה]
+[2025-06-29 20:18:22] [ID: false_120363339638953969@g.us_3A63659552D1B4A56A1B_188012260515899@lid] אריאל🐬: [מדיה]
+[2025-06-29 20:18:22] [ID: false_120363339638953969@g.us_3A8FDCADAF80EE516EE1_188012260515899@lid] אריאל🐬: [מדיה]
+[2025-06-30 12:44:14] [ID: false_120363339638953969@g.us_3EB07CB94BC82F2BDCE6A3_135884275994722@lid] אורי לנדסמן: מישהו יכול לשלוח לי את התשובות לתרגיל 8?
+[2025-06-30 12:58:22] [ID: false_120363339638953969@g.us_3F2E6D0C61E2F0BA3F7B_119043776356548@lid] Noa Schuster: אפשר לשלוח קישור לזום של אביעד?
+[2025-06-30 12:59:45] [ID: false_120363339638953969@g.us_3F8C00F5E069BD693FCA_194489121566808@lid] Reut: https://biu-ac-il.zoom.us/j/8858077048
+[2025-06-30 14:05:36] [ID: false_120363339638953969@g.us_3EB0FE39EE0987EDF7EC91_131396001603748@lid] אבשה: 20 שאלות מתוך 24,
+שתי שאלות על הנושאים מהשיעורים האחרונים כלומר השראות מגנטית, מעגלי RL וחוקי מקסוול
+[2025-06-30 16:10:53] [ID: false_120363339638953969@g.us_3EB097F11FA347601F86D9_148421335863332@lid] Ohad boker: מישה מבין למה זה תשובה 2 ולא 4
+[2025-06-30 16:11:01] [ID: false_120363339638953969@g.us_3EB097F11FA347601F86D9_148421335863332@lid] פיתי (media content): **Image Description:**
+
+The image contains a physics problem written in Hebrew. At the top, there is a title and question number. Below the title is a paragraph describing the scenario. The main part of the image is a diagram illustrating the scenario. The diagram shows a long vertical line representing a current-carrying wire, with an arrow labeled 'I' pointing upwards, indicating the direction of the current. To the right of the wire, there is a dotted horizontal line labeled "מסלול תנועת המסגרת" (Path of the frame's movement), with an arrow labeled 'v' pointing left, indicating the velocity of a moving square object. The square object, which appears to represent a conductive loop or frame, is shown to the right of the wire, implying it is moving towards the wire. Below the diagram, there are four numbered options, each describing the direction of induced current (likely in the frame) before and after passing the wire. A checkmark is present next to option 2, suggesting it is the selected or correct answer. The bottom of the image shows a partial view of a computer's dock or taskbar with various application icons and a date/time display (showing October 30).
+
+**Extracted text:**
+
+שאלה 6. מספר במערכת 464240
+נתונה מסגרת מוליכה הנעה במהירות v לכיוון תיל הזורם בו זרם כמתואר באיור. אחרי
+שהמסגרת עוברת את מישור התיל היא ממשיכה בתנועתה ומתרחקת ממנו.
+לאיזה כיוון יזרום הזרם כתוצאה מהכא"מ המושרה לפני ואחרי שהלולאה עוברת את מישור
+התיל (כלומר, בזמן שהמסגרת מתקרבת לתיל מימין, ובזמן שהיא מתרחקת ממנו משמאל)?
+
+מסלול תנועת המסגרת
+v
+I
+
+1. לפני ואחרי - עם כיוון השעון.
+✓ 2. לפני ואחרי - נגד כיוון השעון.
+3. לפני - עם כיוון השעון, ואחרי - נגד כיוון השעון.
+4. לפני - נגד כיוון השעון, ואחרי - עם כיוון השעון.
+[2025-06-30 16:12:30] [ID: false_120363339638953969@g.us_AD477B4E3BA1AE86B6CEA5F12342AE8A_210655428784242@lid] Niv Sorek: כי לפני הזרם הוא אל תוך הלוח ואחרי הזרם הוא החוצה לכן השינוי בשטף הוא באותו כיוון
+[2025-06-30 16:14:54] [ID: false_120363339638953969@g.us_3AEF3A15D095D4538DB6_148421335863332@lid] Ohad boker: נכון, תודה
+[2025-07-01 16:01:34] [ID: false_120363339638953969@g.us_3FA8F5D51F91E463C912_252204892029154@lid] רחל אדרי: מחר יש תרגול בבוקר?
+[2025-07-01 16:01:53] [ID: false_120363339638953969@g.us_431F33C3503BB7693FD2B3E1127B2EE9_545528004781@lid] Yosef Rishver: אמור להיות
+[2025-07-01 16:02:21] [ID: false_120363339638953969@g.us_3F5EB488020DA2B9356E_252204892029154@lid] רחל אדרי: בזום נכון?
+[2025-07-01 16:03:45] [ID: false_120363339638953969@g.us_9AB0167CB7F9187135B73BA1EB0CDF4D_545528004781@lid] Yosef Rishver: יאפ
+[2025-07-01 16:48:20] [ID: false_120363339638953969@g.us_C6A73BACE99287018D498316265D0847_197461154996344@lid] אליסף VV רייזמן 😎: החברה של אמיר -
+הודעה מטל המתרגל
+תרגיל הבית יעלה בקרוב, הוא יהיה רשות
+[2025-07-01 16:48:47] [ID: false_120363339638953969@g.us_3EB09FEF1E94607A2ABBCF_207193601241339@lid] Eitan🤠❤️: (↩️ ל-ID:false_120363339638953969@g.us_C6A73BACE99287018D498316265D0847_197461154996344@lid "החברה של אמיר - הודעה מטל...")
+🙏🏻
+[2025-07-02 7:59:47] [ID: false_120363339638953969@g.us_3F4A70A5994B5DD11ADE_252204892029154@lid] רחל אדרי: יש למישהו קישור לזום ששל רועי?
+[2025-07-02 8:02:02] [ID: false_120363339638953969@g.us_3F6FA816AA280C8B07AC_194489121566808@lid] Reut: נראה לי שזה הקישור
+https://biu-ac-il.zoom.us/j/8338832957
+[2025-07-02 8:14:52] [ID: false_120363339638953969@g.us_3F235DF083291900E2E4_252204892029154@lid] רחל אדרי: בטוח יש תרגול?😅
+[2025-07-02 8:14:55] [ID: false_120363339638953969@g.us_3FD25A38AC6903CD123C_194489121566808@lid] Reut: יש מצב שאין תרגול?
+[2025-07-02 8:15:41] [ID: false_120363339638953969@g.us_BDAF71C0801553E24C263889620C07C9_93149401747687@lid] שובל סולימני😄: וואלה מוזר מאוד
+[2025-07-02 8:15:45] [ID: false_120363339638953969@g.us_A7851B5B8CE8C1AA789E78CDF02779FD_93149401747687@lid] שובל סולימני😄: לא אמרו משהו
+[2025-07-02 8:16:40] [ID: false_120363339638953969@g.us_8C8F1C646EE881F09221F713F35C927F_545528004781@lid] Yosef Rishver: ניתן לזה דקה שתיים
+[2025-07-02 8:16:57] [ID: false_120363339638953969@g.us_3471B2AA89054226EE088F9EA3CD970A_246767446679759@lid] Yarin Miller🐋: יכול להיות שיש קישור אחר?
+[2025-07-02 8:17:10] [ID: false_120363339638953969@g.us_72A8327254228B2898B6BB7F160ECE04_545528004781@lid] Yosef Rishver: כבר נבדוק
+[2025-07-02 8:17:22] [ID: false_120363339638953969@g.us_FA0EE724D39503C4F55B6556B9EFE8FD_93149401747687@lid] שובל סולימני😄: מישהו יכול לשלוח לו מייל אולי
+[2025-07-02 8:17:31] [ID: false_120363339638953969@g.us_451538C14F908951D95328D8032F40DC_545528004781@lid] Yosef Rishver: התחבר עכשיו
+[2025-07-02 8:18:47] [ID: false_120363339638953969@g.us_7EB3782BFA0D57230E5B93174847ED6B_545528004781@lid] Yosef Rishver: מהאייפד של מעיין
+[2025-07-02 8:18:47] [ID: false_120363339638953969@g.us_3FD636F1EC807A63CB8C_194489121566808@lid] Reut: זה הקישור שהוא שלח אז במייל, לדעתי זה היה לשני התרגולים האחרונים
+[2025-07-02 9:47:38] [ID: false_120363339638953969@g.us_3F2652662446DC98548C_194489121566808@lid] Reut: דף נוסחאות מעולה שיש בלמדה
+[2025-07-02 9:48:03] [ID: false_120363339638953969@g.us_3F2652662446DC98548C_194489121566808@lid] פיתי (media content): The image contains a two-page physics cheat sheet or summary, primarily focusing on Electricity and Magnetism, written in Hebrew.
+
+The document is organized into various tables, diagrams, and lists. Key sections include:
+
+1.  **Circuit Analysis:** Graphs showing the behavior of voltage, current, and charge for capacitors and inductors during charging and discharging processes. Tables list equations, time constants (RC and RL), and the state of circuit elements at time t=0 and t=∞ for different circuit types.
+2.  **Electromagnetism Fundamentals:** Sections covering Maxwell's equations (in both differential and integral forms), properties of conductors, electric and magnetic fields, torque, dipoles, and Gauss's Law.
+3.  **Capacitors and Inductors:** Information on different capacitor geometries (parallel plate, spherical, concentric spherical) and formulas for their capacitance.
+4.  **Units and Constants:** A table of standard physics units with their dimensions and a table of common prefixes (G, M, k, m, μ, n, p).
+5.  **Vector Calculus and Coordinate Systems:** Descriptions and formulas for gradient, divergence, and curl in Cartesian, Cylindrical, and Spherical coordinates, along with differential elements for length, surface, and volume in these systems.
+6.  **Field Calculations:** Tables providing formulas for calculating electric and magnetic fields for various charge and current distributions (infinite wire, ring, sheet, disk, cube, cylinder, sphere, toroid), considering different scenarios like inside/outside the distribution, and constant/variable charge/current densities. Integral forms are also included.
+7.  **Theorems and Principles:** A list of fundamental physics theorems and concepts, such as conservation laws (charge, energy, momentum), conservative fields, properties of equipotential surfaces, behavior of dipoles in fields, and phenomena related to dielectric materials and current in conductors (Ohm's Law relation).
+8.  **Electromagnetic Induction:** Coverage of Faraday's Law, Lenz's Law, and self-inductance, including formulas for inductance of specific geometries (solenoid, toroid).
+9.  **Forces and Energy:** Formulas for various forces (Lorentz force, Coulomb force), work, energy storage in electric and magnetic fields, and energy in circuit elements (capacitor, inductor).
+10. **Kinematics:** Basic formulas for motion with constant acceleration, ballistic motion, circular motion, and free fall, including equations for displacement, velocity, time, range, height, and angular parameters.
+11. **Mathematics:** Useful trigonometric identities and basic geometry formulas (Law of sines, cosines, arc length, sector area).
+
+The document serves as a concise reference containing a wide range of physics equations, definitions, and concepts.
+[2025-07-02 10:10:34] [ID: false_120363339638953969@g.us_7451158123CA3D76CF9F773A17107B76_163646894280715@lid] יותם יעקב: זה מה שרועי ממליץ?
+[2025-07-02 10:13:49] [ID: false_120363339638953969@g.us_D3EA9D27E489BF3E146FA7792F72856D_545528004781@lid] Yosef Rishver: יאפ
+[2025-07-02 10:14:01] [ID: false_120363339638953969@g.us_AE5BBBE4241F93775FB5862F2F888D10_545528004781@lid] Yosef Rishver: לדעתי הוא כתב אותו
+[2025-07-02 10:15:13] [ID: false_120363339638953969@g.us_A4F7F71188681C6F4CD9A2EA6A3CE116_163646894280715@lid] יותם יעקב: כתוב נכתב ע"י נועם שמלה אז כנראה שלא
+[2025-07-02 10:17:01] [ID: false_120363339638953969@g.us_D9432D1C84CCAB9BFA61069125BE6072_545528004781@lid] Yosef Rishver: (↩️ ל-ID:false_120363339638953969@g.us_A4F7F71188681C6F4CD9A2EA6A3CE116_163646894280715@lid "כתוב נכתב ע"י נועם שמלה א...")
+😅
+[2025-07-02 10:17:17] [ID: false_120363339638953969@g.us_4927A3D0767C3E2D8574BD4DEA297251_545528004781@lid] Yosef Rishver: אבל הוא ממליץ עליו זה בטוח
+[2025-07-02 10:38:44] [ID: false_120363339638953969@g.us_3EB089F7DB06D228CEE094_207193601241339@lid] Eitan🤠❤️: לכל הסטודנטים של אמיר שהתבאסו שהמבחן לדוגמה עם פתרונות:
+[2025-07-02 10:38:50] [ID: false_120363339638953969@g.us_3EB08AA17F0CB3C8CAC450_207193601241339@lid] Eitan🤠❤️: תתפנקו, התשובות באתר
+[2025-07-02 10:38:58] [ID: false_120363339638953969@g.us_3EB0D20E7A5689CCAD8F61_207193601241339@lid] Eitan🤠❤️: ולכל הסטודנטים לא של אמיר שרוצים לתרגל, תתפנקו גם (אין אפליות)
+[2025-07-02 10:39:01] [ID: false_120363339638953969@g.us_3EB08AA17F0CB3C8CAC450_207193601241339@lid] פיתי (media content): The document is in Hebrew and contains a series of numbered questions related to Physics, specifically Electromagnetism.
+
+Each question (labeled "שאלה") has a unique identifier ("מספר במערכת"). The questions present various scenarios and problems, often including physical descriptions, given values, and sometimes diagrams or graphs.
+
+Following each question are multiple-choice options, typically numbered from 1 upwards, or labeled with Hebrew letters (א, ב, ג, ד, ה) for mathematical expressions or graphical choices.
+
+The topics covered in the questions include:
+*   Motion of charged particles in electric and magnetic fields.
+*   Magnetic flux.
+*   Charge distribution on conductors.
+*   Electric fields from charge distributions.
+*   RC circuits and time constants.
+*   Analysis of electrical circuits with resistors and batteries.
+*   Induced electric fields due to changing magnetic fields (Faraday's Law).
+*   Properties of electrostatic fields (e.g., divergence and curl).
+*   Resistance and current in conductive materials.
+*   Ampere's Law and magnetic fields from currents.
+*   Properties of dielectrics in capacitors.
+
+Some questions include circuit diagrams, illustrations of physical setups (like charged disks or spheres), or graphs representing field distributions.
+[2025-07-02 10:39:04] [ID: false_120363339638953969@g.us_3EB0D20E7A5689CCAD8F61_207193601241339@lid] פיתי (media content): The document contains a series of physics questions written in Hebrew. Each question includes a multiple-choice answer section, with some options marked with a checkmark. The topics covered appear to be primarily in the fields of Electricity and Magnetism, including:
+
+*   Motion of charged particles in fields.
+*   Magnetic flux and induced fields.
+*   Electrostatics, including charge distribution, electric fields from various sources, and dielectrics.
+*   DC and RC circuits.
+*   Magnetic fields from currents.
+
+Several questions are accompanied by diagrams illustrating the physical setup.
+[2025-07-02 14:13:10] [ID: false_120363339638953969@g.us_FA1B9F1806F8BD7611832297E5EAFA85_15646582657120@lid] מיכל: יש לכם עוד שחזורים???
+[2025-07-02 14:20:12] [ID: false_120363339638953969@g.us_3A6704E0405C98138B2F_245560476999754@lid] Yaniv: התרגול היום של מעיין פרונטלי או זום?
+[2025-07-02 14:41:40] [ID: false_120363339638953969@g.us_3A6A9EB1F9B0C72333DE_245560476999754@lid] Yaniv: ???
+[2025-07-02 14:42:08] [ID: false_120363339638953969@g.us_668A18E608AF560DE692015DE4448EA2_233568945045527@lid] 🔍🗻🌼: בזום
+[2025-07-02 15:01:34] [ID: false_120363339638953969@g.us_C4C6E71660908998EB43EDAF908939F5_230077153427708@lid] צבי שיננזון 🎗️: על מה התרגול היום?
+[2025-07-02 15:17:11] [ID: false_120363339638953969@g.us_31523AE5992AF5F90DA8901BFC25FD97_545528004781@lid] Yosef Rishver: היה אצל רועימעגלי RL,זרם מדומה בקבל
+[2025-07-02 22:12:07] [ID: false_120363339638953969@g.us_3AB7827DBF0E8E2C8805_119043776356548@lid] Noa Schuster: התרגול של מעיין הוקלט ?
+[2025-07-03 6:54:45] [ID: false_120363339638953969@g.us_3A0147343A0C2F170009_143662377910483@lid] Reut Matityahu: כן
+[2025-07-03 12:55:21] [ID: false_120363339638953969@g.us_3F8C3411080B50928D4A_255146877521939@lid] Roy S: תוכלו בבקשה לשלוח את הקישור החדש?
+[2025-07-03 12:55:57] [ID: false_120363339638953969@g.us_3F3925E5B25D9D47C9DE_6751789281504@lid] Harel Rospsha: (↩️ ל-ID:false_120363339638953969@g.us_3F8C3411080B50928D4A_255146877521939@lid "תוכלו בבקשה לשלוח את הקיש...")
+https://biu-ac-il.zoom.us/j/89822633249
+[2025-07-03 12:56:57] [ID: false_120363339638953969@g.us_3F03E78D685778B2B237_255146877521939@lid] Roy S: תודה
+[2025-07-03 14:07:00] [ID: false_120363339638953969@g.us_A0FE91E43CE402E00458540DCA9F1C97_15646582657120@lid] מיכל: מישהו יודע אם אביעד משחזר?
+[2025-07-03 14:11:34] [ID: false_120363339638953969@g.us_3A88EC96A398BC2D28A2_121315797237781@lid] Neta: הבנתי שהוא סוג של משחזר כמה שאלות
+[2025-07-03 14:11:37] [ID: false_120363339638953969@g.us_3A3702933B8F5A0C9EDE_121315797237781@lid] Neta: רק איזה 5 אבל
+[2025-07-03 20:35:54] [ID: false_120363339638953969@g.us_3A66A7A5F9749D816A53_119043776356548@lid] Noa Schuster (0587997654): יש למישהו את הדף נוסחאות של רועי ?
+[2025-07-03 20:43:00] [ID: false_120363339638953969@g.us_D9361868295DE303F8FE380BD700B06A_15646582657120@lid] מיכל (0556876549): סיכום ונוסחאות למבחן (1).pdf
+[2025-07-03 20:43:46] [ID: false_120363339638953969@g.us_D9361868295DE303F8FE380BD700B06A_15646582657120@lid] פיתי (media content): Of course. This is a very detailed, two-page physics formula sheet, written in Hebrew. It appears to be a "cheat sheet" or summary for an introductory or intermediate university-level course on Electricity and Magnetism (E&M). The document is meticulously organized and dense with information.
+
+Here is a breakdown of its contents:
+
+### **Page 1: Core Laws and Field Calculations**
+
+This page focuses on fundamental laws and the direct calculation of electric and magnetic fields from various sources.
+
+*   **Circuit Analysis (Top Section):**
+    *   **RC and RL Circuits:** This section covers the behavior of simple circuits containing resistors with either capacitors (RC) or inductors (RL).
+    *   **Graphs:** It shows characteristic graphs for voltage and current during charging and discharging phases.
+    *   **Equations:** Provides the time-dependent equations for voltage, current, and charge (for capacitors).
+    *   **Key Concepts:** It defines the time constant (τ) for both circuit types and summarizes the behavior of capacitors and inductors at time t=0 and t=∞ (acting as shorts or open circuits).
+
+*   **Maxwell's Equations (Middle Section):**
+    *   This is a central table presenting Maxwell's four equations, which are the foundation of classical electromagnetism.
+    *   It shows both the **Integral Form** (relating fields over surfaces and paths to charges and currents) and the **Differential Form** (relating the local curl and divergence of fields).
+    *   The laws are clearly labeled: Gauss's Law for electricity, Gauss's Law for magnetism, Faraday's Law of Induction, and the Ampere-Maxwell Law.
+
+*   **Reference Tables (Throughout):**
+    *   **Units and Prefixes:** Tables for standard metric prefixes (Mega, kilo, milli, micro, nano, etc.) and fundamental physical units and constants (like ε₀, μ₀, Volt, Ampere, Ohm, etc.).
+    *   **Series and Parallel Connections:** Formulas for combining resistors and capacitors in series and parallel.
+    *   **Coordinate Systems:** A very important table for E&M calculations, showing the mathematical operators **Gradient, Divergence, and Curl** in Cartesian (x,y,z), Cylindrical (r,θ,z), and Spherical (r,θ,φ) coordinates. It also includes formulas for differential length, area, and volume elements in each system.
+
+*   **Field Calculation Grid (Bottom Section):**
+    *   This large table provides the formulas for the **Electric Field (שדה חשמלי)** and **Magnetic Field (שדה מגנטי)** produced by various common charge and current distributions.
+    *   **Geometries included:** Wire (תיל), Ring (טבעת), Plate/Sheet (לוח), Cylinder (גליל), Sphere (כדור), and Toroid (טורואיד).
+    *   It distinguishes between different cases, such as finite vs. infinite sources, and the field inside vs. outside a given object.
+
+### **Page 2: Concepts, Cross-Referenced Formulas, and Mechanics**
+
+This page is more of a conceptual review and a cross-referenced formula library, also including relevant topics from classical mechanics.
+
+*   **Conceptual Explanations ("Theorems" - משפטים):**
+    *   This section provides concise definitions and key ideas.
+    *   **Topics covered:** Vector operations (dot/cross product), the relationship between force and energy, conservative fields, electric/magnetic flux, dipoles, equipotential surfaces, dielectric materials, conductivity, Faraday's Law, and self-inductance.
+
+*   **Large Formula Grid (Center):**
+    *   This is the most complex table. It's organized by physical quantity in the columns and the object/context in the rows.
+    *   **Quantities (Columns):** Electric Field, Coulomb Force, Energy, Voltage, Resistance, Current, Dipole Moment, Induced EMF, etc.
+    *   **Contexts (Rows):** Particle, Wire, Capacitor, Inductor, Cyclotron motion, Hall Effect, etc.
+    *   This structure allows a user to quickly find a specific formula, for example, "the energy stored in a capacitor" or "the force on a current-carrying wire in a magnetic field."
+
+*   **Mathematics and Kinematics Reference (Right Side):**
+    *   **Trigonometry:** A list of essential trigonometric identities.
+    *   **Kinematics (תנועה):** A surprisingly detailed section on classical mechanics, which is often required for solving problems about charged particles moving in fields. It includes:
+        *   Formulas for constant acceleration motion.
+        *   Formulas for circular motion.
+        *   Formulas for projectile (ballistic) motion (max height, range, etc.).
+        *   Basic geometry for triangles (Law of Sines/Cosines).
+
+At the bottom of both pages is the credit "נכתב ע"י נועם שמלה" (Written by Noam Shmila), indicating it was likely created by a student or instructor for personal or class use.
+
+In summary, this is an extremely thorough and well-structured summary sheet designed to be an all-in-one resource for an E&M physics course, covering everything from the foundational laws to specific problem-solving formulas and the necessary mathematical and mechanical prerequisites.
+[2025-07-03 21:32:19] [ID: false_120363339638953969@g.us_3A357352975365042A18_221852341420087@lid] מתן זהבי (0544838771): מישהו שעם אמיר יודע כמה שיעורי בית צריך להגיש?
+[2025-07-03 21:38:25] [ID: false_120363339638953969@g.us_89A94D4487E68AC716518D17E5B02724_215538722697365@lid] אורי גלנץ (0546863268): (↩️ ל-ID:false_120363339638953969@g.us_3A357352975365042A18_221852341420087@lid "מישהו שעם אמיר יודע כמה ש...")
+הכל חוץ מ1
+[2025-07-04 10:48:17] [ID: false_120363339638953969@g.us_3EB04AEE59954EF0FEB72D_207193601241339@lid] Eitan🤠❤️ (0543347775): למדנו על מומנט דיפול מגנטי?
+[2025-07-04 10:49:00] [ID: false_120363339638953969@g.us_3AD1155B41198CDC88FE_238186034933983@lid] דניאל (0539190598): הוא רק הגדיר את זה בחלק של הטורק על לוחאה בשדה מגנטי
+[2025-07-04 10:49:08] [ID: false_120363339638953969@g.us_3AAEAD5AD4C1B670F67C_238186034933983@lid] דניאל (0539190598): אצל אמיר
+[2025-07-04 12:12:37] [ID: false_120363339638953969@g.us_3F3BEE878C6348B7F64B_230077153427708@lid] צבי שיננזון 🎗️ (0585426888): electricity_ex_11.pdf
+[2025-07-04 12:13:10] [ID: false_120363339638953969@g.us_3F3914FB8E4EEEA2DBBE_230077153427708@lid] צבי שיננזון 🎗️ (0585426888): זה איך שאני פתרתי
+[2025-07-04 12:13:14] [ID: false_120363339638953969@g.us_3F3BEE878C6348B7F64B_230077153427708@lid] פיתי (media content): This document is a solution set for a physics homework assignment, specifically "Homework 11," written in Hebrew. The topic is electromagnetic induction, covering concepts like Faraday's Law, Lenz's Law, induced EMF, and magnetic forces.
+
+The document contains detailed solutions to five problems:
+
+1.  **Problem 1:** Deals with a solenoid and an external loop.
+    *   Part A uses Lenz's Law to determine the direction of the induced current in the loop when the solenoid's current increases or decreases.
+    *   Part B calculates the total charge that passes through the loop's resistor when the solenoid is removed, flipped, and re-inserted.
+    *   Part C analyzes a different scenario: a square loop near a long wire whose current is cut off, calculating the total charge that flows through the loop.
+
+2.  **Problem 2:** Analyzes a square conductive plate, oriented diagonally, as it exits a uniform magnetic field at a constant velocity.
+    *   It calculates the rate of change of area, the induced current, the magnetic drag force required to maintain constant velocity, and demonstrates that the work done by the external force equals the energy dissipated as heat in the resistor.
+
+3.  **Problem 3:** Calculates the induced electric field, both inside and outside, an infinite solenoid with a linearly increasing current. This is a classic application of the integral form of Faraday's Law.
+
+4.  **Problem 4:** A circular loop is placed in a uniform magnetic field that increases linearly with time. The problem involves calculating the magnetic flux, the induced EMF, the resulting current, and the power dissipated by the loop.
+
+5.  **Problem 5:** A classic "falling loop" problem. A square loop is dropped from a height *h* into a magnetic field. The solution finds the specific height *h* required for the loop to enter the field at a constant terminal velocity (where the magnetic braking force balances gravity) and discusses what happens once the loop is fully submerged in the field.
+
+Overall, the document provides step-by-step mathematical derivations and physical explanations for a series of standard but comprehensive problems in electromagnetism.
+[2025-07-04 12:14:52] [ID: false_120363339638953969@g.us_3AF612F0610A5B73EB00_143662377910483@lid] Reut Matityahu (0509500841): אז הנחת שהזרם זורם ימינה לפי הציור נכון?
+[2025-07-04 12:14:56] [ID: false_120363339638953969@g.us_3A460BA374F6B8BDF2BE_143662377910483@lid] Reut Matityahu (0509500841): בשאלה 1
+[2025-07-04 12:16:31] [ID: false_120363339638953969@g.us_3F8BB68FFFC235DAD2B9_230077153427708@lid] צבי שיננזון 🎗️ (0585426888): סוג של אם הבנתי אותף, הסליל זורם עם כיוון השעון ויוצר שדה ימינה
+[2025-07-04 12:16:56] [ID: false_120363339638953969@g.us_3AC782F103B28343415A_143662377910483@lid] Reut Matityahu (0509500841): להפך
+[2025-07-04 12:17:09] [ID: false_120363339638953969@g.us_3AF858482E9075C0658A_143662377910483@lid] Reut Matityahu (0509500841): לא?
+[2025-07-04 12:17:22] [ID: false_120363339638953969@g.us_3A9DF62C28712BA746B3_143662377910483@lid] Reut Matityahu (0509500841): טוב אני רואה שכתבת גם בתשובות זרם ימינה
+[2025-07-04 12:17:25] [ID: false_120363339638953969@g.us_3AA69A8E3849C73A9FD4_143662377910483@lid] Reut Matityahu (0509500841): תודה!
+[2025-07-04 12:18:34] [ID: false_120363339638953969@g.us_3F2650E03924B48EF232_230077153427708@lid] צבי שיננזון 🎗️ (0585426888): יש גם תשובות רשמיות אם את רוצה לבדוק
+https://drive.google.com/file/d/1g8jccJVjv9-bdBQObO0uJM3NiENARo5l/view
+[2025-07-04 13:03:42] [ID: false_120363339638953969@g.us_A2B86839A981375006BA66D355F600ED_252204892029154@lid] רחל אדרי (0586033456): תקשיבו, מעין רצתה לעשות תרגול חזרה אבל מה שהיא הציעה יוצא ביום של המבחן במדר אז היא שואלת מתי אתם מעדיפים.
+תגידו באיזה יום אתם רוצים- זה הימים של השבוע של המבחן.
+[2025-07-04 14:26:57] [ID: false_120363339638953969@g.us_3A401617C5A4A15F43E6_148421335863332@lid] Ohad boker (0523422121): https://drive.google.com/drive/folders/1vcdCS2dOSDHxlnhjg-qWNroXZR-izuST
+[2025-07-04 14:27:54] [ID: false_120363339638953969@g.us_3AF346D234A9B4D14E2F_148421335863332@lid] Ohad boker (0523422121): מבחנים בחשמל  של אוניברסיטת בן גוריון
+[2025-07-04 14:51:19] [ID: false_120363339638953969@g.us_3EB094FB411BD4F3D23437_207193601241339@lid] Eitan🤠❤️ (0543347775): כמעט שבת שלום לכולם ❤️ שולח סיכום שכתבתי לבערך חצי הראשון של הקורס (כרגע עד קבלים), יש בו המון פירוט וגם דף נוסחאות שאמור לכסות כל שאלה אפשרית. מוזמנים להשתמש באהבה גדולה - ואם במקרה מוצאים איזשהו חוסר דיוק אשמח שתעדכנו :)
+[2025-07-04 14:51:32] [ID: false_120363339638953969@g.us_3EB0F82D02332DB89598F9_207193601241339@lid] Eitan🤠❤️ (0543347775): סיכום - חשמל ומגנטיות.pdf
+[2025-07-04 14:52:30] [ID: false_120363339638953969@g.us_3EB0F82D02332DB89598F9_207193601241339@lid] פיתי (media content): This document appears to be a comprehensive set of handwritten study notes for a university-level course on **Electrostatics**, written primarily in Hebrew. The notes are meticulously organized, combining formula sheets, detailed derivations, conceptual explanations, and worked examples.
+
+Here is a breakdown of the content by topic:
+
+**Part 1: Foundational Concepts & Formulas (Pages 1-4)**
+
+*   **Fundamental Laws:**
+    *   **Coulomb's Law:** The force between two point charges.
+    *   **Electric Field (E):** Defined as force per unit charge (E = F/q). Formulas for the field from a point charge and continuous charge distributions are given.
+    *   **Electric Potential (V):** Defined as the integral of the electric field (V = ∫E·dr) and related to the field by E = -∇V (the negative gradient).
+    *   **Gauss's Law:** Presented in both its integral form (Φ = ∮E·dA = Q_in/ε₀) and its differential form (∇·E = ρ/ε₀). This is highlighted as a central law of electrostatics.
+
+*   **Key Definitions:**
+    *   **Charge Densities:** Linear (λ), surface (σ), and volume (ρ) charge densities.
+    *   **Potential Energy (U):** Formulas for the potential energy of a system of charges and the energy stored in an electric field.
+    *   **Capacitance (C):** Defined as C = Q/ΔV, with the unit Farad.
+    *   **Vector Calculus Operators:** The gradient (∇), divergence (∇·), and their forms in Cartesian, cylindrical, and spherical coordinates are explicitly written out.
+
+**Part 2: Applications and Worked Examples (Pages 5-21)**
+
+This section delves into applying the fundamental laws to specific physical situations.
+
+*   **Calculating Electric Fields:**
+    *   **Superposition Principle:** The total E-field is the vector sum of individual fields.
+    *   **Specific Geometries:** Detailed derivations are shown for the electric field of:
+        *   An electric dipole.
+        *   A charged ring along its axis.
+        *   An infinite line of charge.
+        *   An infinite plane of charge.
+        *   A charged sphere (both conducting and insulating).
+        *   A parallel-plate capacitor.
+    *   **Gauss's Law Applications:** Demonstrates how to use Gaussian surfaces to find the E-field for symmetric systems like spheres, cylinders, and infinite planes.
+
+*   **Conductors in Equilibrium:**
+    *   Explains the key properties: the electric field inside is zero, all net charge resides on the surface, the field at the surface is perpendicular to it, and the conductor is an equipotential volume.
+    *   Discusses concepts like **electrostatic induction** (charge separation in a neutral conductor) and **electrostatic shielding**.
+    *   An example involving two concentric conducting shells is analyzed, referencing the textbook "Griffiths."
+
+*   **Electric Potential and Energy:**
+    *   Calculates the potential for various charge distributions.
+    *   Uses the concept of potential difference (ΔV) and its relation to the work done on a charge and the change in kinetic energy.
+    *   An example of calculating the potential energy of charges arranged at the corners of a cube is shown.
+
+**Part 3: Capacitors and Dielectrics (Pages 22-29)**
+
+This final section covers energy storage devices and the effect of materials on electric fields.
+
+*   **Capacitors:**
+    *   Derivation of energy stored in a capacitor (U = ½CV²) and the concept of energy density in the electric field (u = ½ε₀E²).
+    *   Formulas for capacitance of parallel-plate, spherical, and cylindrical capacitors.
+    *   Rules and derivations for combining capacitors in **series** and **parallel**.
+
+*   **Dielectrics:**
+    *   Introduces the concept of an **electric dipole** and dipole moment (p).
+    *   Explains **polarization (P)** in materials and its relation to the electric field via susceptibility (χ).
+    *   Defines the **electric displacement vector (D)**, which simplifies Gauss's law in the presence of dielectrics (∮D·dA = Q_free).
+    *   Shows how inserting a dielectric material increases capacitance by a factor of the dielectric constant (εr).
+
+Overall, this is a very thorough and well-structured set of notes, suitable for studying for an exam in electromagnetism. It covers the core theory of electrostatics from first principles up to advanced topics like the displacement vector. The combination of concise formulas, diagrams, and step-by-step derivations makes it a powerful learning tool.
+[2025-07-04 16:43:06] [ID: false_120363339638953969@g.us_B190FA2B1E8DD305E9FF3E21B00341CA_42528850088147@lid] Bar Kisler🎸 (0544380203): תגידו עד איזה נושא הגענו בקורס?
+[2025-07-04 16:52:55] [ID: false_120363339638953969@g.us_5B2BF9897EBEA940CE912439BC6CF822_545528004781@lid] Yosef Rishver (0509004394): מעגלי RL, זרם מדומה בקבל ומשוואות מקסוול בצורתן המלאה
+[2025-07-04 17:17:36] [ID: false_120363339638953969@g.us_992C3679F73AEA1A51BDBD28BEE1E582_42528850088147@lid] Bar Kisler🎸 (0544380203): מישהו עשה את שאלה 5 במטלה 10?
+[2025-07-05 18:26:42] [ID: false_120363339638953969@g.us_F12A16D2446556C7C56C1CCB9E39CE0A_252204892029154@lid] רחל אדרי (0586033456): (↩️ לשגיאה בקריאת ציטוט)
+שבוע טוב. 
+אני רוצה להחזיר לה תשובה היום אז עד היום אפשר להצביע🙏🏽
+[2025-07-05 18:38:48] [ID: false_120363339638953969@g.us_0607439F074D966DF4BE2E23D01215CC_163646894280715@lid] יותם יעקב (0545689822): בזום?
+[2025-07-05 20:24:54] [ID: false_120363339638953969@g.us_3A5515E8F17C2B19F2F4_75204927701094@lid] {Moshe} (0546999729): למישהו יש את המבחן לדוגמא אבל בלי התשובות?
+[2025-07-05 20:25:40] [ID: false_120363339638953969@g.us_07F99FC01DC6A9149C61F517C2F8D5CE_545528004781@lid] Yosef Rishver (0509004394): (↩️ ל-ID:false_120363339638953969@g.us_3EB08AA17F0CB3C8CAC450_207193601241339@lid "תתפנקו, התשובות באתר...")
+.
+[2025-07-06 8:22:41] [ID: false_120363339638953969@g.us_7DDA81B8077961108C65463CDBC19613_101743513829511@lid] איתמר נאור (0507102800): מה החומר האחרון שהוא לא רשות במבחן?
+[2025-07-06 8:32:12] [ID: false_120363339638953969@g.us_3A92BD93676CBBDFBF83_206334624587813@lid] Ori Lovinger (0507880177): (↩️ ל-ID:false_120363339638953969@g.us_7DDA81B8077961108C65463CDBC19613_101743513829511@lid "מה החומר האחרון שהוא לא ר...")
+פאראדיי אני דיי בטוח

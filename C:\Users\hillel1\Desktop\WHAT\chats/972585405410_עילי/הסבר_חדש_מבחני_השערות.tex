@@ -1,0 +1,236 @@
+% Suggested filename: מבחני_השערות_ותיקון_בונפרוני.tex
+\documentclass[12pt]{article}
+
+%========== (1) Math Packages ==========
+\usepackage{amsmath,amssymb,amsthm}
+
+%========== (2) General Packages: Hebrew support, fonts, etc ==========
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{enumerate}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\usepackage{setspace}
+\usepackage[most]{tcolorbox}
+
+\usepackage{fontspec}
+\usepackage{polyglossia}
+
+\newcommand{\enquote}[1]{\textquotedblleft #1\textquotedblright}
+
+% Language settings
+\setdefaultlanguage{hebrew}
+\setotherlanguage{english}
+
+% Fonts
+% Ensure these fonts are available on your system. David CLM is a good choice for Hebrew.
+\newfontfamily\hebrewfont[Script=Hebrew]{David CLM}
+\newfontfamily\englishfont{Times New Roman} % Or any preferred English font
+\newfontfamily\hebrewfonttt[Script=Hebrew]{David CLM} % Monospaced Hebrew font if needed
+
+% Hyperref link color settings
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue, % Changed from black to blue for better visibility
+  urlcolor=cyan,
+  citecolor=green!50!black % Example cite color
+}
+
+%========== ToC Customization ==========
+\usepackage{tocloft}
+\usepackage{etoolbox}
+
+\makeatletter
+% Customize Table of Contents title and appearance
+\renewcommand\tableofcontents{%
+  \section*{\contentsname}% Title for ToC
+  \addcontentsline{toc}{section}{\contentsname}% Add ToC title to itself (optional)
+  \@starttoc{toc}% Actual ToC content
+}
+\makeatother
+
+%========== Spacing and Paragraphs ==========
+\onehalfspacing % 1.5 line spacing
+\setlength{\parskip}{6pt} % Space between paragraphs
+\setlength{\parindent}{0pt} % No paragraph indentation
+
+%========== Header/Footer Settings ==========
+\pagestyle{fancy}
+\setlength{\headheight}{14.5pt} % Necessary for fancyhdr
+\fancyhf{} % Clear header and footer
+\lhead{\emph{\textenglish{Hypothesis Tests and Bonferroni}}} % Left header (Hebrew document reads right-to-left, so lhead is left)
+\rhead{\thepage} % Right header (Page number)
+\cfoot{} % Clear center footer
+
+% Optional: Add document title to header (adjust as needed)
+% \chead{\textsf{\scriptsize הסבר מחודש: מבחני השערות ותיקון בונפרוני}} % Center header
+
+%========== tcolorbox Setup (Refined Colors) ==========
+\tcbset{
+  breakable, % Allows boxes to break across pages
+  colback=blue!5!white, % Soft background color
+  colframe=blue!60!black, % Border color
+  fonttitle=\bfseries, % Bold title font
+  boxsep=5pt, % Space between box border and content
+  top=5pt, bottom=5pt, left=8pt, right=8pt, % Inner padding (more left/right for Hebrew)
+  middle=5pt, % Space between title and content
+  sharp corners, % Optional: use rounded corners if preferred
+  % arc=3mm, auto outer arc, % Uncomment for rounded corners
+  enhanced % Needed for some features like breakable
+}
+
+%========== Special Boxes: Definition, Remark, Example ==========
+\newtcolorbox{definitionBox}[1]{
+  title=#1,
+  colback=green!5!white,
+  colframe=green!60!black,
+  % arc=3mm, auto outer arc, % Uncomment for rounded corners
+  sharp corners,
+  enhanced
+}
+
+\newtcolorbox{remarkBox}[1]{
+  title=#1,
+  colback=yellow!5!white,
+  colframe=yellow!60!black,
+  % arc=3mm, auto outer arc, % Uncomment for rounded corners
+  sharp corners,
+  enhanced
+}
+
+\newtcolorbox{exampleBox}[1]{
+  title=#1,
+  colback=red!5!white,
+  colframe=red!60!black,
+  % arc=3mm, auto outer arc, % Uncomment for rounded corners
+  sharp corners,
+  enhanced
+}
+
+% Bullet fix for Hebrew lists
+\renewcommand{\labelitemi}{\(\bullet\)} % Using a math bullet is safer for bidi
+
+% Adjust header/footer for first page if needed (e.g., no header/footer)
+\fancypagestyle{plain}{%
+  \fancyhf{}% clear all fields
+  \cfoot{\thepage}% page number in center footer
+  \renewcommand{\headrulewidth}{0pt}% no rule
+}
+
+\begin{document}
+
+% Title Section
+\begin{center}
+    \fontsize{20}{24}\selectfont
+    \textbf{הסבר מחודש: מבחני השערות לשתי אוכלוסיות ותיקון בונפרוני}
+\end{center}
+
+\vspace{1cm} % Add some vertical space
+
+% Table of Contents
+\tableofcontents
+\clearpage % Start the main content on a new page
+
+%========== Document Content ==========
+
+\section*{מבוא}
+מטרת מסמך זה היא להציג בצורה ברורה ויסודית את העקרונות מאחורי השוואה סטטיסטית בין שתי קבוצות או מצבים שונים. נתמקד בשני סוגים עיקריים של מדגמים: מדגמים בלתי-תלויים ומדגמים מזווגים (תלויים), וכן נדון בבעיה חשובה שמתעוררת כאשר מבצעים השוואות מרובות - בעיית ההשוואות המרובות - והפתרון הפופולרי שלה: תיקון בונפרוני. הבנה מעמיקה של נושאים אלו חיונית בניתוח נתונים במחקרים רבים.
+
+\section{מבחנים למדגמים בלתי-תלויים}
+כאשר אנו רוצים להשוות את הממוצעים של שתי אוכלוסיות שונות, שאין קשר או תלות בין הפרטים במדגם אחד לפרטים במדגם השני, אנו משתמשים במבחנים למדגמים בלתי-תלויים.
+
+\begin{definitionBox}{הגדרה: מדגמים בלתי-תלויים}
+שני מדגמים נקראים \enquote{בלתי-תלויים} אם בחירת הפרטים במדגם אחד אינה משפיעה או קשורה לבחירת הפרטים במדגם השני. המדגמים נלקחים משתי קבוצות או אוכלוסיות שונות לחלוטין.
+
+\vspace{0.5\baselineskip} % Add a small vertical space
+\textbf{דוגמה:} השוואת ציון הממוצע במבחן סטטיסטיקה בין סטודנטים שלמדו בקורס פרונטלי לבין סטודנטים שלמדו בקורס מקוון (בהנחה שאין חפיפה או תלות בין שתי קבוצות הסטודנטים).
+\end{definitionBox}
+
+\subsection*{השערות המבחן}
+המטרה היא לבדוק האם קיים הבדל מובהק סטטיסטית בין ממוצעי שתי האוכלוסיות (\(\mu_1, \mu_2\)). ההשערות מנוסחות באופן הבא:
+\begin{itemize}
+    \item \textbf{השערת האפס (\(H_0\)):} אין הבדל בין ממוצעי האוכלוסיות.
+    \[ H_0: \mu_1 = \mu_2 \]
+    \item \textbf{השערה אלטרנטיבית (\(H_1\)):} קיים הבדל בין ממוצעי האוכלוסיות.
+    \[ H_1: \mu_1 \neq \mu_2 \]
+\end{itemize}
+ניתן גם לנסח השערות חד-צדדיות (\(H_1: \mu_1 > \mu_2\) או \(H_1: \mu_1 < \mu_2\)).
+
+\subsection*{סטטיסטי המבחן (\(\text{t למדגמים בלתי-תלויים}\))}
+כדי לבדוק את ההשערות, מחשבים סטטיסטי מבחן t, המודד את ההפרש בין ממוצעי המדגם יחסית לשגיאת התקן המאוחדת שלהם. הנוסחה (בהנחת שונויות שוות באוכלוסייה - הנחה שניתן לבדוק במבחן נפרד, אך זו הנוסחה הסטנדרטית):
+\[ t = \frac{(\bar{x}_1 - \bar{x}_2)}{\sqrt{s_p^2 \left(\frac{1}{n_1} + \frac{1}{n_2}\right)}} \]
+
+\begin{remarkBox}{הסבר קצר על מרכיבי הנוסחה}
+\begin{itemize}
+    \item \(\bar{x}_1\) ו-\(\bar{x}_2\): ממוצעי המדגם של שתי הקבוצות. המונה מייצג את ההפרש הנצפה בין הממוצעים במדגם.
+    \item \(n_1\) ו-\(n_2\): גודלי המדגמים של שתי הקבוצות.
+    \item \(s_p^2\): השונות המאוחדת (pooled variance) של המדגמים. זהו אומדן משוקלל לשונות המשותפת בשתי האוכלוסיות, המבוסס על שונויות המדגם \(s_1^2\) ו-\(s_2^2\) וגודלי המדגם \(n_1\) ו-\(n_2\). המכנה כולו מייצג את שגיאת התקן המשולבת של הפרש הממוצעים.
+\end{itemize}
+ערך ה-t המחושב מושווה לערך קריטי מטבלאות התפלגות t (או מומר לערך p) כדי לקבוע אם ההפרש מובהק סטטיסטית.
+\end{remarkBox}
+
+\section{מבחנים למדגמים מזווגים (תלויים)}
+כאשר אנו משווים מדידות שנלקחו מאותם נבדקים בשני מצבים שונים, או מזוגות של נבדקים שיש ביניהם קשר כלשהו (כמו תאומים, או התאמה על פי מאפיינים דמוגרפיים), המדגמים נחשבים תלויים או מזווגים.
+
+\begin{definitionBox}{הגדרה: מדגמים מזווגים}
+שני מדגמים נקראים \enquote{מזווגים} אם כל תצפית במדגם אחד קשורה או מזווגת באופן טבעי או מתוכנן עם תצפית ספציפית במדגם השני. הדוגמה הנפוצה ביותר היא מדידת אותו משתנה על אותם נבדקים בשתי נקודות זמן שונות (לפני/אחרי).
+
+\vspace{0.5\baselineskip} % Add a small vertical space
+\textbf{דוגמה:} מדידת לחץ דם של קבוצת חולים לפני ואחרי מתן תרופה חדשה. כל חולה משמש כביקורת של עצמו.
+\end{definitionBox}
+
+\subsection*{הרעיון המרכזי: הפיכה למבחן על מדגם יחיד}
+היתרון במדגמים מזווגים הוא שאנו יכולים לבטל את ההשפעה של השונות הבין-אישית (ההבדלים הטבעיים בין נבדקים) ולהתמקד בהשפעת המצב או הטיפול. עושים זאת על ידי חישוב ההפרש (\(d\)) בין המדידות המזווגות לכל נבדק או זוג.
+\[ d_i = X_{1i} - X_{2i} \]
+כאשר \(X_{1i}\) ו-\(X_{2i}\) הן המדידות המזווגות עבור הנבדק או הזוג \(i\). לאחר חישוב ההפרשים לכל הזוגות, הבעיה הופכת למבחן t למדגם יחיד על ממוצע ההפרשים (\(\bar{d}\)), לבדיקה האם הוא שונה מ-0.
+
+\subsection*{השערות המבחן}
+ההשערות מתייחסות לממוצע ההפרשים באוכלוסייה (\(\mu_d\)):
+\begin{itemize}
+    \item \textbf{השערת האפס (\(H_0\)):} ממוצע ההפרשים באוכלוסייה שווה ל-0 (אין הבדל מובהק בין המדידות).
+    \[ H_0: \mu_d = 0 \]
+    \item \textbf{השערה אלטרנטיבית (\(H_1\)):} ממוצע ההפרשים באוכלוסייה שונה מ-0 (קיים הבדל מובהק).
+    \[ H_1: \mu_d \neq 0 \]
+\end{itemize}
+גם כאן ניתן לנסח השערות חד-צדדיות.
+
+\subsection*{סטטיסטי המבחן (\(\text{t למדגמים מזווגים}\))}
+סטטיסטי המבחן הוא מבחן t למדגם יחיד המבוצע על ממוצע ההפרשים (\(\bar{d}\)):
+\[ t = \frac{\bar{d}}{s_d / \sqrt{n}} \]
+כאשר:
+\begin{itemize}
+    \item \(\bar{d}\): ממוצע ההפרשים במדגם.
+    \item \(s_d\): סטיית התקן של ההפרשים במדגם.
+    \item \(n\): מספר הזוגות (או מספר הנבדקים במקרה של מדידות חוזרות).
+\end{itemize}
+נוסחה זו פשוטה יותר מהנוסחה למדגמים בלתי-תלויים מכיוון שהיא עובדת על וקטור יחיד של הפרשים.
+
+\section{בעיית ההשוואות המרובות ותיקון בונפרוני}
+לעתים קרובות במחקר, אנו מעוניינים לבצע מספר רב של השוואות סטטיסטיות במקביל. לדוגמה, להשוות ממוצעים של מספר קבוצות זו לזו, או לבדוק מספר רב של קשרים בין משתנים. כאשר עושים זאת, עולה בעיה משמעותית.
+
+\begin{remarkBox}{הבעיה: ניפוח טעות מסוג ראשון}
+טעות מסוג ראשון מתרחשת כאשר אנו דוחים את השערת האפס למרות שהיא נכונה במציאות (מוצאים הבדל מובהק במדגם למרות שאין כזה באוכלוסייה). רמת המובהקות (\(\alpha\)), בדרך כלל 0.05, היא ההסתברות המקסימלית לטעות מסוג ראשון \textbf{במבחן יחיד}.
+
+כאשר מבצעים מספר רב של מבחנים, ההסתברות לבצע לפחות טעות אחת מסוג ראשון עולה באופן דרמטי. אם נבצע 20 מבחנים בלתי-תלויים עם רמת מובהקות של 0.05 לכל מבחן, ההסתברות לביצוע לפחות טעות אחת מסוג ראשון גבוהה בהרבה מ-0.05 (היא קרובה ל-\(1 - (1 - \alpha)^k\), כאשר k הוא מספר המבחנים). זהו \enquote{ניפוח} של רמת הטעות.
+
+\textbf{אנלוגיה פשוטה:} חשבו על זריקת קוביה. ההסתברות לקבל '6' בזריקה אחת היא 1/6. אבל אם תזרקו את הקוביה 10 פעמים, ההסתברות שתקבלו לפחות '6' אחד גבוהה בהרבה מ-1/6. באופן דומה, ככל שמבצעים יותר מבחנים סטטיסטיים, גדל הסיכוי למצוא \enquote{מובהקות} מקרית רק בגלל הריבוי.
+\end{remarkBox}
+
+\begin{definitionBox}{הפתרון: תיקון בונפרוני}
+תיקון בונפרוני הוא שיטה פשוטה ושמרנית להתמודדות עם בעיית ההשוואות המרובות. הרעיון הוא לחלק את רמת המובהקות המקורית (\(\alpha_{original}\)) במספר ההשוואות שמבצעים (\(k\)), ולקבל רמת מובהקות חדשה ומחמירה יותר (\(\alpha_{new}\)) עבור כל מבחן בודד.
+
+\vspace{0.5\baselineskip} % Add a small vertical space
+הנוסחה לתיקון בונפרוני היא:
+\[ \alpha_{new} = \frac{\alpha_{original}}{k} \]
+לדוגמה, אם רמת המובהקות המקורית היא \(\alpha = 0.05\) ואנו מבצעים \(k=10\) השוואות, רמת המובהקות החדשה והמחמירה עבור כל אחת מההשוואות תהיה \(\alpha_{new} = \frac{0.05}{10} = 0.005\). משמעות הדבר היא שנדחה את השערת האפס עבור השוואה מסוימת רק אם ערך ה-p שלה נמוך מ-0.005.
+
+תיקון בונפרוני מבטיח שההסתברות לביצוע \textbf{לפחות} טעות אחת מסוג ראשון בכל מערך ההשוואות לא תעלה על רמת המובהקות המקורית (\(\alpha_{original}\)). החיסרון של בונפרוני הוא שהוא שמרני יתר על המידה, במיוחד כשיש מספר רב של השוואות, ועלול להפחית את העוצמה הסטטיסטית (להגדיל את הסיכוי לטעות מסוג שני - אי-דחיית השערת האפס כשהיא שגויה). קיימות שיטות מתקדמות יותר, אך בונפרוני נותר פשוט ושימושי במקרים רבים.
+\end{definitionBox}
+
+\section{סיכום}
+מסמך זה הציג סקירה מחודשת של מבחני השערות לממוצעים בשתי אוכלוסיות: מבחנים למדגמים בלתי-תלויים עבור השוואה בין קבוצות שונות לחלוטין, ומבחנים למדגמים מזווגים עבור השוואה בין מדידות תלויות (כמו לפני/אחרי). בנוסף, הדגשנו את בעיית ניפוח טעות מסוג ראשון בהשוואות מרובות והצגנו את תיקון בונפרוני ככלי בסיסי להתמודדות עם בעיה זו. הבנה נכונה של מבחנים אלו ואופן השימוש בהם חיונית לניתוח סטטיסטי מדויק.
+
+\end{document}
