@@ -1106,110 +1106,166 @@ function restartBotViaTG(chatId) {
     }, 2000);
 }
 
-tgBot.onText(/\/groups/, async (msg) => {
-    await sendChatList(msg.chat.id, true);
+tgBot.onText(~/groups/, async (msg) => {
+    try {
+        await sendChatList(msg.chat.id, true);
+    } catch (e) {
+        console.error('[Telegram] Failed to send group list:', e);
+    }
 });
 
-tgBot.onText(/\/privates/, async (msg) => {
-    await sendChatList(msg.chat.id, false);
+tgBot.onText(~/privates/, async (msg) => {
+    try {
+        await sendChatList(msg.chat.id, false);
+    } catch (e) {
+        console.error('[Telegram] Failed to send private chat list:', e);
+    }
 });
 
-tgBot.onText(/\/manage/, async (msg) => {
-    const keyboard = [
-        [{ text: 'קבוצות', callback_data: 'manage_groups' }],
-        [{ text: 'צ\'אטים פרטיים', callback_data: 'manage_privates' }]
-    ];
-    tgBot.sendMessage(msg.chat.id, 'מה תרצה לנהל?', { reply_markup: { inline_keyboard: keyboard } });
+tgBot.onText(~/manage/, async (msg) => {
+    try {
+        const keyboard = [
+            [{ text: 'קבוצות', callback_data: 'manage_groups' }],
+            [{ text: 'צ\'אטים פרטיים', callback_data: 'manage_privates' }]
+        ];
+        await tgBot.sendMessage(msg.chat.id, 'מה תרצה לנהל?', { reply_markup: { inline_keyboard: keyboard } });
+    } catch (e) {
+        console.error('[Telegram] Failed to send manage menu:', e);
+    }
 });
 
-tgBot.onText(/\/merge/, async (msg) => {
-    await sendMergeOptions(msg.chat.id);
+tgBot.onText(~/merge/, async (msg) => {
+    try {
+        await sendMergeOptions(msg.chat.id);
+    } catch (e) {
+        console.error('[Telegram] Failed to send merge options:', e);
+    }
 });
 
-tgBot.onText(/\/revert/, async (msg) => {
-    await sendRevertOptions(msg.chat.id);
+tgBot.onText(~/revert/, async (msg) => {
+    try {
+        await sendRevertOptions(msg.chat.id);
+    } catch (e) {
+        console.error('[Telegram] Failed to send revert options:', e);
+    }
 });
 
-tgBot.onText(/\/update/, async (msg) => {
-    exec('echo $GEMINI_API_KEY', (err, stdout) => {
-        const key = stdout ? stdout.trim() : '';
-        tgBot.sendMessage(msg.chat.id, key || '(no key)');
-    });
-    tgStates.set(msg.chat.id, { action: 'update_prompt' });
-    tgBot.sendMessage(msg.chat.id, 'מה אתה רוצה לשנות בקוד?');
+tgBot.onText(~/update/, async (msg) => {
+    try {
+        exec('echo $GEMINI_API_KEY', (err, stdout) => {
+            const key = stdout ? stdout.trim() : '';
+            tgBot.sendMessage(msg.chat.id, key || '(no key)').catch(e => console.error('[Telegram] Failed to send API key:', e));
+        });
+        tgStates.set(msg.chat.id, { action: 'update_prompt' });
+        await tgBot.sendMessage(msg.chat.id, 'מה אתה רוצה לשנות בקוד?');
+    } catch (e) {
+        console.error('[Telegram] Failed to send update prompt:', e);
+    }
 });
 
-tgBot.onText(/\/restartbot/, async (msg) => {
-    restartBotViaTG(msg.chat.id);
+tgBot.onText(~/restartbot/, async (msg) => {
+    try {
+        restartBotViaTG(msg.chat.id);
+    } catch (e) {
+        console.error('[Telegram] Failed to restart bot:', e);
+    }
 });
 
 tgBot.onText(null, async (msg) => {
-    const load = os.loadavg()[0].toFixed(2);
-    const mem = ((os.totalmem()-os.freemem())/1024/1024).toFixed(0);
-    exec('df -h /', (err, stdout) => {
-        const disk = err ? 'N/A' : stdout.split('\n')[1];
-        tgBot.sendMessage(msg.chat.id, `CPU load: ${load}\nRAM used: ${mem}MB\nDisk: ${disk}`);
-    });
-});
-
-tgBot.onText(/\/hello/, async (msg) => {
-    tgBot.sendMessage(msg.chat.id, 'שלום מה נשמע');
-});
-
-tgBot.onText(null, async (msg) => {
-    tgBot.sendMessage(msg.chat.id, 'שלום');
-});
-
-tgBot.onText(/\/allowuser (.+)/, (msg, match) => {
-    const num = (match[1]||'').trim();
-    if (num) {
-        allowedNumbers.add(num);
-        saveAllowedUsers();
-        tgBot.sendMessage(msg.chat.id, `המשתמש ${num} נוסף לרשימת המורשים.`);
+    try {
+        const load = os.loadavg()[0].toFixed(2);
+        const mem = ((os.totalmem()-os.freemem())/1024/1024).toFixed(0);
+        exec('df -h /', (err, stdout) => {
+            const disk = err ? 'N/A' : stdout.split('\n')[1];
+            tgBot.sendMessage(msg.chat.id, `CPU load: ${load}\nRAM used: ${mem}MB\nDisk: ${disk}`).catch(e => console.error('[Telegram] Failed to send status:', e));
+        });
+    } catch (e) {
+        console.error('[Telegram] Failed to handle status message:', e);
     }
 });
 
-tgBot.onText(/\/unallowuser (.+)/, (msg, match) => {
-    const num = (match[1]||'').trim();
-    if (allowedNumbers.delete(num)) {
-        saveAllowedUsers();
-        tgBot.sendMessage(msg.chat.id, `המשתמש ${num} הוסר מרשימת המורשים.`);
+tgBot.onText(~/hello/, async (msg) => {
+    try {
+        await tgBot.sendMessage(msg.chat.id, 'שלום מה נשמע');
+    } catch (e) {
+        console.error('[Telegram] Failed to say hello:', e);
     }
 });
 
-tgBot.onText(/\/setvoice (.+)/, (msg, match) => {
-    const v = (match[1]||'').trim();
-    if (v) {
-        defaultTtsVoice = v;
-        tgBot.sendMessage(msg.chat.id, `עודכן קול ברירת המחדל ל-${v}`);
+tgBot.onText(~/allowuser (.+)/, (msg, match) => {
+    try {
+        const num = (match[1]||'').trim();
+        if (num) {
+            allowedNumbers.add(num);
+            saveAllowedUsers();
+            tgBot.sendMessage(msg.chat.id, `המשתמש ${num} נוסף לרשימת המורשים.`).catch(e => console.error('[Telegram] Failed to confirm allow user:', e));
+        }
+    } catch (e) {
+        console.error('[Telegram] Failed to handle allow user command:', e);
     }
 });
 
-tgBot.onText(/\/backupmems/, (msg) => {
-    const memPath = path.join(__dirname, 'memories.json');
-    if (fs.existsSync(memPath)) {
-        tgBot.sendDocument(msg.chat.id, memPath);
-    } else {
-        tgBot.sendMessage(msg.chat.id, 'קובץ memories.json לא נמצא.');
+tgBot.onText(~/unallowuser (.+)/, (msg, match) => {
+    try {
+        const num = (match[1]||'').trim();
+        if (allowedNumbers.delete(num)) {
+            saveAllowedUsers();
+            tgBot.sendMessage(msg.chat.id, `המשתמש ${num} הוסר מרשימת המורשים.`).catch(e => console.error('[Telegram] Failed to confirm unallow user:', e));
+        }
+    } catch (e) {
+        console.error('[Telegram] Failed to handle unallow user command:', e);
     }
 });
 
-tgBot.onText(/\/restoremems/, (msg) => {
-    tgStates.set(msg.chat.id, { action: 'restore_mems' });
-    tgBot.sendMessage(msg.chat.id, 'שלח את קובץ memories.json כעת.');
+tgBot.onText(~/setvoice (.+)/, (msg, match) => {
+    try {
+        const v = (match[1]||'').trim();
+        if (v) {
+            defaultTtsVoice = v;
+            tgBot.sendMessage(msg.chat.id, `עודכן קול ברירת המחדל ל-${v}`).catch(e => console.error('[Telegram] Failed to confirm set voice:', e));
+        }
+    } catch (e) {
+        console.error('[Telegram] Failed to handle set voice command:', e);
+    }
 });
 
-tgBot.onText(/\/schedule (\S+) (\S+) (.+)/, (msg, match) => {
-    const chat = match[1];
-    const when = new Date(match[2]);
-    const text = match[3];
-    if (!isNaN(when)) {
-        const actions = loadPendingActions();
-        actions.push({ chatId: chat, executionTime: when.toISOString(), actionData: { action: 'text', message: text } });
-        savePendingActions(actions);
-        tgBot.sendMessage(msg.chat.id, 'הודעה תוזמנה בהצלחה.');
-    } else {
-        tgBot.sendMessage(msg.chat.id, 'פורמט זמן שגוי.');
+tgBot.onText(~/backupmems/, (msg) => {
+    try {
+        const memPath = path.join(__dirname, 'memories.json');
+        if (fs.existsSync(memPath)) {
+            tgBot.sendDocument(msg.chat.id, memPath).catch(e => console.error('[Telegram] Failed to send memories backup:', e));
+        } else {
+            tgBot.sendMessage(msg.chat.id, 'קובץ memories.json לא נמצא.').catch(e => console.error('[Telegram] Failed to send memories not found message:', e));
+        }
+    } catch (e) {
+        console.error('[Telegram] Failed to handle backup memories command:', e);
+    }
+});
+
+tgBot.onText(~/restoremems/, (msg) => {
+    try {
+        tgStates.set(msg.chat.id, { action: 'restore_mems' });
+        tgBot.sendMessage(msg.chat.id, 'שלח את קובץ memories.json כעת.').catch(e => console.error('[Telegram] Failed to prompt for memories restore:', e));
+    } catch (e) {
+        console.error('[Telegram] Failed to handle restore memories command:', e);
+    }
+});
+
+tgBot.onText(~/schedule (\S+) (\S+) (.+)/, (msg, match) => {
+    try {
+        const chat = match[1];
+        const when = new Date(match[2]);
+        const text = match[3];
+        if (!isNaN(when)) {
+            const actions = loadPendingActions();
+            actions.push({ chatId: chat, executionTime: when.toISOString(), actionData: { action: 'text', message: text } });
+            savePendingActions(actions);
+            tgBot.sendMessage(msg.chat.id, 'הודעה תוזמנה בהצלחה.').catch(e => console.error('[Telegram] Failed to confirm schedule:', e));
+        } else {
+            tgBot.sendMessage(msg.chat.id, 'פורמט זמן שגוי.').catch(e => console.error('[Telegram] Failed to send schedule format error:', e));
+        }
+    } catch (e) {
+        console.error('[Telegram] Failed to handle schedule command:', e);
     }
 });
 
@@ -1217,294 +1273,303 @@ tgBot.on('callback_query', async (query) => {
     const data = query.data;
     const chatId = query.message.chat.id;
 
-    if(data === 'cmd_groups') { await sendChatList(chatId, true, 0, null); return tgBot.answerCallbackQuery(query.id); }
-    if(data === 'cmd_privates') { await sendChatList(chatId, false, 0, null); return tgBot.answerCallbackQuery(query.id); }
-    if(data && data.startsWith('groups_')) { const page=parseInt(data.split('_')[1])||0; await sendChatList(chatId,true,page,query.message.message_id); return tgBot.answerCallbackQuery(query.id); }
-    if(data && data.startsWith('privates_')) { const page=parseInt(data.split('_')[1])||0; await sendChatList(chatId,false,page,query.message.message_id); return tgBot.answerCallbackQuery(query.id); }
-    if(data === 'refresh_privates') { await sendChatList(chatId,false,0,query.message.message_id); return tgBot.answerCallbackQuery(query.id); }
-    if(data === 'close_list') { const keyboard=[[{text:'/groups',callback_data:'cmd_groups'}],[{text:'/privates',callback_data:'cmd_privates'}],[{text:'/manage',callback_data:'cmd_manage'}],[{text:'/merge',callback_data:'cmd_merge'}],[{text:'/revert',callback_data:'cmd_revert'}],[{text:'/status',callback_data:'cmd_status'}],[{text:'/update',callback_data:'cmd_update'}]]; tgBot.editMessageText('בחר פקודה:',{chat_id:chatId,message_id:query.message.message_id,reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
-    if(data === 'merge_cancel' || data === 'revert_cancel') { const keyboard=[[{text:'/groups',callback_data:'cmd_groups'}],[{text:'/privates',callback_data:'cmd_privates'}],[{text:'/manage',callback_data:'cmd_manage'}],[{text:'/merge',callback_data:'cmd_merge'}],[{text:'/revert',callback_data:'cmd_revert'}],[{text:'/status',callback_data:'cmd_status'}],[{text:'/update',callback_data:'cmd_update'}]]; tgStates.delete(chatId); tgBot.editMessageText('בחר פקודה:',{chat_id:chatId,message_id:query.message.message_id,reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
-    if(data === 'cmd_manage') { const keyboard=[[{text:'קבוצות',callback_data:'manage_groups'}],[{text:"צ'אטים פרטיים",callback_data:'manage_privates'}]]; tgBot.sendMessage(chatId,'מה תרצה לנהל?',{reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
-    if(data === 'cmd_merge') { await sendMergeOptions(chatId); return tgBot.answerCallbackQuery(query.id); }
-    if(data === 'cmd_revert') { await sendRevertOptions(chatId); return tgBot.answerCallbackQuery(query.id); }
-    if(data === 'cmd_update') { tgStates.set(chatId, { action: 'update_prompt' }); tgBot.sendMessage(chatId, 'מה אתה רוצה לשנות בקוד?'); return tgBot.answerCallbackQuery(query.id); }
-    if(data === 'cmd_status') { const load=os.loadavg()[0].toFixed(2); const mem=((os.totalmem()-os.freemem())/1024/1024).toFixed(0); exec('df -h /',(e,out)=>{const disk=e?'N/A':out.split('\n')[1]; tgBot.sendMessage(chatId,`CPU load: ${load}\nRAM used: ${mem}MB\nDisk: ${disk}`);}); return tgBot.answerCallbackQuery(query.id); }
+    try {
+        if(data === 'cmd_groups') { await sendChatList(chatId, true, 0, null); return tgBot.answerCallbackQuery(query.id); }
+        if(data === 'cmd_privates') { await sendChatList(chatId, false, 0, null); return tgBot.answerCallbackQuery(query.id); }
+        if(data && data.startsWith('groups_')) { const page=parseInt(data.split('_')[1])||0; await sendChatList(chatId,true,page,query.message.message_id); return tgBot.answerCallbackQuery(query.id); }
+        if(data && data.startsWith('privates_')) { const page=parseInt(data.split('_')[1])||0; await sendChatList(chatId,false,page,query.message.message_id); return tgBot.answerCallbackQuery(query.id); }
+        if(data === 'refresh_privates') { await sendChatList(chatId,false,0,query.message.message_id); return tgBot.answerCallbackQuery(query.id); }
+        if(data === 'close_list') { const keyboard=[[{text:'/groups',callback_data:'cmd_groups'}],[{text:'/privates',callback_data:'cmd_privates'}],[{text:'/manage',callback_data:'cmd_manage'}],[{text:'/merge',callback_data:'cmd_merge'}],[{text:'/revert',callback_data:'cmd_revert'}],[{text:'/status',callback_data:'cmd_status'}],[{text:'/update',callback_data:'cmd_update'}]]; await tgBot.editMessageText('בחר פקודה:',{chat_id:chatId,message_id:query.message.message_id,reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
+        if(data === 'merge_cancel' || data === 'revert_cancel') { const keyboard=[[{text:'/groups',callback_data:'cmd_groups'}],[{text:'/privates',callback_data:'cmd_privates'}],[{text:'/manage',callback_data:'cmd_manage'}],[{text:'/merge',callback_data:'cmd_merge'}],[{text:'/revert',callback_data:'cmd_revert'}],[{text:'/status',callback_data:'cmd_status'}],[{text:'/update',callback_data:'cmd_update'}]]; tgStates.delete(chatId); await tgBot.editMessageText('בחר פקודה:',{chat_id:chatId,message_id:query.message.message_id,reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
+        if(data === 'cmd_manage') { const keyboard=[[{text:'קבוצות',callback_data:'manage_groups'}],[{text:"צ'אטים פרטיים",callback_data:'manage_privates'}]]; await tgBot.sendMessage(chatId,'מה תרצה לנהל?',{reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
+        if(data === 'cmd_merge') { await sendMergeOptions(chatId); return tgBot.answerCallbackQuery(query.id); }
+        if(data === 'cmd_revert') { await sendRevertOptions(chatId); return tgBot.answerCallbackQuery(query.id); }
+        if(data === 'cmd_update') { tgStates.set(chatId, { action: 'update_prompt' }); await tgBot.sendMessage(chatId, 'מה אתה רוצה לשנות בקוד?'); return tgBot.answerCallbackQuery(query.id); }
+        if(data === 'cmd_status') { const load=os.loadavg()[0].toFixed(2); const mem=((os.totalmem()-os.freemem())/1024/1024).toFixed(0); exec('df -h /',async (e,out)=>{const disk=e?'N/A':out.split('\n')[1]; await tgBot.sendMessage(chatId,`CPU load: ${load}\nRAM used: ${mem}MB\nDisk: ${disk}`);}); return tgBot.answerCallbackQuery(query.id); }
 
-    if (data.startsWith('chat_')) {
-        const waId = data.slice(5);
-        tgStates.set(chatId, { waId });
-        const keyboard = [
-            [{ text: 'שליחת הודעה', callback_data: `send_${waId}` }],
-            [{ text: 'הודעה לפיתי בלבד', callback_data: `secret_${waId}` }],
-            [{ text: 'קבל היסטוריה', callback_data: `history_${waId}` }],
-            [{ text: 'זכרונות', callback_data: `mems_${waId}` }],
-            [{ text: 'קבצים', callback_data: `files_${waId}` }],
-            [{ text: 'טריגרים', callback_data: `triggers_${waId}` }]
-        ];
-        tgBot.sendMessage(chatId, 'בחר פעולה:', { reply_markup: { inline_keyboard: keyboard } });
-        return tgBot.answerCallbackQuery(query.id);
-    }
+        if (data.startsWith('chat_')) {
+            const waId = data.slice(5);
+            tgStates.set(chatId, { waId });
+            const keyboard = [
+                [{ text: 'שליחת הודעה', callback_data: `send_${waId}` }],
+                [{ text: 'הודעה לפיתי בלבד', callback_data: `secret_${waId}` }],
+                [{ text: 'קבל היסטוריה', callback_data: `history_${waId}` }],
+                [{ text: 'זכרונות', callback_data: `mems_${waId}` }],
+                [{ text: 'קבצים', callback_data: `files_${waId}` }],
+                [{ text: 'טריגרים', callback_data: `triggers_${waId}` }]
+            ];
+            await tgBot.sendMessage(chatId, 'בחר פעולה:', { reply_markup: { inline_keyboard: keyboard } });
+            return tgBot.answerCallbackQuery(query.id);
+        }
 
-    if (data.startsWith('send_')) {
-        const waId = data.slice(5);
-        tgStates.set(chatId, { waId, action: 'send' });
-        tgBot.sendMessage(chatId, 'מה לשלוח?');
-        return tgBot.answerCallbackQuery(query.id);
-    }
+        if (data.startsWith('send_')) {
+            const waId = data.slice(5);
+            tgStates.set(chatId, { waId, action: 'send' });
+            await tgBot.sendMessage(chatId, 'מה לשלוח?');
+            return tgBot.answerCallbackQuery(query.id);
+        }
 
-    if (data.startsWith('secret_')) {
-        const waId = data.slice(7);
-        tgStates.set(chatId, { waId, action: 'secret' });
-        tgBot.sendMessage(chatId, 'מה ההודעה הסודית?');
-        return tgBot.answerCallbackQuery(query.id);
-    }
+        if (data.startsWith('secret_')) {
+            const waId = data.slice(7);
+            tgStates.set(chatId, { waId, action: 'secret' });
+            await tgBot.sendMessage(chatId, 'מה ההודעה הסודית?');
+            return tgBot.answerCallbackQuery(query.id);
+        }
 
-    if (data.startsWith('history_')) {
-        const waId = data.slice(8);
-        tgStates.set(chatId, { waId, action: 'history' });
-        tgBot.sendMessage(chatId, 'כמה הודעות להציג?');
-        return tgBot.answerCallbackQuery(query.id);
-    }
+        if (data.startsWith('history_')) {
+            const waId = data.slice(8);
+            tgStates.set(chatId, { waId, action: 'history' });
+            await tgBot.sendMessage(chatId, 'כמה הודעות להציג?');
+            return tgBot.answerCallbackQuery(query.id);
+        }
 
-    if (data.startsWith('mems_')) {
-        const waId = data.slice(5);
-        const chat = await client.getChatById(waId);
-        const safeName = await getSafeNameForChat(chat);
-        const paths = getChatPaths(waId, safeName);
-        const mems = loadMemories(paths);
-        const keyboard = mems.slice(0, 10).map(m => [{
-            text: (m.info || '').toString().slice(0, 30),
-            callback_data: `memview_${waId}_${m.id}`
-        }]);
-        keyboard.push([{ text: '➕ הוסף זיכרון', callback_data: `memadd_${waId}` }]);
-        tgBot.sendMessage(chatId, 'זכרונות:', { reply_markup: { inline_keyboard: keyboard } });
-        return tgBot.answerCallbackQuery(query.id);
-    }
+        if (data.startsWith('mems_')) {
+            const waId = data.slice(5);
+            const chat = await client.getChatById(waId);
+            const safeName = await getSafeNameForChat(chat);
+            const paths = getChatPaths(waId, safeName);
+            const mems = loadMemories(paths);
+            const keyboard = mems.slice(0, 10).map(m => [{
+                text: (m.info || '').toString().slice(0, 30),
+                callback_data: `memview_${waId}_${m.id}`
+            }]);
+            keyboard.push([{ text: '➕ הוסף זיכרון', callback_data: `memadd_${waId}` }]);
+            await tgBot.sendMessage(chatId, 'זכרונות:', { reply_markup: { inline_keyboard: keyboard } });
+            return tgBot.answerCallbackQuery(query.id);
+        }
 
-    if (data.startsWith('memview_')) {
-        const parts = data.split('_');
-        const waId = parts[1];
-        const memId = Number(parts[2]);
-        tgStates.set(chatId, { waId, memId });
-        const keyboard = [
-            [{ text: '🗑️ מחק', callback_data: `memdel_${waId}_${memId}` }],
-            [{ text: '✏️ ערוך', callback_data: `memedit_${waId}_${memId}` }]
-        ];
-        tgBot.sendMessage(chatId, 'בחר פעולה לזיכרון:', { reply_markup: { inline_keyboard: keyboard } });
-        return tgBot.answerCallbackQuery(query.id);
-    }
+        if (data.startsWith('memview_')) {
+            const parts = data.split('_');
+            const waId = parts[1];
+            const memId = Number(parts[2]);
+            tgStates.set(chatId, { waId, memId });
+            const keyboard = [
+                [{ text: '🗑️ מחק', callback_data: `memdel_${waId}_${memId}` }],
+                [{ text: '✏️ ערוך', callback_data: `memedit_${waId}_${memId}` }]
+            ];
+            await tgBot.sendMessage(chatId, 'בחר פעולה לזיכרון:', { reply_markup: { inline_keyboard: keyboard } });
+            return tgBot.answerCallbackQuery(query.id);
+        }
 
-    if (data.startsWith('memadd_')) {
-        const waId = data.slice(7);
-        tgStates.set(chatId, { waId, action: 'mem_add' });
-        tgBot.sendMessage(chatId, 'כתוב את הזיכרון החדש:');
-        return tgBot.answerCallbackQuery(query.id);
-    }
+        if (data.startsWith('memadd_')) {
+            const waId = data.slice(7);
+            tgStates.set(chatId, { waId, action: 'mem_add' });
+            await tgBot.sendMessage(chatId, 'כתוב את הזיכרון החדש:');
+            return tgBot.answerCallbackQuery(query.id);
+        }
 
-    if (data.startsWith('memedit_')) {
-        const parts = data.split('_');
-        const waId = parts[1];
-        const memId = Number(parts[2]);
-        tgStates.set(chatId, { waId, action: 'mem_edit', memId });
-        tgBot.sendMessage(chatId, 'כתוב את הזיכרון המעודכן:');
-        return tgBot.answerCallbackQuery(query.id);
-    }
+        if (data.startsWith('memedit_')) {
+            const parts = data.split('_');
+            const waId = parts[1];
+            const memId = Number(parts[2]);
+            tgStates.set(chatId, { waId, action: 'mem_edit', memId });
+            await tgBot.sendMessage(chatId, 'כתוב את הזיכרון המעודכן:');
+            return tgBot.answerCallbackQuery(query.id);
+        }
 
-    if (data.startsWith('memdel_')) {
-        const parts = data.split('_');
-        const waId = parts[1];
-        const memId = Number(parts[2]);
-        const chat = await client.getChatById(waId);
-        const safeName = await getSafeNameForChat(chat);
-        const paths = getChatPaths(waId, safeName);
-        const mems = loadMemories(paths).filter(m => m.id !== memId);
-        await saveMemories(paths, mems);
-        tgBot.sendMessage(chatId, 'הזיכרון נמחק.');
-        return tgBot.answerCallbackQuery(query.id);
-    }
+        if (data.startsWith('memdel_')) {
+            const parts = data.split('_');
+            const waId = parts[1];
+            const memId = Number(parts[2]);
+            const chat = await client.getChatById(waId);
+            const safeName = await getSafeNameForChat(chat);
+            const paths = getChatPaths(waId, safeName);
+            const mems = loadMemories(paths).filter(m => m.id !== memId);
+            await saveMemories(paths, mems);
+            await tgBot.sendMessage(chatId, 'הזיכרון נמחק.');
+            return tgBot.answerCallbackQuery(query.id);
+        }
 
-    if (data.startsWith('files_')) {
-        const waId = data.slice(6);
-        const chat = await client.getChatById(waId);
-        const safeName = await getSafeNameForChat(chat);
-        const paths = getChatPaths(waId, safeName);
-        let files = [];
-        if (fs.existsSync(paths.generatedFilesIndex)) {
+        if (data.startsWith('files_')) {
+            const waId = data.slice(6);
+            const chat = await client.getChatById(waId);
+            const safeName = await getSafeNameForChat(chat);
+            const paths = getChatPaths(waId, safeName);
+            let files = [];
+            if (fs.existsSync(paths.generatedFilesIndex)) {
+                try {
+                    files = JSON.parse(fs.readFileSync(paths.generatedFilesIndex, 'utf8'));
+                } catch {}
+            }
+            const keyboard = files.slice(0, 10).map((f, idx) => [{ text: f.filename || `file${idx+1}`, callback_data: `getfile_${waId}_${idx}` }]);
+            if (keyboard.length === 0) keyboard.push([{ text: 'אין קבצים', callback_data: 'noop' }]);
+            tgStates.set(chatId, { waId, files });
+            await tgBot.sendMessage(chatId, 'בחר קובץ:', { reply_markup: { inline_keyboard: keyboard } });
+            return tgBot.answerCallbackQuery(query.id);
+        }
+
+        if (data.startsWith('getfile_')) {
+            const parts = data.split('_');
+            const waId = parts[1];
+            const idx = Number(parts[2]);
+            const state = tgStates.get(chatId);
+            const file = state?.files?.[idx];
+            if (file && fs.existsSync(file.generatedFilePath)) {
+                await tgBot.sendDocument(chatId, file.generatedFilePath);
+            } else {
+                await tgBot.sendMessage(chatId, 'קובץ לא נמצא.');
+            }
+            return tgBot.answerCallbackQuery(query.id);
+        }
+
+        if (data.startsWith('triggers_')) {
+            const waId = data.slice(9);
+            const chat = await client.getChatById(waId);
+            const safeName = await getSafeNameForChat(chat);
+            const paths = getChatPaths(waId, safeName);
+            const trs = loadTriggers(paths);
+            const keyboard = trs.slice(0, 10).map(t => [{ text: t.trigger.slice(0,30), callback_data: `trview_${waId}_${t.id}` }]);
+            await tgBot.sendMessage(chatId, 'רשימת הטריגרים:', { reply_markup: { inline_keyboard: keyboard } });
+            return tgBot.answerCallbackQuery(query.id);
+        }
+
+        if (data.startsWith('trview_')) {
+            const parts = data.split('_');
+            const waId = parts[1];
+            const trId = Number(parts[2]);
+            tgStates.set(chatId, { waId, trId });
+            const keyboard = [
+                [{ text: '🗑️ מחק', callback_data: `trdel_${waId}_${trId}` }],
+                [{ text: '✏️ ערוך', callback_data: `tredit_${waId}_${trId}` }]
+            ];
+            await tgBot.sendMessage(chatId, 'בחר פעולה לטריגר:', { reply_markup: { inline_keyboard: keyboard } });
+            return tgBot.answerCallbackQuery(query.id);
+        }
+
+        if (data.startsWith('tredit_')) {
+            const parts = data.split('_');
+            const waId = parts[1];
+            const trId = Number(parts[2]);
+            tgStates.set(chatId, { waId, action: 'tr_edit', trId });
+            await tgBot.sendMessage(chatId, 'כתוב את מילת הטריגר החדשה:');
+            return tgBot.answerCallbackQuery(query.id);
+        }
+
+        if (data.startsWith('trdel_')) {
+            const parts = data.split('_');
+            const waId = parts[1];
+            const trId = Number(parts[2]);
+            const chat = await client.getChatById(waId);
+            const safeName = await getSafeNameForChat(chat);
+            const paths = getChatPaths(waId, safeName);
+            const trs = loadTriggers(paths).filter(t => t.id !== trId);
+            saveTriggers(paths, trs);
+            await tgBot.sendMessage(chatId, 'הטריגר נמחק.');
+            return tgBot.answerCallbackQuery(query.id);
+        }
+
+        if (data.startsWith('mergepr_')) {
+            const idx = Number(data.split('_')[1]);
+            const state = tgStates.get(chatId);
+            const pr = state?.prs?.[idx];
+            if (!pr) { await tgBot.sendMessage(chatId, 'PR לא נמצא.'); return tgBot.answerCallbackQuery(query.id); }
+            tgStates.set(chatId, { action: 'merge_confirm', pr });
+            const keyboard = [[{ text: 'כן', callback_data: 'merge_yes' }, { text: 'לא', callback_data: 'merge_no' }]];
+            await tgBot.sendMessage(chatId, `האם למזג PR #${pr.number}?`, { reply_markup: { inline_keyboard: keyboard } });
+            return tgBot.answerCallbackQuery(query.id);
+        }
+
+        if (data === 'merge_yes') {
+            const state = tgStates.get(chatId);
+            const pr = state?.pr;
+            if (!pr) { await tgBot.sendMessage(chatId, 'אין PR לביצוע.'); return tgBot.answerCallbackQuery(query.id); }
             try {
-                files = JSON.parse(fs.readFileSync(paths.generatedFilesIndex, 'utf8'));
-            } catch {}
+                await execPromise(`gh pr merge ${pr.number} --merge`);
+                const kb = [[{ text: '🔄 Restart', callback_data: 'gh_restart' }]];
+                await tgBot.sendMessage(chatId, 'המיזוג הושלם.', { reply_markup: { inline_keyboard: kb } });
+            } catch (err) {
+                console.error('[merge_yes]', err);
+                await tgBot.sendMessage(chatId, 'שגיאה במיזוג.');
+            }
+            tgStates.delete(chatId);
+            return tgBot.answerCallbackQuery(query.id);
         }
-        const keyboard = files.slice(0, 10).map((f, idx) => [{ text: f.filename || `file${idx+1}`, callback_data: `getfile_${waId}_${idx}` }]);
-        if (keyboard.length === 0) keyboard.push([{ text: 'אין קבצים', callback_data: 'noop' }]);
-        tgStates.set(chatId, { waId, files });
-        tgBot.sendMessage(chatId, 'בחר קובץ:', { reply_markup: { inline_keyboard: keyboard } });
-        return tgBot.answerCallbackQuery(query.id);
-    }
 
-    if (data.startsWith('getfile_')) {
-        const parts = data.split('_');
-        const waId = parts[1];
-        const idx = Number(parts[2]);
-        const state = tgStates.get(chatId);
-        const file = state?.files?.[idx];
-        if (file && fs.existsSync(file.generatedFilePath)) {
-            await tgBot.sendDocument(chatId, file.generatedFilePath);
-        } else {
-            tgBot.sendMessage(chatId, 'קובץ לא נמצא.');
+        if (data === 'merge_no') {
+            await tgBot.sendMessage(chatId, 'הפעולה בוטלה.');
+            tgStates.delete(chatId);
+            return tgBot.answerCallbackQuery(query.id);
         }
-        return tgBot.answerCallbackQuery(query.id);
-    }
 
-    if (data.startsWith('triggers_')) {
-        const waId = data.slice(9);
-        const chat = await client.getChatById(waId);
-        const safeName = await getSafeNameForChat(chat);
-        const paths = getChatPaths(waId, safeName);
-        const trs = loadTriggers(paths);
-        const keyboard = trs.slice(0, 10).map(t => [{ text: t.trigger.slice(0,30), callback_data: `trview_${waId}_${t.id}` }]);
-        tgBot.sendMessage(chatId, 'רשימת הטריגרים:', { reply_markup: { inline_keyboard: keyboard } });
-        return tgBot.answerCallbackQuery(query.id);
-    }
+        if (data.startsWith('revertpr_')) {
+            const idx = Number(data.split('_')[1]);
+            const state = tgStates.get(chatId);
+            const pr = state?.prs?.[idx];
+            if (!pr) { await tgBot.sendMessage(chatId, 'PR לא נמצא.'); return tgBot.answerCallbackQuery(query.id); }
+            tgStates.set(chatId, { action: 'revert_confirm', pr });
+            const keyboard = [[{ text: 'כן', callback_data: 'revert_yes' }, { text: 'לא', callback_data: 'revert_no' }]];
+            await tgBot.sendMessage(chatId, `האם לשחזר PR #${pr.number}?`, { reply_markup: { inline_keyboard: keyboard } });
+            return tgBot.answerCallbackQuery(query.id);
+        }
 
-    if (data.startsWith('trview_')) {
-        const parts = data.split('_');
-        const waId = parts[1];
-        const trId = Number(parts[2]);
-        tgStates.set(chatId, { waId, trId });
-        const keyboard = [
-            [{ text: '🗑️ מחק', callback_data: `trdel_${waId}_${trId}` }],
-            [{ text: '✏️ ערוך', callback_data: `tredit_${waId}_${trId}` }]
-        ];
-        tgBot.sendMessage(chatId, 'בחר פעולה לטריגר:', { reply_markup: { inline_keyboard: keyboard } });
-        return tgBot.answerCallbackQuery(query.id);
-    }
+        if (data === 'revert_yes') {
+            const state = tgStates.get(chatId);
+            const pr = state?.pr;
+            if (!pr) { await tgBot.sendMessage(chatId, 'אין PR לשחזור.'); return tgBot.answerCallbackQuery(query.id); }
+            try {
+                await execPromise(`gh pr revert ${pr.number}`);
+                const kb = [[{ text: '🔄 Restart', callback_data: 'gh_restart' }]];
+                await tgBot.sendMessage(chatId, 'בוצע revert.', { reply_markup: { inline_keyboard: kb } });
+            } catch (err) {
+                console.error('[revert_yes]', err);
+                await tgBot.sendMessage(chatId, 'שגיאה בביצוע revert.');
+            }
+            tgStates.delete(chatId);
+            return tgBot.answerCallbackQuery(query.id);
+        }
 
-    if (data.startsWith('tredit_')) {
-        const parts = data.split('_');
-        const waId = parts[1];
-        const trId = Number(parts[2]);
-        tgStates.set(chatId, { waId, action: 'tr_edit', trId });
-        tgBot.sendMessage(chatId, 'כתוב את מילת הטריגר החדשה:');
-        return tgBot.answerCallbackQuery(query.id);
-    }
+        if (data === 'revert_no') {
+            await tgBot.sendMessage(chatId, 'הפעולה בוטלה.');
+            tgStates.delete(chatId);
+            return tgBot.answerCallbackQuery(query.id);
+        }
 
-    if (data.startsWith('trdel_')) {
-        const parts = data.split('_');
-        const waId = parts[1];
-        const trId = Number(parts[2]);
-        const chat = await client.getChatById(waId);
-        const safeName = await getSafeNameForChat(chat);
-        const paths = getChatPaths(waId, safeName);
-        const trs = loadTriggers(paths).filter(t => t.id !== trId);
-        saveTriggers(paths, trs);
-        tgBot.sendMessage(chatId, 'הטריגר נמחק.');
-        return tgBot.answerCallbackQuery(query.id);
-    }
+        if (data === 'gh_restart') {
+            restartBotViaTG(chatId);
+            return tgBot.answerCallbackQuery(query.id);
+        }
 
-    if (data.startsWith('mergepr_')) {
-        const idx = Number(data.split('_')[1]);
-        const state = tgStates.get(chatId);
-        const pr = state?.prs?.[idx];
-        if (!pr) { await tgBot.sendMessage(chatId, 'PR לא נמצא.'); return tgBot.answerCallbackQuery(query.id); }
-        tgStates.set(chatId, { action: 'merge_confirm', pr });
-        const keyboard = [[{ text: 'כן', callback_data: 'merge_yes' }, { text: 'לא', callback_data: 'merge_no' }]];
-        tgBot.sendMessage(chatId, `האם למזג PR #${pr.number}?`, { reply_markup: { inline_keyboard: keyboard } });
-        return tgBot.answerCallbackQuery(query.id);
-    }
 
-    if (data === 'merge_yes') {
-        const state = tgStates.get(chatId);
-        const pr = state?.pr;
-        if (!pr) { await tgBot.sendMessage(chatId, 'אין PR לביצוע.'); return tgBot.answerCallbackQuery(query.id); }
+        if (data === 'manage_groups' || data === 'manage_privates') {
+            const isGroup = data === 'manage_groups';
+            const list = await listChats(isGroup);
+            const keyboard = list.map(c => [{
+                text: `${stoppedChats.has(normalizeChatId(c.id)) ? '❌' : '✅'} ${c.name}`,
+                callback_data: `toggle_${c.id}`
+            }]);
+            tgStates.set(chatId, { manageList: isGroup });
+            await tgBot.editMessageText('לחץ כדי לשנות מצב:', {
+                chat_id: chatId,
+                message_id: query.message.message_id,
+                reply_markup: { inline_keyboard: keyboard }
+            });
+            return tgBot.answerCallbackQuery(query.id);
+        }
+
+        if (data.startsWith('toggle_')) {
+            const waId = normalizeChatId(data.slice(7));
+            if (stoppedChats.has(waId)) {
+                stoppedChats.delete(waId);
+            } else {
+                stoppedChats.add(waId);
+            }
+            saveStoppedChats();
+            const isGroup = tgStates.get(chatId)?.manageList || false;
+            const list = await listChats(isGroup);
+            const keyboard = list.map(c => [{
+                text: `${stoppedChats.has(normalizeChatId(c.id)) ? '❌' : '✅'} ${c.name}`,
+                callback_data: `toggle_${c.id}`
+            }]);
+            await tgBot.editMessageReplyMarkup({ inline_keyboard: keyboard }, { chat_id: chatId, message_id: query.message.message_id });
+            return tgBot.answerCallbackQuery(query.id);
+        }
+    } catch (e) {
+        console.error(`[Telegram] Failed to handle callback_query ${data}:`, e);
         try {
-            await execPromise(`gh pr merge ${pr.number} --merge`);
-            const kb = [[{ text: '🔄 Restart', callback_data: 'gh_restart' }]];
-            await tgBot.sendMessage(chatId, 'המיזוג הושלם.', { reply_markup: { inline_keyboard: kb } });
-        } catch (err) {
-            console.error('[merge_yes]', err);
-            await tgBot.sendMessage(chatId, 'שגיאה במיזוג.');
+            await tgBot.answerCallbackQuery(query.id, { text: 'שגיאה בעיבוד הפעולה' });
+        } catch (e2) {
+            console.error(`[Telegram] Failed to even answer callback query:`, e2);
         }
-        tgStates.delete(chatId);
-        return tgBot.answerCallbackQuery(query.id);
-    }
-
-    if (data === 'merge_no') {
-        tgBot.sendMessage(chatId, 'הפעולה בוטלה.');
-        tgStates.delete(chatId);
-        return tgBot.answerCallbackQuery(query.id);
-    }
-
-    if (data.startsWith('revertpr_')) {
-        const idx = Number(data.split('_')[1]);
-        const state = tgStates.get(chatId);
-        const pr = state?.prs?.[idx];
-        if (!pr) { await tgBot.sendMessage(chatId, 'PR לא נמצא.'); return tgBot.answerCallbackQuery(query.id); }
-        tgStates.set(chatId, { action: 'revert_confirm', pr });
-        const keyboard = [[{ text: 'כן', callback_data: 'revert_yes' }, { text: 'לא', callback_data: 'revert_no' }]];
-        tgBot.sendMessage(chatId, `האם לשחזר PR #${pr.number}?`, { reply_markup: { inline_keyboard: keyboard } });
-        return tgBot.answerCallbackQuery(query.id);
-    }
-
-    if (data === 'revert_yes') {
-        const state = tgStates.get(chatId);
-        const pr = state?.pr;
-        if (!pr) { await tgBot.sendMessage(chatId, 'אין PR לשחזור.'); return tgBot.answerCallbackQuery(query.id); }
-        try {
-            await execPromise(`gh pr revert ${pr.number}`);
-            const kb = [[{ text: '🔄 Restart', callback_data: 'gh_restart' }]];
-            await tgBot.sendMessage(chatId, 'בוצע revert.', { reply_markup: { inline_keyboard: kb } });
-        } catch (err) {
-            console.error('[revert_yes]', err);
-            await tgBot.sendMessage(chatId, 'שגיאה בביצוע revert.');
-        }
-        tgStates.delete(chatId);
-        return tgBot.answerCallbackQuery(query.id);
-    }
-
-    if (data === 'revert_no') {
-        tgBot.sendMessage(chatId, 'הפעולה בוטלה.');
-        tgStates.delete(chatId);
-        return tgBot.answerCallbackQuery(query.id);
-    }
-
-    if (data === 'gh_restart') {
-        restartBotViaTG(chatId);
-        return tgBot.answerCallbackQuery(query.id);
-    }
-
-
-    if (data === 'manage_groups' || data === 'manage_privates') {
-        const isGroup = data === 'manage_groups';
-        const list = await listChats(isGroup);
-        const keyboard = list.map(c => [{
-            text: `${stoppedChats.has(normalizeChatId(c.id)) ? '❌' : '✅'} ${c.name}`,
-            callback_data: `toggle_${c.id}`
-        }]);
-        tgStates.set(chatId, { manageList: isGroup });
-        tgBot.editMessageText('לחץ כדי לשנות מצב:', {
-            chat_id: chatId,
-            message_id: query.message.message_id,
-            reply_markup: { inline_keyboard: keyboard }
-        });
-        return tgBot.answerCallbackQuery(query.id);
-    }
-
-    if (data.startsWith('toggle_')) {
-        const waId = normalizeChatId(data.slice(7));
-        if (stoppedChats.has(waId)) {
-            stoppedChats.delete(waId);
-        } else {
-            stoppedChats.add(waId);
-        }
-        saveStoppedChats();
-        const isGroup = tgStates.get(chatId)?.manageList || false;
-        const list = await listChats(isGroup);
-        const keyboard = list.map(c => [{
-            text: `${stoppedChats.has(normalizeChatId(c.id)) ? '❌' : '✅'} ${c.name}`,
-            callback_data: `toggle_${c.id}`
-        }]);
-        tgBot.editMessageReplyMarkup({ inline_keyboard: keyboard }, { chat_id: chatId, message_id: query.message.message_id });
-        return tgBot.answerCallbackQuery(query.id);
     }
 });
 
@@ -1540,179 +1605,215 @@ async function processSecretMessageToPiti(waId, text, file) {
 
 async function runGeminiUpdate(promptText, sendFn) {
     if (geminiUpdateInProgress) {
-        sendFn('⚠️ תהליך עדכון כבר מתבצע, אנא המתן לסיומו.');
+        await sendFn('⚠️ תהליך עדכון כבר מתבצע, אנא המתן לסיומו.');
         return;
     }
     geminiUpdateInProgress = true;
-    try {
-        const bashrcPath = path.join(os.homedir(), '.bashrc');
-        fs.appendFileSync(bashrcPath, `export GEMINI_API_KEY="${DEFAULT_GEMINI_API_KEY}"\n`);
-    } catch (err) {
-        console.error('[Gemini Update] Failed to update .bashrc:', err);
+
+    const apiKey = apiKeyManager.getRandomApiKey();
+    if (!apiKey) {
+        await sendFn('❌ אין מפתח API זמין של Gemini.');
+        geminiUpdateInProgress = false;
+        return;
     }
-    // Run gemini -I to ensure CLI uses latest config
+
+    console.log(`[Gemini CLI INPUT] Using API Key ending in ...${apiKey.slice(-4)} for update.`);
+    
     try {
-        spawnSync('gemini', ['-I'], { cwd: __dirname, stdio: 'inherit' });
+        await sendFn('🔄 מתחיל עדכון קוד באמצעות Gemini CLI...');
     } catch (e) {
-        console.error('[Gemini CLI] gemini -I failed:', e);
+        console.error(`[Telegram] Failed to send initial update message:`, e);
     }
-    console.log(`[Gemini CLI INPUT] ${promptText}`);
+
     return new Promise((resolve, reject) => {
-        const gemini = spawn('gemini', ['-i'], { cwd: __dirname });
-        gemini.stdin.write(promptText);
-        gemini.stdin.end();
+        const env = { ...process.env, GEMINI_API_KEY: apiKey };
+        const gemini = spawn('gemini', ['-i'], { cwd: __dirname, env: env });
 
         let output = '';
+        let errorOutput = '';
+
         gemini.stdout.on('data', data => {
             const chunk = data.toString();
             output += chunk;
             console.log(`[Gemini CLI STDOUT] ${chunk.trim()}`);
-            sendFn(chunk);
         });
+
         gemini.stderr.on('data', data => {
             const errChunk = data.toString();
-            output += errChunk;
+            errorOutput += errChunk;
             console.error(`[Gemini CLI STDERR] ${errChunk.trim()}`);
-            sendFn(errChunk);
         });
-        gemini.on('close', code => {
+
+        gemini.on('close', async code => {
             geminiUpdateInProgress = false;
-            sendFn(`העדכון הסתיים (קוד יציאה ${code}).`);
-            if (output.trim()) {
-                const msg = output.length > 3500 ? output.slice(-3500) : output;
-                sendFn(`פלט gemini:\n\n${msg}`);
+            const fullOutput = `STDOUT:\n${output}\n\nSTDERR:\n${errorOutput}`;
+
+            try {
+                if (code !== 0) {
+                    apiKeyManager.disableKey(apiKey);
+                    console.warn(`[Gemini CLI] Disabled API key ...${apiKey.slice(-4)} due to non-zero exit code: ${code}`);
+                    await sendFn(`העדכון נכשל (קוד יציאה ${code}). מפתח ה-API ששימש הושבת.`);
+                } else {
+                    await sendFn(`העדכון הסתיים בהצלחה (קוד יציאה ${code}).`);
+                }
+                
+                const finalMessage = `פלט מלא של gemini:\n\n${fullOutput}`;
+                
+                const MAX_LENGTH = 4000;
+                if (finalMessage.length > MAX_LENGTH) {
+                    await sendFn('הפלט ארוך, שולח אותו בחלקים:');
+                    for (let i = 0; i < finalMessage.length; i += MAX_LENGTH) {
+                        const chunk = finalMessage.substring(i, i + MAX_LENGTH);
+                        await sendFn(chunk);
+                    }
+                } else {
+                    await sendFn(finalMessage);
+                }
+            } catch (e) {
+                console.error(`[Telegram] Failed to send final update message:`, e);
             }
+            
             resolve();
         });
-        gemini.on('error', err => {
+
+        gemini.on('error', async err => {
             geminiUpdateInProgress = false;
-            console.error('[Gemini CLI] spawn error:', err);
-            const errMsg = err.code === 'ENOENT' ? 'gemini CLI לא נמצא במערכת.' : 'שגיאה בהרצת gemini CLI.';
-            sendFn(errMsg);
+            apiKeyManager.disableKey(apiKey);
+            console.error(`[Gemini CLI] Spawn error for key ...${apiKey.slice(-4)}:`, err);
+            const errMsg = err.code === 'ENOENT' 
+                ? 'gemini CLI לא נמצא במערכת.' 
+                : 'שגיאה קריטית בהרצת gemini CLI.';
+            try {
+                await sendFn(errMsg);
+            } catch (e) {
+                console.error(`[Telegram] Failed to send spawn error message:`, e);
+            }
             reject(err);
         });
+
+        gemini.stdin.write(promptText);
+        gemini.stdin.end();
     });
 }
 
 tgBot.on('message', async (msg) => {
-    if (!msg.text && !msg.document && !msg.photo && !msg.video) return; // ignore commands only
-    if (msg.text && msg.text.startsWith('/')) return; // handled elsewhere
-    const state = tgStates.get(msg.chat.id);
-    if (!state) {
-        sendMainMenu(msg.chat.id);
-        return;
-    }
-
-    const { waId, action, memId, trId, files } = state;
-
-    const downloadTgFile = async () => {
-        let fileId, mime;
-        if (msg.photo) {
-            const ph = msg.photo[msg.photo.length - 1];
-            fileId = ph.file_id;
-            mime = 'image/jpeg';
-        } else if (msg.document) {
-            fileId = msg.document.file_id;
-            mime = msg.document.mime_type;
-        } else if (msg.video) {
-            fileId = msg.video.file_id;
-            mime = msg.video.mime_type;
-        }
-        if (!fileId) return null;
-        const dir = path.join(__dirname, 'tg_downloads');
-        fs.mkdirSync(dir, { recursive: true });
-        const filePath = await tgBot.downloadFile(fileId, dir);
-        return { path: filePath, mime };
-    };
-
-    if (action === 'send') {
-        const textContent = msg.text || msg.caption || '';
-        const text = textContent ? `פיתי\n\n${textContent}` : '';
-        const file = await downloadTgFile();
-        if (file) {
-            const media = MessageMedia.fromFilePath(file.path);
-            await client.sendMessage(waId, media, { caption: text || undefined });
-        } else if (text) {
-            await client.sendMessage(waId, text);
-        }
-        const back = { reply_markup: { inline_keyboard: [[{ text: '⬅️ חזרה לתפריט', callback_data: `chat_${waId}` }]] } };
-        tgBot.sendMessage(msg.chat.id, 'ההודעה נשלחה.', back);
-    } else if (action === 'secret') {
-        const file = await downloadTgFile();
-        const textContent = msg.text || msg.caption || '';
-        await processSecretMessageToPiti(waId, textContent, file).catch(err =>
-            console.error('[Telegram Secret] Async error:', err));
-        const back = { reply_markup: { inline_keyboard: [[{ text: '⬅️ חזרה לתפריט', callback_data: `chat_${waId}` }]] } };
-        tgBot.sendMessage(msg.chat.id, 'ההודעה נשלחה לפיתי.', back);
-    } else if (action === 'history') {
-        const count = parseInt(msg.text, 10) || 0;
-        if (count <= 0) {
-            tgBot.sendMessage(msg.chat.id, 'מספר לא תקין.');
+    try {
+        if (!msg.text && !msg.document && !msg.photo && !msg.video) return; // ignore commands only
+        if (msg.text && msg.text.startsWith('/')) return; // handled elsewhere
+        const state = tgStates.get(msg.chat.id);
+        if (!state) {
+            sendMainMenu(msg.chat.id);
             return;
         }
-        const chat = await client.getChatById(waId);
-        const messages = await chat.fetchMessages({ limit: count });
-        let out = messages.map(m => `${(m._data?.notifyName || m._data?.from)}: ${m.body}`).join('\n');
-        tgBot.sendMessage(msg.chat.id, out || 'אין הודעות.');
-        tgStates.delete(msg.chat.id);
-    } else if (action === 'mem_add') {
-        const chat = await client.getChatById(waId);
-        const safeName = await getSafeNameForChat(chat);
-        const paths = getChatPaths(waId, safeName);
-        const mems = loadMemories(paths);
-        mems.unshift({ id: Date.now(), info: msg.text });
-        await saveMemories(paths, mems);
-        tgBot.sendMessage(msg.chat.id, 'הזיכרון נשמר.');
-        tgStates.delete(msg.chat.id);
-    } else if (action === 'mem_edit') {
-        const chat = await client.getChatById(waId);
-        const safeName = await getSafeNameForChat(chat);
-        const paths = getChatPaths(waId, safeName);
-        const mems = loadMemories(paths);
-        const idx = mems.findIndex(m => m.id === memId);
-        if (idx >= 0) {
-            mems[idx].info = msg.text;
+
+        const { waId, action, memId, trId, files } = state;
+
+        const downloadTgFile = async () => {
+            let fileId, mime;
+            if (msg.photo) {
+                const ph = msg.photo[msg.photo.length - 1];
+                fileId = ph.file_id;
+                mime = 'image/jpeg';
+            } else if (msg.document) {
+                fileId = msg.document.file_id;
+                mime = msg.document.mime_type;
+            } else if (msg.video) {
+                fileId = msg.video.file_id;
+                mime = msg.video.mime_type;
+            }
+            if (!fileId) return null;
+            const dir = path.join(__dirname, 'tg_downloads');
+            fs.mkdirSync(dir, { recursive: true });
+            const filePath = await tgBot.downloadFile(fileId, dir);
+            return { path: filePath, mime };
+        };
+
+        if (action === 'send') {
+            const textContent = msg.text || msg.caption || '';
+            const text = textContent ? `פיתי\n\n${textContent}` : '';
+            const file = await downloadTgFile();
+            if (file) {
+                const media = MessageMedia.fromFilePath(file.path);
+                await client.sendMessage(waId, media, { caption: text || undefined });
+            } else if (text) {
+                await client.sendMessage(waId, text);
+            }
+            const back = { reply_markup: { inline_keyboard: [[{ text: '⬅️ חזרה לתפריט', callback_data: `chat_${waId}` }]] } };
+            await tgBot.sendMessage(msg.chat.id, 'ההודעה נשלחה.', back);
+        } else if (action === 'secret') {
+            const file = await downloadTgFile();
+            const textContent = msg.text || msg.caption || '';
+            await processSecretMessageToPiti(waId, textContent, file).catch(err =>
+                console.error('[Telegram Secret] Async error:', err));
+            const back = { reply_markup: { inline_keyboard: [[{ text: '⬅️ חזרה לתפריט', callback_data: `chat_${waId}` }]] } };
+            await tgBot.sendMessage(msg.chat.id, 'ההודעה נשלחה לפיתי.', back);
+        } else if (action === 'history') {
+            const count = parseInt(msg.text, 10) || 0;
+            if (count <= 0) {
+                await tgBot.sendMessage(msg.chat.id, 'מספר לא תקין.');
+                return;
+            }
+            const chat = await client.getChatById(waId);
+            const messages = await chat.fetchMessages({ limit: count });
+            let out = messages.map(m => `${(m._data?.notifyName || m._data?.from)}: ${m.body}`).join('\n');
+            await tgBot.sendMessage(msg.chat.id, out || 'אין הודעות.');
+            tgStates.delete(msg.chat.id);
+        } else if (action === 'mem_add') {
+            const chat = await client.getChatById(waId);
+            const safeName = await getSafeNameForChat(chat);
+            const paths = getChatPaths(waId, safeName);
+            const mems = loadMemories(paths);
+            mems.unshift({ id: Date.now(), info: msg.text });
             await saveMemories(paths, mems);
-            tgBot.sendMessage(msg.chat.id, 'הזיכרון עודכן.');
-        } else {
-            tgBot.sendMessage(msg.chat.id, 'זיכרון לא נמצא.');
-        }
-        tgStates.delete(msg.chat.id);
-    } else if (action === 'tr_edit') {
-        const chat = await client.getChatById(waId);
-        const safeName = await getSafeNameForChat(chat);
-        const paths = getChatPaths(waId, safeName);
-        const trs = loadTriggers(paths);
-        const idx = trs.findIndex(t => t.id === trId);
-        if (idx >= 0) {
-            trs[idx].trigger = msg.text;
-            saveTriggers(paths, trs);
-            tgBot.sendMessage(msg.chat.id, 'הטריגר עודכן.');
-        } else {
-            tgBot.sendMessage(msg.chat.id, 'טריגר לא נמצא.');
-        }
-        tgStates.delete(msg.chat.id);
-    } else if (action === 'update_prompt') {
-        const extra = ' ותיצור pull request על הקבצים ששינית. אל תשאל שאלות כי המשתמש לא יכול לענות.';
-        const fullText = (msg.text || '') + extra;
-        try {
+            await tgBot.sendMessage(msg.chat.id, 'הזיכרון נשמר.');
+            tgStates.delete(msg.chat.id);
+        } else if (action === 'mem_edit') {
+            const chat = await client.getChatById(waId);
+            const safeName = await getSafeNameForChat(chat);
+            const paths = getChatPaths(waId, safeName);
+            const mems = loadMemories(paths);
+            const idx = mems.findIndex(m => m.id === memId);
+            if (idx >= 0) {
+                mems[idx].info = msg.text;
+                await saveMemories(paths, mems);
+                await tgBot.sendMessage(msg.chat.id, 'הזיכרון עודכן.');
+            } else {
+                await tgBot.sendMessage(msg.chat.id, 'זיכרון לא נמצא.');
+            }
+            tgStates.delete(msg.chat.id);
+        } else if (action === 'tr_edit') {
+            const chat = await client.getChatById(waId);
+            const safeName = await getSafeNameForChat(chat);
+            const paths = getChatPaths(waId, safeName);
+            const trs = loadTriggers(paths);
+            const idx = trs.findIndex(t => t.id === trId);
+            if (idx >= 0) {
+                trs[idx].trigger = msg.text;
+                saveTriggers(paths, trs);
+                await tgBot.sendMessage(msg.chat.id, 'הטריגר עודכן.');
+            } else {
+                await tgBot.sendMessage(msg.chat.id, 'טריגר לא נמצא.');
+            }
+            tgStates.delete(msg.chat.id);
+        } else if (action === 'update_prompt') {
+            const extra = ' ותיצור pull request על הקבצים ששינית. אל תשאל שאלות כי המשתמש לא יכול לענות.';
+            const fullText = (msg.text || '') + extra;
             await runGeminiUpdate(fullText, txt => tgBot.sendMessage(msg.chat.id, txt));
-        } catch (err) {
-            console.error('[TG Update]', err);
-            tgBot.sendMessage(msg.chat.id, 'שגיאה בביצוע העדכון.');
+            tgStates.delete(msg.chat.id);
+            sendMainMenu(msg.chat.id);
+        } else if (action === 'restore_mems') {
+            if (msg.document) {
+                const filePath = await tgBot.downloadFile(msg.document.file_id, path.join(__dirname, 'tg_downloads'));
+                fs.copyFileSync(filePath, path.join(__dirname, 'memories.json'));
+                await tgBot.sendMessage(msg.chat.id, 'הזיכרונות שוחזרו.');
+            } else {
+                await tgBot.sendMessage(msg.chat.id, 'אנא שלח קובץ memories.json.');
+                return;
+            }
+            tgStates.delete(msg.chat.id);
         }
-        tgStates.delete(msg.chat.id);
-        sendMainMenu(msg.chat.id);
-    } else if (action === 'restore_mems') {
-        if (msg.document) {
-            const filePath = await tgBot.downloadFile(msg.document.file_id, path.join(__dirname, 'tg_downloads'));
-            fs.copyFileSync(filePath, path.join(__dirname, 'memories.json'));
-            tgBot.sendMessage(msg.chat.id, 'הזיכרונות שוחזרו.');
-        } else {
-            tgBot.sendMessage(msg.chat.id, 'אנא שלח קובץ memories.json.');
-            return;
-        }
-        tgStates.delete(msg.chat.id);
+    } catch (e) {
+        console.error(`[Telegram] Failed to handle message:`, e);
     }
 });
 // ---------------------------------------------------------------
@@ -12002,6 +12103,11 @@ async function searchYouTube(query) {
 
 
 client.on('message', async (msg) => {
+    if (msg.body.startsWith('/info21')) {
+        msg.reply('פיתי אומר: למה דג לא יכול לשיר? כי הוא מפחד מהרשת!');
+        return;
+    }
+
     const originalReply = msg.reply;
 
     msg.reply = async function (text, ...args) {
