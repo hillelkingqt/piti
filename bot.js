@@ -12,7 +12,7 @@ const { searchDuckDuckGoTop10 } = require('./ducksearch');
 const QRCode = require('qrcode');
 const sharp = require('sharp');
 const { Buffer } = require('buffer');
-const { spawn } = require('child_process');
+const { spawn, spawnSync } = require('child_process');
 
 const { apiKeyManager } = require('./services/ApiKeyManager');
 const writtenMessageIds = new Set();
