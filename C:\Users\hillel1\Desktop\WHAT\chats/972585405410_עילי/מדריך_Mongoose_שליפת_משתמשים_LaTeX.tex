@@ -1,0 +1,262 @@
+\documentclass[12pt]{article}
+
+%========== (1) Math Packages ==========
+\usepackage{amsmath,amssymb,amsthm}
+
+%========== (2) General Packages: Hebrew support, fonts, etc ==========
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{enumerate}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\usepackage{setspace}
+\usepackage[most]{tcolorbox}
+
+\usepackage{fontspec}
+\usepackage{polyglossia}
+
+\newcommand{\enquote}[1]{\textquotedbl bluff #1\textquotedbl right}
+
+% Language settings
+\setdefaultlanguage{hebrew}
+\setotherlanguage{english}
+
+% Fonts
+% Ensure these fonts are available on your system.
+% David CLM is commonly available in TeX Live/MikTeX.
+% Times New Roman is a standard system font.
+\newfontfamily\hebrewfont[Script=Hebrew]{David CLM}
+\newfontfamily\englishfont{Times New Roman}
+\newfontfamily\hebrewfonttt[Script=Hebrew]{David CLM} % Using David CLM for Hebrew monospace as well
+
+% Hyperref link color settings
+% Using black for links for a clean, print-friendly look
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  urlcolor=black,
+  citecolor=black,
+  linktoc=all % Add links to section titles in TOC
+}
+
+%========== Spacing and Paragraphs ==========
+\onehalfspacing
+\setlength{\parskip}{6pt}
+\setlength{\parindent}{0pt}
+
+%========== Header/Footer Settings ==========
+\pagestyle{fancy}
+\setlength{\headheight}{14.5pt} % Adjust if needed based on font size and content
+\addtolength{\topmargin}{-2.5pt} % Adjust top margin to make space for header
+\fancyhf{} % Clear default header/footer
+\lhead{} % Left header empty as per final instruction
+\rhead{\today} % Right header with today's date
+\cfoot{\thepage} % Center footer with page number
+
+%========== tcolorbox Setup ==========
+% Adjusted colors for slightly more saturation as requested, while remaining soft
+\tcbset{
+  colback=blue!15!white, % Slightly more saturated blue background
+  colframe=blue!60!black, % Darker blue frame
+  fonttitle=\bfseries,
+  boxsep=5pt, % Space between box content and frame
+  top=5pt, bottom=5pt, left=5pt, right=5pt,
+  middle=5pt, % Space between title and content
+  arc=2mm, auto outer arc % Rounded corners
+}
+
+%========== Special Boxes: Definition, Remark, Example ==========
+\newtcolorbox{definitionBox}[1]{
+  title=#1,
+  colback=green!15!white, % Slightly more saturated green background
+  colframe=green!60!black, % Darker green frame
+  arc=2mm, auto outer arc,
+  enhanced
+}
+
+\newtcolorbox{remarkBox}[1]{
+  title=#1,
+  colback=yellow!15!white, % Slightly more saturated yellow background
+  colframe=yellow!60!black, % Darker yellow frame
+  arc=2mm, auto outer arc,
+  enhanced
+}
+
+\newtcolorbox{exampleBox}[1]{
+  title=#1,
+  colback=red!15!white, % Slightly more saturated red background
+  colframe=red!60!black, % Darker red frame
+  arc=2mm, auto outer arc,
+  enhanced
+}
+
+% Box for Code/Listing explanation
+\newtcolorbox{codeExplanationBox}[1]{
+  title=#1,
+  colback=gray!10!white, % Light gray background
+  colframe=gray!50!black, % Gray frame
+  arc=2mm, auto outer arc,
+  enhanced
+}
+
+
+% Bullet fix for Hebrew lists
+\renewcommand{\labelitemi}{\bullet} % Use standard bullet symbol
+
+% Table of Contents setup
+\usepackage{tocloft}
+\usepackage{etoolbox}
+\makeatletter
+\renewcommand\tableofcontents{%
+  \section*{\contentsname}%
+  \@starttoc{toc}%
+}
+\makeatother
+
+\begin{document}
+
+\begin{center}
+  \Huge\bfseries מדריך מפורט: שליפת משתמשים והפעלת פונקציה ב-Mongoose
+\end{center}
+
+\vspace{1cm}
+
+\tableofcontents
+
+\newpage
+
+\section{מבוא: שליפת מידע מ-Mongoose}
+
+בעת פיתוח אפליקציות מבוססות Node.js ו-MongoDB, פעולה נפוצה היא שליפת נתונים ממסד הנתונים. ספריית Mongoose מספקת ממשק נוח וקריא לעבודה עם MongoDB, ומאפשרת לבצע פעולות כמו שמירה, עדכון, מחיקה ושליפה של מסמכים (Documents).
+
+מדריך זה יתמקד במקרה ספציפי אך שכיח: כיצד לשלוף את \textbf{כל} המסמכים מאוסף (Collection) ספציפי (בדוגמה שלנו, אוסף ה"משתמשים") וכיצד להפעיל פונקציה מוגדרת מראש על כל אחד מהמסמכים שנשלפו. נשתמש בפונקציה דמיונית בשם \(\englishfont{showinfo}\) כדוגמה לפעולה שניתן לבצע על כל אובייקט משתמש.
+
+\section{שליפת כל המשתמשים באמצעות \(\englishfont{User.find(\{\})}\)}
+
+Mongoose, כאשר מגדירים מודל (Model) כמו \(\englishfont{User}\), מספקת סט של שיטות סטטיות על המודל הזה לביצוע פעולות על האוסף המתאים במסד הנתונים. אחת השיטות הבסיסיות ביותר היא \(\englishfont{find()}\).
+
+\begin{definitionBox}{הגדרה: שיטת \(\englishfont{find()}\)}
+  השיטה \(\englishfont{Model.find()}\) ב-Mongoose משמשת לשליפת מסמכים מאוסף. היא מקבלת אובייקט שאילתה כפרמטר. אם מועבר אובייקט ריק \(\englishfont{\{\}}\), היא תחזיר את \textbf{כל} המסמכים באוסף.
+\end{definitionBox}
+
+לשליפת כל המשתמשים, נשתמש בפקודה הבאה:
+\(\englishfont{User.find(\{\})}\)
+
+\begin{remarkBox}{הערה: פעולות אסינכרוניות}
+  פעולות קריאה למסד נתונים הן בדרך כלל פעולות אסינכרוניות (Asynchronous). משמעות הדבר היא שהקריאה לשיטה כמו \(\englishfont{User.find()}\) לא עוצרת את ריצת התוכנית עד שהנתונים מתקבלים. במקום זאת, היא מחזירה אובייקט \(\englishfont{Promise}\) או מקבלת Callback פונקציה שתופעל כשהפעולה תסתיים. בגישה המודרנית, לרוב נעשה שימוש ב-\(\englishfont{async/await}\) לטיפול בפעולות אסינכרוניות בצורה קריאה יותר.
+\end{remarkBox}
+
+\section{עיבוד המשתמשים שנשלפו}
+
+לאחר ששלפנו בהצלחה את רשימת המשתמשים, נרצה לעבור על כל אחד מהם ולהפעיל עליו פונקציה ספציפית, כמו \(\englishfont{showinfo()}\). רשימת המשתמשים המתקבלת מ-\(\englishfont{User.find(\{\})}\) היא מערך של אובייקטים (מסמכים) של Mongoose.
+
+קיימות מספר דרכים לעבור על איברי מערך ב-JavaScript. שתי הדרכים הנפוצות ביותר הן שיטת \(\englishfont{forEach()}\) ושיטת \(\englishfont{map()}\).
+
+\subsection{איטרציה באמצעות \(\englishfont{forEach()}\)}
+השיטה \(\englishfont{forEach()}\) מבצעת פונקציה מסוימת פעם אחת לכל איבר במערך. זוהי דרך קלה לבצע פעולה צדדית (Side effect) על כל איבר, כמו הדפסה או קריאה לפונקציה שלא אמורה להחזיר ערך משמעותי שצריך לאסוף.
+
+\begin{exampleBox}{דוגמה: שימוש ב-\(\englishfont{forEach}\)}
+  \(\englishfont{users.forEach(user \Rightarrow \{}\)\\
+  \(\quad \englishfont{// Do something with 'user'}\)\\
+  \(\englishfont{\});}\)
+\end{exampleBox}
+
+\subsection{איטרציה באמצעות \(\englishfont{map()}\)}
+השיטה \(\englishfont{map()}\) יוצרת מערך חדש המכיל את התוצאות של קריאה לפונקציה על כל איבר במערך המקורי. היא שימושית כאשר רוצים לשנות את הנתונים או לאסוף מידע מכל איבר למערך חדש.
+
+\begin{exampleBox}{דוגמה: שימוש ב-\(\englishfont{map}\)}
+  \(\englishfont{const processedUsers = users.map(user \Rightarrow \{}\)\\
+  \(\quad \englishfont{return user.showinfo(); \quad // Call showInfo and collect results}\)\\
+  \(\englishfont{\});}\)
+\end{exampleBox}
+
+במקרה של הפעלת פונקציה כמו \(\englishfont{showinfo()}\) על כל משתמש, שתי הגישות אפשריות, תלוי האם רוצים רק לבצע את הפעולה (\(\englishfont{forEach}\)) או גם לאסוף את התוצאות שלה (\(\englishfont{map}\)). הקוד שסיפקת משתמש ב-\(\englishfont{forEach}\) להדפסת המידע, אך גם מראה אפשרות לשימוש ב-\(\englishfont{map}\).
+
+\section{קוד דוגמה מפורט}
+
+להלן קוד JavaScript מלא המדגים כיצד לשלוף את כל המשתמשים, להשתמש ב-\(\englishfont{async/await}\) לטיפול בפעולה האסינכרונית, להשתמש ב-\(\englishfont{try...catch}\) לטיפול בשגיאות, ולבסוף לעבור על המשתמשים שנשלפו ולהפעיל את פונקציית \(\englishfont{showinfo()}\).
+
+\begin{tcolorbox}[title=קוד דוגמה: שליפת משתמשים והפעלת פונקציה ב-Mongoose]
+  \begin{Verbatim}[lang=js]
+async function processAllUsers() {
+  try {
+    // 1. שליפת כל המשתמשים מהמסד
+    // User.find({}) תחזיר Promise שמכיל מערך של כל המסמכים באוסף 'users'
+    const users = await User.find({});
+
+    // 2. בדיקה אם נמצאו משתמשים
+    if (users.length === 0) {
+      console.log('לא נמצאו משתמשים במסד הנתונים.');
+      return; // יציאה מהפונקציה אם אין משתמשים
+    }
+
+    console.log(`נמצאו ${users.length} משתמשים.`);
+
+    // 3. מעבר על כל משתמש והפעלת הפונקציה showInfo
+    // users הוא מערך, forEach מאפשרת לעבור על כל איבר בו
+    users.forEach(user => {
+      // user הוא אובייקט מסמך Mongoose
+      // הפעלת פונקציית showInfo המוגדרת על ה-Schema/Model
+      const userInfo = user.showinfo(); // נניח ש-showinfo מחזירה סטרינג מידע
+      console.log('מידע משתמש:', userInfo);
+    });
+
+    // 4. אופציה חלופית: שימוש ב-map כדי לאסוף את כל התוצאות
+    /*
+    const allUsersInfo = users.map(user => {
+      return user.showinfo(); // הפעלת showInfo על כל משתמש ואיסוף התוצאה
+    });
+    console.log('כל המידע על המשתמשים במערך:', allUsersInfo);
+    */
+
+  } catch (error) {
+    // 5. טיפול בשגיאות במהלך השליפה או העיבוד
+    console.error('שגיאה במהלך שליפת או עיבוד המשתמשים:', error);
+  }
+}
+
+// קריאה לפונקציה לביצוע הפעולה
+// processAllUsers();
+  \end{Verbatim}
+\end{tcolorbox}
+
+\section{הסבר מפורט של הקוד}
+
+נפרט כעת את החלקים השונים של קוד הדוגמה:
+
+\subsection{הגדרת פונקציה אסינכרונית (\(\englishfont{async function}\))}
+\begin{codeExplanationBox}{\(\englishfont{async function processAllUsers()}\)}
+  הגדרת הפונקציה כ-\(\englishfont{async}\) מאפשרת לנו להשתמש במילת המפתח \(\englishfont{await}\) בתוכה. זה מאפשר לנו לכתוב קוד אסינכרוני שנראה ונקרא כמו קוד סינכרוני, מה שמשפר מאוד את קריאות הקוד. הפונקציה \(\englishfont{processAllUsers}\) תחזיר \(\englishfont{Promise}\) באופן אוטומטי.
+\end{codeExplanationBox}
+
+\subsection{טיפול בשגיאות (\(\englishfont{try...catch}\))}
+\begin{codeExplanationBox}{\(\englishfont{try \{ ... \} catch (error) \{ ... \}}\)}
+  בלוק \(\englishfont{try...catch}\) הוא הדרך הסטנדרטית ב-JavaScript לטיפול בשגיאות (Exceptions). הקוד בתוך בלוק \(\englishfont{try}\) מבוצע. אם מתרחשת שגיאה כלשהי בתוך בלוק זה (למשל, בעיית חיבור למסד הנתונים או שגיאה בפעולת \(\englishfont{find}\)), הביצוע עובר מיד לבלוק \(\englishfont{catch}\), שם אובייקט השגיאה זמין במשתנה \(\englishfont{error}\), וניתן לטפל בה בצורה מסודרת, למשל על ידי הדפסתה.
+\end{codeExplanationBox}
+
+\subsection{ביצוע השאילתה האסינכרונית (\(\englishfont{await User.find(\{\})}\))}
+\begin{codeExplanationBox}{\(\englishfont{const users = await User.find(\{\});}\)}
+  כאן אנו קוראים לשיטת \(\englishfont{find(\{\})}\) על מודל המשתמשים \(\englishfont{User}\). כפי שהוסבר, האובייקט הריק \(\englishfont{\{\}}\) כשאלתא אומר ל-Mongoose להחזיר את \textbf{כל} המסמכים. השימוש ב-\(\englishfont{await}\) גורם לריצת הפונקציה \(\englishfont{processAllUsers}\) "להמתין" שה-\(\englishfont{Promise}\) שמוחזר מ-\(\englishfont{User.find}\) ייפתר. כשהוא נפתר בהצלחה, ערך ה-\(\englishfont{Promise}\) (שהוא מערך המשתמשים) נשמר במשתנה \(\englishfont{users}\). אם ה-\(\englishfont{Promise}\) נכשל (כלומר, קרתה שגיאה), השגיאה נזרקת ונתפסת על ידי בלוק \(\englishfont{catch}\).
+\end{codeExplanationBox}
+
+\subsection{בדיקה ואיטרציה על המשתמשים}
+\begin{codeExplanationBox}{בדיקת אורך המערך (\(\englishfont{if (users.length === 0)}\))}
+  זוהי בדיקה חשובה כדי לוודא שאכן נמצאו משתמשים לפני שמנסים לעבור עליהם. אם המערך \(\englishfont{users}\) ריק, מודפסת הודעה מתאימה והפונקציה מסתיימת.
+\end{codeExplanationBox}
+\begin{codeExplanationBox}{מעבר באמצעות \(\englishfont{forEach}\) (\(\englishfont{users.forEach(user \Rightarrow \{ ... \});}\))}
+  אם נמצאו משתמשים, לולאת \(\englishfont{forEach}\) עוברת על כל איבר במערך ה-\(\englishfont{users}\). עבור כל איבר (שהוא אובייקט משתמש יחיד), הפונקציה האנונימית \(\englishfont{user \Rightarrow \{ ... \}}\) מבוצעת. בתוך הפונקציה הזו, משתנה ה-\(\englishfont{user}\) מייצג את אובייקט המשתמש הנוכחי.
+\end{codeExplanationBox}
+
+\subsection{קריאה לפונקציה על אובייקט המשתמש (\(\englishfont{user.showinfo()}\))}
+\begin{codeExplanationBox}{\(\englishfont{const userInfo = user.showinfo();}\)}
+  בתוך לולאת ה-\(\englishfont{forEach}\), אנו קוראים לשיטה \(\englishfont{showinfo()}\) על אובייקט המשתמש הנוכחי. שיטה זו היא שיטת Instance, כלומר היא מוגדרת על ה-\(\englishfont{Schema}\) של המשתמשים ומאפשרת לבצע פעולות ספציפיות על מופע יחיד של משתמש. ההנחה היא ש-\(\englishfont{showinfo()}\) מבצעת מניפולציה על המידע של המשתמש ומחזירה את המידע המעובד (בדוגמה, נניח שהיא מחזירה סטרינג להדפסה). התוצאה נשמרת במשתנה \(\englishfont{userInfo}\) ומוצגת לקונסול.
+\end{codeExplanationBox}
+
+\section{סיכום}
+
+מדריך זה הציג את הדרך הסטנדרטית והמומלצת לשליפת כל המסמכים מאוסף מסוים ב-Mongoose באמצעות \(\englishfont{User.find(\{\})}\), תוך שימוש ב-\(\englishfont{async/await}\) לניהול זרימת הקוד האסינכרונית ו-\(\englishfont{try...catch}\) לטיפול בשגיאות. הראינו כיצד לעבור על המערך המתקבל של מסמכי המשתמשים באמצעות \(\englishfont{forEach}\) ואיך להפעיל פונקציית מופע (\(\englishfont{showinfo()}\)) על כל משתמש בנפרד. שימוש בטכניקות אלו מבטיח קוד קריא, יעיל ובטוח יותר בעת עבודה עם מסד נתונים ביישומי Node.js.
+
+\end{document}

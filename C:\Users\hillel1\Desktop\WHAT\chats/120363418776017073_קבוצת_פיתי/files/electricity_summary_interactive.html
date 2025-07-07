@@ -1,0 +1,205 @@
+<!-- filename: electricity_summary_interactive.html -->
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>סיכום אינטראקטיבי: חשמל</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --border-color: #30363d;
+            --primary-text: #c9d1d9;
+            --secondary-text: #8b949e;
+            --electric-blue: #38bdf8;
+            --electric-yellow: #facc15;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--primary-text);
+            font-family: 'Heebo', sans-serif;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+            overflow: hidden;
+        }
+        
+        /* Custom cursor style */
+        .electric-cursor {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="%23facc15" stroke="black" stroke-width="1"><path d="M13 2L3 14h9l-1 8L21 10h-9z"/></svg>'), auto !important;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        h1 {
+            color: var(--electric-blue);
+            font-size: 2.5rem;
+            text-shadow: 0 0 10px var(--electric-blue), 0 0 20px var(--electric-blue);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 25px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card h2 {
+            margin-top: 0;
+            color: var(--electric-blue);
+            font-size: 1.5rem;
+        }
+        
+        .card p {
+            color: var(--secondary-text);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        /* Zap effect styles */
+        .zap {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background-color: var(--electric-yellow);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0;
+            box-shadow: 0 0 10px 2px var(--electric-yellow), 0 0 20px 5px white;
+            animation: zap-flash 0.15s ease-out;
+        }
+        
+        .zap-line {
+             position: absolute;
+             height: 2px;
+             background: linear-gradient(90deg, rgba(250,204,21,0), var(--electric-yellow), rgba(250,204,21,0));
+             pointer-events: none;
+             transform-origin: left;
+             animation: zap-fade 0.3s forwards;
+        }
+
+        @keyframes zap-flash {
+            0% { opacity: 1; transform: scale(1.5); }
+            100% { opacity: 0; transform: scale(0); }
+        }
+        
+        @keyframes zap-fade {
+            0% { opacity: 0.8; }
+            100% { opacity: 0; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>סיכום אינטראקטיבי: חשמל ⚡</h1>
+        <p style="color: var(--secondary-text);">העבר את העכבר מעל הכרטיסים כדי לראות את הקסם!</p>
+
+        <div class="grid">
+            <div class="card">
+                <h2>חוק קולון</h2>
+                <p>מתאר את הכוח החשמלי (דחייה או משיכה) הפועל בין שני מטענים חשמליים נקודתיים. הכוח תלוי בגודל המטענים ובמרחק ביניהם.</p>
+            </div>
+            <div class="card">
+                <h2>שדה חשמלי</h2>
+                <p>תכונה של המרחב סביב מטען חשמלי. כל מטען אחר שייכנס לשדה זה ירגיש את השפעתו של הכוח החשמלי.</p>
+            </div>
+            <div class="card">
+                <h2>חוק אוהם</h2>
+                <p>קובע את הקשר הישר בין המתח, הזרם וההתנגדות במעגל חשמלי. הנוסחה המפורסמת: V = IR.</p>
+            </div>
+            <div class="card">
+                <h2>פוטנציאל חשמלי</h2>
+                <p>האנרגיה הפוטנציאלית החשמלית ליחידת מטען. ההפרש בפוטנציאל בין שתי נקודות נקרא "מתח חשמלי".</p>
+            </div>
+            <div class="card">
+                <h2>מעגל חשמלי</h2>
+                <p>מסלול סגור המאפשר זרימה של זרם חשמלי. בדרך כלל מורכב ממקור מתח, מוליכים וצרכנים (כמו נורה או נגד).</p>
+            </div>
+            <div class="card">
+                <h2>אלקטרומגנטיות</h2>
+                <p>התחום המאחד בין תופעות החשמל והמגנטיות. זרם חשמלי יוצר שדה מגנטי, ושינוי בשדה מגנטי יכול ליצור זרם חשמלי.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.card');
+
+            const createZapEffect = (e) => {
+                let lastX = e.clientX;
+                let lastY = e.clientY;
+
+                for (let i = 0; i < 8; i++) { // Create 8 segments for the lightning bolt
+                    const zap = document.createElement('div');
+                    zap.className = 'zap';
+                    document.body.appendChild(zap);
+                    zap.style.left = e.clientX + 'px';
+                    zap.style.top = e.clientY + 'px';
+
+                    const angle = Math.random() * 2 * Math.PI;
+                    const length = Math.random() * 40 + 20;
+                    const newX = lastX + length * Math.cos(angle);
+                    const newY = lastY + length * Math.sin(angle);
+
+                    const line = document.createElement('div');
+                    line.className = 'zap-line';
+                    document.body.appendChild(line);
+                    
+                    const deltaX = newX - lastX;
+                    const deltaY = newY - lastY;
+                    const lineLength = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
+                    const lineAngle = Math.atan2(deltaY, deltaX) * 180 / Math.PI;
+
+                    line.style.width = lineLength + 'px';
+                    line.style.left = lastX + 'px';
+                    line.style.top = lastY + 'px';
+                    line.style.transform = `rotate(${lineAngle}deg)`;
+
+                    lastX = newX;
+                    lastY = newY;
+
+                    setTimeout(() => {
+                        zap.remove();
+                        line.remove();
+                    }, 300);
+                }
+            };
+
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', (e) => {
+                    document.body.classList.add('electric-cursor');
+                    createZapEffect(e);
+                });
+
+                card.addEventListener('mousemove', (e) => {
+                     // You can add more effects here on move if needed
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    document.body.classList.remove('electric-cursor');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

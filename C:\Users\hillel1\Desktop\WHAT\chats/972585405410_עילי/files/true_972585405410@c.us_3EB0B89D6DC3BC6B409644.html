@@ -1,0 +1,289 @@
+<!-- filename: מבחני_השערות_חד_דו_צדדי.html -->
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>המדריך המלא למבחני השערות: ימני, שמאלי ודו-צדדי</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" integrity="sha384-cpW21h6ecxGcbe42h40AeKosLMg3IGIhNZAP0sry9JS9CCzIv4I1aENXT3oQE2o0" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --primary-color: #bb86fc;
+            --secondary-color: #03dac6;
+            --surface-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --header-color: #ffffff;
+            --border-color: #333333;
+        }
+
+        body {
+            font-family: 'Rubik', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.8;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1, h2, h3 {
+            color: var(--header-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+        }
+
+        .step-box {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-left: 5px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        .step-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(187, 134, 252, 0.3);
+        }
+
+        .math-block {
+            display: block;
+            background-color: #2a2a2e;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            border: 1px solid #444;
+            overflow-x: auto;
+            text-align: center;
+        }
+
+        .katex {
+            font-size: 1.2em !important;
+            direction: ltr;
+        }
+
+        .katex-display {
+            margin: 1em 0;
+        }
+        
+        .explanation {
+            background-color: rgba(3, 218, 198, 0.1);
+            border-right: 3px solid var(--secondary-color);
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        
+        .example {
+             background-color: rgba(187, 134, 252, 0.1);
+             border-right: 3px solid var(--primary-color);
+             padding: 15px;
+             border-radius: 5px;
+             margin-top: 15px;
+        }
+
+        strong {
+            color: var(--primary-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: var(--surface-color);
+        }
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            text-align: center;
+        }
+        th {
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+            font-weight: bold;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>המדריך המלא למבחני השערות: זנב ימני, שמאלי ודו-צדדי</h1>
+
+        <div class="step-box" id="step-0">
+            <h2>שלב 0: אקספוזיציה - מה זה בכלל מבחן השערות?</h2>
+            <p>בסטטיסטיקה, אנחנו כל הזמן רוצים לבדוק טענות על האוכלוסייה. למשל: "האם תרופה חדשה יעילה יותר מהישנה?", "האם הגובה הממוצע של סטודנטים הוא 175 ס"מ?".</p>
+            <p><strong>מבחן השערות</strong> הוא כלי פורמלי שמאפשר לנו לקבל החלטה, על סמך נתוני מדגם, האם לדחות טענה קיימת (שנקראת <strong>השערת האפס</strong>) לטובת טענה חדשה (<strong>השערה אלטרנטיבית</strong>).</p>
+            <div class="explanation">
+                <ul>
+                    <li><strong>השערת האפס (\(H_0\)):</strong> זהו הסטטוס קוו, המצב הקיים שאנחנו מניחים שהוא נכון. לרוב היא תכלול סימן שוויון (=, ≥, ≤). למשל: \(H_0: \mu = 100\).</li>
+                    <li><strong>השערה אלטרנטיבית (\(H_1\)):</strong> זוהי הטענה החדשה שאנחנו רוצים לבדוק, הטענה שתתקבל אם נדחה את השערת האפס. היא תמיד תכיל סימן של אי-שוויון (≠, >, <). למשל: \(H_1: \mu > 100\).</li>
+                </ul>
+            </div>
+            <p>הרעיון הוא לבדוק עד כמה התוצאה שקיבלנו במדגם "קיצונית" או "לא סבירה" בהנחה שהשערת האפס נכונה. אם היא מספיק קיצונית, נחליט לדחות את השערת האפס.</p>
+        </div>
+
+        <div class="step-box" id="step-1">
+            <h2>שלב 1: הכנה - איך מתחילים?</h2>
+            <p>לפני שקופצים למים, יש כמה שלבי הכנה הכרחיים:</p>
+            <ol>
+                <li><strong>ניסוח ההשערות (\(H_0\) ו-\(H_1\)):</strong> זהו השלב הכי חשוב! השאלה המחקרית קובעת איך נראות ההשערות, וזה מה שיקבע את סוג המבחן (ימני, שמאלי או דו-צדדי).</li>
+                <li><strong>קביעת רמת מובהקות (\(\alpha\)):</strong> זו ההסתברות שאנחנו מוכנים "לסבול" כדי לעשות טעות מסוג ראשון - כלומר, לדחות את \(H_0\) למרות שהיא נכונה. ערכים נפוצים הם 0.05 (5%), 0.01 (1%), 0.1 (10%).</li>
+                <li><strong>בחירת סטטיסטי המבחן:</strong> זהו "הסרגל" שבו נשתמש למדידת הקיצוניות של התוצאה. הבחירה תלויה במידע שיש לנו. למשל, אם שונות האוכלוסייה (\(\sigma^2\)) ידועה, נשתמש במבחן Z. אם לא, נשתמש במבחן T.</li>
+            </ol>
+        </div>
+
+        <div class="step-box" id="step-2">
+            <h2>שלב 2: הנוסחאות - שלושת סוגי המבחנים ("הזנבות")</h2>
+            <p>כאן נכנס הסיפור של הזנבות. כיוון האי-שוויון בהשערה האלטרנטיבית (\(H_1\)) קובע איפה נמצא "אזור הדחייה" שלנו – האזור שבו תוצאות ייחשבו קיצוניות מספיק כדי לדחות את \(H_0\).</p>
+
+            <h3>א. מבחן ימני (חד-זנבי ימני)</h3>
+            <div class="explanation">
+                <p><strong>מתי משתמשים?</strong> כאשר אנחנו רוצים לבדוק אם הפרמטר <strong>גדול יותר</strong> מערך מסוים.</p>
+                <p><strong>השערות לדוגמה:</strong> \(H_0: \mu \le \mu_0\)   לעומת   \(H_1: \mu > \mu_0\)</p>
+                <p><strong>היגיון:</strong> אנחנו נדחה את השערת האפס רק אם ממוצע המדגם שלנו יהיה <strong>גבוה משמעותית</strong> מ-\(mu_0\). לכן, כל אזור הדחייה נמצא בזנב הימני של ההתפלגות.</p>
+                <p><strong>כלל החלטה:</strong> דוחים את \(H_0\) אם סטטיסטי המבחן שחישבנו גדול מהערך הקריטי.</p>
+                 <div class="math-block" dir="ltr">Z_{calc} > Z_{1-\alpha}</div>
+            </div>
+
+            <h3>ב. מבחן שמאלי (חד-זנבי שמאלי)</h3>
+            <div class="explanation">
+                <p><strong>מתי משתמשים?</strong> כאשר אנחנו רוצים לבדוק אם הפרמטר <strong>קטן יותר</strong> מערך מסוים.</p>
+                <p><strong>השערות לדוגמה:</strong> \(H_0: \mu \ge \mu_0\)   לעומת   \(H_1: \mu < \mu_0\)</p>
+                <p><strong>היגיון:</strong> אנחנו נדחה את השערת האפס רק אם ממוצע המדגם שלנו יהיה <strong>נמוך משמעותית</strong> מ-\(mu_0\). לכן, כל אזור הדחייה נמצא בזנב השמאלי של ההתפלגות.</p>
+                <p><strong>כלל החלטה:</strong> דוחים את \(H_0\) אם סטטיסטי המבחן שחישבנו קטן מהערך הקריטי (שהוא שלילי).</p>
+                 <div class="math-block" dir="ltr">Z_{calc} < Z_{\alpha} \text{  (or  } Z_{calc} < -Z_{1-\alpha})</div>
+            </div>
+            
+            <h3>ג. מבחן מרכזי (דו-צדדי / דו-זנבי)</h3>
+            <div class="explanation">
+                <p><strong>מתי משתמשים?</strong> כאשר אנחנו רוצים לבדוק אם הפרמטר <strong>שונה</strong> מערך מסוים, לא משנה לאיזה כיוון (גדול יותר או קטן יותר).</p>
+                <p><strong>השערות לדוגמה:</strong> \(H_0: \mu = \mu_0\)   לעומת   \(H_1: \mu \ne \mu_0\)</p>
+                <p><strong>היגיון:</strong> אנחנו נדחה את השערת האפס אם ממוצע המדגם שלנו יהיה <strong>רחוק משמעותית</strong> מ-\(mu_0\), בין אם הוא גבוה מדי ובין אם הוא נמוך מדי. לכן, אזור הדחייה מתחלק באופן שווה בין שני הזנבות של ההתפלגות. את רמת המובהקות \(\alpha\) מחלקים ב-2.</p>
+                <p><strong>כלל החלטה:</strong> דוחים את \(H_0\) אם הערך המוחלט של סטטיסטי המבחן גדול מהערך הקריטי.</p>
+                 <div class="math-block" dir="ltr">|Z_{calc}| > Z_{1-\frac{\alpha}{2}}</div>
+            </div>
+        </div>
+
+        <div class="step-box" id="step-3">
+            <h2>שלב 3: דוגמה מלאה</h2>
+            <p>בוא ניקח דוגמה קונקרטית. יצרן טוען שמשקל ממוצע של חטיף אנרגיה שהוא מייצר הוא 50 גרם. אנחנו חושדים שהיצרן "מעגל כלפי מעלה", ושהמשקל הממוצע נמוך יותר. לקחנו מדגם של 25 חטיפים, ומצאנו שהמשקל הממוצע במדגם הוא 48.5 גרם. ידוע מניסיון העבר שסטיית התקן של משקל החטיפים היא 2 גרם. נבדוק את טענתנו ברמת מובהקות של 5%.</p>
+            
+            <div class="example">
+                <p><strong>1. ניסוח השערות:</strong></p>
+                <p>אנחנו רוצים לבדוק אם המשקל נמוך מ-50, לכן זהו מבחן שמאלי.</p>
+                <p>\(H_0: \mu \ge 50\)</p>
+                <p>\(H_1: \mu < 50\)</p>
+
+                <p><strong>2. רמת מובהקות ונתונים:</strong></p>
+                <p>\(\alpha = 0.05\)</p>
+                <p>\(n = 25\), \(\bar{X} = 48.5\), \(\sigma = 2\), \(\mu_0 = 50\)</p>
+                
+                <p><strong>3. חישוב סטטיסטי המבחן:</strong></p>
+                <p>מאחר ש-\(sigma\) ידועה, נשתמש במבחן Z:</p>
+                <div class="math-block" dir="ltr">
+                    Z_{calc} = \frac{\bar{X} - \mu_0}{\sigma / \sqrt{n}} = \frac{48.5 - 50}{2 / \sqrt{25}} = \frac{-1.5}{2 / 5} = \frac{-1.5}{0.4} = -3.75
+                </div>
+
+                <p><strong>4. מציאת ערך קריטי וקבלת החלטה:</strong></p>
+                <p>זהו מבחן שמאלי עם \(\alpha = 0.05\). אנחנו צריכים למצוא את הערך הקריטי \(Z_{0.05}\). אם נסתכל בטבלת Z הסטנדרטית, נגלה שהערך שמשמאלו יש 5% מהשטח הוא בערך -1.645.</p>
+                <p>אזור הדחייה שלנו הוא כל ערך שקטן מ-1.645-.</p>
+                <p><strong>השוואה:</strong> \(-3.75 < -1.645\)</p>
+                <p><strong>מסקנה:</strong> סטטיסטי המבחן שחישבנו (\(-3.75\)) נופל בתוך אזור הדחייה. לכן, ברמת מובהקות של 5%, <strong>אנחנו דוחים את השערת האפס</strong>. יש לנו עדות סטטיסטית מספקת כדי לטעון שהמשקל הממוצע של החטיפים אכן נמוך מ-50 גרם.</p>
+            </div>
+        </div>
+        
+        <div class="step-box" id="step-4">
+            <h2>טבלת סיכום מהירה</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>מאפיין</th>
+                        <th>מבחן ימני</th>
+                        <th>מבחן שמאלי</th>
+                        <th>מבחן דו-צדדי</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>סימן ב-\(H_1\)</strong></td>
+                        <td>></td>
+                        <td><</td>
+                        <td>≠</td>
+                    </tr>
+                    <tr>
+                        <td><strong>אזור הדחייה</strong></td>
+                        <td>בזנב הימני</td>
+                        <td>בזנב השמאלי</td>
+                        <td>בשני הזנבות</td>
+                    </tr>
+                    <tr>
+                        <td><strong>שטח אזור הדחייה</strong></td>
+                        <td>\(\alpha\)</td>
+                        <td>\(\alpha\)</td>
+                        <td>\(\alpha/2\) בכל צד</td>
+                    </tr>
+                    <tr>
+                        <td><strong>שאלה לדוגמה</strong></td>
+                        <td>האם התרופה שיפרה את המצב?</td>
+                        <td>האם זמן התגובה התקצר?</td>
+                        <td>האם יש שינוי במשקל?</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '\\[', right: '\\]', display: true},
+                    {left: '$', right: '$', display: false},
+                    {left: '\\(', right: '\\)', display: false}
+                ]
+            });
+
+            const boxes = document.querySelectorAll('.step-box');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            boxes.forEach(box => {
+                observer.observe(box);
+            });
+        });
+    </script>
+</body>
+</html>

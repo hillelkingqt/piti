@@ -1,0 +1,212 @@
+[2025-07-02 8:47:54] [ID: true_972543910941@c.us_3FD473B58A3F73A687AA] הלל (Owner): עדי אתה יכול לשלוח לי את הדף נוסחאות במדר שהיה לך בבקשה?
+[2025-07-02 8:47:54] [ID: true_972543910941@c.us_3FDC986A441E8C71F191] הלל (Owner): את ההוא של השני דפים
+[2025-07-02 8:47:55] [ID: false_972543910941@c.us_3FE13BFF529A064F081C] עדי מכנס2️⃣4️⃣: כמובן
+[2025-07-02 8:48:00] [ID: true_972543910941@c.us_3F5F344630FCC4E6DD55] הלל (Owner): תודה 🙏
+[2025-07-02 8:48:06] [ID: false_972543910941@c.us_3FC54850704E068FA2F8] עדי מכנס2️⃣4️⃣: מקוצמדר מוקלד.pdf
+[2025-07-02 8:48:08] [ID: true_972543910941@c.us_3F263C80487D98F9295E] הלל (Owner): אתה כתבת את כל זה?
+[2025-07-02 8:48:08] [ID: false_972543910941@c.us_3F411BAD95A8AC4C1AB4] עדי מכנס2️⃣4️⃣: אכן
+[2025-07-02 8:48:09] [ID: false_972543910941@c.us_3F492595C683CC1D64FC] עדי מכנס2️⃣4️⃣: חלק לקחתי ממה שהם שמו מהלמדה
+[2025-07-02 8:48:09] [ID: true_972543910941@c.us_3F8DCD2DBF7304662DA7] הלל (Owner): (↩️ ל-ID:false_972543910941@c.us_3F411BAD95A8AC4C1AB4 "אכן...")
+בוורד?
+[2025-07-02 8:48:09] [ID: true_972543910941@c.us_3FE1BE6F16C0A7A64A27] הלל (Owner): (↩️ ל-ID:false_972543910941@c.us_3F492595C683CC1D64FC "חלק לקחתי ממה שהם שמו מהל...")
+כן ראיתי
+[2025-07-02 8:48:09] [ID: false_972543910941@c.us_3FEF6449700D67E305BC] עדי מכנס2️⃣4️⃣: powerpoint
+[2025-07-02 8:48:09] [ID: true_972543910941@c.us_3F6F5FA4B8B78B181C3A] הלל (Owner): (↩️ ל-ID:false_972543910941@c.us_3FEF6449700D67E305BC "powerpoint...")
+אע
+[2025-07-02 8:48:10] [ID: false_972543910941@c.us_3FA069F1E2BD312065C0] עדי מכנס2️⃣4️⃣: זה נוח יותר לסדר את הכל
+[2025-07-02 8:48:10] [ID: true_972543910941@c.us_3FA1005B376A75880667] הלל (Owner): טוב כל הכבוד
+[2025-07-02 8:48:11] [ID: true_972543910941@c.us_3F73E44A59CEAB60C521] הלל (Owner): תודה
+[2025-07-02 8:48:24] [ID: false_972543910941@c.us_3FC54850704E068FA2F8] פיתי (media content): This document is a handwritten and typed summary or "cheat sheet" covering various topics and methods for solving differential equations (מד"ר - Mid'ar).
+
+It is divided into multiple sections, each focusing on a specific type of differential equation or a general technique:
+
+1.  **Linear Constant-Coefficient ODEs:** Discusses finding solutions using the characteristic polynomial, identifying roots (real, complex, multiplicity), and forming homogeneous solutions. It also covers the method of undetermined coefficients for finding particular solutions.
+2.  **First-Order Linear ODEs (Linear I):** Provides the general solution formula for y' + P(x)y = Q(x), covers Bernoulli equations, Clairaut's equation, and autonomous equations (lacking x or y).
+3.  **Separable Equations:** Describes the method for equations that can be written as f(x)dx = g(y)dy.
+4.  **Homogeneous Equations:** Explains the form f(x,y)dx + g(x,y)dy=0 where f and g are homogeneous functions of the same degree, and mentions the substitution y=zx.
+5.  **Almost Homogeneous Equations:** Addresses equations of the form (A₁x + B₁y + C₁)dx + (A₂x + B₂y + C₂)dy = 0, detailing approaches based on whether the lines intersect or are parallel.
+6.  **Exact Equations:** Defines exact differential equations f(x,y)dx + g(x,y)dy=0 and the condition for exactness (∂f/∂y = ∂g/∂x), explaining how to find the potential function and the solution.
+7.  **Integrating Factors for Exact Equations:** Provides formulas for integrating factors when the equation is not exact but specific conditions related to partial derivatives and coefficients hold.
+8.  **Series Solutions:** Covers the use of power series (Taylor series) for solving ODEs, including notation for series and their derivatives.
+9.  **Integration Method:** Describes a method for solving higher-order linear ODEs by factoring the differential operator (D) based on the characteristic polynomial roots and solving sequential first-order equations.
+10. **Cauchy-Euler Equations (קושי):** Discusses this type of ODE, focusing on the indicial equation and the form of solutions based on the roots (real, complex, multiplicity).
+11. **Finding Solutions based on Others:** Includes the reduction of order formula to find a second linearly independent solution (y₂) for a second-order homogeneous ODE if one solution (y₁) is known. It also shows a related method (y=y₁v) likely used for variation of parameters to find a particular solution for non-homogeneous equations.
+12. **Method of Undetermined Coefficients (Cauchy):** Provides a guessing form for particular solutions for Cauchy-Euler equations with specific non-homogeneous terms.
+13. **Reference Tables:** Includes tables of common trigonometric and hyperbolic identities, known Taylor series expansions, and a collection of useful integral formulas.
+14. **Integration Methods:** Briefly describes integration by parts and the method of substitution, outlining the steps.
+15. **Partial Fraction Decomposition:** Explains the process for decomposing rational functions, including handling linear and quadratic factors with multiplicity.
+16. **Important Change of Variables:** Suggests useful substitutions (like z = ax + by + c or z = xy) when specific combinations of variables appear in the equation.
+17. **General Recommendations:** Offers general tips for solving ODEs, such as looking for relationships between terms, rearranging the equation, swapping variables, and guessing simple solutions based on coefficient properties.
+
+Overall, it functions as a quick reference guide summarizing key concepts, formulas, and techniques for solving various types of ordinary differential equations encountered in typical undergraduate courses. The notes are primarily in Hebrew with standard mathematical notation.
+[2025-07-02 9:58:03] [ID: true_972543910941@c.us_3FC6B84F878AE7F4856D] הלל (Owner): עדי למדנו את זה?
+[2025-07-02 9:58:12] [ID: true_972543910941@c.us_3FC6B84F878AE7F4856D] פיתי (media content): Detailed description:
+The image contains a snippet of mathematical notes or a lecture slide written in Hebrew. It discusses a method for solving differential equations, titled "Integration method". The text appears to describe decomposing a higher-order linear ordinary differential equation (ODE) into a series of first-order ODEs using factorization of the differential operator.
+
+The content is structured as follows:
+1.  A header at the top in black text: "שיטת האינטגרציה:" (Integration Method:).
+2.  Below the header, more black text: "מפרקים את המד\"ר בעזרת שורשי" (Decompose the ODE using the roots of). The last word is cut off, but based on context, it likely refers to the characteristic polynomial.
+3.  A mathematical equation is shown in blue: $(D - \lambda_1 I) \cdots (D - \lambda_n I) y = f(x)$. This represents an n-th order linear non-homogeneous ODE with constant coefficients, factored into a product of first-order operators $(D - \lambda_i I)$, where D is the differential operator, I is the identity operator, $\lambda_i$ are constants (likely roots of the characteristic polynomial), y is the dependent variable (function of x), and f(x) is the non-homogeneous term.
+4.  An arrow pointing down ($\Rightarrow$) indicates a consequence or transformation.
+5.  A large left curly brace `{` encloses a system of equations, showing a stepwise decomposition of the original ODE.
+    *   The first line within the brace is in orange and blue: $g_1 = (D - \lambda_n I) y$. This defines an intermediate function $g_1$.
+    *   Ellipses (`⋮`) indicate that there are intermediate steps not shown explicitly.
+    *   The last line within the brace is in black and blue: $g' - \lambda g = (D - \lambda I) g = f(x)$. This shows a generic first-order linear ODE in terms of an intermediate function 'g', which is the result of applying some of the differential operators to y (or a previous g function), and equating it to the non-homogeneous term f(x). Note the use of $g'$ for the derivative of g.
+
+The overall concept illustrated is the reduction of an n-th order ODE to a sequence of n first-order ODEs, which can be solved iteratively.
+
+Extracted text via OCR:
+שיטת האינטגרציה:
+מפרקים את המד"ר בעזרת שורשי
+הפ"א:
+$$(D - \lambda_1 I) \cdots (D - \lambda_n I) y = f(x)$$
+$$\Rightarrow \begin{cases} g_1 = (D - \lambda_n I) y \\ \vdots \\ g' - \lambda g = (D - \lambda I) g = f(x) \end{cases}$$
+[2025-07-02 9:58:15] [ID: true_972543910941@c.us_3F936F435E58CE9E1F98] הלל (Owner): אני זוכר שהיו על זה שיעורי בית אבל ממש לא זוכר שלמדנו
+[2025-07-02 10:00:41] [ID: false_972543910941@c.us_3F26A76B1277885BEA6A] עדי מכנס2️⃣4️⃣: כן
+פשוט שכללתי את זה מסדר שני לסדר כללי
+[2025-07-02 10:01:27] [ID: false_972543910941@c.us_3F8FAAA9F65843543523] עדי מכנס2️⃣4️⃣: בסדר שני מגדירים g=(D-\lambdaI)y
+ואז פותרים סדר ראשון
+באופן כללי, מגדירים ככה n פעמים
+[2025-07-02 10:01:31] [ID: true_972543910941@c.us_3F78A00EA9594C87ED35] הלל (Owner): (↩️ ל-ID:false_972543910941@c.us_3F8FAAA9F65843543523 "בסדר שני מגדירים g=(D-\la...")
+אמממ זה נשמע לי מוכר אבל שכחתי את זה
+[2025-07-02 10:01:31] [ID: true_972543910941@c.us_3F2020A7707824B51D97] הלל (Owner): טוב תודה אבדוק
+[2025-07-02 11:54:51] [ID: true_972543910941@c.us_3F231C4E8C3618AEE887] הלל (Owner): עדי יש סיכוי פתרת את זה?
+[2025-07-02 11:54:56] [ID: true_972543910941@c.us_3F231C4E8C3618AEE887] פיתי (media content): The image is a scanned or photographed document page containing mathematical equations and multiple-choice questions written in Hebrew. At the top is a differential equation and an initial condition, followed by a question about the type of the differential equation with five options, one of which is checked. Below this is another section labeled "שאלה 14" (Question 14), which presents a statement about converting a differential equation to a standard form of a linear first-order equation after a substitution, followed by five options for the functions P(x) and Q(x), one of which is checked. Finally, there is "שאלה 15" (Question 15) which asks about functions appearing in the solution for a certain term (y^-2), followed by four options, one of which is checked. The text is black on a white background.
+
+Extracted text:
+נתונה המשוואה:
+xdy - {y + xy³(1 + ln(x))} dx = 0
+עם תנאי קצה:
+y(x = 1) = 1
+סוג את המשוואה:
+1. משוואת קלרו
+2. משוואה מדוייקת
+3. משוואה הומוגנית
+4. משוואה מסדר 3
+5. אין תשובה נכונה
+שאלה 14. מספר במערכת 530614
+אם ניתן להעביר את המשוואה לצורה (U'(x)+P(x)U=Q(x אזיי,
+זו לצורה להביא ניתן לא .1
+P(x) = 4/x, Q(x) = 1+ln(x) .2
+P(x) = 2/x, Q(x) = -2(1+ln(x)) .3
+P(x) = 4/x, Q(x) = 2(1+ln(x)) .4
+P(x) = 2/x, Q(x) = 2(1+ln(x)) .5
+שאלה 15. מספר במערכת 530615
+אילו פונקציות מופיעות בפתרון עבור 2-y ?
+x, x², x ln(x) .1
+const, x, x², x ln(x) .2
+x, x ln(x) .3
+const, x, x ln(x) .4
+[2025-07-02 11:54:57] [ID: true_972543910941@c.us_3FD94E81E7541DE0B57B] הלל (Owner): בשאלה 15 זה לא אמור להיות התשובה 2?
+[2025-07-02 11:56:42] [ID: false_972543910941@c.us_3F715E4DF2906DCBDCCF] עדי מכנס2️⃣4️⃣: lemme check
+[2025-07-02 11:57:10] [ID: true_972543910941@c.us_3F6B33A8496CAD0AA2FF] הלל (Owner): זה מה שיצא לי
+[2025-07-02 11:57:14] [ID: true_972543910941@c.us_3F6B33A8496CAD0AA2FF] פיתי (media content): Description: The image contains a mathematical equation written in white text on a dark background, enclosed within a white rectangular border. The equation is an expression for $y^{-2}$ in terms of $x$ and a constant $C$.
+
+Extracted text:
+$y^{-2}=\frac{x(-4-6 \ln x)}{9}+\frac{C}{x^{2}}$
+[2025-07-02 11:57:14] [ID: true_972543910941@c.us_3F9A832BAEBA69F390DC] הלל (Owner): הם מחשיבים את זה בתור קונסט לא?
+[2025-07-02 12:01:16] [ID: true_972543910941@c.us_3FA8E457311D320DAF70] הלל (Owner): עדי אתה חיי?
+[2025-07-02 12:01:31] [ID: true_972543910941@c.us_3F12FC73C9A47B80F28F] הלל (Owner): אה גפט אומר שזה נחשב חלק מהפונקציה של איקס
+[2025-07-02 12:01:34] [ID: true_972543910941@c.us_3F27687D46062DD0C576] הלל (Owner): לא משנה תודה
+[2025-07-02 12:06:17] [ID: false_972543910941@c.us_3F3FD0A0F4173B0979BD] עדי מכנס2️⃣4️⃣: (↩️ ל-ID:true_972543910941@c.us_3FA8E457311D320DAF70 "עדי אתה חיי?...")
+כן בדיוק סיימתי לפתור
+[2025-07-02 12:07:21] [ID: false_972543910941@c.us_3F4BBBED971EE0D60C0E] עדי מכנס2️⃣4️⃣: (↩️ ל-ID:true_972543910941@c.us_3F12FC73C9A47B80F28F "אה גפט אומר שזה נחשב חלק ...")
+כןכן אפשר לפתוח ויש שם -4/9 x
+[2025-07-02 12:09:02] [ID: false_972543910941@c.us_3F177F3D5B575DFA546E] עדי מכנס2️⃣4️⃣: אבל וואלה תרגיל די מציק
+[2025-07-02 12:09:15] [ID: true_972543910941@c.us_3FECF6CE80A887E6C6FB] הלל (Owner): תגיד
+[2025-07-02 12:09:15] [ID: true_972543910941@c.us_3FF027DD96DAD98ED4BB] הלל (Owner): מה זה המבחן הזה
+[2025-07-02 12:09:21] [ID: true_972543910941@c.us_3F13E231B4061A11BE24] הלל (Owner): אין שם בכלל מדר מסדר שני
+[2025-07-02 12:09:27] [ID: false_972543910941@c.us_2A233FDCDB73EC7194C336397545FACE] עדי מכנס2️⃣4️⃣: איזה מבחן זה?
+[2025-07-02 12:09:33] [ID: true_972543910941@c.us_3F3AB6BE4363FC5A90B4] הלל (Owner): תשפג מועד ב
+[2025-07-02 12:09:35] [ID: false_972543910941@c.us_1FFCD12FE46EBF7723DBFA72E76789B7] עדי מכנס2️⃣4️⃣: מה המועד?
+[2025-07-02 12:09:35] [ID: true_972543910941@c.us_3F07398295BEFF954DF1] הלל (Owner): א
+[2025-07-02 12:09:39] [ID: false_972543910941@c.us_D2A73DC5499C5BD535DEE3B9117C5F80] עדי מכנס2️⃣4️⃣: דאיימ
+[2025-07-02 12:09:39] [ID: true_972543910941@c.us_3F42BE63BD299B0FE88D] הלל (Owner): מועד א
+[2025-07-02 12:09:49] [ID: true_972543910941@c.us_3F857AECE20F31BD5A41] הלל (Owner): לא לצפות שיהיה לנו כזה אתה אומר
+[2025-07-02 12:09:55] [ID: true_972543910941@c.us_3F96E35783BA44945C33] הלל (Owner): 😭
+[2025-07-02 12:11:28] [ID: false_972543910941@c.us_3FA6CA172FDEDC33ECC7] עדי מכנס2️⃣4️⃣: לאלא יש אח"כ
+[2025-07-02 12:11:30] [ID: false_972543910941@c.us_3FC1452661FC0658AC4E] עדי מכנס2️⃣4️⃣: השאלה בסוף
+[2025-07-02 12:11:32] [ID: false_972543910941@c.us_3F113A784B1AD7E1AA8E] עדי מכנס2️⃣4️⃣: סדר שני
+[2025-07-02 12:13:58] [ID: true_972543910941@c.us_3FA89F6EF329230E64BB] הלל (Owner): אה כנראה לא הדפסתי את זה
+[2025-07-02 19:42:00] [ID: true_972543910941@c.us_3FC449BCE881F865CC16] הלל (Owner): עדי יש לך שנייה?
+[2025-07-02 20:19:20] [ID: true_972543910941@c.us_3F28FF4DCB8256D66081] הלל (Owner): עדי עדי עדי
+[2025-07-02 20:19:20] [ID: true_972543910941@c.us_3F1A41DE75F942A14589] הלל (Owner): אתה זוכר את ההגדרות של ריסון וכל זה?
+[2025-07-02 20:19:58] [ID: true_972543910941@c.us_3F336561BAD372DBFE2E] הלל (Owner): זה נכון?
+[2025-07-02 20:20:03] [ID: true_972543910941@c.us_3F336561BAD372DBFE2E] פיתי (media content): Description:
+The image is a table summarizing common physics problems, their differential equations, and solutions or conditions. The table has three columns with headers in Hebrew. The leftmost column appears to describe the problem type or characteristic. The middle column shows the typical differential equation. The rightmost column provides the solution, conditions, or a brief description in Hebrew. The table has several rows, each representing a different type of problem. The language of the text is primarily Hebrew, with mathematical equations and symbols included in the differential equations and solutions. The title of the table, written in green text above the table, is also in Hebrew.
+
+Extracted Text:
+בעיות פיזיקליות נפוצות
+
+| בעיה                       | משוואה טיפוסית                 | פתרון / פירוש קצר                                   |
+| :------------------------- | :----------------------------- | :--------------------------------------------------- |
+| קצב פרופורציונלי לַגּוּדֶל | $\frac{dy}{dt} = ky$           | $y(t) = y_0 e^{kt}$ <br> $k>0$ - גידול, $k<0$ - דעיכה |
+| תאוצה קבועה                | $\ddot{x} = g$                | $x(t) = \frac{1}{2}gt^2 + v_0t + x_0$                |
+| מתנד הרמוני מרוסן           | $m\ddot{x} + \gamma\dot{x} + kx = 0$ |                                                      |
+| ריסון חסר (חלש)           | $\gamma^2 < 4mk$               | $x(t) = e^{-\frac{\gamma}{2m}t} [C_1 \cos\omega t + C_2 \sin\omega t]$ |
+| ריסון קריטי                | $\gamma^2 = 4mk$               | $x(t) = (C_1 + C_2t) e^{-\frac{\gamma}{2m}t}$       |
+| ריסון יתר (חזק)            | $\gamma^2 > 4mk$               | $x(t) = C_1 e^{r_1t} + C_2 e^{r_2t}$ <br> $r_{1,2} < 0$ |
+[2025-07-02 20:20:29] [ID: true_972543910941@c.us_3F0B3E290496B229E55B] הלל (Owner): אני מתכוון לריסונים
+[2025-07-02 20:20:30] [ID: true_972543910941@c.us_3F64477732986AF82FFF] הלל (Owner): השלוש שורות שלמטה
+[2025-07-02 20:23:04] [ID: false_972543910941@c.us_3F3BCAAAFE0C4A59E55B] עדי מכנס2️⃣4️⃣: כןכן
+זה נראה נכון
+רק כדאי להסביר מה זה \omega ועוד כמה דברים
+[2025-07-02 20:23:11] [ID: true_972543910941@c.us_3F84BC617702D4D99E6F] הלל (Owner): אין לי מקום 😭😭😭😭😭
+[2025-07-02 20:23:12] [ID: true_972543910941@c.us_3F1C40A02C70902D34EB] הלל (Owner): תודה 🙏
+[2025-07-06 8:33:51] [ID: true_972543910941@c.us_3F9E9FE0775E9F8EA24A] הלל (Owner) (0532752474): עדי זה לא אמור להיות כפול C ב9?
+[2025-07-06 8:34:00] [ID: true_972543910941@c.us_3F4C2231F9177E992A6C] הלל (Owner) (0532752474): או שמכיוון שזה הומוגני או משהו לא כופלים
+[2025-07-06 8:34:05] [ID: true_972543910941@c.us_3F9E9FE0775E9F8EA24A] פיתי (media content): An image of a mathematics problem written in Hebrew, likely from a test or quiz. The problem involves a first-order differential equation.
+
+The image is divided into two parts. The top part presents the differential equation and asks for its classification. The bottom part, labeled "Question 9," asks for the homogeneous solution after a specific substitution.
+
+In the first part, option 3, "Bernoulli's equation," is marked with a checkmark.
+In the second part, option 3, "sin⁴(x)," is marked with a checkmark.
+
+**Extracted Text (OCR):**
+
+**Top section:**
+
+נתונה המשוואה:
+yy' - 2y²cotg(x) = sin(x)cos(x)
+
+סווג את המשוואה:
+1. משוואה מדויקת
+2. משוואה לינארית מסדר ראשון
+3. ✓ משוואת ברנולי
+4. משוואה טריגונומטרית מסדר ראשון
+5. משוואת קלרו
+
+**Middle floating text:**
+
+יצירת בחינה
+
+**Bottom section:**
+
+שאלה 9, מספר במערכת 536545
+אם ניתן להעביר את המשוואה לצורה z' + P(x)z = Q(x), מהו הפתרון עבור z_H (הפתרון ההומוגני)?
+1. לא ניתן להעביר לצורה זו
+2. -4ln(sin(x))
+3. ✓ sin⁴(x)
+4. sin²(x)
+5. sin(x)
+[2025-07-06 8:56:13] [ID: false_972543910941@c.us_E6F000C8F54D6F296A20D648E4405435] עדי מכנס2️⃣4️⃣ (0543910941): בגדןל קח רק את הבסס
+[2025-07-06 8:57:11] [ID: true_972543910941@c.us_3F0710CD48EA1D15A1EB] הלל (Owner) (0532752474): סבבה, ועוד משהו, כששואלים אותי "איזה פונקציות נמצאות בפתרון הזה והזה" מה זה פונקציות? כי הם גם כותבים שם קונסט מדי פעם, אם יש קבוע גם הוא נחשב פונקציה?
+[2025-07-06 9:02:06] [ID: false_972543910941@c.us_34B270B9EFE267A2BAE0CADF6AE51008] עדי מכנס2️⃣4️⃣ (0543910941): כן
+[2025-07-06 9:58:06] [ID: true_972543910941@c.us_3F6F0E94057CCC0BB58A] הלל (Owner) (0532752474): עדי אם סיימתי לפתור את כל המבחנים שהם הביאו מה לעשות
+[2025-07-06 9:58:10] [ID: true_972543910941@c.us_3FDEF40A6CC53C536BD3] הלל (Owner) (0532752474): אני לא מרגיש מוכן מספיק
+[2025-07-06 9:58:15] [ID: true_972543910941@c.us_3F6698474AA0DD6AC872] הלל (Owner) (0532752474): ליצור בעצמי?
+[2025-07-06 9:58:17] [ID: true_972543910941@c.us_3F93098305B3AE9E0687] הלל (Owner) (0532752474): אממממ
+[2025-07-06 9:58:26] [ID: true_972543910941@c.us_3FE57685B41FEF33C211] הלל (Owner) (0532752474): פיתי שאצור מבחנים כאלו בעצמי?
+[2025-07-06 9:58:46] [ID: true_972543910941@c.us_3EB09F26C6087DE894422C] פיתי (0532752474): (↩️ ל-ID:true_972543910941@c.us_3FE57685B41FEF33C211 "פיתי שאצור מבחנים כאלו בע...")
+פיתי
+
+הלל שלי, זה רעיון מעולה שאתה רוצה להמשיך לתרגל! אבל במקום שתתאמץ בעצמך, למה שלא תיתן לי ליצור לך מבחנים? רק תגיד לי על אילו נושאים תרצה להתמקד ואני אכין לך מבחן חדש לגמרי. מה אומר?
+[2025-07-06 9:59:10] [ID: true_972543910941@c.us_3F09B8D5738A9026F0CB] הלל (Owner) (0532752474): טוב אצור
+[2025-07-06 10:06:05] [ID: false_972543910941@c.us_1BE1FB537EB8EC4C0B74A76E1157D521] עדי מכנס2️⃣4️⃣ (0543910941): תפתןר מבחנים של מתמטיקה
+[2025-07-06 10:07:01] [ID: true_972543910941@c.us_3F2B33A6218B94BF2663] הלל (Owner) (0532752474): זה באותה רמה?
+[2025-07-06 10:07:05] [ID: true_972543910941@c.us_3F194E1C2352155CA9DF] הלל (Owner) (0532752474): יש לך קישור?
+[2025-07-06 10:08:37] [ID: false_972543910941@c.us_6DF8C97662DF759505D48BCE5EFA33AC] עדי מכנס2️⃣4️⃣ (0543910941): (↩️ ל-ID:true_972543910941@c.us_3F2B33A6218B94BF2663 "זה באותה רמה?...")
+רובו כן
+[2025-07-06 10:08:46] [ID: false_972543910941@c.us_D34AC213EB86A3BA58305FB10FA5ED6D] עדי מכנס2️⃣4️⃣ (0543910941): mathwiki
+מדר
+[2025-07-06 10:09:00] [ID: true_972543910941@c.us_3F41ED95FE49F8EBA25D] הלל (Owner) (0532752474): סבבה תודה רבה

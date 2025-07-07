@@ -1,0 +1,251 @@
+<!-- filename: פתרון_תקלה_בלמדה.html -->
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>פתרון תקלה זמנית במערכת הלמידה</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap');
+
+        :root {
+            --bg-color: #1a1a2e;
+            --surface-color: #16213e;
+            --primary-color: #0f3460;
+            --secondary-color: #e94560;
+            --text-primary: #ffffff;
+            --text-secondary: #c0c0c0;
+            --border-color: #533483;
+        }
+
+        body {
+            font-family: 'Rubik', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: var(--text-primary);
+            direction: rtl;
+            line-height: 1.7;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: right;
+        }
+
+        .container {
+            background-color: var(--surface-color);
+            border-radius: 20px;
+            padding: 30px 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--border-color);
+            opacity: 0;
+            animation: fadeInContainer 1s ease-out forwards;
+        }
+
+        @keyframes fadeInContainer {
+            from { opacity: 0; transform: scale(0.95) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        
+        h1, h2 {
+            color: var(--secondary-color);
+            border-bottom: 3px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(233, 69, 96, 0.5);
+            animation: slideInText 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+
+        @keyframes slideInText {
+            from { transform: translateX(50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .intro, .warning-box {
+            margin-bottom: 25px;
+            padding: 20px;
+            border-radius: 8px;
+            border-right: 5px solid var(--secondary-color);
+            background-color: rgba(15, 52, 96, 0.3);
+            animation: popIn 0.5s ease-out backwards;
+        }
+
+        .warning-box {
+            border-right-color: #f44336;
+            background-color: rgba(244, 67, 54, 0.2);
+        }
+
+        .warning-box strong {
+            color: #ff8a80;
+        }
+
+        p {
+            color: var(--text-secondary);
+        }
+
+        nav {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        nav a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            margin: 0 10px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 10px 15px;
+            border-radius: 20px;
+            background: var(--primary-color);
+        }
+
+        nav a:hover {
+            background-color: var(--secondary-color);
+            color: var(--text-primary);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(233, 69, 96, 0.4);
+        }
+        
+        section {
+            margin-top: 30px;
+        }
+
+        ol {
+            list-style: none;
+            padding-right: 0;
+            counter-reset: steps-counter;
+        }
+
+        ol li {
+            background-color: var(--primary-color);
+            margin-bottom: 12px;
+            padding: 15px 25px;
+            padding-right: 60px;
+            border-radius: 10px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            animation: popIn 0.5s ease-out backwards;
+        }
+        
+        ol li:nth-child(1) { animation-delay: 0.1s; }
+        ol li:nth-child(2) { animation-delay: 0.2s; }
+        ol li:nth-child(3) { animation-delay: 0.3s; }
+        ol li:nth-child(4) { animation-delay: 0.4s; }
+        ol li:nth-child(5) { animation-delay: 0.5s; }
+
+        @keyframes popIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        ol li:hover {
+            transform: translateX(-10px) scale(1.02);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+        }
+        
+        ol li::before {
+            counter-increment: steps-counter;
+            content: counter(steps-counter);
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--secondary-color);
+            color: var(--text-primary);
+            font-weight: bold;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 30px;
+        }
+
+        code {
+            background-color: var(--bg-color);
+            color: var(--secondary-color);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+            border: 1px solid var(--border-color);
+        }
+
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>פתרון תקלה זמנית במערכת הלמידה</h1>
+        </header>
+
+        <div class="intro">
+            <p>שלום, המדריך הזה נועד לפתור תקלה נפוצה במערכת הלמידה (למדה) באמצעות ניקוי נתוני גלישה בדפדפן. ברוב המקרים, פעולה זו פותרת את הבעיה.</p>
+        </div>
+
+        <div class="warning-box">
+            <p><strong>חשוב להדגיש:</strong> זהו פתרון ל<strong>בעיה זמנית</strong>. אם התקלה ממשיכה לאחר ביצוע הפעולות במדריך, מומלץ לפנות לתמיכה הטכנית.</p>
+        </div>
+
+        <nav>
+            <a href="#chrome-pc">💻 כרום (מחשב)</a>
+            <a href="#chrome-android">📱 כרום (אנדרואיד)</a>
+            <a href="#safari-ios">🍎 ספארי (אייפון)</a>
+        </nav>
+
+        <main>
+            <section id="chrome-pc">
+                <h2>ניקוי נתוני גלישה בכרום (מחשב)</h2>
+                <ol>
+                    <li>פתחו את דפדפן כרום.</li>
+                    <li>לחצו על תפריט שלוש הנקודות (<code>⋮</code>) בפינה השמאלית העליונה.</li>
+                    <li>בתפריט שנפתח, נווטו אל <code>היסטוריה &gt; היסטוריה</code>. (קיצור מקלדת: <code>Ctrl+H</code>).</li>
+                    <li>בצד ימין, לחצו על "ניקוי נתוני גלישה".</li>
+                    <li>בחלון שנפתח, בחרו טווח זמן (מומלץ לבחור "כל הזמנים" לניקוי יסודי).</li>
+                    <li>סמנו את התיבות: "היסטוריית גלישה", "קובצי Cookie ונתוני אתרים אחרים", ובעיקר "תמונות וקבצים שמורים במטמון".</li>
+                    <li>לחצו על הכפתור הכחול "ניקוי נתונים".</li>
+                </ol>
+            </section>
+            
+            <section id="chrome-android">
+                <h2>ניקוי נתוני גלישה בכרום (אנדרואיד)</h2>
+                <ol>
+                    <li>פתחו את אפליקציית כרום בטלפון.</li>
+                    <li>לחצו על תפריט שלוש הנקודות (<code>⋮</code>) בפינה העליונה.</li>
+                    <li>לחצו על "היסטוריה".</li>
+                    <li>לחצו על "נקה נתוני גלישה..." בראש המסך.</li>
+                    <li>בחרו טווח זמן וסמנו את האפשרויות הרצויות (במיוחד קבצים במטמון).</li>
+                    <li>לחצו על "נקה נתונים" בתחתית המסך.</li>
+                </ol>
+            </section>
+            
+            <section id="safari-ios">
+                <h2>ניקוי נתוני גלישה בספארי (אייפון/אייפד)</h2>
+                <ol>
+                    <li>פתחו את אפליקציית "הגדרות" במכשיר.</li>
+                    <li>גללו מטה ומצאו את "Safari" ולחצו עליה.</li>
+                    <li>גללו עוד למטה ולחצו על "נקה היסטוריה ונתוני אתרים".</li>
+                    <li>תופיע אזהרה. אשרו את הפעולה.</li>
+                    <li><strong>שימו לב:</strong> פעולה זו מוחקת את כל היסטוריית הגלישה וקובצי ה-Cookie, ומנתקת אתכם מכל האתרים שהייתם מחוברים אליהם.</li>
+                </ol>
+            </section>
+        </main>
+        
+        <div class="footer">
+            <p>נוצר במיוחד בשבילך על ידי פיתי ✨</p>
+        </div>
+    </div>
+</body>
+</html>

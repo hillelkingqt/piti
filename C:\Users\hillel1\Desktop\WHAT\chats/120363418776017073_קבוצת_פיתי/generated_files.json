@@ -1,0 +1,639 @@
+[
+  {
+    "timestamp": "2025-06-29T00:48:15.296Z",
+    "originalMessageId": "false_120363418776017073@g.us_3AF3FF5FCAE1E2896A5B_39754334744810@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/image_flux-1-schnell_1751158095294.jpeg",
+    "filename": "image_flux-1-schnell_1751158095294.jpeg",
+    "description": "8 camels",
+    "type": "image/jpeg",
+    "modelUsed": "flux-1-schnell"
+  },
+  {
+    "timestamp": "2025-06-29T00:48:16.232Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB0490A155B1D053985E3",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB0490A155B1D053985E3.jpeg",
+    "filename": "true_120363418776017073@g.us_3EB0490A155B1D053985E3.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (פיתי)",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-06-29T00:50:07.417Z",
+    "originalMessageId": "false_120363418776017073@g.us_3A7652CF37AB9A7AA7FF_39754334744810@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/image_flux-1-schnell_1751158207416.jpeg",
+    "filename": "image_flux-1-schnell_1751158207416.jpeg",
+    "description": "A man named Muhammad standing next to a camel in the desert, photorealistic",
+    "type": "image/jpeg",
+    "modelUsed": "flux-1-schnell"
+  },
+  {
+    "timestamp": "2025-06-29T00:50:08.225Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB041F479809AAADA96A2",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB041F479809AAADA96A2.jpeg",
+    "filename": "true_120363418776017073@g.us_3EB041F479809AAADA96A2.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (פיתי)",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-06-29T00:51:01.397Z",
+    "originalMessageId": "false_120363418776017073@g.us_3AC81D2FC847EB1AD17B_39754334744810@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/sticker_1751158260372.webp",
+    "filename": "sticker_1751158260372.webp",
+    "description": "Sticker. Source: existing_image. Elements: 1.",
+    "type": "image/webp"
+  },
+  {
+    "timestamp": "2025-06-29T00:51:02.135Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB0905F2E659B9D4C80BF",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB0905F2E659B9D4C80BF.webp",
+    "filename": "true_120363418776017073@g.us_3EB0905F2E659B9D4C80BF.webp",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (הלל (Owner))",
+    "type": "image/webp"
+  },
+  {
+    "timestamp": "2025-06-29T04:51:00.208Z",
+    "originalMessageId": "false_120363418776017073@g.us_7335ADA4DD7B6E02B1394EB79D47A6AD_11437531476001@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/image_stable-diffusion-xl-base-1.0_1751172660206.png",
+    "filename": "image_stable-diffusion-xl-base-1.0_1751172660206.png",
+    "description": "A photorealistic portrait of a friendly and intelligent 15-year-old girl, with a gentle smile and kind eyes. Long, slightly wavy brown hair. She looks approachable and helpful. Studio lighting.",
+    "type": "image/png",
+    "modelUsed": "stable-diffusion-xl-base-1.0"
+  },
+  {
+    "timestamp": "2025-06-29T04:51:00.596Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB0AFCA31C8B8C72F7C27",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB0AFCA31C8B8C72F7C27.jpeg",
+    "filename": "true_120363418776017073@g.us_3EB0AFCA31C8B8C72F7C27.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (פיתי)",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-06-29T05:35:42.113Z",
+    "originalMessageId": "false_120363418776017073@g.us_A3A96C0943A4F012F169D5557FE7206B_124519826120821@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/false_120363418776017073@g.us_A3A96C0943A4F012F169D5557FE7206B_124519826120821@lid.webp",
+    "filename": "false_120363418776017073@g.us_A3A96C0943A4F012F169D5557FE7206B_124519826120821@lid.webp",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (עידו טאומן)",
+    "type": "image/webp"
+  },
+  {
+    "timestamp": "2025-06-29T06:03:19.270Z",
+    "originalMessageId": "false_120363418776017073@g.us_307D9BBF6F8F4BB8DF704E1B719FB346_124519826120821@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/false_120363418776017073@g.us_307D9BBF6F8F4BB8DF704E1B719FB346_124519826120821@lid.webp",
+    "filename": "false_120363418776017073@g.us_307D9BBF6F8F4BB8DF704E1B719FB346_124519826120821@lid.webp",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (עידו טאומן)",
+    "type": "image/webp"
+  },
+  {
+    "timestamp": "2025-06-29T07:17:05.190Z",
+    "originalMessageId": "false_120363418776017073@g.us_3FC5FA99762E9621C059_181059077582919@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/image_flux-1-schnell_1751181425188.jpeg",
+    "filename": "image_flux-1-schnell_1751181425188.jpeg",
+    "description": "A simple, clear image showing two stylized robot icons with a plus sign (+) between them, followed by an equals sign (=), and then a stylized human icon. The style should resemble a mathematical equation or a simple infographic. Use icons.",
+    "type": "image/jpeg",
+    "modelUsed": "flux-1-schnell"
+  },
+  {
+    "timestamp": "2025-06-29T07:17:05.548Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB04DF83390E2A33B729F",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB04DF83390E2A33B729F.jpeg",
+    "filename": "true_120363418776017073@g.us_3EB04DF83390E2A33B729F.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (פיתי)",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-06-29T07:17:46.074Z",
+    "originalMessageId": "false_120363418776017073@g.us_3FD75CE79568C146E26A_181059077582919@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/image_flux-1-schnell_1751181466074.jpeg",
+    "filename": "image_flux-1-schnell_1751181466074.jpeg",
+    "description": "A simple, clear image showing two stylized robot icons with a prominent plus sign (+) placed directly between them. The style should be iconic and simple, like a math equation.",
+    "type": "image/jpeg",
+    "modelUsed": "flux-1-schnell"
+  },
+  {
+    "timestamp": "2025-06-29T07:17:46.196Z",
+    "originalMessageId": "false_120363418776017073@g.us_3F69E28BD7D02E0B886D_181059077582919@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/image_flux-1-schnell_1751181466195.jpeg",
+    "filename": "image_flux-1-schnell_1751181466195.jpeg",
+    "description": "Simple infographic or equation style. Two stylized robot icons on the left. A clear plus sign (+) positioned directly between the two robot icons. An equals sign (=) to the right of the second robot and the plus sign. A stylized human icon to the right of the equals sign. Icons only, transparent background.",
+    "type": "image/jpeg",
+    "modelUsed": "flux-1-schnell"
+  },
+  {
+    "timestamp": "2025-06-29T07:17:46.826Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB08C613C053C48E660AC",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB08C613C053C48E660AC.jpeg",
+    "filename": "true_120363418776017073@g.us_3EB08C613C053C48E660AC.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (פיתי)",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-06-29T07:17:46.881Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB082DD988B2314E02EC2",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB082DD988B2314E02EC2.jpeg",
+    "filename": "true_120363418776017073@g.us_3EB082DD988B2314E02EC2.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (פיתי)",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-06-29T10:15:24.844Z",
+    "originalMessageId": "false_120363418776017073@g.us_32F66DDA5EA4AEDCE10CF345696DBE40_11437531476001@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/image_stable-diffusion-xl-base-1.0_1751192124839.png",
+    "filename": "image_stable-diffusion-xl-base-1.0_1751192124839.png",
+    "description": "A photorealistic portrait of a friendly and intelligent 15-year-old girl, with a gentle smile and kind eyes. Long, slightly wavy brown hair. She looks approachable and helpful. Standing in a setting with a soft, blurred background, studio lighting.",
+    "type": "image/png",
+    "modelUsed": "stable-diffusion-xl-base-1.0"
+  },
+  {
+    "timestamp": "2025-06-29T10:15:25.524Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB0F8C5EC58F82B6ADA23",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB0F8C5EC58F82B6ADA23.jpeg",
+    "filename": "true_120363418776017073@g.us_3EB0F8C5EC58F82B6ADA23.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (פיתי)",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-06-29T10:16:22.303Z",
+    "originalMessageId": "false_120363418776017073@g.us_814575A198E00640CAF5112C191CAC6F_11437531476001@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/image_stable-diffusion-xl-base-1.0_1751192182301.png",
+    "filename": "image_stable-diffusion-xl-base-1.0_1751192182301.png",
+    "description": "A photorealistic image of a friendly and intelligent 15-year-old girl, with a gentle smile and kind eyes, with long, slightly wavy brown hair, gently interacting with a few realistic ants on her hand in a natural setting. Blurred background.",
+    "type": "image/png",
+    "modelUsed": "stable-diffusion-xl-base-1.0"
+  },
+  {
+    "timestamp": "2025-06-29T10:16:23.214Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB0C330EBF523E12A9839",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB0C330EBF523E12A9839.jpeg",
+    "filename": "true_120363418776017073@g.us_3EB0C330EBF523E12A9839.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (פיתי)",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-06-29T21:38:06.973Z",
+    "originalMessageId": "false_120363418776017073@g.us_3A9DE39DC10695F491A6_39754334744810@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/image_flux-1-schnell_1751233086971.jpeg",
+    "filename": "image_flux-1-schnell_1751233086971.jpeg",
+    "description": "A photorealistic image of a man named Mohamed sitting in a desert, actively eating a large piece of roasted camel meat from a bone and holding a glass of red wine. He looks satisfied.",
+    "type": "image/jpeg",
+    "modelUsed": "flux-1-schnell"
+  },
+  {
+    "timestamp": "2025-06-29T21:38:07.856Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB0F0851B1771F60689AE",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB0F0851B1771F60689AE.jpeg",
+    "filename": "true_120363418776017073@g.us_3EB0F0851B1771F60689AE.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (פיתי)",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-06-29T21:39:50.387Z",
+    "originalMessageId": "false_120363418776017073@g.us_3AC11259CD9DDE767E67_39754334744810@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/image_flux-1-schnell_1751233190386.jpeg",
+    "filename": "image_flux-1-schnell_1751233190386.jpeg",
+    "description": "A photorealistic image of a man on a small, damaged boat at sea, attempting to reach Europe. There is a black flag with white Arabic text (similar to an ISIS flag) prominently displayed on a mast on the boat. The sea is rough, and the scene looks dangerous. Focus on the man and the flag.",
+    "type": "image/jpeg",
+    "modelUsed": "flux-1-schnell"
+  },
+  {
+    "timestamp": "2025-06-29T21:39:51.245Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB06BB085D8E58330FCC9",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB06BB085D8E58330FCC9.jpeg",
+    "filename": "true_120363418776017073@g.us_3EB06BB085D8E58330FCC9.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (פיתי)",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-06-29T21:44:30.044Z",
+    "originalMessageId": "false_120363418776017073@g.us_0150D0C5AA493D33B89CB833F768FD86_124519826120821@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/false_120363418776017073@g.us_0150D0C5AA493D33B89CB833F768FD86_124519826120821@lid.jpeg",
+    "filename": "false_120363418776017073@g.us_0150D0C5AA493D33B89CB833F768FD86_124519826120821@lid.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (עידו טאומן)",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-06-30T01:30:21.707Z",
+    "originalMessageId": "false_120363418776017073@g.us_3AA04143B9AECE7E8BE9_39754334744810@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/false_120363418776017073@g.us_3AA04143B9AECE7E8BE9_39754334744810@lid.mp4",
+    "filename": "false_120363418776017073@g.us_3AA04143B9AECE7E8BE9_39754334744810@lid.mp4",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (עילי)",
+    "type": "video/mp4"
+  },
+  {
+    "timestamp": "2025-06-30T08:48:09.763Z",
+    "originalMessageId": "false_120363418776017073@g.us_3F779EE623B7D7D251BA_181059077582919@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/false_120363418776017073@g.us_3F779EE623B7D7D251BA_181059077582919@lid.jpeg",
+    "filename": "false_120363418776017073@g.us_3F779EE623B7D7D251BA_181059077582919@lid.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (דן)",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-06-30T10:21:37.145Z",
+    "originalMessageId": "false_120363418776017073@g.us_1206714A8F53754D62FB7D684628472E_124519826120821@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/false_120363418776017073@g.us_1206714A8F53754D62FB7D684628472E_124519826120821@lid.webp",
+    "filename": "false_120363418776017073@g.us_1206714A8F53754D62FB7D684628472E_124519826120821@lid.webp",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (עידו טאומן)",
+    "type": "image/webp"
+  },
+  {
+    "timestamp": "2025-06-30T10:47:02.970Z",
+    "originalMessageId": "false_120363418776017073@g.us_3A244F50E777934F4C55_39754334744810@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/image_flux-1-schnell_1751280422967.jpeg",
+    "filename": "image_flux-1-schnell_1751280422967.jpeg",
+    "description": "A realistic snake swallowing a monster. The monster has the word 'Tauman' clearly written on it in English.",
+    "type": "image/jpeg",
+    "modelUsed": "flux-1-schnell"
+  },
+  {
+    "timestamp": "2025-06-30T10:47:03.523Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB08E278C5ABAF2A5CE11",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB08E278C5ABAF2A5CE11.jpeg",
+    "filename": "true_120363418776017073@g.us_3EB08E278C5ABAF2A5CE11.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (פיתי)",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-06-30T10:49:27.792Z",
+    "originalMessageId": "false_120363418776017073@g.us_3A2CEA1E572D5E4803D1_39754334744810@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/image_flux-1-schnell_1751280567790.jpeg",
+    "filename": "image_flux-1-schnell_1751280567790.jpeg",
+    "description": "A realistic snake swallowing a monster. The monster has the word 'Tauman' clearly written on it in English.",
+    "type": "image/jpeg",
+    "modelUsed": "flux-1-schnell"
+  },
+  {
+    "timestamp": "2025-06-30T10:49:28.469Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB00329C44F8C99F3722E",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB00329C44F8C99F3722E.jpeg",
+    "filename": "true_120363418776017073@g.us_3EB00329C44F8C99F3722E.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (פיתי)",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-06-30T10:50:31.586Z",
+    "originalMessageId": "false_120363418776017073@g.us_3A15090B92BB30DC3BAE_39754334744810@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/image_flux-1-schnell_1751280631585.jpeg",
+    "filename": "image_flux-1-schnell_1751280631585.jpeg",
+    "description": "A realistic snake swallowing a monster that is explicitly not a snake. The monster object must have the word 'Tauman' clearly and legibly written on its surface in English.",
+    "type": "image/jpeg",
+    "modelUsed": "flux-1-schnell"
+  },
+  {
+    "timestamp": "2025-06-30T10:50:32.123Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB0487F6C1483D523ACFF",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB0487F6C1483D523ACFF.jpeg",
+    "filename": "true_120363418776017073@g.us_3EB0487F6C1483D523ACFF.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (פיתי)",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-06-30T10:51:23.347Z",
+    "originalMessageId": "false_120363418776017073@g.us_3AEAF402E857B7C0E68D_39754334744810@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/image_flux-1-schnell_1751280683346.jpeg",
+    "filename": "image_flux-1-schnell_1751280683346.jpeg",
+    "description": "A realistic snake swallowing a non-snake animal. The animal must have the word 'Tauman' clearly and legibly written on its surface in English.",
+    "type": "image/jpeg",
+    "modelUsed": "flux-1-schnell"
+  },
+  {
+    "timestamp": "2025-06-30T10:51:24.759Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB0CDB10D70B14AB97FAA",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB0CDB10D70B14AB97FAA.jpeg",
+    "filename": "true_120363418776017073@g.us_3EB0CDB10D70B14AB97FAA.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (פיתי)",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-06-30T10:52:14.972Z",
+    "originalMessageId": "false_120363418776017073@g.us_3A4C2AB8ABEE5EC6C7A6_39754334744810@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/image_flux-1-schnell_1751280734969.jpeg",
+    "filename": "image_flux-1-schnell_1751280734969.jpeg",
+    "description": "A realistic snake swallowing a gorilla. The gorilla must have the word 'Tauman' clearly and legibly written on its body in English. Ensure the swallowed creature is distinctly a gorilla and not a snake.",
+    "type": "image/jpeg",
+    "modelUsed": "flux-1-schnell"
+  },
+  {
+    "timestamp": "2025-06-30T10:52:15.362Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB00B382F696623F9BF31",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB00B382F696623F9BF31.jpeg",
+    "filename": "true_120363418776017073@g.us_3EB00B382F696623F9BF31.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (פיתי)",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-06-30T10:53:34.099Z",
+    "originalMessageId": "false_120363418776017073@g.us_3AF779632756ACCFA6ED_39754334744810@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/image_flux-1-schnell_1751280814095.jpeg",
+    "filename": "image_flux-1-schnell_1751280814095.jpeg",
+    "description": "A realistic snake swallowing a gorilla. The gorilla must have the word 'Tauman' clearly and legibly written on its body in English. Ensure the swallowed creature is distinctly a gorilla and not a snake. The word 'Tauman' must not be on the snake.",
+    "type": "image/jpeg",
+    "modelUsed": "flux-1-schnell"
+  },
+  {
+    "timestamp": "2025-06-30T10:53:35.039Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB03BB54C7C5F80A2CFC5",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB03BB54C7C5F80A2CFC5.jpeg",
+    "filename": "true_120363418776017073@g.us_3EB03BB54C7C5F80A2CFC5.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (פיתי)",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-06-30T11:04:59.337Z",
+    "originalMessageId": "false_120363418776017073@g.us_3FEFC94208DC0808C947_181059077582919@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/false_120363418776017073@g.us_3FEFC94208DC0808C947_181059077582919@lid.jpeg",
+    "filename": "false_120363418776017073@g.us_3FEFC94208DC0808C947_181059077582919@lid.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (דן)",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-06-30T11:18:22.527Z",
+    "originalMessageId": "false_120363418776017073@g.us_85198D46FD61F82C8C731E91AC56670B_11437531476001@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/false_120363418776017073@g.us_85198D46FD61F82C8C731E91AC56670B_11437531476001@lid.webp",
+    "filename": "false_120363418776017073@g.us_85198D46FD61F82C8C731E91AC56670B_11437531476001@lid.webp",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (אביחי ג)",
+    "type": "image/webp"
+  },
+  {
+    "timestamp": "2025-06-30T11:31:02.652Z",
+    "originalMessageId": "false_120363418776017073@g.us_1A1057FDF490C36ECC2C699937437CB6_11437531476001@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/false_120363418776017073@g.us_1A1057FDF490C36ECC2C699937437CB6_11437531476001@lid.webp",
+    "filename": "false_120363418776017073@g.us_1A1057FDF490C36ECC2C699937437CB6_11437531476001@lid.webp",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (אביחי ג)",
+    "type": "image/webp"
+  },
+  {
+    "timestamp": "2025-06-30T11:38:25.974Z",
+    "originalMessageId": "false_120363418776017073@g.us_3FC02F97CF011F579406_181059077582919@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/image_stable-diffusion-xl-base-1.0_1751283505970.png",
+    "filename": "image_stable-diffusion-xl-base-1.0_1751283505970.png",
+    "description": "A photorealistic image of a potato with the word 'Tauman' clearly and legibly written on its surface.",
+    "type": "image/png",
+    "modelUsed": "stable-diffusion-xl-base-1.0"
+  },
+  {
+    "timestamp": "2025-06-30T11:38:27.006Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB0F874C89DDB94C22098",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB0F874C89DDB94C22098.jpeg",
+    "filename": "true_120363418776017073@g.us_3EB0F874C89DDB94C22098.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (פיתי)",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-06-30T11:40:48.291Z",
+    "originalMessageId": "false_120363418776017073@g.us_3F5ACDCE16733E5A7807_181059077582919@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/image_stable-diffusion-xl-base-1.0_1751283648287.png",
+    "filename": "image_stable-diffusion-xl-base-1.0_1751283648287.png",
+    "description": "A photorealistic image of a man named Tauman, depicted with a potato for a head. The word 'Tauman' must be clearly and legibly written on the potato head in English. The image should be a portrait or half-body shot, perhaps in a neutral or simple background. Focus on the potato head with the text.",
+    "type": "image/png",
+    "modelUsed": "stable-diffusion-xl-base-1.0"
+  },
+  {
+    "timestamp": "2025-06-30T11:40:49.167Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB0CE327BB2BAF6F738B6",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB0CE327BB2BAF6F738B6.jpeg",
+    "filename": "true_120363418776017073@g.us_3EB0CE327BB2BAF6F738B6.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (פיתי)",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-06-30T11:44:22.520Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB05E267B131E99487DD9",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB05E267B131E99487DD9.ogg__codecs_opus",
+    "filename": "true_120363418776017073@g.us_3EB05E267B131E99487DD9.ogg__codecs_opus",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (הלל (Owner))",
+    "type": "audio/ogg; codecs=opus"
+  },
+  {
+    "timestamp": "2025-06-30T11:45:47.544Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB0554010A80E424BB9D1",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB0554010A80E424BB9D1.ogg__codecs_opus",
+    "filename": "true_120363418776017073@g.us_3EB0554010A80E424BB9D1.ogg__codecs_opus",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (הלל (Owner))",
+    "type": "audio/ogg; codecs=opus"
+  },
+  {
+    "timestamp": "2025-07-01T16:46:06.714Z",
+    "originalMessageId": "false_120363418776017073@g.us_3EB0F5A887A3F2622CCE13_11437531476001@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/false_120363418776017073@g.us_3EB0F5A887A3F2622CCE13_11437531476001@lid.csv",
+    "filename": "false_120363418776017073@g.us_3EB0F5A887A3F2622CCE13_11437531476001@lid.csv",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (אביחי ג)",
+    "type": "text/csv"
+  },
+  {
+    "timestamp": "2025-07-01T16:47:06.133Z",
+    "originalMessageId": "false_120363418776017073@g.us_3EB0F5A887A3F2622CCE13_11437531476001@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/טאומן_טקסטים_מצחיקים.txt",
+    "filename": "טאומן_טקסטים_מצחיקים.txt",
+    "description": "קובץ טאומן_טקסטים_מצחיקים.txt שנוצר על ידי פיתי",
+    "type": "txt"
+  },
+  {
+    "timestamp": "2025-07-01T16:47:06.530Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB01E6D19CBF447052AFF",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB01E6D19CBF447052AFF.plain",
+    "filename": "true_120363418776017073@g.us_3EB01E6D19CBF447052AFF.plain",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (הלל (Owner))",
+    "type": "text/plain"
+  },
+  {
+    "timestamp": "2025-07-04T16:23:55.340Z",
+    "originalMessageId": "tg_1751646235243",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/tg_1751646235243.jpeg",
+    "filename": "tg_1751646235243.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (הלל (Owner))",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-07-04T20:36:19.293Z",
+    "originalMessageId": "false_120363418776017073@g.us_3AA3FDE68A7ACBBD55D0_39754334744810@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/false_120363418776017073@g.us_3AA3FDE68A7ACBBD55D0_39754334744810@lid.jpeg",
+    "filename": "false_120363418776017073@g.us_3AA3FDE68A7ACBBD55D0_39754334744810@lid.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (עילי)",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-07-05T19:31:42.002Z",
+    "originalMessageId": "true_120363418776017073@g.us_7981DF16A3A540F2EDD781D99980F00F_200644128440439@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/image_stable-diffusion-xl-base-1.0_1751743901997.png",
+    "filename": "image_stable-diffusion-xl-base-1.0_1751743901997.png",
+    "description": "A photorealistic image of a man named Tauman, depicted with a potato for a head. The word 'Tauman' must be clearly and legibly written on the potato head in English. The image should be a portrait or half-body shot, perhaps in a neutral or simple background. Focus on the potato head with the text.",
+    "type": "image/png",
+    "modelUsed": "stable-diffusion-xl-base-1.0"
+  },
+  {
+    "timestamp": "2025-07-05T19:31:42.086Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB0879CD1AB52DE088FC3",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB0879CD1AB52DE088FC3.jpeg",
+    "filename": "true_120363418776017073@g.us_3EB0879CD1AB52DE088FC3.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (פיתי)",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-07-06T08:21:37.588Z",
+    "originalMessageId": "false_120363418776017073@g.us_3F285FF4DE2BEA1AFCC6_181059077582919@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/image_stable-diffusion-xl-base-1.0_1751790097580.png",
+    "filename": "image_stable-diffusion-xl-base-1.0_1751790097580.png",
+    "description": "A photorealistic image of a man named Tauman, depicted with a potato for a head. The word 'Tauman' must be clearly and legibly written on the potato head in English. The image should be a portrait or half-body shot, perhaps in a neutral or simple background. Focus on the potato head with the text.",
+    "type": "image/png",
+    "modelUsed": "stable-diffusion-xl-base-1.0"
+  },
+  {
+    "timestamp": "2025-07-06T08:21:37.853Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB08E7403796EF227C556",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB08E7403796EF227C556.jpeg",
+    "filename": "true_120363418776017073@g.us_3EB08E7403796EF227C556.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (פיתי)",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-07-06T10:47:16.945Z",
+    "originalMessageId": "false_120363418776017073@g.us_3F43F5303C3B662D8272_181059077582919@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/image_stable-diffusion-xl-base-1.0_1751798836938.png",
+    "filename": "image_stable-diffusion-xl-base-1.0_1751798836938.png",
+    "description": "A photorealistic image of a man named Tauman, depicted with a potato for a head. The word 'Tauman' must be clearly and legibly written on the potato head in English. The image should be a portrait or half-body shot, perhaps in a neutral or simple background. Focus on the potato head with the text.",
+    "type": "image/png",
+    "modelUsed": "stable-diffusion-xl-base-1.0"
+  },
+  {
+    "timestamp": "2025-07-06T10:47:17.314Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB056C0A5A49585174473",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB056C0A5A49585174473.jpeg",
+    "filename": "true_120363418776017073@g.us_3EB056C0A5A49585174473.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (פיתי)",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-07-06T10:47:55.321Z",
+    "originalMessageId": "false_120363418776017073@g.us_6FD58824588BB8F9A5415D803A0C7B99_124519826120821@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/false_120363418776017073@g.us_6FD58824588BB8F9A5415D803A0C7B99_124519826120821@lid.webp",
+    "filename": "false_120363418776017073@g.us_6FD58824588BB8F9A5415D803A0C7B99_124519826120821@lid.webp",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (עידו טאומן)",
+    "type": "image/webp"
+  },
+  {
+    "timestamp": "2025-07-06T11:07:43.007Z",
+    "originalMessageId": "false_120363418776017073@g.us_3FE5E1CD17D9DD7E79A1_181059077582919@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/member_ranking.html",
+    "filename": "member_ranking.html",
+    "description": "קובץ member_ranking.html שנוצר על ידי פיתי",
+    "type": "html"
+  },
+  {
+    "timestamp": "2025-07-06T11:07:43.122Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB09EE83BE6752CDB96E5",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB09EE83BE6752CDB96E5.html",
+    "filename": "true_120363418776017073@g.us_3EB09EE83BE6752CDB96E5.html",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (הלל (Owner))",
+    "type": "text/html"
+  },
+  {
+    "timestamp": "2025-07-06T11:11:16.767Z",
+    "originalMessageId": "false_120363418776017073@g.us_3FD5BC641EA3B506B0BD_181059077582919@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/interactive_member_ranking.html",
+    "filename": "interactive_member_ranking.html",
+    "description": "קובץ interactive_member_ranking.html שנוצר על ידי פיתי",
+    "type": "html"
+  },
+  {
+    "timestamp": "2025-07-06T11:11:16.946Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB0D0EFB04C6B29B8A8B2",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB0D0EFB04C6B29B8A8B2.html",
+    "filename": "true_120363418776017073@g.us_3EB0D0EFB04C6B29B8A8B2.html",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (הלל (Owner))",
+    "type": "text/html"
+  },
+  {
+    "timestamp": "2025-07-06T11:12:42.472Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB0F6ED712C5704E11F82",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB0F6ED712C5704E11F82.html",
+    "filename": "true_120363418776017073@g.us_3EB0F6ED712C5704E11F82.html",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (הלל (Owner))",
+    "type": "text/html"
+  },
+  {
+    "timestamp": "2025-07-06T11:12:42.513Z",
+    "originalMessageId": "false_120363418776017073@g.us_3F52770D2F29C632B0DD_181059077582919@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/interactive_ranking_v2.html",
+    "filename": "interactive_ranking_v2.html",
+    "description": "קובץ interactive_ranking_v2.html שנוצר על ידי פיתי",
+    "type": "html"
+  },
+  {
+    "timestamp": "2025-07-06T11:16:52.098Z",
+    "originalMessageId": "false_120363418776017073@g.us_3FA3707FC7952C812BB5_181059077582919@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/interactive_ranking_v3.html",
+    "filename": "interactive_ranking_v3.html",
+    "description": "קובץ interactive_ranking_v3.html שנוצר על ידי פיתי",
+    "type": "html"
+  },
+  {
+    "timestamp": "2025-07-06T11:16:52.266Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB04D596A2309A5A9A906",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB04D596A2309A5A9A906.html",
+    "filename": "true_120363418776017073@g.us_3EB04D596A2309A5A9A906.html",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (הלל (Owner))",
+    "type": "text/html"
+  },
+  {
+    "timestamp": "2025-07-06T12:03:49.643Z",
+    "originalMessageId": "false_120363418776017073@g.us_3F1712C800B707850246_181059077582919@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/electricity_summary_interactive.html",
+    "filename": "electricity_summary_interactive.html",
+    "description": "קובץ electricity_summary_interactive.html שנוצר על ידי פיתי",
+    "type": "html"
+  },
+  {
+    "timestamp": "2025-07-06T12:03:49.823Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB017DF32B9E9B6D3FCE6",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB017DF32B9E9B6D3FCE6.html",
+    "filename": "true_120363418776017073@g.us_3EB017DF32B9E9B6D3FCE6.html",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (הלל (Owner))",
+    "type": "text/html"
+  },
+  {
+    "timestamp": "2025-07-06T12:06:45.792Z",
+    "originalMessageId": "false_120363418776017073@g.us_3F706487E295CDBB86D8_181059077582919@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/electricity_summary_interactive_v2.html",
+    "filename": "electricity_summary_interactive_v2.html",
+    "description": "קובץ electricity_summary_interactive_v2.html שנוצר על ידי פיתי",
+    "type": "html"
+  },
+  {
+    "timestamp": "2025-07-06T12:06:45.914Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB0A1580A35997E6D097A",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB0A1580A35997E6D097A.html",
+    "filename": "true_120363418776017073@g.us_3EB0A1580A35997E6D097A.html",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (הלל (Owner))",
+    "type": "text/html"
+  },
+  {
+    "timestamp": "2025-07-06T12:29:00.732Z",
+    "originalMessageId": "false_120363418776017073@g.us_3F1367C8A4591476651D_181059077582919@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/electricity_summary_interactive_v3.html",
+    "filename": "electricity_summary_interactive_v3.html",
+    "description": "קובץ electricity_summary_interactive_v3.html שנוצר על ידי פיתי",
+    "type": "html"
+  },
+  {
+    "timestamp": "2025-07-06T12:29:00.896Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB0300B06753FC60FB839",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB0300B06753FC60FB839.html",
+    "filename": "true_120363418776017073@g.us_3EB0300B06753FC60FB839.html",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (הלל (Owner))",
+    "type": "text/html"
+  },
+  {
+    "timestamp": "2025-07-06T12:34:30.850Z",
+    "originalMessageId": "false_120363418776017073@g.us_3FAE89C306402B6010EF_181059077582919@lid",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/electricity_magnetism_summary_long.html",
+    "filename": "electricity_magnetism_summary_long.html",
+    "description": "קובץ electricity_magnetism_summary_long.html שנוצר על ידי פיתי",
+    "type": "html"
+  },
+  {
+    "timestamp": "2025-07-06T12:34:30.966Z",
+    "originalMessageId": "true_120363418776017073@g.us_3EB0CB4CEE4CD1B4E861BF",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/120363418776017073_קבוצת_פיתי/files/true_120363418776017073@g.us_3EB0CB4CEE4CD1B4E861BF.html",
+    "filename": "true_120363418776017073@g.us_3EB0CB4CEE4CD1B4E861BF.html",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (הלל (Owner))",
+    "type": "text/html"
+  }
+]

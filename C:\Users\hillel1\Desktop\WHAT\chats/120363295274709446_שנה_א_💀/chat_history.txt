@@ -1,0 +1,17 @@
+[2025-06-30 13:08:18] [ID: false_120363295274709446@g.us_19B2154EC586F3998C43D8EF1BDC77FB_204492066783430@lid] סהר: אפשר עזרה בסעיף ה בשאלה 5 בשיעורי בית 7 באינפי?
+[2025-06-30 13:09:51] [ID: false_120363295274709446@g.us_A019FF108CB6623061327C1CA922C10E_120916365279434@lid] 𝔒𝔣𝔢𝔮 𝔎𝔬𝔯𝔢𝔫✌: (↩️ ל-ID:false_120363295274709446@g.us_19B2154EC586F3998C43D8EF1BDC77FB_204492066783430@lid "אפשר עזרה בסעיף ה בשאלה 5...")
+אם זה הזה של אופיר וזה הזה על הטורים אפשר להשתמש בטור טיילור של e
+[2025-06-30 13:11:53] [ID: false_120363295274709446@g.us_ACDF8847C558B02F033C90F38A524DD3_204492066783430@lid] סהר: אני לא מבין
+[2025-06-30 13:13:57] [ID: false_120363295274709446@g.us_9CF86F2F504E20A4BBFBEB302E19244A_204492066783430@lid] סהר: [מדיה]
+[2025-06-30 13:14:01] [ID: false_120363295274709446@g.us_9CF86F2F504E20A4BBFBEB302E19244A_204492066783430@lid] פיתי (media content): Description: The image contains a mathematical expression representing an infinite series. The expression starts with a summation symbol ($\Sigma$) with the index $n$ starting from 0 at the bottom and going to infinity ($\infty$) at the top. The term being summed is a fraction. The numerator of the fraction is 1. The denominator is the product of $4^n$ and the factorial of $(2n+1)$, written as $(2n+1)!$.
+
+Extracted text:
+$\sum_{n=0}^{\infty} \frac{1}{4^{n}(2 n+1) !}$
+[2025-06-30 15:51:02] [ID: false_120363295274709446@g.us_BECE2F65DC1C492F2FC15762E2620074_5596409495754@lid] רז הברווז תעשיות בע"מ: (↩️ ל-ID:false_120363295274709446@g.us_9CF86F2F504E20A4BBFBEB302E19244A_204492066783430@lid "[מדיה]...")
+אני חושב שזה משהו כמו 12?
+[2025-06-30 15:51:07] [ID: false_120363295274709446@g.us_39E869F3FDB899980A29FDABBADDCE40_5596409495754@lid] רז הברווז תעשיות בע"מ: לא
+[2025-06-30 15:51:12] [ID: false_120363295274709446@g.us_CF7CD4398E454E1540D56F068C214694_5596409495754@lid] רז הברווז תעשיות בע"מ: זה 13
+[2025-07-03 9:40:17] [ID: false_120363295274709446@g.us_3A4B9000788386CA52E8_12519863259287@lid] WrongWay: (↩️ ל-ID:false_120363295274709446@g.us_9CF86F2F504E20A4BBFBEB302E19244A_204492066783430@lid "[מדיה]...")
+r^2n / (2n+1)!
+[2025-07-04 11:40:05] [ID: false_120363295274709446@g.us_3F2FC989B75094EE1F25_181059077582919@lid] דן (0527278845): https://docs.google.com/document/d/1j5IU6lAY1dwnjSkMYuqP4dAQo_ah1r6mdCFL0KX1Uaw/edit?tab=t.8mtvtt9fmavq
+תקשיבו אנשים צריך להוסיף ציטוטים

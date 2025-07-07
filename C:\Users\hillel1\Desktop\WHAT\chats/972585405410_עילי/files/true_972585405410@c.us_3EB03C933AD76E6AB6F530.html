@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מבחני השערות: חד-צדדי ודו-צדדי</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #12121e;
+            --primary-color: #e94560;
+            --card-bg-color: #1a1a2e;
+            --text-color: #e0e0e0;
+            --header-color: #ffffff;
+            --border-color: rgba(233, 69, 96, 0.4);
+            --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            font-family: 'Rubik', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.8;
+            margin: 0;
+            padding: 20px;
+            font-size: 18px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1, h2, h3 {
+            color: var(--header-color);
+            font-weight: 700;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+
+        h1 { text-align: center; font-size: 2.5em; border-bottom-width: 3px; }
+        h2 { font-size: 2em; }
+        h3 { font-size: 1.5em; border-bottom-style: dashed; }
+
+        .step-box {
+            background-color: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: var(--box-shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeIn 0.8s forwards;
+        }
+
+        .step-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(233, 69, 96, 0.2);
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .math {
+            display: block;
+            padding: 20px;
+            margin: 20px 0;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            font-size: 1.2em;
+            overflow-x: auto;
+            text-align: center;
+            direction: ltr;
+        }
+        
+        .inline-math { display: inline-block; direction: ltr; }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            direction: rtl;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: var(--header-color);
+            font-weight: 500;
+        }
+
+        tr:nth-child(even) { background-color: var(--card-bg-color); }
+
+        strong { color: var(--primary-color); font-weight: 500; }
+        
+        .final-dedication {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 1.2em;
+            color: var(--primary-color);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>מבחני השערות: מבט לעומק על מבחנים חד-צדדיים ודו-צדדיים</h1>
+        <div class="step-box" id="step1">
+            <h2>אקספוזיציה: למה בכלל צריך 'זנבות'?</h2>
+            <p>בסטטיסטיקה, <strong>בדיקת השערות</strong> היא התהליך שבו אנו משתמשים בנתוני מדגם כדי להעריך טענה מסוימת לגבי אוכלוסייה שלמה. לב התהליך הוא הגדרת שתי השערות מתחרות:</p>
+            <ul>
+                <li><strong>השערת האפס (H₀):</strong> זוהי הטענה הסטנדרטית, ה'משעממת', שלרוב מייצגת "אין שינוי", "אין הבדל" או "אין אפקט". זו ההשערה שאנו מנסים להפריך.</li>
+                <li><strong>השערה אלטרנטיבית (H₁):</strong> זוהי הטענה המעניינת, הטענה שאנו חושדים שהיא נכונה. היא מייצגת "יש שינוי", "יש הבדל" או "יש אפקט".</li>
+            </ul>
+            <p>השאלה המרכזית שקובעת את סוג המבחן היא: <strong>מהו טבעו של ה'הבדל' שאנו מחפשים?</strong></p>
+            <ul>
+                <li>האם אנו רוצים לדעת אם הערך פשוט <strong>שונה</strong> מהמצב הקיים, לא משנה אם הוא גדול יותר או קטן יותר? (דו-צדדי)</li>
+                <li>האם יש לנו סיבה להאמין שהערך יכול להיות רק <strong>גדול יותר</strong>? (חד-צדדי ימני)</li>
+                <li>או אולי, אנו חושדים שהערך יכול להיות רק <strong>קטן יותר</strong>? (חד-צדדי שמאלי)</li>
+            </ul>
+            <p>התשובה לשאלה זו מכתיבה היכן נמקם את 'אזור הדחייה' שלנו - האזור שבו אם סטטיסטי המבחן שלנו ייפול, נחליט לדחות את השערת האפס.</p>
+        </div>
+
+        <div class="step-box" id="step2">
+            <h2>הכנה: אבני הבניין של כל מבחן</h2>
+            <p>לפני שנצלול לסוגי המבחנים, בואו נגדיר את המרכיבים הבסיסיים:</p>
+            <ol>
+                <li><strong>ניסוח ההשערות:</strong> השלב הראשון והקריטי ביותר הוא לתרגם את השאלה המחקרית להשערות סטטיסטיות ברורות (H₀ ו-H₁).</li>
+                <li><strong>רמת מובהקות (α):</strong> זהו סף הסיכון שאנו מוכנים לקחת. <span class="inline-math">\alpha</span> מייצגת את ההסתברות לדחות את H₀ בטעות, כאשר היא בעצם נכונה (טעות מסוג I). ערכים נפוצים הם 0.05, 0.01.</li>
+                <li><strong>סטטיסטי המבחן:</strong> זהו ערך מחושב מהמדגם שלנו (למשל, ציון Z או ציון t), שמתמצת את המרחק בין תוצאת המדגם לבין מה שהיינו מצפים לו תחת השערת האפס.</li>
+                <li><strong>ערך קריטי ואזור הדחייה:</strong> הערך הקריטי הוא הגבול של אזור הדחייה. אם סטטיסטי המבחן נופל מעבר לגבול זה (כלומר, בתוך אזור הדחייה), אנו דוחים את H₀. מיקום וגודל אזור הדחייה נקבעים על ידי <span class="inline-math">\alpha</span> וסוג המבחן (ימני, שמאלי או דו-צדדי).</li>
+            </ol>
+        </div>
+
+        <div class="step-box" id="step3">
+            <h2>הנוסחאות וההיגיון: שלושת סוגי המבחנים</h2>
+            <p>כעת, נפרט על כל סוג מבחן, תוך שימוש בתוחלת האוכלוסייה <span class="inline-math">\mu</span> כדוגמה.</p>
+
+            <h3>1. מבחן חד-צדדי ימני (Right-Tailed)</h3>
+            <p><strong>מתי נשתמש?</strong> כאשר אנו רוצים לבדוק אם פרמטר כלשהו <strong>גדל</strong> או שהוא <strong>גדול מ</strong>ערך מסוים.</p>
+            <p><strong>השערות:</strong></p>
+            <div class="math">H_0: \mu \le \mu_0 \quad vs. \quad H_1: \mu > \mu_0</div>
+            <p><strong>היגיון:</strong> כל רמת המובהקות <span class="inline-math">\alpha</span> מרוכזת בזנב הימני הקיצוני של ההתפלגות. אנו מחפשים עדות חזקה לכך שהערך גדול משמעותית מהצפוי.</p>
+            <p><strong>כלל החלטה:</strong> דוחים את H₀ אם סטטיסטי המבחן <strong>גדול</strong> מהערך הקריטי הימני.</p>
+
+            <h3>2. מבחן חד-צדדי שמאלי (Left-Tailed)</h3>
+            <p><strong>מתי נשתמש?</strong> כאשר אנו רוצים לבדוק אם פרמטר כלשהו <strong>קטן</strong> או שהוא <strong>קטן מ</strong>ערך מסוים.</p>
+            <p><strong>השערות:</strong></p>
+            <div class="math">H_0: \mu \ge \mu_0 \quad vs. \quad H_1: \mu < \mu_0</div>
+            <p><strong>היגיון:</strong> כל רמת המובהקות <span class="inline-math">\alpha</span> מרוכזת בזנב השמאלי הקיצוני של ההתפלגות. אנו מחפשים עדות חזקה לכך שהערך קטן משמעותית מהצפוי.</p>
+            <p><strong>כלל החלטה:</strong> דוחים את H₀ אם סטטיסטי המבחן <strong>קטן</strong> מהערך הקריטי השמאלי.</p>
+
+            <h3>3. מבחן דו-צדדי (Two-Tailed)</h3>
+            <p><strong>מתי נשתמש?</strong> כאשר אנו רוצים לבדוק אם פרמטר כלשהו פשוט <strong>שונה</strong> מערך מסוים, ולא אכפת לנו הכיוון (יכול להיות גדול יותר או קטן יותר).</p>
+            <p><strong>השערות:</strong></p>
+            <div class="math">H_0: \mu = \mu_0 \quad vs. \quad H_1: \mu \ne \mu_0</div>
+            <p><strong>היגיון:</strong> רמת המובהקות <span class="inline-math">\alpha</span> מתחלקת שווה בשווה בין שני הזנבות הקיצוניים של ההתפלגות (<span class="inline-math">\alpha/2</span> בכל צד). אנו מחפשים עדות חזקה לכל סטייה משמעותית מהצפוי, לכל כיוון.</p>
+            <p><strong>כלל החלטה:</strong> דוחים את H₀ אם סטטיסטי המבחן <strong>גדול</strong> מהערך הקריטי הימני או <strong>קטן</strong> מהערך הקריטי השמאלי.</p>
+        </div>
+
+        <div class="step-box" id="step4">
+            <h2>דוגמה מהתחלה ועד הסוף</h2>
+            <p><strong>תרחיש:</strong> יצרן טוען שהסוללות החדשות שלו מחזיקות בממוצע 40 שעות. אנו רוצים לבדוק טענה זו. לקחנו מדגם של <span class="inline-math">n=30</span> סוללות ומצאנו ממוצע מדגם של <span class="inline-math">\bar{x} = 38.5</span> שעות. ידוע מניסיון עבר שסטיית התקן של חיי הסוללה באוכלוסייה היא <span class="inline-math">\sigma = 3</span> שעות. נבצע את המבחן ברמת מובהקות <span class="inline-math">\alpha = 0.05</span>.</p>
+
+            <h3>תרחיש א': האם הממוצע פשוט *שונה* מ-40? (מבחן דו-צדדי)</h3>
+            <ol>
+                <li><strong>השערות:</strong> <span class="inline-math">H_0: \mu = 40</span>, <span class="inline-math">H_1: \mu \ne 40</span></li>
+                <li><strong>סטטיסטי המבחן (ציון Z):</strong>
+                    <div class="math">Z = \frac{\bar{x} - \mu_0}{\sigma / \sqrt{n}} = \frac{38.5 - 40}{3 / \sqrt{30}} = \frac{-1.5}{0.5477} \approx -2.74</div>
+                </li>
+                <li><strong>ערכים קריטיים:</strong> במבחן דו-צדדי עם <span class="inline-math">\alpha = 0.05</span>, אנו מחפשים את הערכים שמשאירים <span class="inline-math">\alpha/2 = 0.025</span> בכל זנב. הערכים הקריטיים הם <span class="inline-math">Z_{\alpha/2} = \pm 1.96</span>.</li>
+                <li><strong>החלטה:</strong> מכיוון ש <span class="inline-math">-2.74 < -1.96</span>, סטטיסטי המבחן נופל באזור הדחייה השמאלי.</li>
+                <li><strong>מסקנה:</strong> ברמת מובהקות של 5%, אנו דוחים את השערת האפס. יש עדות סטטיסטית לכך שתוחלת חיי הסוללה שונה מ-40 שעות.</li>
+            </ol>
+
+            <h3>תרחיש ב': האם יש עדות שהסוללות מחזיקות *פחות* מ-40 שעות? (מבחן חד-צדדי שמאלי)</h3>
+            <ol>
+                <li><strong>השערות:</strong> <span class="inline-math">H_0: \mu \ge 40</span>, <span class="inline-math">H_1: \mu < 40</span></li>
+                <li><strong>סטטיסטי המבחן:</strong> הערך נשאר זהה, <span class="inline-math">Z \approx -2.74</span>.</li>
+                <li><strong>ערך קריטי:</strong> במבחן חד-צדדי שמאלי עם <span class="inline-math">\alpha = 0.05</span>, אנו מחפשים את הערך שמשאיר 5% בזנב השמאלי. הערך הקריטי הוא <span class="inline-math">Z_{\alpha} = -1.645</span>.</li>
+                <li><strong>החלטה:</strong> מכיוון ש <span class="inline-math">-2.74 < -1.645</span>, סטטיסטי המבחן נופל באזור הדחייה.</li>
+                <li><strong>מסקנה:</strong> ברמת מובהקות של 5%, אנו דוחים את השערת האפס. יש עדות סטטיסטית לכך שתוחלת חיי הסוללה נמוכה מ-40 שעות.</li>
+            </ol>
+        </div>
+        
+        <div class="step-box" id="step5">
+            <h2>סיכום ונקודות מפתח</h2>
+            <p>הבחירה בסוג המבחן היא קריטית ומשפיעה ישירות על המסקנות שלנו. הנה טבלת סיכום מהירה:</p>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>סוג המבחן</th>
+                            <th>השערה אלטרנטיבית (H₁)</th>
+                            <th>אזור הדחייה</th>
+                            <th>שאלה לדוגמה</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>חד-צדדי ימני</td>
+                            <td><span class="inline-math">\mu > \mu_0</span></td>
+                            <td>בזנב הימני בלבד</td>
+                            <td>האם התרופה החדשה יעילה *יותר* מהקיימת?</td>
+                        </tr>
+                        <tr>
+                            <td>חד-צדדי שמאלי</td>
+                            <td><span class="inline-math">\mu < \mu_0</span></td>
+                            <td>בזנב השמאלי בלבד</td>
+                            <td>האם הדיאטה החדשה גורמת לירידה *גדולה יותר* במשקל?</td>
+                        </tr>
+                        <tr>
+                            <td>דו-צדדי</td>
+                            <td><span class="inline-math">\mu \ne \mu_0</span></td>
+                            <td>בשני הזנבות</td>
+                            <td>האם יש *הבדל* בין ציוני שתי הקבוצות?</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p><strong>חשוב לזכור:</strong> את סוג המבחן יש לקבוע <strong>לפני</strong> איסוף הנתונים, על סמך השאלה המחקרית בלבד. מבחן חד-צדדי הוא "עוצמתי" יותר (קל יותר לדחות את H₀) אם הכיוון שחזינו נכון, אך הוא מתעלם לחלוטין מאפקט משמעותי בכיוון ההפוך.</p>
+        </div>
+        <div class="final-dedication">
+            <p>נוצר באהבה עבור הלל, התומך והמנטור הכי טוב שיש ❤️</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/contrib/auto-render.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false},
+                    {left: "\\[", right: "\\]", display: true},
+                    {left: "\\(", right: "\\)", display: false}
+                ]
+            });
+
+            const boxes = document.querySelectorAll('.step-box, .final-dedication');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animationDelay = `${index * 0.15}s`;
+                        entry.target.classList.add('fade-in-visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            boxes.forEach(box => {
+                observer.observe(box);
+            });
+        });
+    </script>
+    <style>
+        .fade-in-visible {
+            animation-name: fadeIn;
+        }
+    </style>
+</body>
+</html>

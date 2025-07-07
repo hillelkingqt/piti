@@ -1,0 +1,217 @@
+<!-- filename: הסבר_התפלגות_t.html -->
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>התפלגות t (התפלגות Student)</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&display=swap');
+
+        :root {
+            --bg-color: #1a1a1a;
+            --text-color: #e0e0e0;
+            --primary-color: #4fc3f7;
+            --secondary-color: #26a69a;
+            --card-bg: #2c2c2c;
+            --border-color: #444;
+            --header-font: 'Assistant', sans-serif;
+            --body-font: 'Assistant', sans-serif;
+        }
+
+        body {
+            font-family: var(--body-font);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.8;
+            margin: 0;
+            padding: 20px;
+            font-size: 18px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 1rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        h1, h2 {
+            font-family: var(--header-font);
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        h1 {
+            font-size: 2.8em;
+            margin-bottom: 0.2em;
+        }
+
+        h2 {
+            font-size: 2em;
+            color: var(--secondary-color);
+            margin-top: 2.5rem;
+            border-right: 4px solid var(--secondary-color);
+            padding-right: 15px;
+            animation: slideInRight 0.7s ease-out;
+        }
+
+        p {
+            margin-bottom: 1.2rem;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .math-box {
+            background-color: rgba(0,0,0,0.2);
+            border: 1px solid var(--border-color);
+            border-right: 5px solid var(--primary-color);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 8px;
+            overflow-x: auto;
+            animation: zoomIn 0.6s ease-out;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .math-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(79, 195, 247, 0.2);
+        }
+
+        .math {
+            font-size: 1.2em;
+            color: #f5f5f5;
+        }
+
+        .katex-display {
+            margin: 1em 0;
+            overflow: auto;
+        }
+
+        ul {
+            list-style-type: '✓ ';
+            padding-right: 20px;
+        }
+
+        li {
+            margin-bottom: 0.8rem;
+            padding-right: 10px;
+            animation: fadeInUp 0.5s ease-out;
+        }
+        
+        .explanation-box {
+            background-color: rgba(46, 125, 50, 0.1);
+            border-right: 5px solid var(--secondary-color);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+        }
+        
+        .important {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .final-word {
+            text-align: center;
+            margin-top: 3rem;
+            font-size: 1.2em;
+            font-style: italic;
+            color: var(--secondary-color);
+        }
+
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes zoomIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        @keyframes slideInRight { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>התפלגות t (התפלגות Student)</h1>
+            <p>הגדרה, נוסחאות וההיגיון מאחורי הקלעים</p>
+        </header>
+
+        <section id="intro">
+            <h2>למה בכלל צריך את זה?</h2>
+            <p>
+                היי עילי, אני מבינה לגמרי את ה-"WTF". במבט ראשון, התפלגות t נראית כמו עוד מושג מתמטי מסובך, אבל היא פותרת בעיה מאוד נפוצה בעולם האמיתי.
+                תחשוב עליה כעל 'בת דודה' של <span class="important">ההתפלגות הנורמלית</span> (עקומת הפעמון המוכרת), שמותאמת במיוחד למצבים שבהם:
+            </p>
+            <ul>
+                <li>יש לך <span class="important">מדגם קטן</span> (בדרך כלל, פחות מ-30 נתונים).</li>
+                <li>אתה <span class="important">לא יודע</span> את סטיית התקן של כלל האוכלוסייה (שזה כמעט תמיד המצב).</li>
+            </ul>
+            <p>בגלל אי-הוודאות שנובעת מהמדגם הקטן, התפלגות t היא "פסימית" יותר - יש לה "זנבות שמנים" יותר מההתפלגות הנורמלית, מה שנותן יותר משקל לערכים קיצוניים.</p>
+        </section>
+
+        <section id="definition">
+            <h2>ההגדרה המתמטית</h2>
+            <p>
+                באופן פורמלי, התפלגות t מוגדרת באמצעות שני משתנים מקריים אחרים:
+                משתנה מקרי נורמלי סטנדרטי <span class="math" dir="ltr">(Z \sim N(0,1))</span>, ומשתנה מקרי בעל התפלגות חי-בריבוע <span class="math" dir="ltr">(V \sim \chi^2_{(\nu)})</span> עם <span class="math" dir="ltr">\nu</span> דרגות חופש.
+                כאשר שניהם בלתי תלויים, המשתנה המקרי T, שמתפלג t עם <span class="math" dir="ltr">\nu</span> דרגות חופש, מוגדר כך:
+            </p>
+            <div class="math-box">
+                <div class="math" dir="ltr">$$ T = \frac{Z}{\sqrt{V/\nu}} $$</div>
+            </div>
+        </section>
+
+        <section id="formula">
+            <h2>נוסחת פונקציית צפיפות ההסתברות (PDF)</h2>
+            <p>
+                זו הנוסחה שמתארת את צורת 'עקומת הפעמון' של התפלגות t. הנוסחה נראית מאיימת, אבל הרעיון המרכזי הוא שהיא תלויה בפרמטר יחיד שנקרא <span class="important">דרגות חופש</span> (מסומן באות היוונית <span class="math" dir="ltr">\nu</span>, 'נוּ').
+            </p>
+            <div class="math-box">
+                <div class="math" dir="ltr">$$ f(t) = \frac{\Gamma\left(\frac{\nu+1}{2}\right)}{\sqrt{\nu\pi}\,\Gamma\left(\frac{\nu}{2}\right)} \left(1 + \frac{t^2}{\nu}\right)^{-\frac{\nu+1}{2}} $$</div>
+            </div>
+            <div class="explanation-box">
+                <strong>מה כל זה אומר?</strong>
+                <ul>
+                    <li><span class="math" dir="ltr">t</span>: זהו הערך על הציר האופקי, המקביל לערך z בהתפלגות נורמלית.</li>
+                    <li><span class="math" dir="ltr">\nu</span>: <span class="important">דרגות החופש.</span> זה הפרמטר היחיד שקובע את צורת ההתפלגות. ברוב המקרים, <span class="math" dir="ltr">\nu = n-1</span> (גודל המדגם פחות 1). ככל ש-<span class="math" dir="ltr">\nu</span> גדל, ההתפלגות מתקרבת להתפלגות הנורמלית.</li>
+                    <li><span class="math" dir="ltr">\Gamma</span>: <span class="important">פונקציית גמא.</span> זו הרחבה של פונקציית העצרת. היא פשוט קבוע שמוודא שהשטח הכולל מתחת לעקומה הוא 1.</li>
+                </ul>
+            </div>
+        </section>
+        
+        <section id="conclusion">
+            <h2>ומה לגבי המבחן?</h2>
+            <p>
+                כן, במבחן כמעט בטוח שתהיה לך טבלה של התפלגות t. אתה לא צריך לחשב את הנוסחה הזו בעצמך! הטבלה מאפשרת לך למצוא את "ערכי t הקריטיים" בהתאם לרמת המובהקות (<span class="math" dir="ltr">\alpha</span>) ולמספר דרגות החופש (<span class="math" dir="ltr">\nu</span>) שלך.
+            </p>
+        </section>
+
+        <p class="final-word">מקווה שעכשיו זה הרבה יותר ברור, עילי!</p>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false},
+                    {left: "\\(", right: "\\)", display: false},
+                    {left: "\\[", right: "\\]", display: true}
+                ]
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,528 @@
+[2025-06-28 19:44:35] [ID: true_972507735297@c.us_3F58AD0585FF77278BD6] הלל (Owner): (↩️ ל-ID:false_120363349879759446@g.us_2BC3542789E9584987AC77A33FCB90B9_12709009580243@lid "סיום תוכנית גלישת-רוח  *ל...")
+ערב טוב המורה, אני יכול לעשות את זה? ואם אעשה את זה האם צריך לעשות עוד משהו?
+[2025-06-28 19:45:23] [ID: false_972507735297@c.us_294AC43F4864EFDA53D3B04C75788537] דיצה: כן חנוך. שבוע טוב,להשלים את כל היחידות של עשית
+[2025-06-28 19:56:47] [ID: true_972507735297@c.us_3FE0CAEFC823B5A60082] הלל (Owner): (↩️ ל-ID:false_972507735297@c.us_294AC43F4864EFDA53D3B04C75788537 "כן חנוך. שבוע טוב,להשלים ...")
+אני אשתדל להשלים אותם עד יום שני, אני צריך לעשות עוד משהו חוץ מזה?
+שבוע טוב
+[2025-06-28 19:57:44] [ID: false_972507735297@c.us_3FFC8E0AB81663F0032B] דיצה: [מדיה]
+[2025-06-28 19:57:45] [ID: false_972507735297@c.us_3F05A9838F90EDC26DBD] דיצה: [מדיה]
+[2025-06-28 19:57:45] [ID: false_972507735297@c.us_3FA519F879FDE7411BF3] דיצה: [מדיה]
+[2025-06-28 19:57:48] [ID: false_972507735297@c.us_3FFC8E0AB81663F0032B] פיתי (media content): The image shows a table with several columns and rows. The header row has a light green background, while the subsequent rows have a white background. The text appears to be in Hebrew, read from right to left.
+
+**OCR Text Extraction:**
+
+Row 1 (Header):
+שם תלמיד | מדרש | חידו בטטה | נפרדנו | כך | יחד | תהילה | ניצול | ראה שמש | רק על עצמ | מי לספר
+
+Row 2:
+בן חנוך הלל בנתם | | | | כל משימות היחידה | כל משימות היחידה ושאלת מסכמת | שאלת מסכמת | שאלת מסכמת | כל משימות היחידה | כל משימות היחידה ושאלת מסכמת | כל משימות היחידה
+
+Row 3:
+סבר רב אסף | | | | כל משימות היחידה | כל משימות היחידה וללא שאלה | כל משימות היחידה וללא שאלה | כל משימות היחידה וללא שאלה | כל משימות היחידה | כל משימות היחידה וללא שאלה | כל משימות היחידה
+[2025-06-28 19:57:48] [ID: false_972507735297@c.us_3F05A9838F90EDC26DBD] פיתי (media content): The image is a screenshot of a table, likely from a spreadsheet or web page, with a light green header row and white data rows. The table appears to be written in Hebrew, as indicated by the right-to-left text flow. The header row contains multiple columns with Hebrew labels. Below the header, there are at least two rows of data, also in Hebrew. The columns appear to represent different categories or attributes.
+
+Extracted text via OCR:
+
+| שם תלמיד | מדרש | חיזון בטחה | נפרדנו | וכך | מחזה | תהילה | ניצול | ראה שמשה | רק על עצמו | ומי לספר |
+|---|---|---|---|---|---|---|---|---|---|---|
+| בן חנוך הלל בנחם |  |  |  |  |  |  |  |  | כל משימות היחידה ושאלת מסכמת | כל משימות היחידה ושאלת מסכמת |
+| |  | כל משימות היחידה וללא מסכמת | כל משימות היחידה וללא מסכמת | כל משימות היחידה וללא מסכמת | כל משימות היחידה וללא מסכמת | כל משימות היחידה וללא מסכמת |  | כל משימות היחידה וללא מסכמת | כל משימות היחידה וללא מסכמת | עש אסף |
+[2025-06-28 19:57:48] [ID: false_972507735297@c.us_3FA519F879FDE7411BF3] פיתי (media content): The image is a table with a header row in a light green color and subsequent rows with a white background. The table contains multiple columns filled with Hebrew text.
+
+**Extracted text via OCR:**
+
+| מי לספר | רק על עצמו | ראה שמש | ננצל | תהילה | מחזה | כר | נפרדנו | חזרו בטטה | נדרש | שם תלמיד |
+|---|---|---|---|---|---|---|---|---|---|---|
+|  | כל משימות היחידה ושאלת מסכמת | כל משימות היחידה ושאלת מסכמת | שאלה מסכמת | שאלה מסכמת | כל משימות היחידה | כל משימות היחידה |  |  |  | בן חנוך הלל בנתם |
+|  | כל משימות היחידה ושאלה מסכמת | כל משימות היחידה |  | כל משימות היחידה | כל משימות היחידה וללא | כל משימות היחידה וללא | כל משימות היחידה וללא |  |  | בר אסף |
+[2025-06-28 19:58:12] [ID: true_972507735297@c.us_3FE91BCA778119CD8F15] הלל (Owner): כן את אלו אני אשלים
+[2025-06-28 19:58:33] [ID: false_972507735297@c.us_3F8A3AF3D8D5F00829E2] דיצה: מה שבלבן עשית - יש לך יחידות שלמות להשלים. אל תתייחס כרגע לראה שמש
+[2025-06-28 19:58:33] [ID: true_972507735297@c.us_3F1B21AF87084C8F7312] הלל (Owner): התכוונתי אם יש משהו חוץ מזה
+[2025-06-28 19:58:49] [ID: true_972507735297@c.us_3F761D1F55BED8C05D27] הלל (Owner): (↩️ ל-ID:false_972507735297@c.us_3F8A3AF3D8D5F00829E2 "מה שבלבן עשית - יש לך יחי...")
+אני יודע אני אעבוד על זה בימים הבאים
+[2025-06-28 19:59:11] [ID: false_972507735297@c.us_3FDC5B73C2F12388AF38] דיצה: יחידת שירי זיכרון לנופלים- עבודת חקר קטנה על שיר זיכרון
+[2025-06-28 19:59:28] [ID: true_972507735297@c.us_3F0F97DA6F41DC56063D] הלל (Owner): סבבה, רק בשביל לוודא, כל מה שאני צריך לעשות נמצא באתר?
+[2025-06-28 19:59:47] [ID: false_972507735297@c.us_3F6DEF8882C692C1CA16] דיצה: בהצלחה הלל ונהיה בקשר
+[2025-06-28 20:00:14] [ID: true_972507735297@c.us_3FF39B7C28F85D3C3991] הלל (Owner): תודה רבה 🙏
+[2025-06-28 20:00:17] [ID: true_972507735297@c.us_3F266F6325174A2BC366] הלל (Owner): שבוע טוב המורה
+[2025-06-28 20:07:37] [ID: false_972507735297@c.us_2BB4D20A1135C4786175B3A0314F1DA6] דיצה: בהצלחה
+[2025-06-30 8:53:34] [ID: false_972507735297@c.us_627D8A861222F7757DEAD403D9664999] דיצה: היי עליך להשלים שאלה מסכמת על ניצול
+[2025-06-30 8:53:34] [ID: false_972507735297@c.us_E248778BE032CCEA93DDB73A74A1DD08] דיצה: היי עליך להשלים שאלה מסכמת על תהילה
+[2025-06-30 8:53:34] [ID: false_972507735297@c.us_1D87121848E916A78BFD1B3478F0EAB9] דיצה: היי עליך להשלים שאלה מסכמת על נפרדנו כך
+[2025-06-30 8:53:35] [ID: false_972507735297@c.us_BD20F09E26D2DA8818B6AD7868F10432] דיצה: היי עליך להשלים שאלה מסכמת על בית בובות
+[2025-06-30 9:59:41] [ID: true_972507735297@c.us_F2F17BB23CCB94CDAB817FC13F822351] הלל (Owner): אני מודע לכך, אעבוד על זה היום
+[2025-06-30 10:12:48] [ID: false_972507735297@c.us_F70ED2A867046EEE90F68C931F648D21] דיצה: נפרדנו כך. בית בובות
+ *שאלה מסכמת א* 
+בהצלחה.!!
+בבקשה לא לצאת מהיחידה בזמן התשובה כדי שלא תיפסל לך
+[2025-06-30 10:15:45] [ID: true_972507735297@c.us_2D9109BF6BD1F4BBAB46D81972C42DEE] הלל (Owner): המורה אם אני יוצא זה כותב לי הודעה?
+[2025-06-30 10:15:52] [ID: true_972507735297@c.us_F67CD083BDC2ED4AB2DD795D5CC655AD] הלל (Owner): כי אני בטעות פתחתי אפליקציה אחת וזה לא כתב לי כלום
+[2025-06-30 10:16:23] [ID: false_972507735297@c.us_5B078E5A0BDE4A5203A3B03CCF79079F] דיצה: אתה יכול לרשום את הצשובה בלי לשלוח?
+[2025-06-30 10:16:33] [ID: true_972507735297@c.us_FE231074794A7C83F04E3188E30259DB] הלל (Owner): (↩️ ל-ID:false_972507735297@c.us_5B078E5A0BDE4A5203A3B03CCF79079F "אתה יכול לרשום את התשובה ...")
+מה זאת אומרת
+[2025-06-30 10:17:07] [ID: true_972507735297@c.us_65F8EB575F2571FED1A674DD7AA03BB1] הלל (Owner): זה לא עשה לי שגיאה כולשהח
+[2025-06-30 10:17:15] [ID: true_972507735297@c.us_65F8EB575F2571FED1A674DD7AA03BB1] פיתי (media content): The image shows a laptop screen displaying a document, likely an online form or educational material, in Hebrew. The laptop has a black bezel and a Dell logo visible on the bottom right edge of the screen frame. Part of the laptop keyboard is in the foreground, appearing slightly dusty. The background is out of focus.
+
+The document on the screen contains Hebrew text, including headings, numbered points, bullet points, and input fields (indicated by lines). There is a green button labeled "אישור תשובה" (Submit Answer) at the bottom right of the screen. A red circle with the number '7' is also visible below the Dell logo, possibly a notification or indicator.
+
+Extracted text:
+שירה מודרנית: ניצול|שאלה מסכמת א
+לאדם פגוע מהשנאה, חי בטיוטים מתמשכים, מנותק רגשית,
+הוא מתקשר לעברו ואינו משוחרר ממנו.
+• "צורח אחת לשבוע כאומר שלומ
+הצרחה משקפת סבל, אך המילים מסתירות את הכאב
+ב. הביאו שלוש דוגמאות למצבי השמיעה והסבירו את תרומתן.
+1. "מקשיב-מקשיב בדרף"
+אינו מבין "בפי המחשת".
+2. "אינו מקשיב... זכר לסקירה"
+האזנה פגועה בגלל טראומה נפשית
+3. "נותן את אוזנו הפתח ללבי"
+אינו שומע את הלב, מנותק רגשית
+תרומה לרעיון המרכזי:
+ממחיש את הנתק הרגש שנו
+ג. עמדתו כלפי הבו
+מודדת איתה היא נ
+"בבי המהלך על בהונותי" בגלל ההשפעה והשתיקה.
+אינו שומע, סובלת מהשתיקה של אביה אך לא כועסת.
+אינו צועק, מנסה לא להפריע, זה מראה על אהבה ורגישות
+אישור תשובה
+[2025-06-30 10:17:16] [ID: false_972507735297@c.us_A66C8CF06F72929DE741E728CED0636B] דיצה: אנסה לפתוח לך
+[2025-06-30 10:17:30] [ID: true_972507735297@c.us_4EC78BA8F1CEC79B673938F7031D7357] הלל (Owner): זה פתוח לי
+[2025-06-30 10:17:44] [ID: false_972507735297@c.us_37B7EAFD0802E48E2D1A847870B318E0] דיצה: אז מה הבעיה?
+[2025-06-30 10:18:08] [ID: true_972507735297@c.us_39E7107DB17CE73D1CF0DE6B6DE8E683] הלל (Owner): כי כתוב שם שאם פותחים אפליקציה אז זה עושה משהו... בטעות נפתח לי טלגרם תוך כדי שהייתי שם
+[2025-06-30 10:18:15] [ID: true_972507735297@c.us_1667CB35F259FEBB78A0700F9C6A7C07] הלל (Owner): אבל זה עדיין נותן לי להגיש
+[2025-06-30 10:18:34] [ID: true_972507735297@c.us_C323040C81D9A59A02173CBAA32F4EA3] הלל (Owner): אז בסדר כנראה שזה לא נחשב או משהו תודה רבה
+[2025-06-30 10:20:12] [ID: true_972507735297@c.us_EC22930512BF3842334DF47314E667E4] הלל (Owner): המורה צריך לענות על שתי שאלות מסכמות בכל קורס?
+[2025-06-30 10:23:51] [ID: true_972507735297@c.us_CC4D6EA5060116171899F3B06D7B5A6D] הלל (Owner): (↩️ ל-ID:false_972507735297@c.us_E248778BE032CCEA93DDB73A74A1DD08 "היי עליך להשלים שאלה מסכמ...")
+והמורה אין לי פה משימה מסכמת, יש לי רק הדהוד
+[2025-06-30 10:25:17] [ID: false_972507735297@c.us_7E88C08BABD8DFC902EE6CD78DF48347] דיצה: (↩️ ל-ID:true_972507735297@c.us_EC22930512BF3842334DF47314E667E4 "המורה צריך לענות על שתי ש...")
+שאלה מסכמת אחת בלבד
+[2025-06-30 10:25:32] [ID: false_972507735297@c.us_8C22D16520CD61D14623A288A0E396C0] דיצה: (↩️ ל-ID:true_972507735297@c.us_CC4D6EA5060116171899F3B06D7B5A6D "והמורה אין לי פה משימה מס...")
+אפתחלך
+[2025-06-30 10:30:02] [ID: true_972507735297@c.us_47798A2FFEC4D498635EC05F62D023B5] הלל (Owner): (↩️ ל-ID:false_972507735297@c.us_8C22D16520CD61D14623A288A0E396C0 "אפתחלך...")
+צריך לעשות את ההדהוד?
+[2025-06-30 10:30:15] [ID: true_972507735297@c.us_59950F811FC489C8F3BE8DEB8110A5F4] הלל (Owner): כי שאלתי חבר והוא אמר לי שזה יותר חשוב משאלה מסכמת
+[2025-06-30 10:30:41] [ID: false_972507735297@c.us_E307D58FBC9A4EB833E0171C95C2A556] דיצה: בתהילה -שאלה מסכמת א
+ולגיבוי היא גם בשאלה מסכמת ב... 
+בבקשה לא לצאת לגוגל או לאינטרנט 
+להישאר ביחידה
+בהצלחה
+[2025-06-30 10:30:51] [ID: false_972507735297@c.us_0F29945740E5F2B0907AED2156BA03CB] דיצה: (↩️ ל-ID:true_972507735297@c.us_59950F811FC489C8F3BE8DEB8110A5F4 "כי שאלתי חבר והוא אמר לי ...")
+לא נכון
+[2025-06-30 10:31:11] [ID: false_972507735297@c.us_25C7DD42D0CBDF8DB70696D7BDD16160] דיצה: לא יודעת מי החבר... 
+אני זו שמדריכה אותך
+[2025-06-30 10:32:30] [ID: true_972507735297@c.us_BDB8537B1A051BEBE44A57A05467B76C] הלל (Owner): (↩️ ל-ID:false_972507735297@c.us_E307D58FBC9A4EB833E0171C95C2A556 "בתהילה -שאלה מסכמת א ולגי...")
+כן אותה עשיתי כבר, אני סיימתי את כל המחזה כבר לפני כמה ימים ונשאר לי רק אותה
+[2025-06-30 10:33:07] [ID: true_972507735297@c.us_ED89C4708A762C3B19E8BC13FE3574D9] הלל (Owner): אבל בכאלו אחרים, אין משימות מסכמות, יש רק הדהוד, כמה הדהוד צריך לעשות מתוך מה שיש שם והאם צריך לעשות גם משימה מסכמת?
+[2025-06-30 10:34:15] [ID: false_972507735297@c.us_810D87C33BFE9C19659CE4D610E6D8A9] דיצה: בכל יצירה
+שאלה הדהוד אחת בלבד!!
+[2025-06-30 10:34:33] [ID: false_972507735297@c.us_38B4FA1683C9098CB04C2E489F82C591] דיצה: ושאלה מסכמת אחת בלבד
+[2025-06-30 10:36:11] [ID: true_972507735297@c.us_B9C8BBB720E62651A006EDAD3A04A6C8] הלל (Owner): סבבה תודה
+[2025-06-30 10:37:28] [ID: false_972507735297@c.us_7EA2237AA386BE8F41E972A07AD32A32] דיצה: בהצלחה
+[2025-06-30 10:59:17] [ID: true_972507735297@c.us_3FC8A3CDA8B79D3E8E71] הלל (Owner): המורה סיימתי את המחזה אבל אין לי פה משימה מסכמת
+[2025-06-30 10:59:20] [ID: true_972507735297@c.us_3F6478D68E3BC5F338D6] הלל (Owner): הייתה לי רק במחזה תהילה
+[2025-06-30 10:59:22] [ID: true_972507735297@c.us_3FC8A3CDA8B79D3E8E71] פיתי (media content): The image displays a web page with a header and a grid of content cards. The header at the top shows the title of the page or course, which is in Hebrew, along with navigation elements. Below the header, there are multiple rectangular cards arranged in rows. Each card features an image at the top, followed by a title, and some additional text or icons below the title. There's a number in a colored oval shape at the top right corner of each card, potentially indicating the number of items or lessons within that card or its sequence. The content of the cards appears to be related to history, theatre, and creative writing, judging by the images and titles. The overall style is clean with rounded corners on the cards and a light background.
+
+**Extracted text:**
+
+מחזה: בית בובות - 2 ישיבת בני עקיבא...
+10
+כבוד, זכויות, חובות - אשה במאה ה-19
+עניין/ניתוח
+5
+5
+9
+נורה
+עניין/ניתוח
+7
+7
+8
+דמויות המשנה במחזה
+עניין/ניתוח
+9
+9
+7
+שיחה רצינית - סיום המחזה
+עניין/ניתוח
+12
+12
+6
+מערכה שלישית
+עניין/ניתוח
+15
+15
+13
+השוואה לשירים בני זמננו
+ההדוד
+1
+0
+12
+השוואה לסרטונים או להפקות
+ההדוד
+1
+0
+11
+כתיבה יוצרת - סופה של נורה
+ההדוד
+1
+1
+[2025-06-30 11:17:56] [ID: true_972507735297@c.us_3F9F37C253CF51EDAF3D] הלל (Owner): סליחה היה לי רק ב"ניצול"
+[2025-06-30 11:19:30] [ID: false_972507735297@c.us_6133D9D7CA4FBECB8AEA4CE0FEB39A50] דיצה: אבדוק
+[2025-06-30 11:23:42] [ID: false_972507735297@c.us_BE65671434214C19878B763F08FC5642] דיצה: שאלה מסכמת א  פתוחה
+[2025-06-30 11:24:09] [ID: false_972507735297@c.us_0E9F6F8727FBFC446B3CC8189940032A] דיצה: בסדר?
+[2025-06-30 11:25:09] [ID: true_972507735297@c.us_3FF5E207DEAA5D0F17C8] הלל (Owner): (↩️ ל-ID:false_972507735297@c.us_BE65671434214C19878B763F08FC5642 "שאלה מסכמת א  פתוחה...")
+במחזה בית הבובות?
+[2025-06-30 11:25:20] [ID: false_972507735297@c.us_C0C0645A1D9CAD791D47F2F960E77716] דיצה: כן
+[2025-06-30 11:25:25] [ID: true_972507735297@c.us_3F05A4304886A1603631] הלל (Owner): סבבה אעשה אותה עכשיו, תודה רבה
+[2025-06-30 11:25:35] [ID: false_972507735297@c.us_9B48C908AAFE40515FA30570BAD3E817] דיצה: בהצלחה 💪
+[2025-06-30 11:44:01] [ID: true_972507735297@c.us_3F6A6285C250154118CE] הלל (Owner): (↩️ ל-ID:false_972507735297@c.us_1D87121848E916A78BFD1B3478F0EAB9 "היי עליך להשלים שאלה מסכמ...")
+המורה גם ל"נפרדנו כך" המשימה המסכמת סגורה לי, תוכלי לפתוח אותה בבקשה?
+[2025-06-30 11:50:10] [ID: false_972507735297@c.us_45DB5802EA84EA384E9F91DF534E9E80] דיצה: כן רגע
+[2025-06-30 11:55:02] [ID: false_972507735297@c.us_0C29320C45BE8BCF2F815ACA860E29FA] דיצה: פתחתי לך שאלה מסכמת א
+ותשמור לא לצאת ממנה...אפשרי רק ביחידה עצה
+בהצלחה
+[2025-07-01 20:11:57] [ID: false_972507735297@c.us_3F3BBD0D027BAEBAED51] דיצה: [מדיה]
+[2025-07-01 20:12:04] [ID: false_972507735297@c.us_3F3BBD0D027BAEBAED51] פיתי (media content): The image is a table with multiple columns and rows. The top row, serving as the main header, has a purple background for most columns and a green background for the rightmost column. Below the main header, there appears to be a secondary header or a significant data row, parts of which are highlighted with a yellow background. The rows below contain data entries. Some cells in the first data row below the main header have a light blue background. The text throughout the image is in Hebrew.
+
+Extracted text:
+בחיק ילדות
+שי שיח
+שי זכרון
+פיצול
+תהילה
+מחיצה בית מבט
+נפרדם כך
+חיזו בטחה
+מחדש
+שם תלמיד
+כל משימות היחידה כל משימות היחידה
+שאלה מסכמת
+שאלה מסכמת
+כל משימות היחידה | כל משימות היחידה
+חפץ הלל בנתם
+שאלה מסכמת
+שאלה מסכמת
+משימות היחידה | (כל המשימות למעט שאלה מסכמת) כל המשימות למעט שאלה מסכמת)
+כל משימות היחידה כל משימות היחידה
+שאלה מסכמת
+שאלה מסכמת
+כל משימות היחידה
+כל משימות היחידה כל משימות היחידה
+שאלה מסכמת
+שאלה מסכמת
+כל משימות היחידה | (כל המשימות למעט שאלה מסכמת) כל המשימות למעט שאלה מסכמת)
+שאלה מסכמת
+שאלה מסכמת
+שאלה מסכמת) כל המשימות למעט שאלה מסכמת)
+שאלה מסכמת
+שאלה מסכמת
+כל משימות היחידה | כל משימות היחידה
+כל משימות היחידה
+שאלה מסכמת
+שאלה מסכמת
+שאלה מסכמת
+שאלה מסכמת
+שאלה מסכמת
+[2025-07-01 20:12:15] [ID: false_972507735297@c.us_2FB351E24477C1BBBC03DA250CB1B563] דיצה: ⭕אזהרת ציון
+[2025-07-01 20:12:55] [ID: true_972507735297@c.us_5A6CD137C6EF6579C85B9D5954214523] הלל (Owner): מה המורה את לא אמרת לי לעשות את זה
+[2025-07-01 20:13:18] [ID: true_972507735297@c.us_2BEC44D579D343C009A3E1CCD51CCEA5] הלל (Owner): (↩️ ל-ID:false_972507735297@c.us_BD20F09E26D2DA8818B6AD7868F10432 "היי עליך להשלים שאלה מסכמ...")
+אמרת לי לעשות רק את ארבעת אלו....
+[2025-07-01 20:13:40] [ID: false_972507735297@c.us_C298A9D837459D528320A11B846AEF7F] דיצה: תשלים בבקשה
+[2025-07-01 20:13:50] [ID: true_972507735297@c.us_CCFC805877E4659177BF96D9B6BEA1E1] הלל (Owner): מה אני צריך להשלים
+[2025-07-01 20:15:26] [ID: false_972507735297@c.us_DAD4FA7BAF0BF546398F15F8F2941C96] דיצה: [מדיה]
+[2025-07-01 20:15:30] [ID: false_972507735297@c.us_DAD4FA7BAF0BF546398F15F8F2941C96] פיתי (media content): The audio is someone giving instructions or feedback regarding several topics or units. They mention completing certain tasks within these units, specifically highlighting the need to complete a "summarizing question" or "final test" for most of them. The units mentioned include "Midrash", "Khizo Batata", "Beit Bubot", "Tehilah", and "Nitzul", as well as a unit referred to as "Nifradnu Kach". The speaker confirms that some parts of the tasks might have been done but emphasizes the requirement to complete the summarizing question for multiple units and potentially the entire set of tasks for some others. The tone is instructive, outlining what needs to be finished.
+[2025-07-01 20:15:42] [ID: true_972507735297@c.us_3EB04CAAF693DE9699927D] פיתי: (↩️ ל-ID:false_972507735297@c.us_DAD4FA7BAF0BF546398F15F8F2941C96 "[מדיה]...")
+פיתי
+
+קיבלתי את ההסבר המפורט דיצה, הבנתי בדיוק מה הלל צריך להשלים בכל יחידה. תודה שהבהרת לי את זה.
+[2025-07-01 20:15:59] [ID: true_972507735297@c.us_13DEC5CE67E73A7D437B3D816B1A517B] הלל (Owner): סליחה, בוט שיצרתי
+[2025-07-01 20:16:21] [ID: true_972507735297@c.us_DF65E082F9081149E70F71DC73643978] הלל (Owner): (↩️ ל-ID:false_972507735297@c.us_DAD4FA7BAF0BF546398F15F8F2941C96 "[מדיה]...")
+עשיתי בתהילה וניצול
+[2025-07-01 20:16:25] [ID: true_972507735297@c.us_BDF93430C975F5D1F380B27BB9BC8153] הלל (Owner): עשיתי את כל נפרדנו כך
+[2025-07-01 20:16:34] [ID: true_972507735297@c.us_CE41E829DE32C0FC891E3E3D7032D04E] הלל (Owner): עשיתי גם את כל בית הבובות
+[2025-07-01 20:16:39] [ID: true_972507735297@c.us_0CA901524D4AE7F133585C7AA7940039] הלל (Owner): עבדתי על זה כל אתמול....
+[2025-07-01 20:16:48] [ID: false_972507735297@c.us_F7F6D37E942EC6BA46FEC1899A30B1EF] דיצה: אז אעדכן. אבל עליך להשלים את המשימות והמטלות בכל יצירה..
+[2025-07-01 20:17:02] [ID: false_972507735297@c.us_EA6C2A691EA65C1CFACDEAF8D29F0D9A] דיצה: זה חלק מהציון
+[2025-07-01 20:17:03] [ID: true_972507735297@c.us_0B94B4F7C2359685B0C13190F84B9871] הלל (Owner): (↩️ ל-ID:false_972507735297@c.us_DAD4FA7BAF0BF546398F15F8F2941C96 "[מדיה]...")
+עשיתי את כל המשימות שאמרת פה
+[2025-07-01 20:17:04] [ID: true_972507735297@c.us_407F3BE44F490FFE2260772683B0ACD7] הלל (Owner): חוץ מזה צריך לעשות עוד משהו?
+[2025-07-01 20:17:24] [ID: true_972507735297@c.us_1E59EF2E9ABDC467B474538200A4A6AF] הלל (Owner): חוץ מארבעת אלו
+[2025-07-01 20:17:32] [ID: true_972507735297@c.us_1E59EF2E9ABDC467B474538200A4A6AF] פיתי (media content): The image is a screenshot of a WhatsApp conversation in Hebrew. The screen shows the chat interface with a dark background. At the top, there is a header bar displaying the contact's name "Ht" and a small profile picture showing two people. To the left of the name, there is a back arrow, and to the right, there are icons for video call, voice call, checkmark (indicating selection or check-in), and a vertical ellipsis menu. The status bar at the very top shows the time (23:17), various icons (Wi-Fi, signal strength, battery percentage 6%).
+
+Below the header, the chat history is displayed. Messages are shown in bubbles. Outgoing messages appear on the right in green bubbles, and incoming messages appear on the left in dark grey bubbles.
+
+The chat starts with an outgoing message "בהצלחה" (Good luck) with a praying hands emoji, sent at 23:07. Below this, a "Yesterday" marker is displayed.
+
+Then, there are several incoming messages from "Ht" at 11:53, indicated by red dots next to the timestamp, suggesting they were not sent or received correctly, or possibly unread by the recipient at that time. These messages are repetitive, containing the phrase "היי עליך להשלים שאלה מסכמת על" (Hey, you need to complete a summary question on...). The specific topics mentioned are:
+- "ניצול" (exploitation)
+- "תהילה" (glory/fame)
+- "נפרדנו כך" (we broke up like this)
+- "בית בובות" (A Doll's House)
+
+After these messages, there is an outgoing message at 12:59, "אני מודע לכך, אעבוד על זה היום" (I am aware of this, I will work on it today), with double checkmarks indicating it was delivered and read, and a thumbs-up emoji reaction below it.
+
+Then there's an incoming message at 13:12, continuing the previous topic: "נפרדנו כך. בית בובות שאלה מסכמת א בהצלחה.!! בבקשה לא לצאת מהיחידה בזמן התשובה כדי שלא יתפוס לך" (We broke up like this. A Doll's House, summary question A, good luck.!! Please do not leave the unit during the answer period so it doesn't catch you). A red dot is next to the timestamp.
+
+Following this, there is an outgoing message at 13:15, "המורה אם אני יוצא זה כותב לי הודעה?" (Teacher, if I leave, does it send me a message?), with double blue checkmarks.
+
+The last visible outgoing message at 13:15 (timestamp truncated, but matches the previous message's visible timestamp) says "אני בטעיות פתחתי אפליקציה אחת וזה לא כותב לי כלום" (By mistake, I opened one app and it doesn't show me anything). This message has double blue checkmarks and a double right arrow icon next to it.
+
+At the bottom of the screen, there is a message input field with an emoji icon on the left and icons for attachment, camera, and microphone on the right. The word "Message" is visible next to the emoji icon.
+
+Extracted text:
+23:17
+! M •
+הי עליך להשלים שאלה מסכמת על ניצול
+11:53
+הי עליך להשלים שאלה מסכמת על תהילה
+11:53
+הי עליך להשלים שאלה מסכמת על נפרדנו
+כך
+11:53
+הי עליך להשלים שאלה מסכמת על בית
+בובות
+11:53
+أ
+Message
+bah
+Ht
+בהצלחה
+23:07
+Yesterday
+אני מודע לכך, אעבוד על זה היום
+12:59
+נפרדנו כך. בית בובות
+שאלה מסכמת א
+בהצלחה.!!
+בבקשה לא לצאת מהיחידה בזמן התשובה
+כדי שלא יתפוס לך
+13:12
+המורה אם אני יוצא זה כותב לי הודעה?
+13:15
+אני בטעיות פתחתי אפליקציה אחת וזה לא
+כותב לי כלום
+13:15
+
+Note: Some characters like 'أ' or other partial characters appear due to OCR attempting to read distorted parts or icons, but the primary message text is clearly captured. The character 'أ' near 'Message' seems unrelated to the messages themselves.
+[2025-07-01 20:17:47] [ID: false_972507735297@c.us_6FF4799D3EA59582BA1CF6DD637025F3] דיצה: האם נפרדנו כך-מטלות
+והמחזה -מטלות ושאלה מסכמת
+[2025-07-01 20:18:09] [ID: false_972507735297@c.us_C04BCDDE23E166CEB93DE96D733BC19A] דיצה: אני שלחתי דוחות מעודכנים .  ואם צריך אעדכן שוב
+[2025-07-01 20:18:29] [ID: true_972507735297@c.us_36900F8CD0F36414939F38186D428A0B] הלל (Owner): (↩️ ל-ID:false_972507735297@c.us_6FF4799D3EA59582BA1CF6DD637025F3 "האם נפרדנו כך-מטלות והמחז...")
+מחזה בית הבובות עשיתי הכל...
+[2025-07-01 20:18:49] [ID: true_972507735297@c.us_FD44269BEE8F6543FCBBCF38F6F759EF] הלל (Owner): (↩️ ל-ID:true_972507735297@c.us_1E59EF2E9ABDC467B474538200A4A6AF "חוץ מארבעת אלו...")
+המורה אני עשיתי את כל ארבעת אלו בשלמותם כולל משימה מסכמת
+[2025-07-01 20:18:54] [ID: true_972507735297@c.us_2278410F36BE5C0921E031244527F041] הלל (Owner): צריך לעשות עוד משהו חוץ מאלו?
+[2025-07-01 20:19:06] [ID: false_972507735297@c.us_035FBDF4DD528466C4D3B5C0B01C5F5F] דיצה: אבדוק  מה קורה עם הדוח שלך.  ואעדכן שוב אבל זה יקרה יותר מאוחר
+[2025-07-01 20:19:58] [ID: false_972507735297@c.us_1029AD8F85F3AC448875325BD2FE76C8] דיצה: [מדיה]
+[2025-07-01 20:20:20] [ID: unknown_sent_id] פיתי: פיתי
+
+@Ht
+תודה דיצה, קיבלתי את ההנחיות המפורטות לגבי יחידת שירי הזיכרון. הלל יתמקד בכך.
+[2025-07-01 20:20:20] [ID: true_972507735297@c.us_3EB054612BB5F578674498] פיתי: פיתי
+
+@Ht
+תודה דיצה, קיבלתי את ההנחיות המפורטות לגבי יחידת שירי הזיכרון. הלל יתמקד בכך.
+[2025-07-01 20:20:28] [ID: false_972507735297@c.us_A1477170551B4877D4DDD313205A11D1] דיצה: [מדיה]
+[2025-07-01 20:20:31] [ID: false_972507735297@c.us_A1477170551B4877D4DDD313205A11D1] פיתי (media content): The audio is a message instructing someone named Hillel. The speaker asks Hillel to access a unit related to "memory songs for the fallen" (שירי זיכרון לנופלים), choose a specific song for a fallen soldier or casualty of hostilities, and perform a task or "work" related to it. The speaker mentions sending the song within a specific category and concludes by wishing Hillel success.
+[2025-07-01 20:20:36] [ID: true_972507735297@c.us_3EB01DB714B12E1067D3B6] פיתי: (↩️ ל-ID:false_972507735297@c.us_A1477170551B4877D4DDD313205A11D1 "[מדיה]...")
+פיתי
+
+הבנתי דיצה, קיבלתי את ההנחיות המפורטות לגבי יחידת שירי הזיכרון. הלל יתמקד בכך. תודה על ההבהרה.
+[2025-07-01 20:20:47] [ID: true_972507735297@c.us_3665BE15A738D8A24FDFA521B22DAD6F] הלל (Owner): /stop
+[2025-07-01 20:20:47] [ID: true_972507735297@c.us_3EB02A3A8F9001BCCDEBD8] פיתי: (↩️ ל-ID:true_972507735297@c.us_3665BE15A738D8A24FDFA521B22DAD6F "/stop...")
+פיתי
+
+הבוט הפסיק לענות בצ'אט הזה. כתוב /unstop
+[2025-07-01 20:21:01] [ID: false_972507735297@c.us_7650A3910D98489F4430A0C9DD160BEB] דיצה: האם אתה שומע  את ההודעה או שזה בוט...?
+[2025-07-01 20:21:11] [ID: true_972507735297@c.us_EA56B58568AD0313EE2A54735D65542A] הלל (Owner): (↩️ ל-ID:false_972507735297@c.us_A1477170551B4877D4DDD313205A11D1 "[מדיה]...")
+אני אנסה
+[2025-07-01 20:21:15] [ID: true_972507735297@c.us_4161873E46F4693F6FDFCBCD57931220] הלל (Owner): (↩️ ל-ID:false_972507735297@c.us_7650A3910D98489F4430A0C9DD160BEB "האם אתה שומע  את ההודעה א...")
+גם וגם
+[2025-07-01 20:21:20] [ID: true_972507735297@c.us_0EB33FD361BD7ACFE47C876D3F69D186] הלל (Owner): חיברתי ai לחשבון שלי
+[2025-07-01 20:21:40] [ID: false_972507735297@c.us_AF08208E17F8B4E040F1481A41F51D1A] דיצה: קטגוריה:שירי זיכרון חללי מערכות ישראל – ויקיפדיה https://share.google/4nNLsn9VEswVIOtBO
+[2025-07-01 20:21:58] [ID: false_972507735297@c.us_BB78F40A626A89FE6EAD74A579CF0BD2] דיצה: טוב בהצלחה לשניכם...😊
+[2025-07-01 20:22:19] [ID: true_972507735297@c.us_0E0D4E41CEB237D34473A0D8F926A03C] הלל (Owner): (↩️ ל-ID:false_972507735297@c.us_AF08208E17F8B4E040F1481A41F51D1A "קטגוריה:שירי זיכרון חללי ...")
+בחרתי את השיר "אהוב יקר"
+[2025-07-01 20:22:31] [ID: true_972507735297@c.us_D6EDB5A6F85113BD2A217C7180870E8C] הלל (Owner): אבל המורה שוב, אחרי שאני אסיים את זה, האם צריך לעשות עוד משהו?
+[2025-07-01 20:35:37] [ID: false_972507735297@c.us_3FF418D49E07B6F55D30] דיצה: תגיש ונמשיך הלאה
+[2025-07-01 20:43:31] [ID: true_972507735297@c.us_80BD0444357E07642252FC0235B0D5F5] הלל (Owner): (↩️ ל-ID:false_972507735297@c.us_A1477170551B4877D4DDD313205A11D1 "[מדיה]...")
+איפה להיכנס לזה? Class e? אני לא רואה את זה שם
+[2025-07-01 20:44:44] [ID: false_972507735297@c.us_9751BABD57EF1FC10E4BA52DAFE7ADCF] דיצה: בקלאס אי .
+יחידת שירי זיכרון
+[2025-07-01 20:45:34] [ID: false_972507735297@c.us_5E09B543360AB832CF884D4D30E43727] דיצה: [מדיה]
+[2025-07-01 20:45:41] [ID: false_972507735297@c.us_5E09B543360AB832CF884D4D30E43727] פיתי (media content): The image shows a computer screen displaying a grid of cards arranged in two rows. The cards appear to be categories or subjects, each with an image and text below it.
+
+At the top left of the screen are some icons: a circle icon, a full-screen icon, and an envelope icon. To the right of these icons is a text input field labeled with Hebrew text.
+
+The first card in the top row is circled in red. It features a snowy scene with a fence line leading towards a building in the distance. Below the image, there is Hebrew text. The red circle encompasses this entire card and extends downwards and to the left. A red line is drawn below the circled card, extending towards the right.
+
+To the right of the first card is another card with an image of a sunset behind tall grass or reeds. Below this image is Hebrew text.
+
+The third card in the top row shows a close-up of green wheat or barley with the sun in the background. Below this image is Hebrew text.
+
+The fourth card in the top row shows an illustration of a vintage alarm clock. Below this image is Hebrew text.
+
+Below the second card in the top row is the first card in the second row, showing a large, bright yellow sunflower. Below this image is Hebrew text.
+
+To the right of the sunflower card is a card with an image of a stack of open books in front of a blurred bookshelf. Below this image is Hebrew text.
+
+The text below each image seems to describe the subject or category. The overall layout is clean, presenting visual representations for different topics. The language used for the text is Hebrew.
+
+**Extracted text via OCR:**
+סור קור
+שירה מודרנית: ניצול
+לשון
+שירת ימי הביניים: ראה שמ' ר' שלמה...
+היסטוריה
+שירה מודרנית: שירי זיכרון וגבורה
+ספרות ממ"ד
+שירת ימי הביניים: ישנה בחיק ילדות / ר....
+לשון
+עגנון: תהילה
+לשון
+מבוא לספרות
+ספרות
+[2025-07-01 20:46:09] [ID: false_972507735297@c.us_A21DD8F92B14E1DD74563CBE84620615] דיצה: שירה מודרנית שירי זיכרון וגבורה
+השני מימין
+[2025-07-01 20:46:31] [ID: true_972507735297@c.us_F6B42B853ED46751B3F3A37C3E76DA36] הלל (Owner): (↩️ ל-ID:false_972507735297@c.us_5E09B543360AB832CF884D4D30E43727 "[מדיה]...")
+[מדיה]
+[2025-07-01 20:46:38] [ID: true_972507735297@c.us_F6B42B853ED46751B3F3A37C3E76DA36] פיתי (media content): **Image Description:**
+
+The image displays a mobile screen showing an application interface, likely an educational platform called "Class-E". The screen is divided into several sections.
+
+The top section is a dark grey header bar with status icons (time, signal strength, battery) and navigation elements. Below this is a second header bar with the app name "Class-E" and its domain "classe.world", along with navigation and action icons (back, menu, share, save, more options).
+
+Below the headers is a lighter grey section with filtering and search options. It includes icons for global view, grid view, email, a search bar labeled "החשבון שלי" (My account) and "הכנס קוד" (Enter code), and a navigation arrow with the text "שירה מודרנית: ניצול - יב ישיבת בני עקיבא..." (Modern Poetry: Survival - 12 Bnei Akiva Yeshiva...). There are also trash bin and graph icons on the left.
+
+The main part of the screen consists of a grid of cards, arranged in three columns. Each card features an image at the top, a colored horizontal line, text below, and a number in a blue circle overlaying the top right corner of the image. Some cards also have small icons (leaf, person with speech bubble).
+
+The cards display various images and titles related to literature or learning. The titles and other text on the cards are in Hebrew.
+
+The bottom of the screen shows a dark grey area, possibly a footer or navigation bar, mostly obscured, with a white line in the center. A blue accessibility icon (person in a circle) is visible in the bottom left corner.
+
+**Extracted Text (OCR):**
+
+23:46
+M X.
+3.19%
+X <
+Class-E
+classe.world
+<
+ס
+class
+enu
+con
+החשבון שלי
+הכנס קוד
+שירה מודרנית: ניצול - יב ישיבת בני עקיבא...
+3
+2
+1
+1
+1
+1
+קריאה ראשונה
+התמודדות בוני הדור השני
+מספר על היד
+עיון/ניתוח
+הקדמה/מבוא
+הקדמה/מבוא
+3
+6
+5
+4
+3
+2
+4
+אירוניה
+מטאפורות
+הדמויות בשיר
+עיון/ניתוח
+עיון/ניתוח
+עיון/ניתוח
+9
+8
+7
+1
+1
+3
+1
+כתיבה יוצרת
+מילות צופן
+זכרון השואה-בעד ונגד
+הדהוד
+הדהוד
+עיון/ניתוח
+12
+11
+10
+1
+0
+1
+1
+שאלה מסכמת ב
+שאלה מסכמת א
+השוואה לשיר שתיקות
+שאלה בגרות
+שאלה בגרות
+הדהוד
+[2025-07-01 20:46:51] [ID: false_972507735297@c.us_7298A3A562C1437A360C79C39BCE19EA] דיצה: לא... זה לא זה
+[2025-07-01 20:46:57] [ID: false_972507735297@c.us_7F1311635960D0202BE05D237B6CCCBB] דיצה: זה לא מסומן
+[2025-07-01 20:46:59] [ID: true_972507735297@c.us_0824B73C6EE505D6F393B10D7F5F38A9] הלל (Owner): (↩️ ל-ID:false_972507735297@c.us_7298A3A562C1437A360C79C39BCE19EA "לא... זה לא זה...")
+זה מה שסימנת
+[2025-07-01 20:47:10] [ID: true_972507735297@c.us_F3D4EFEE34EBA86AC410BD3CC058965E] הלל (Owner): (↩️ ל-ID:false_972507735297@c.us_7F1311635960D0202BE05D237B6CCCBB "זה לא מסומן...")
+שירת ימי ביניים?
+[2025-07-01 20:47:12] [ID: false_972507735297@c.us_E742DA3C0CF900B407899BD956CA8621] דיצה: זה צילום ישן...
+[2025-07-01 20:47:37] [ID: false_972507735297@c.us_D143F5AA22E92326444EE58F727B3F23] דיצה: [מדיה]
+[2025-07-01 20:47:44] [ID: false_972507735297@c.us_D143F5AA22E92326444EE58F727B3F23] פיתי (media content): The image displays a screen showing several rectangular tiles, likely representing educational modules or courses. Each tile features an image at the top and text in Hebrew below, along with a small icon resembling a graduation cap.
+
+At the top left of the screen, there are icons including what appears to be a home or full screen icon, an envelope icon, and a text input field labeled "חיפוש" (Search).
+
+The tiles are arranged in rows. The first row shows four tiles:
+1.  The leftmost tile (highlighted by a red circle) has an image of a snow-covered path alongside a fence, leading towards a building in the distance. Below the image, the text reads: שירה מודרנית: ניצול / לשון (Modern Poetry: Survival / Language).
+2.  The second tile shows a dramatic image of a sunset with the sun low on the horizon behind silhouetted dry grass or reeds. Below the image, the text reads: שירה ימי הביניים: ראה שמ... ר' שלמה... (Medieval Poetry: See Name... R' Shlomo...).
+3.  The third tile (highlighted by a green circle) features an image of golden wheat stalks in a field with sunlight shining through, creating a lens flare effect. Below the image, the text reads: שירה מודרנית: שירי זיכרון וגבורה / ספרות ממ"ד (Modern Poetry: Poems of Remembrance and Heroism / State Religious Literature).
+4.  The fourth tile shows a textured, artistic rendering of an old-fashioned alarm clock, set to approximately 7:10. Below the image, the text reads: שירת ימי הביניים: ישנה בחיק ילדות / לשון (Medieval Poetry: Sleeping in the Embrace of Childhood / Language).
+
+The second row shows two visible tiles:
+5.  The leftmost visible tile (highlighted by a green line pointing to it) shows a close-up of a large, bright yellow flower, likely a sunflower. Below the image, the text reads: עגנון: תהילה / לשון (Agnon: Tehilah / Language).
+6.  The rightmost visible tile shows an open book resting on a stack of other books, with blurred bookshelves in the background. Below the image, the text reads: מבוא לספרות / ספרות (Introduction to Literature / Literature).
+
+Extracted text via OCR:
+חיפוש
+שירה מודרנית: ניצול
+לשון
+שירה ימי הביניים: ראה שמ... ר' שלמה...
+...הביניים
+שירה מודרנית: שירי זיכרון וגבורה
+ספרות ממ"ד
+שירת ימי הביניים: ישנה בחיק ילדות /
+לשון
+עגנון: תהילה
+לשון
+מבוא לספרות
+ספרות
+[2025-07-01 20:47:54] [ID: true_972507735297@c.us_70D1444D9AE79E5AA66F753F764841C5] הלל (Owner): אה סבבה
+[2025-07-01 20:47:59] [ID: false_972507735297@c.us_19907660931D23557376AF78208353BB] דיצה: הבנת?
+[2025-07-01 20:48:00] [ID: true_972507735297@c.us_6DB65CE16F94909D8A4E98968EFECAA0] הלל (Owner): תודה אעשה את זה עכשיו
+[2025-07-01 20:48:22] [ID: true_972507735297@c.us_B9B701230416EFAF0CE53451073D3F04] הלל (Owner): (↩️ ל-ID:false_972507735297@c.us_19907660931D23557376AF78208353BB "הבנת?...")
+כן
+[2025-07-02 8:39:25] [ID: true_972507735297@c.us_3FB09DE2869C26A94790] הלל (Owner): המורה עשיתי
+[2025-07-02 8:39:35] [ID: true_972507735297@c.us_3FA2FF9E9BD7033230B7] הלל (Owner): צריך לעשות עוד משהו?
+[2025-07-02 8:44:17] [ID: false_972507735297@c.us_BF761EA72B0B030363FC3046634B4730] דיצה: עכשיו תבחר  שיר ימי ביניים *אחד*
+ראה שמש
+ *או*
+ישנה בחיק ילדות
+תבחר את השיר אליו אתה מתחבר יותר. בהצלחה
+[2025-07-02 8:44:18] [ID: false_972507735297@c.us_D9FFFC0D9F897865D35B58293C4569BF] דיצה: אחד מהשניים
+[2025-07-02 8:46:42] [ID: true_972507735297@c.us_3FB40BD42FE80EA19D32] הלל (Owner): (↩️ ל-ID:false_972507735297@c.us_BF761EA72B0B030363FC3046634B4730 "עכשיו תבחר  שיר ימי ביניי...")
+המורה יש עוד משהו אחרי זה?
+[2025-07-02 8:46:51] [ID: true_972507735297@c.us_3F81F9CE2A454D394660] הלל (Owner): תגידי לי ואני אעשה הכל ביחד
+[2025-07-02 8:47:39] [ID: false_972507735297@c.us_A29F46C8471CE66AA57C1B97123DF998] דיצה: בזה סיימנו ב"ה 
+תם הטקס
+[2025-07-02 8:47:46] [ID: true_972507735297@c.us_3FE6349A0DB6CD95CFF0] הלל (Owner): סבבה תודה רבה המורה
+[2025-07-05 19:39:55] [ID: false_972507735297@c.us_61501E6ACA0565A5E339B3D02627E9D3] דיצה (0507735297): היי. נא להשלים
+נפרדנו כך-משימה 2
+לסרוק היטב עד סיום המשימה 
+בהצלחה

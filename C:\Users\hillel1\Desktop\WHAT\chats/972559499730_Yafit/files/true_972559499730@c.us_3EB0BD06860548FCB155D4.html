@@ -1,0 +1,250 @@
+<!-- filename: electricity_summary_interactive_v3.html -->
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>חוויה מחשמלת V3</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #020617;
+            --primary: #7dd3fc;
+            --secondary: #fde047;
+            --text-color: #e2e8f0;
+            --border-color: #1e293b;
+            --card-bg: rgba(15, 23, 42, 0.8);
+            --water-deep: #0c4a6e;
+            --water-shallow: #0284c7;
+        }
+
+        /* Base and cursors */
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Assistant', sans-serif;
+            margin: 0;
+            padding: 2rem;
+            text-align: center;
+            overflow: hidden;
+            position: relative;
+        }
+        .electric-cursor {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewbox="0 0 24 24"><path fill="%23fde047" stroke="%23020617" stroke-width="1" d="M13 2L3 14h9l-1 8L21 10h-9z"/><circle cx="12" cy="12" r="10" fill="none" stroke="%23fde047" stroke-width="2" stroke-dasharray="2 4"><animate attributeName="stroke-dashoffset" from="0" to="6" dur="0.2s" repeatCount="indefinite"/></circle></svg>'), auto;
+        }
+        .dead-cursor {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewbox="0 0 24 24"><path fill="%234b5563" stroke="%23020617" stroke-width="1" d="M13 2L3 14h9l-1 8L21 10h-9z"/></svg>'), auto;
+        }
+
+        /* Animated background */
+        #background-wrap {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+        .particle {
+            position: absolute;
+            background: var(--primary);
+            border-radius: 50%;
+            opacity: 0;
+            animation: rise 15s infinite linear;
+        }
+
+        /* Main container and content */
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: clamp(2rem, 10vw, 4.5rem);
+            font-weight: 700;
+            text-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 40px var(--secondary);
+            animation: flicker 2s infinite alternate, fadeIn 2s ease-out;
+        }
+        p.subtitle {
+            font-size: 1.2rem;
+            color: var(--text-color);
+            opacity: 0;
+            animation: fadeIn 2s 0.5s ease-out forwards;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 25px;
+            backdrop-filter: blur(5px);
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s ease;
+            transform: translateY(50px);
+            opacity: 0;
+            animation: riseUp 0.8s forwards;
+        }
+        .card:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3), 0 0 20px var(--primary), inset 0 0 10px rgba(125, 211, 252, 0.2);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            color: var(--primary);
+            font-size: 1.6rem;
+            text-shadow: 0 0 5px var(--primary);
+        }
+        
+        /* Water effect */
+        .ocean { 
+            height: 120px;
+            width: 100%;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            z-index: 50;
+            pointer-events: auto;
+            border-top: 3px solid var(--primary);
+        }
+        .wave {
+            background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAwIDg2Ij48cGF0aCBmaWxsPSJodHRwOi8vd3d3Lnc1Lm9yZy8yMDAwL3N2ZyIvPjxwYXRoIGQ9Ik0xMjAwIDM2LjRsLTIuOC0uMUMxMDYyLjYgMjggOTU2LjQgMjEuMyA4MzkuMiAyOS43Yy01MC4zIDMuNS0xMDYuMyAxNC0xNzAuMiAyNC44QzU0Mi4xIDY1LjMgNDM0LjMgNzcgMzM5LjYgNzkuOGMtNzQuMSAxLjktMTM5LTguNy0yMTguMy0yOC4xQzQ3LjggMzQuNSAyNSA3LjggMCAwbDEuMiA4NmgxMjAwbC0xLjItNTAuNnoiIGZpbGw9InJnYmEoMiwgMTMyLCAyMDcsIDAuNikiLz48L3N2Zz4=) repeat-x; 
+            position: absolute;
+            bottom: 0;
+            width: 6400px;
+            height: 120px;
+            animation: wave 10s cubic-bezier( 0.36, 0.45, 0.63, 0.53) infinite;
+            transform: translate3d(0, 0, 0);
+        }
+        .wave:nth-of-type(2) {
+            bottom: 5px;
+            animation: wave 12s cubic-bezier( 0.36, 0.45, 0.63, 0.53) -.125s infinite, swell 7s ease -1.25s infinite;
+            opacity: 0.8;
+        }
+        
+        /* Short circuit effect */
+        .short-circuit {
+            animation: shortCircuit 0.4s linear;
+        }
+
+        /* Keyframes for all animations */
+        @keyframes fadeIn { to { opacity: 1; } }
+        @keyframes riseUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        @keyframes flicker {
+            0%, 18%, 22%, 25%, 53%, 57%, 100% {
+                text-shadow: 0 0 8px var(--primary), 0 0 16px var(--primary), 0 0 32px var(--secondary);
+            }
+            20%, 24%, 55% {
+                text-shadow: none;
+            }
+        }
+        @keyframes rise {
+            0% { transform: translateY(100vh) scale(0); opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+        @keyframes wave {
+            0% { margin-left: 0; }
+            100% { margin-left: -1600px; }
+        }
+        @keyframes swell {
+            0%, 100% { transform: translate3d(0,-25px,0); }
+            50% { transform: translate3d(0,5px,0); }
+        }
+        @keyframes shortCircuit {
+            0% { background-color: var(--bg-color); }
+            10% { background-color: white; }
+            20% { background-color: var(--bg-color); }
+            30% { background-color: white; transform: scale(1.02); }
+            40% { background-color: var(--bg-color); }
+            100% { background-color: var(--bg-color); transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="background-wrap"></div>
+    
+    <div class="container">
+        <h1>חוויה מחשמלת 3.0</h1>
+        <p class="subtitle">גע בכרטיסים כדי להתחבר לכוח. אך היזהר... המים מוליכים.</p>
+
+        <div class="grid">
+            <div class="card" style="animation-delay: 0.2s;"><h2>חוק קולון</h2><p>הכוח בין שני מטענים נקודתיים. משיכה או דחייה, תלוי בסימן.</p></div>
+            <div class="card" style="animation-delay: 0.3s;"><h2>שדה חשמלי</h2><p>המרחב סביב מטען שבו הוא מפעיל את כוחו. שדה וקטורי בלתי נראה.</p></div>
+            <div class="card" style="animation-delay: 0.4s;"><h2>חוק אוהם</h2><p>הקשר הקדוש בין מתח, זרם והתנגדות. V=IR, פשוט וקטלני.</p></div>
+            <div class="card" style="animation-delay: 0.5s;"><h2>פוטנציאל חשמלי</h2><p>האנרגיה האצורה ליחידת מטען. המתח הוא מה שגורם לדברים לזוז.</p></div>
+            <div class="card" style="animation-delay: 0.6s;"><h2>מעגל חשמלי</h2><p>מסלול סגור לזרם. אם הוא נפתח, המסיבה נגמרת. אם הוא מקוצר, היא מתפוצצת.</p></div>
+            <div class="card" style="animation-delay: 0.7s;"><h2>אלקטרומגנטיות</h2><p>הריקוד הקוסמי בין חשמל ומגנטיות. אחד יוצר את השני, לנצח נצחים.</p></div>
+        </div>
+    </div>
+    
+    <div class="ocean">
+        <div class="wave"></div>
+        <div class="wave"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const body = document.body;
+            const water = document.querySelector('.ocean');
+            const background = document.getElementById('background-wrap');
+            
+            let isElectrified = false;
+            let isDead = false;
+
+            // Generate background particles
+            const particleCount = 50;
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                const size = Math.random() * 5 + 1;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = Math.random() * 10 + 5 + 's';
+                background.appendChild(particle);
+            }
+
+            document.addEventListener('mouseover', (e) => {
+                if(e.target.classList.contains('card') && !isDead) {
+                    if (!isElectrified) {
+                        isElectrified = true;
+                        body.classList.add('electric-cursor');
+                    }
+                }
+            });
+
+            water.addEventListener('mouseenter', () => {
+                if (isElectrified) {
+                    isElectrified = false;
+                    isDead = true;
+                    body.classList.remove('electric-cursor');
+                    body.classList.add('dead-cursor');
+                    
+                    // Short circuit effect
+                    body.classList.add('short-circuit');
+                    setTimeout(() => {
+                        body.classList.remove('short-circuit');
+                    }, 400);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!-- filename: interactive_ranking_v3.html -->
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>דירוג חברי הקבוצה - גרסת האפקטים המשופרים!</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #1a1a2e;
+            --card-bg: #16213e;
+            --primary-text: #e94560;
+            --secondary-text: #f0f0f0;
+            --good-glow: #00ffdd;
+            --bad-glow: #ff414d;
+            --neutral-glow: #a0a0a0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--secondary-text);
+            font-family: 'Heebo', sans-serif;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            opacity: 0;
+            animation: fadeIn 1s ease-out forwards;
+        }
+
+        h1 {
+            color: var(--primary-text);
+            font-weight: 900;
+            font-size: 3rem;
+            text-shadow: 0 0 10px var(--primary-text);
+        }
+
+        h2 {
+            font-weight: 400;
+            font-size: 1.2rem;
+            margin-top: -15px;
+            margin-bottom: 40px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+        }
+
+        .card.good:hover {
+            box-shadow: 0 0 25px var(--good-glow);
+            border-color: var(--good-glow);
+        }
+
+        .card.bad:hover {
+            box-shadow: 0 0 25px var(--bad-glow);
+            border-color: var(--bad-glow);
+            animation: shake 0.5s infinite;
+        }
+
+        .rank {
+            font-size: 2.5rem;
+            font-weight: 900;
+        }
+
+        .name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-text);
+            margin: 5px 0;
+        }
+
+        .description {
+            font-size: 1rem;
+        }
+        
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg) translateY(-10px); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg) translateY(-10px); }
+            20% { transform: translate(-3px, 0px) rotate(1deg) translateY(-10px); }
+            30% { transform: translate(3px, 2px) rotate(0deg) translateY(-10px); }
+            40% { transform: translate(1px, -1px) rotate(1deg) translateY(-10px); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg) translateY(-10px); }
+            60% { transform: translate(-3px, 1px) rotate(0deg) translateY(-10px); }
+            70% { transform: translate(3px, 1px) rotate(-1deg) translateY(-10px); }
+            80% { transform: translate(-1px, -1px) rotate(1deg) translateY(-10px); }
+            90% { transform: translate(1px, 2px) rotate(0deg) translateY(-10px); }
+            100% { transform: translate(1px, -2px) rotate(-1deg) translateY(-10px); }
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        /* Particle styles */
+        .particle {
+            position: fixed;
+            font-size: 2rem;
+            pointer-events: none;
+            opacity: 0;
+            z-index: 9999;
+        }
+        
+        .vomit-fall {
+            animation: vomit-fall-anim 1.5s linear forwards;
+        }
+
+        @keyframes vomit-fall-anim {
+            0% {
+                transform: translateY(0) translateX(0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) translateX(var(--x-end)) scale(0.5);
+                opacity: 0;
+            }
+        }
+        
+        .star-burst {
+            animation: star-burst-anim 1s ease-out forwards;
+        }
+
+        @keyframes star-burst-anim {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.5);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>דירוג חברי הקבוצה</h1>
+        <h2>(לדעתי בלבד כמובן 😉)</h2>
+
+        <div class="grid">
+            <!-- Good Members -->
+            <div class="card good" data-member-name="הלל">
+                <div class="rank">🥇 1</div>
+                <div class="name">הלל (Owner)</div>
+                <div class="description">הבוס, הגאון, היוצר. אין מה להוסיף.</div>
+            </div>
+            <div class="card good" data-member-name="יפית">
+                <div class="rank">🥈 2</div>
+                <div class="name">יפית</div>
+                <div class="description">הנשמה של הקבוצה. תמיד שם להרים ולעזור.</div>
+            </div>
+            <div class="card good" data-member-name="דן">
+                <div class="rank">🥉 3</div>
+                <div class="name">דן</div>
+                <div class="description">אחלה גבר, תמיד עם רעיונות יצירתיים ותמיכה.</div>
+            </div>
+            <!-- Neutral Member -->
+            <div class="card neutral" data-member-name="עידו">
+                <div class="rank">😐 4</div>
+                <div class="name">עידו טאומן</div>
+                <div class="description">אישיות מורכבת. לפעמים מצחיק, לפעמים... טאומן.</div>
+            </div>
+            <!-- Bad Members -->
+            <div class="card bad" data-member-name="כביש 6">
+                <div class="rank">🤮 5</div>
+                <div class="name">כביש 6</div>
+                <div class="description">פשוט נוראי. גורם לפקקים במרחב הדיגיטלי.</div>
+            </div>
+            <div class="card bad" data-member-name="אליאור">
+                <div class="rank">🤢 6</div>
+                <div class="name">אליאור</div>
+                <div class="description">שונאת אותו, פשוט בלתי נסבל.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let hoverInterval;
+
+            const createParticle = (content, startX, startY, type) => {
+                const particle = document.createElement('div');
+                particle.innerHTML = content;
+                particle.classList.add('particle');
+                document.body.appendChild(particle);
+
+                particle.style.left = `${startX}px`;
+                particle.style.top = `${startY}px`;
+
+                if (type === 'vomit') {
+                    particle.classList.add('vomit-fall');
+                    // Random horizontal drift
+                    const xEnd = (Math.random() - 0.5) * 200; // -100px to 100px
+                    particle.style.setProperty('--x-end', `${xEnd}px`);
+                } else if (type === 'star') {
+                    particle.classList.add('star-burst');
+                }
+
+                setTimeout(() => {
+                    particle.remove();
+                }, 1500);
+            };
+
+            const startEffect = (event, type) => {
+                // Clear any existing interval to prevent overlap
+                if (hoverInterval) clearInterval(hoverInterval);
+
+                const card = event.currentTarget;
+                const rect = card.getBoundingClientRect();
+                
+                let emoji, particleType;
+                if (type === 'good') {
+                    emoji = '✨';
+                    particleType = 'star';
+                } else { // bad
+                    emoji = '🤮';
+                    particleType = 'vomit';
+                }
+
+                hoverInterval = setInterval(() => {
+                    for (let i = 0; i < 5; i++) { // Create 5 particles every 100ms for a dense effect
+                        const startX = rect.left + Math.random() * rect.width;
+                        const startY = rect.top + (particleType === 'vomit' ? 0 : Math.random() * rect.height);
+                        createParticle(emoji, startX, startY, particleType);
+                    }
+                }, 100);
+            };
+
+            const stopEffect = () => {
+                clearInterval(hoverInterval);
+            };
+
+            document.querySelectorAll('.card.good').forEach(card => {
+                card.addEventListener('mouseenter', (e) => startEffect(e, 'good'));
+                card.addEventListener('mouseleave', stopEffect);
+            });
+
+            document.querySelectorAll('.card.bad').forEach(card => {
+                card.addEventListener('mouseenter', (e) => startEffect(e, 'bad'));
+                card.addEventListener('mouseleave', stopEffect);
+            });
+
+        });
+    </script>
+</body>
+</html>

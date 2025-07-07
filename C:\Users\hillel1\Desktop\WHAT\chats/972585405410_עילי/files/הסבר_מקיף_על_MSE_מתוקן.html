@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הסבר מקיף על MSE (שגיאה ריבועית ממוצעת)</title>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}, {left: '\\(', right: '\\)', display: false}, {left: '\\[', right: '\\]', display: true}]});"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&display=swap');
+
+        :root {
+            --bg-color: #1a1a2e;
+            --card-bg: #16213e;
+            --primary-color: #0f3460;
+            --secondary-color: #e94560;
+            --text-color: #e0e0e0;
+            --header-color: #ffffff;
+        }
+
+        body {
+            font-family: 'Assistant', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.7;
+            font-size: 18px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 20px;
+        }
+
+        header h1 {
+            color: var(--header-color);
+            font-size: 3em;
+            font-weight: 700;
+            margin: 0;
+            animation: slideInDown 0.8s ease-in-out;
+        }
+        
+        @keyframes slideInDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            border-left: 5px solid var(--primary-color);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+
+        h2 {
+            color: var(--secondary-color);
+            font-size: 2em;
+            margin-top: 0;
+            border-bottom: 1px solid #e9456055;
+            padding-bottom: 10px;
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        .formula-box {
+            background-color: #00000030;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.5em;
+            overflow-x: auto;
+        }
+        
+        .katex-display, .katex {
+            direction: ltr !important; /* Ensure math is always LTR */
+            color: var(--header-color);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid var(--primary-color);
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: var(--header-color);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 0.9em;
+            color: #ffffff80;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>הכל על MSE (שגיאה ריבועית ממוצעת)</h1>
+        </header>
+
+        <section class="card">
+            <h2>אקספוזיציה: מה הסיפור?</h2>
+            <p>
+                דמיין שאתה חזאי. כל בוקר אתה מנסה לנבא את הטמפרטורה, אבל המציאות... ובכן, למציאות יש תוכניות משלה. לפעמים אתה קולע בול, לפעמים אתה מפספס במעלה, ולפעמים... עדיף שלא נדבר על זה.
+            </p>
+            <p>
+                כדי להשתפר, אתה חייב דרך למדוד כמה התחזיות שלך "רחוקות" מהמציאות. אתה צריך ציון אחד, מספר פשוט שיגיד לך: "היום היית קרוב!" או "חביבי, אולי כדאי שתחפש מקצוע אחר".
+            </p>
+            <p>
+                בעולם של מודלים סטטיסטיים ולמידת מכונה, <strong>MSE (Mean Squared Error)</strong> הוא בדיוק הציון הזה. זהו אחד המדדים הנפוצים והחשובים ביותר להערכת הביצועים של מודל חיזוי (רגרסיה).
+            </p>
+        </section>
+
+        <section class="card">
+            <h2>פירוק לגורמים: למה "ריבועית" ו"ממוצעת"?</h2>
+            <p>השם אולי נשמע מאיים, אבל הרעיון פשוט להפליא. בוא נפרק אותו:</p>
+            <ul>
+                <li><strong>שגיאה (Error):</strong> זה החלק הכי אינטואיטיבי. השגיאה היא פשוט ההפרש בין הערך האמיתי לערך שהמודל חזה.
+                    <br>
+                    \( \text{Error} = \text{Actual} - \text{Predicted} \)
+                </li>
+                <li><strong>ריבועית (Squared):</strong> כאן נכנס הקסם. אנחנו לוקחים כל שגיאה ומעלים אותה בריבוע. למה? שתי סיבות עיקריות:
+                    <ol>
+                        <li><strong>ביטול המינוסים:</strong> אם מודל אחד טועה ב-10+ ומודל אחר ב-10-, בלי הריבוע, הממוצע שלהם יהיה 0, כאילו לא היו טעויות כלל! הריבוע הופך כל שגיאה לחיובית, כך שטעויות לא מבטלות זו את זו.</li>
+                        <li><strong>עונש על טעויות גדולות:</strong> העלאה בריבוע מענישה טעויות גדולות הרבה יותר מאשר טעויות קטנות. שגיאה של 2 הופכת ל-4, אבל שגיאה של 10 הופכת ל-100! זה גורם למודל "לפחד" מטעויות גדולות ולנסות להימנע מהן.</li>
+                    </ol>
+                </li>
+                <li><strong>ממוצעת (Mean):</strong> אחרי שהעלינו את כל השגיאות בריבוע, אנחנו פשוט מחשבים את הממוצע שלהן. זה נותן לנו מספר יחיד שמייצג את "גודל הטעות הממוצעת בריבוע" של המודל על פני כל הדוגמאות.</li>
+            </ul>
+        </section>
+
+        <section class="card">
+            <h2>הגדרה פורמלית</h2>
+            <p>ועכשיו, אחרי שהבנו את הרעיון, בוא נראה איך זה נראה בשפה מתמטית:</p>
+            <div class="formula-box">
+                $$ 
+                \text{MSE} = \frac{1}{n} \sum_{i=1}^{n} (Y_i - \hat{Y}_i)^2 
+                $$ 
+            </div>
+            <p>כאשר:</p>
+            <ul>
+                <li>\( n \): מספר הדוגמאות או התצפיות.</li>
+                <li>\( Y_i \): הערך האמיתי (הנצפה) של התצפית ה-i.</li>
+                <li>\( \hat{Y}_i \): הערך שהמודל חזה עבור התצפית ה-i.</li>
+                <li>\( \sum \): סימן הסכימה, שאומר לנו לסכום את כל השגיאות הריבועיות.</li>
+            </ul>
+        </section>
+        
+        <section class="card">
+            <h2>דוגמה מעשית</h2>
+            <p>
+                נניח שבנינו מודל שחוזה מחירי דירות. בדקנו אותו על 3 דירות ויצאו התוצאות הבאות:
+            </p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>דירה</th>
+                        <th>מחיר אמיתי (Y)</th>
+                        <th>מחיר חזוי (Ŷ)</th>
+                        <th>שגיאה (Y - Ŷ)</th>
+                        <th>שגיאה ריבועית (Y - Ŷ)²</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>2,000,000 ₪</td>
+                        <td>1,900,000 ₪</td>
+                        <td>100,000</td>
+                        <td>10,000,000,000</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>2,500,000 ₪</td>
+                        <td>2,600,000 ₪</td>
+                        <td>-100,000</td>
+                        <td>10,000,000,000</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>3,000,000 ₪</td>
+                        <td>2,800,000 ₪</td>
+                        <td>200,000</td>
+                        <td>40,000,000,000</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                עכשיו נחשב את ה-MSE:
+            </p>
+            <div class="formula-box">
+                $$ 
+                 \text{MSE} = \frac{10,000,000,000 + 10,000,000,000 + 40,000,000,000}{3} = \frac{60,000,000,000}{3} = 20,000,000,000
+                $$ 
+            </div>
+            <p>
+                ה-MSE של המודל שלנו הוא 20 מיליארד. זהו הציון שלנו. ככל שה-MSE יהיה נמוך יותר, כך המודל שלנו טוב יותר!
+            </p>
+        </section>
+        
+        <footer>
+            <p>נוצר באהבה על ידי פיתי ❤️</p>
+        </footer>
+    </div>
+</body>
+</html>

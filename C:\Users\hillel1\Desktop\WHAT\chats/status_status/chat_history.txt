@@ -1,0 +1,76 @@
+[2025-06-30 16:13:56] [ID: false_status@broadcast_158DD561CC1B64A1D657DA6A6D1D3A8C_972522311422@c.us] Matan Nahari: [מדיה]
+[2025-06-30 16:14:07] [ID: false_status@broadcast_158DD561CC1B64A1D657DA6A6D1D3A8C_972522311422@c.us] פיתי (media content): The image is a flyer or advertisement with a light blue background, featuring various illustrations and text in Hebrew. At the top left is a yellow kite with a tail of green and blue diamond shapes. On the right, there are three balloons (pink, orange, and teal) tied together with strings, extending upwards. In the upper right corner, there's a logo resembling an open book with a laurel wreath and Hebrew text, alongside a caption "בס"ד". Below this is another logo with a pile of books and colourful squares, and the text "מחלקת חינוך מיוחד" (Department of Special Education).
+
+The main body of the flyer contains prominent Hebrew text in different sizes and colors. Below the central text, there are three outlined speech bubbles shaped like balloons, each containing handwritten Hebrew text. At the bottom left, a cartoon illustration of a boy is partially visible, smiling. At the bottom right, a cartoon illustration of a girl with a pink bow is partially visible, smiling. Below the main text and balloons, there is more text in black and red, followed by two phone numbers and finally a concluding phrase in red text. The lower part of the background transitions into a green, grassy area.
+
+The extracted text is:
+בס"ד
+הרצליה
+מרכז
+מחלקת
+חינוך מיוחד
+המרכז
+שילוב ותמיכה
+סניף בני עקיבא הרצליה מרכז
+מגייס חניכים
+לשבט יובל
+שבט לילדים
+עם צרכים מיוחדים
+גילאי
+9-16
+פעילות
+קבוצה
+קטנה
+באת שליו
+ושקט
+סניף
+שהוא בית
+ומשפחה
+אם אתם הורים או מכירים ילד מיוחד
+ישמחו להצטרף אלינו,
+מוזמנים להתקשר
+ישראל ורכז שבט יובל) 053-4296092
+אודל (קומנרית הסניף)- 053-2806033
+מחכים לכם!
+[2025-07-02 8:29:01] [ID: false_status@broadcast_ED2FB988E5729CA2A989A1F1049D2BB6_972522311422@c.us] Matan Nahari: [מדיה]
+[2025-07-02 8:29:13] [ID: false_status@broadcast_ED2FB988E5729CA2A989A1F1049D2BB6_972522311422@c.us] פיתי (media content): The image is a flyer or poster advertising an activity for children with special needs. The background is light blue with a gentle wave shape at the top. In the top left corner, there is a yellow kite with a colorful tail flying. On the right side, there are three balloons tied together by strings: one pink, one orange, and one turquoise.
+
+In the top right corner, there is a logo with the text "החמ״ד מרכז" (Hamad Merkaz) inside a stylized book or Torah scroll. Below this, there is another logo with colored squares and symbols, and the text "מחלקה חינוך מיוחד מרכז" (Machlaka Chinuch Meyuchad Merkaz - Department of Special Education Center).
+
+Large blue text across the upper middle reads "סניף בני עקיבא הרצליה מרכז" (Snif Bnei Akiva Herzliya Merkaz - Bnei Akiva Branch Herzliya Center). Below this, in large orange text, is "מגייס חניכים לשבט יובל" (Megayes Chanichim Leshevet Yuval - Recruiting members for Yuval Tribe). Further down, in red text, is "שבט לילדים עם צרכים מיוחדים" (Shevet LeYeladim Im Tzarichim Meyuchadim - Tribe for children with special needs).
+
+Below the main text are three outlined balloons serving as text bubbles. The leftmost balloon contains Hebrew text written in a circular fashion: "סניף שהוא בית ומשפחה" (Snif SheHu Bayit UMishpacha - A branch that is a home and family). The middle balloon contains text: "פעילויות קבוצה קטנה באופן אישי" (Pe'iluyot Kvutza Ktana BeOfen Ishi - Small group activities personally). The rightmost balloon contains text: "גילאי 9-16" (Gilay 9-16 - Ages 9-16).
+
+At the bottom left, a cartoon boy with dark hair and tan skin is peeking from the side, smiling. He is wearing a brown shirt with a bear face on it. At the bottom right, a cartoon girl with dark skin and hair tied in a pink bow is also peeking and smiling. She is wearing a yellow shirt with a reindeer face. The bottom of the image features a green grassy area where the children are illustrated.
+
+Above the children and on the green background, there is dark blue text: "אז אם אתם הורים או מכירים ילד מיוחד" (Az Im Atem Horim O Makirim Yeled Meyuchad - So if you are parents or know a special child). Below this, in blue text: "נשמח להצטרף אלינו," (Nismach LeHitzerif Eleinu, - We would be happy for you to join us,). Below this, in blue text: "מוזמנים להתקשר" (Muzmanim LeHitkasher - Invited to call). Finally, in green text, are two phone numbers with names: "ישראל רכז שבט יובל - 053-4296092" (Yisrael Rekez Shevet Yuval - 053-4296092 - Yisrael, Yuval Tribe Coordinator) and "אודל קומונרית הסניף - 053-2806033" (Odel Kumunerit HaSnif - 053-2806033 - Odel, Branch Madricha). The bottom-most text in red says "מחכים לכם!" (Mechakim Lacham! - Waiting for you!).
+
+Text Extracted:
+בס״ד
+החמ״ד
+מרכז
+מחלקה
+חינוך מיוחד
+מרכז
+לצורך לב ולכל
+סניף בני עקיבא הרצליה מרכז
+מגייס חניכים
+לשבט יובל
+שבט לילדים
+עם צרכים מיוחדים
+סניף
+שהוא בית
+ומשפחה
+פעילויות
+קבוצה
+קטנה
+באופן אישי
+גילאי
+9-16
+וקשב
+אז אם אתם הורים או מכירים ילד מיוחד
+נשמח להצטרף אלינו,
+מוזמנים להתקשר
+ישראל רכז שבט יובל - 053-4296092
+אודל קומונרית הסניף - 053-2806033
+מחכים לכם!

@@ -1,0 +1,52 @@
+[2025-07-02 19:11:44] [ID: false_972584829342@c.us_3EB025BE63A4A69A3DDA7F] רועי ק: (↩️ ל-ID:true_120363316946072293@g.us_3F2E6D5999F6A38F0156_200644128440439@lid "למי שרוצה, אם למישהו יש ה...")
+נראה מטורף. נראה לי תוספת טובה יכולה להיות בקצת מקום שנשאר כל מיני הגדרות של בעיות פיזיקליות ראיתי שבמבחנים תמיד יש כמה שאלות על זה כמו נגיד ההגדרה שמשהו פרופרציונלי למשהו, קצב גידול או (פחות ראיתי שנפוץ) הסרטון האחרון החומר תנועה הרמונית מרוסנת חלשה וחזקה
+[2025-07-02 19:48:39] [ID: true_972584829342@c.us_3F7ECBA0F28BA2AEAB95] הלל (Owner): (↩️ ל-ID:false_972584829342@c.us_3EB025BE63A4A69A3DDA7F "נראה מטורף. נראה לי תוספת...")
+כן? עברתי על כמה מבחנים ולא ראיתי שם שאלות פיזיקאליות כאלו
+[2025-07-02 19:48:39] [ID: true_972584829342@c.us_3FAB0AAD51FA481E230D] הלל (Owner): אבל צודק שכחתי מזה לגמרי
+[2025-07-02 19:48:40] [ID: true_972584829342@c.us_3F616356E4541E686F60] הלל (Owner): אוסיף, תודה
+[2025-07-02 20:29:46] [ID: true_972584829342@c.us_3F28C379513364E9659C] הלל (Owner): לבנתיים
+[2025-07-02 20:30:00] [ID: true_972584829342@c.us_3FB2840C9102B6EE94FA] הלל (Owner): אגב אם אתה עומד להשתמש בזה במבחן כדי לך לעבור על זה קודם ולראות אם זה מתאים לך
+[2025-07-02 20:30:01] [ID: true_972584829342@c.us_3F28C379513364E9659C] פיתי (media content): This document is a two-page formula sheet in Hebrew for differential equations (מד"ר).
+
+**Page 1 covers:**
+*   **Introduction and First Order DEs:**
+    *   General definitions (DE, order, degree, solution types - general, particular, singular).
+    *   Separable equations.
+    *   Homogeneous equations (substitution method).
+    *   "Almost" homogeneous equations (method for linear systems).
+    *   Exact equations (condition for exactness, method to find potential function).
+    *   Integrating factors to make non-exact equations exact (formulas for μ(x) and μ(y)).
+    *   First-order linear equations (formula for integrating factor, general solution).
+    *   Bernoulli's equation (substitution to turn it into linear).
+    *   Additional techniques (solving for dx/dy).
+    *   Clairaut's equation (form and general solution).
+*   **Second Order DEs:**
+    *   Order reduction for special cases (when x or y is missing).
+    *   Linear constant-coefficient homogeneous DEs (characteristic equation, solutions based on real distinct, real repeated, and complex conjugate roots). Includes extension to higher order equations with repeated roots.
+    *   Linear constant-coefficient non-homogeneous DEs (general solution yh + yp).
+    *   Method of Undetermined Coefficients for finding yp (building the guess set based on R(x) and its derivatives, checking for resonance and adjusting the guess). Includes a table mapping R(x) terms to parts of the guess set.
+    *   Operator Method (Annihilator method) for finding yp (factoring the differential operator, solving in stages).
+
+**Page 2 covers:**
+*   **Second Order DEs (continued):**
+    *   Linear DEs with general coefficients (y'' + P(x)y' + Q(x) = R(x)).
+    *   Finding a first homogeneous solution y1 (special cases).
+    *   Finding a second homogeneous solution y2 using order reduction (formula involving y1 and P(x)).
+    *   Variation of Parameters method for finding the particular solution yp (formulas involving y1, y2, the Wronskian, and R(x)). Definition of the Wronskian.
+*   **Solution using Series:**
+    *   Method for solving DEs using power series around x=0 (assuming y, y', y'' are power series, substitution, finding recurrence relation, general form of solution). Includes a table of common Taylor series expansions.
+*   **Euler-Cauchy Equation:**
+    *   Form ax²y'' + bxy' + cy = R(x).
+    *   Method for solving the homogeneous part (assuming y=xm, characteristic equation, solutions based on roots - real distinct, real repeated, complex conjugate, using ln|x| for repeated roots).
+    *   Finding the particular solution for the non-homogeneous part (guessing method, adjusting for resonance by multiplying by ln x).
+*   **Singular Solution:** Mentions solving a specific system of equations (related to Clairaut's equation).
+*   **Common Physical Problems:** Lists typical parameters and describes common physical scenarios (proportional growth/decay, constant acceleration, damped harmonic oscillator - underdamped, critically damped, overdamped) including their characteristic equations or solution forms.
+*   **Common Integrals:** A table of standard integral formulas.
+*   **Trigonometric Identities:** A list of common trigonometric formulas.
+*   **Integration Methods:** Briefly mentions standard integration techniques:
+    *   Integration by Parts (formula).
+    *   Substitution Method (formula).
+    *   Partial Fractions (describes the process for rational functions - factoring denominator, setting up fractions, solving for coefficients).
+
+The document provides a concise summary of definitions, methods, formulas, and common cases encountered in an introductory course on ordinary differential equations.
+[2025-07-02 21:12:00] [ID: false_972584829342@c.us_3A026A4A2417BD069A5D] רועי ק: סבבה תודה

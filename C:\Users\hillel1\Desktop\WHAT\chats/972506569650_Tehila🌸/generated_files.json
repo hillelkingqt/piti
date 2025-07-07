@@ -1,0 +1,46 @@
+[
+  {
+    "timestamp": "2025-06-28T19:33:58.105Z",
+    "originalMessageId": "true_972506569650@c.us_F7AC7E24B3F474869DBA8D98C7D3EE45",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/972506569650_Tehila🌸/files/image_flux-1-schnell_1751139238104.jpeg",
+    "filename": "image_flux-1-schnell_1751139238104.jpeg",
+    "description": "A woman dancing ballet with her arms up (in fifth position), looking proud and satisfied, elegant, graceful, realistic",
+    "type": "image/jpeg",
+    "modelUsed": "flux-1-schnell"
+  },
+  {
+    "timestamp": "2025-06-28T19:33:58.869Z",
+    "originalMessageId": "true_972506569650@c.us_3EB0FC69D82145E93278A2",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/972506569650_Tehila🌸/files/true_972506569650@c.us_3EB0FC69D82145E93278A2.jpeg",
+    "filename": "true_972506569650@c.us_3EB0FC69D82145E93278A2.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (פיתי)",
+    "type": "image/jpeg"
+  },
+  {
+    "timestamp": "2025-06-28T19:34:57.362Z",
+    "originalMessageId": "true_972506569650@c.us_9FC3B21507D26D39C26D6D8D2776C301",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/972506569650_Tehila🌸/files/gradio_image_FLUX.1-dev_1751139297362.webp",
+    "filename": "gradio_image_FLUX.1-dev_1751139297362.webp",
+    "description": "A graceful woman dancing ballet, in fifth position with her arms raised high, looking proud and satisfied, realistic, high detail",
+    "type": "image/webp",
+    "modelUsed": "black-forest-labs/FLUX.1-dev",
+    "seedUsed": 1274203534,
+    "params": {
+      "prompt": "A graceful woman dancing ballet, in fifth position with her arms raised high, looking proud and satisfied, realistic, high detail",
+      "seed": 0,
+      "randomize_seed": true,
+      "width": 1024,
+      "height": 1024,
+      "guidance_scale": 3.5,
+      "num_inference_steps": 28
+    }
+  },
+  {
+    "timestamp": "2025-06-28T19:34:57.867Z",
+    "originalMessageId": "true_972506569650@c.us_3EB00DC4EF610C4F844445",
+    "generatedFilePath": "C:\\Users\\hillel1\\Desktop\\WHAT\\chats/972506569650_Tehila🌸/files/true_972506569650@c.us_3EB00DC4EF610C4F844445.jpeg",
+    "filename": "true_972506569650@c.us_3EB00DC4EF610C4F844445.jpeg",
+    "description": "קובץ מדיה שהתקבל מהמשתמש (פיתי)",
+    "type": "image/jpeg"
+  }
+]

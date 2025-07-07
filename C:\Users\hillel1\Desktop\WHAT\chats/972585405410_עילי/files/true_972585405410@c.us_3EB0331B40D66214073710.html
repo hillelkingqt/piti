@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- filename: הסבר_מקיף_על_MSE.html -->
+    <title>הכל על שגיאה ריבועית ממוצעת (MSE)</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" integrity="sha384-cpW21h6RZv/phavutF+AuVYrr+dA8xD9zs6FwLcpOohf+GVIIYSZdcwnDC5HDChX" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&display=swap');
+
+        :root {
+            --bg-color: #1a1a2e;
+            --primary-color: #16213e;
+            --secondary-color: #0f3460;
+            --accent-color: #e94560;
+            --text-color: #dcdcdc;
+            --header-color: #ffffff;
+            --card-bg: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Assistant', sans-serif;
+            line-height: 1.8;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        header {
+            text-align: center;
+            padding: 2rem 0;
+            border-bottom: 2px solid var(--accent-color);
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            color: var(--header-color);
+            margin: 0;
+            font-weight: 700;
+            letter-spacing: 1px;
+            animation: slideInDown 1s ease-out;
+        }
+        
+        header p {
+             font-size: 1.2rem;
+             color: var(--text-color);
+        }
+
+        @keyframes slideInDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 16px 40px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .card h2 {
+            font-size: 2.2rem;
+            color: var(--accent-color);
+            margin-top: 0;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .math-block {
+            display: block;
+            text-align: center;
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background-color: var(--primary-color);
+            border-radius: 8px;
+            font-size: 1.5rem; /* Larger font size for formulas */
+            overflow-x: auto;
+        }
+        
+        .math-block .katex {
+            direction: ltr;
+        }
+
+        strong, b {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+
+        th, td {
+            padding: 1rem;
+            border: 1px solid var(--secondary-color);
+        }
+
+        th {
+            background-color: var(--secondary-color);
+            color: var(--header-color);
+            font-size: 1.1rem;
+        }
+        
+        tr:nth-child(even) {
+             background-color: rgba(15, 52, 96, 0.3);
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 2rem;
+            border-top: 1px solid var(--primary-color);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>שגיאה ריבועית ממוצעת (MSE)</h1>
+            <p>המדריך להבנת אחד מכלי המדידה החשובים ביותר בסטטיסטיקה ולמידת מכונה</p>
+        </header>
+
+        <main>
+            <section class="card">
+                <h2>אקספוזיציה: מה הסיפור?</h2>
+                <p>דמיין שאתה מנסה לחזות את הטמפרטורה מחר. אתה אומר "25 מעלות", אבל בפועל היו 27 מעלות. טעית ב-2 מעלות. עכשיו, דמיין שאתה בונה מודל מתוחכם שעושה את זה כל יום. איך תדע אם המודל שלך "טוב"? אתה צריך דרך למדוד את סך כל הטעויות שלו.</p>
+                <p>כאן נכנסת לתמונה <strong>השגיאה הריבועית הממוצעת (Mean Squared Error - MSE)</strong>. זהו מדד קלאסי ואינטואיטיבי שאומר לנו, בממוצע, כמה "רחוקות" התחזיות שלנו מהמציאות. ככל שה-MSE נמוך יותר, כך המודל שלנו מדויק יותר.</p>
+            </section>
+
+            <section class="card">
+                <h2>הכנת הקרקע: למה "ריבועית" ו"ממוצעת"?</h2>
+                <p>השם של המדד מסביר בדיוק איך הוא עובד. בוא נפרק אותו:</p>
+                <ul>
+                    <li><strong>שגיאה (Error):</strong> זה החלק הפשוט. עבור כל נקודת מידע, השגיאה היא פשוט ההפרש בין הערך האמיתי לערך שהמודל חזה. (לדוגמה: 27 - 25 = 2).</li>
+                    <li><strong>ריבועית (Squared):</strong> אחרי שחישבנו את השגיאה, אנחנו מעלים אותה בריבוע. יש לכך שתי סיבות מרכזיות: 
+                    <ol>
+                        <li><strong>היפטרות מסימנים שליליים:</strong> אם פעם אחת המודל טעה ב-2+ ופעם שנייה ב-2-, סך השגיאות יהיה 0, וזה מטעה! העלאה בריבוע הופכת את כל השגיאות לחיוביות.</li>
+                        <li><strong>הענשה על טעויות גדולות:</strong> העלאה בריבוע גורמת לטעויות גדולות "לכאוב" הרבה יותר. טעות של 10 (בריבוע 100) משפיעה הרבה יותר מ-10 טעויות של 1 (שסכום הריבועים שלהן הוא 10). זה מעודד את המודל להימנע מטעויות קיצוניות.</li>
+                    </ol>
+                    </li>
+                    <li><strong>ממוצע (Mean):</strong> לבסוף, אנחנו פשוט מסכמים את כל השגיאות הריבועיות ומחלקים במספר התצפיות. זה נותן לנו מדד ממוצע של טעות, שמייצג את ביצועי המודל על כל הדאטה.</li>
+                </ul>
+            </section>
+
+            <section class="card">
+                <h2>הגדרה פורמלית</h2>
+                <p>אחרי שהבנו את הרעיון, הנוסחה המתמטית נראית הרבה יותר פשוטה:</p>
+                <div class="math-block">
+                    <span class="math" dir="ltr">MSE = \frac{1}{n} \sum_{i=1}^{n} (Y_i - \hat{Y}_i)^2</span>
+                </div>
+                <p>כאשר:</p>
+                <ul>
+                    <li><span class="math" dir="ltr">n</span> - מספר התצפיות (או נקודות המידע).</li>
+                    <li><span class="math" dir="ltr">Y_i</span> - הערך האמיתי והנצפה של התצפית ה-i.</li>
+                    <li><span class="math" dir="ltr">\hat{Y}_i</span> - הערך שהמודל שלנו חזה עבור התצפית ה-i.</li>
+                    <li><span class="math" dir="ltr">\sum</span> - סמל הסכום, שאומר לנו לסכום את כל השגיאות הריבועיות.</li>
+                </ul>
+            </section>
+
+            <section class="card">
+                <h2>דוגמה יפה לשימוש</h2>
+                <p>נניח שבנינו מודל פשוט שחוזה מחיר של דירה (באלפי שקלים) על בסיס הגודל שלה (במ"ר). בדקנו את המודל על 3 דירות:</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>דירה</th>
+                            <th>מחיר אמיתי (Y)</th>
+                            <th>מחיר חזוי (Ŷ)</th>
+                            <th>שגיאה (Y - Ŷ)</th>
+                            <th>שגיאה בריבוע (Y - Ŷ)²</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>1,500</td>
+                            <td>1,450</td>
+                            <td>50</td>
+                            <td>2,500</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>1,800</td>
+                            <td>1,850</td>
+                            <td>-50</td>
+                            <td>2,500</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>1,200</td>
+                            <td>1,300</td>
+                            <td>-100</td>
+                            <td>10,000</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>עכשיו, נחשב את ה-MSE:</p>
+                <ol>
+                    <li><strong>סכום השגיאות בריבוע:</strong> <span class="math" dir="ltr">2,500 + 2,500 + 10,000 = 15,000</span></li>
+                    <li><strong>נחלק במספר הדירות (n=3):</strong> <span class="math" dir="ltr">\frac{15,000}{3} = 5,000</span></li>
+                </ol>
+                 <p>ה-MSE של המודל שלנו הוא <strong>5,000</strong>. אם נשפר את המודל ונריץ שוב את החישוב, נצפה לראות את הערך הזה יורד.</p>
+            </section>
+        </main>
+
+        <footer>
+            <p>נוצר באהבה על ידי פיתי</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false},
+                    {left: "\\(", right: "\\)", display: false},
+                    {left: "\\[", right: "\\]", display: true}
+                ],
+                throwOnError : false
+            });
+        });
+    </script>
+</body>
+</html>

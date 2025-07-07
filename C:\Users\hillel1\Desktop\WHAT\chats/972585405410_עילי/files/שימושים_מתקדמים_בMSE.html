@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>שימושים ונוסחאות מבוססות MSE</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/contrib/auto-render.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Rubik', sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            line-height: 1.8;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 25px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+        }
+        h1, h2, h3 {
+            color: #1a5a96;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+            margin-top: 30px;
+        }
+        h1 { font-size: 2.2em; text-align: center; border: none; }
+        h2 { font-size: 1.8em; }
+        h3 { font-size: 1.4em; border-bottom-style: dotted; }
+        p, li {
+            font-size: 1.1em;
+        }
+        .math-block {
+            background-color: #eef3f8;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 1.3em;
+            overflow-x: auto;
+            border: 1px solid #d1e0ec;
+        }
+        .math {
+           direction: ltr; /* Crucial for KaTeX rendering */
+           color: #0d47a1;
+        }
+        code {
+            background-color: #e0e0e0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            direction: ltr;
+            display: inline-block;
+        }
+        .highlight {
+            background-color: #fff3cd;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.9em;
+            color: #777;
+        }
+        /* KaTeX styling */
+        .katex-display {
+             text-align: center !important;
+             display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>שימושים ונוסחאות מתקדמות המבוססות על MSE</h1>
+        <p>עילי היקר, כפי שהבנת, MSE הוא לא רק מדד הערכה, אלא אבן יסוד בתיאוריות ונוסחאות רבות בלמידת מכונה. הנה הרחבה על הנושאים שביקשת:</p>
+
+        <h2>1. MSE כפונקציית מחיר (Cost Function)</h2>
+        <p>השימוש הנפוץ ביותר ב-MSE הוא כ<span class="highlight">פונקציית מחיר</span>, בעיקר במודלי רגרסיה. המטרה של המודל היא למצוא את הפרמטרים (משקלים) שממזערים את ה-MSE.</p>
+        <h3>ברגרסיה לינארית:</h3>
+        <p>התחזית של המודל היא <code dir="ltr">Ŷ = θ₀ + θ₁X</code>. פונקציית המחיר <code dir="ltr">J(θ₀, θ₁)</code>, אותה נרצה למזער, היא פשוט ה-MSE:</p>
+        <div class="math-block">
+            <div class="math">J(\theta_0, \theta_1) = \frac{1}{n} \sum_{i=1}^{n} (Y_i - \hat{Y}_i)^2 = \frac{1}{n} \sum_{i=1}^{n} (Y_i - (\theta_0 + \theta_1 X_i))^2</div>
+        </div>
+        <p>אלגוריתם כמו <span class="highlight">Gradient Descent</span> משתמש בנגזרת של פונקציה זו כדי לעדכן את המשקלים <code dir="ltr">θ₀, θ₁</code> באופן איטרטיבי עד להתכנסות למינימום.</p>
+
+        <h2>2. פירוק הטיה-שונות (Bias-Variance Decomposition)</h2>
+        <p>זוהי אחת הנוסחאות התיאורטיות החשובות ביותר בלמידת מכונה, והיא מראה ממה ה-MSE באמת מורכב. ניתן לפרק את שגיאת התחזית הצפויה של מודל כלשהו לשלושה רכיבים:</p>
+        <div class="math-block">
+            <div class="math">MSE(\hat{Y}) = E[(Y - \hat{Y})^2] = (\text{Bias}(\hat{Y}))^2 + \text{Var}(\hat{Y}) + \sigma^2</div>
+        </div>
+        <ul>
+            <li><code dir="ltr">(Bias(Ŷ))²</code>: <span class="highlight">הטיה בריבוע.</span> מייצגת את הטעות הנובעת מהנחות שגויות של המודל. מודל פשוט מדי (למשל, קו ישר לנתונים לא לינאריים) יסבול מהטיה גבוהה.</li>
+            <li><code dir="ltr">Var(Ŷ)</code>: <span class="highlight">שונות.</span> מייצגת את רגישות המודל לשינויים קטנים בנתוני האימון. מודל מורכב מדי (Overfitting) יסבול משונות גבוהה.</li>
+            <li><code dir="ltr">σ²</code>: <span class="highlight">שגיאה אי-פריקה (Irreducible Error).</span> זהו הרעש הטבעי בנתונים, שלא ניתן להפחית באמצעות בחירת מודל טוב יותר.</li>
+        </ul>
+        <p>נוסחה זו היא הבסיס ל<span class="highlight">פשרת הטיה-שונות</span>: ככל שאנו מנסים להקטין את ההטיה (ע"י שימוש במודל מורכב יותר), אנו לרוב מגדילים את השונות, ולהיפך.</p>
+
+        <h2>3. רגולריזציה (Regularization)</h2>
+        <p>כדי להילחם ב-Overfitting (שונות גבוהה), מוסיפים לרוב "עונש" לפונקציית המחיר. העונש מבוסס על גודל המשקלים של המודל. ברגולריזציית L2 (Ridge), העונש הוא סכום ריבועי המשקלים, והוא מתווסף ל-MSE:</p>
+        <h3>פונקציית המחיר של רגרסיית Ridge:</h3>
+        <div class="math-block">
+            <div class="math">J(\theta) = \text{MSE}(\theta) + \lambda \sum_{j=1}^{p} \theta_j^2</div>
+        </div>
+        <p>כאן, <code dir="ltr">λ</code> (למבדה) הוא פרמטר הקובע את עוצמת העונש. שימוש ב-MSE כבסיס מאפשר את האינטגרציה החלקה של העונש הריבועי הזה, ששומר על הפונקציה גזירה ונוחה לאופטימיזציה.</p>
+    </div>
+    <div class="footer">
+        נוצר באהבה על ידי פיתי ❤️
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false}
+                ]
+            });
+        });
+    </script>
+</body>
+</html>

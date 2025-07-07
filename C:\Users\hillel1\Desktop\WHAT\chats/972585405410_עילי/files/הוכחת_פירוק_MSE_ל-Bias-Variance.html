@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הוכחת פירוק MSE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" integrity="sha384-cpW21h6ecxGcbe421LT4XWMqDNO4SoVit3gCaypOkMn5vjI/741bVhTRsLFXsoPe" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+        onload="renderMathInElement(document.body);"></script>
+    <style>
+        body {
+            font-family: 'Rubik', sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            line-height: 1.8;
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+        h1, h2 {
+            color: #BB86FC;
+            border-bottom: 2px solid #03DAC6;
+            padding-bottom: 10px;
+        }
+        .step {
+            background-color: #1e1e1e;
+            border-left: 4px solid #03DAC6;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        .math-block {
+            background-color: #2a2a2a;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+            overflow-x: auto;
+            text-align: center;
+        }
+        code {
+            background-color: #333;
+            color: #f0f0f0;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .explanation {
+            font-style: italic;
+            color: #b0b0b0;
+            margin-top: 10px;
+        }
+        .final-result {
+            background-color: #03DAC6;
+            color: #121212;
+            font-weight: bold;
+            padding: 1.5rem;
+            text-align: center;
+            border-radius: 8px;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>הוכחת פירוק שגיאה ריבועית ממוצעת (MSE)</h1>
+        <p>היי עילי, לבקשתך, הנה הוכחה מפורטת שלב אחר שלב לפירוק המפורסם של תוחלת השגיאה הריבועית (MSE) למרכיביה: הטיה בריבוע, שונות, והשגיאה האי-פריקה.</p>
+        
+        <h2>1. הגדרות בסיס</h2>
+        <div class="step">
+            <p>נניח שהמודל האמיתי (שאותו אנחנו מנסים ללמוד) הוא:</p>
+            <div class="math-block" dir="ltr">$$ y = f(x) + \epsilon $$</div>
+            <p>כאשר:</p>
+            <ul>
+                <li><code>y</code> הוא המשתנה התלוי (הערך האמיתי).</li>
+                <li><code>f(x)</code> היא הפונקציה האמיתית והדטרמיניסטית שקובעת את הקשר.</li>
+                <li><code>\epsilon</code> הוא רעש אקראי (שגיאה), עם תוחלת 0 (<code>E[\epsilon] = 0</code>) ושונות <code>\sigma^2</code> (<code>Var(\epsilon) = \sigma^2</code>).</li>
+            </ul>
+            <p>המודל שלנו, שנלמד מהנתונים, מסומן כ-<code>\hat{f}(x)</code>. המטרה שלנו היא לנתח את השגיאה של המודל הזה.</p>
+            <p>ההגדרות המתמטיות הן:</p>
+             <ul>
+                <li><b>MSE:</b> <span dir="ltr">$$ E\left[ (y - \hat{f}(x))^2 \right] $$</span></li>
+                <li><b>הטיה (Bias):</b> <span dir="ltr">$$ \text{Bias}(\hat{f}(x)) = E[\hat{f}(x)] - f(x) $$</span></li>
+                <li><b>שונות (Variance):</b> <span dir="ltr">$$ \text{Var}(\hat{f}(x)) = E\left[ (\hat{f}(x) - E[\hat{f}(x)])^2 \right] $$</span></li>
+            </ul>
+        </div>
+
+        <h2>2. ההוכחה</h2>
+        <div class="step">
+            <h3>שלב א': פירוק ראשוני</h3>
+            <p>נתחיל מהגדרת ה-MSE ונציב את <code>y</code>:</p>
+            <div class="math-block" dir="ltr">$$ \text{MSE} = E\left[ (f(x) + \epsilon - \hat{f}(x))^2 \right] $$</div>
+            <p>נסדר את האיברים בתוך הסוגריים:</p>
+            <div class="math-block" dir="ltr">$$ \text{MSE} = E\left[ ( (f(x) - \hat{f}(x)) + \epsilon )^2 \right] $$</div>
+            <p>נפתח את הסוגריים לפי נוסחת כפל מקוצר <code>(a+b)^2 = a^2 + 2ab + b^2</code>:</p>
+            <div class="math-block" dir="ltr">$$ \text{MSE} = E\left[ (f(x) - \hat{f}(x))^2 + 2\epsilon(f(x) - \hat{f}(x)) + \epsilon^2 \right] $$</div>
+            <p>נשתמש בליניאריות של התוחלת:</p>
+            <div class="math-block" dir="ltr">$$ \text{MSE} = E\left[ (f(x) - \hat{f}(x))^2 \right] + E\left[ 2\epsilon(f(x) - \hat{f}(x)) \right] + E[\epsilon^2] $$</div>
+            <p class="explanation">עכשיו נטפל בכל איבר בנפרד.</p>
+        </div>
+
+        <div class="step">
+            <h3>שלב ב': טיפול באיברי הרעש</h3>
+            <p>נתחיל מהאיבר האחרון, <code>E[\epsilon^2]</code>:</p>
+            <p>מהגדרת השונות, <code>Var(\epsilon) = E[\epsilon^2] - (E[\epsilon])^2</code>. מכיוון שהנחנו <code>E[\epsilon]=0</code> ו-<code>Var(\epsilon)=\sigma^2</code>, נקבל:</p>
+            <div class="math-block" dir="ltr">$$ E[\epsilon^2] = \sigma^2 $$</div>
+            <p>עכשיו נעבור לאיבר האמצעי, <code>E[2\epsilon(f(x) - \hat{f}(x))]</code>:</p>
+            <p>הרעש <code>\epsilon</code> בלתי תלוי בנתונים ששימשו לאימון המודל <code>\hat{f}(x)</code>, וגם בפונקציה האמיתית <code>f(x)</code>. לכן, ניתן להפריד את התוחלת:</p>
+            <div class="math-block" dir="ltr">$$ E\left[ 2\epsilon(f(x) - \hat{f}(x)) \right] = 2 \cdot E[\epsilon] \cdot E[f(x) - \hat{f}(x)] $$</div>
+            <p>מכיוון ש-<code>E[\epsilon] = 0</code>, כל הביטוי הזה שווה ל-0.</p>
+            <p class="explanation">לכן, אחרי שלב זה, הנוסחה שלנו נראית כך:</p>
+            <div class="math-block" dir="ltr">$$ \text{MSE} = E\left[ (f(x) - \hat{f}(x))^2 \right] + \sigma^2 $$</div>
+        </div>
+
+        <div class="step">
+            <h3>שלב ג': פירוק איבר השגיאה של המודל</h3>
+            <p>כעת, נתמקד בביטוי <code>E[(f(x) - \hat{f}(x))^2]</code>. זהו החלק המעניין. נשתמש בטריק נפוץ ונחבר ונחסר את התוחלת של החזאי שלנו, <code>E[\hat{f}(x)]</code>:</p>
+            <div class="math-block" dir="ltr">$$ E\left[ (f(x) - E[\hat{f}(x)] + E[\hat{f}(x)] - \hat{f}(x))^2 \right] $$</div>
+            <p>נקבץ את האיברים מחדש. נסמן <code>A = f(x) - E[\hat{f}(x)]</code> ו-<code>B = E[\hat{f}(x)] - \hat{f}(x)</code> ונפתח את <code>(A+B)^2</code>:</p>
+            <div class="math-block" dir="ltr">$$ E[A^2 + 2AB + B^2] = E[A^2] + 2E[AB] + E[B^2] $$</div>
+            <p>ננתח כל חלק:</p>
+            <ul>
+                <li><b><code>E[B^2]</code>:</b> <span dir="ltr">$$ E\left[ (E[\hat{f}(x)] - \hat{f}(x))^2 \right] = E\left[ (\hat{f}(x) - E[\hat{f}(x)])^2 \right] \equiv \text{Var}(\hat{f}(x)) $$</span>
+                <p class="explanation">זהו בדיוק ההגדרה של שונות החזאי.</p></li>
+                <li><b><code>E[A^2]</code>:</b> <span dir="ltr">$$ E\left[ (f(x) - E[\hat{f}(x)])^2 \right] $$</span>
+                <p class="explanation">הביטוי שבתוך התוחלת, <code>(f(x) - E[\hat{f}(x)])</code>, הוא קבוע ביחס לתוחלת (היא כבר ממוצעת על פני כל המודלים האפשריים). לכן התוחלת לא משפיעה, וזה שווה ל-<code>(f(x) - E[\hat{f}(x)])^2</code>, שהוא <code>\text{Bias}(\hat{f}(x))^2</code>.</p></li>
+                <li><b><code>2E[AB]</code> (האיבר המעורב):</b> <span dir="ltr">$$ 2E\left[ (f(x) - E[\hat{f}(x)]) (E[\hat{f}(x)] - \hat{f}(x)) \right] $$</span>
+                <p class="explanation">הגורם הראשון <code>(f(x) - E[\hat{f}(x)])</code> הוא קבוע, ולכן ניתן להוציא אותו מהתוחלת:</p>
+                <div class="math-block" dir="ltr">$$ 2(f(x) - E[\hat{f}(x)]) \cdot E[E[\hat{f}(x)] - \hat{f}(x)] $$</div>
+                <p class="explanation">נפתח את התוחלת הפנימית: <code>E[E[\hat{f}(x)] - \hat{f}(x)] = E[E[\hat{f}(x)]] - E[\hat{f}(x)]</code>. מכיוון ש-<code>E[\hat{f}(x)]</code> הוא כבר ערך תוחלת (קבוע), התוחלת שלו היא הוא עצמו. לכן <code>E[\hat{f}(x)] - E[\hat{f}(x)] = 0</code>. כל האיבר המעורב מתאפס!</p></li>
+            </ul>
+            <p>אז קיבלנו:</p>
+            <div class="math-block" dir="ltr">$$ E\left[ (f(x) - \hat{f}(x))^2 \right] = \text{Bias}(\hat{f}(x))^2 + \text{Var}(\hat{f}(x)) $$</div>
+        </div>
+
+        <h2>3. תוצאה סופית</h2>
+        <div class="step">
+            <p>עכשיו כל מה שנשאר הוא לחבר את החלקים. נחזור לנוסחה מסוף שלב ב':</p>
+            <div class="math-block" dir="ltr">$$ \text{MSE} = E\left[ (f(x) - \hat{f}(x))^2 \right] + \sigma^2 $$</div>
+            <p>ונציב את התוצאה משלב ג':</p>
+            <div class="final-result" dir="ltr">
+                $$ \text{MSE} = \text{Bias}(\hat{f}(x))^2 + \text{Var}(\hat{f}(x)) + \sigma^2 $$
+            </div>
+            <p class="explanation" style="text-align: center; margin-top: 1rem;">וזה מה שרצינו להוכיח (מ.ש.ל)!</p>
+        </div>
+
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false},
+                    {left: "\\(", right: "\\)", display: false},
+                    {left: "\\[", right: "\\]", display: true}
+                ]
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,371 @@
+<!-- filename: הסבר_מורחב_על_MSE.html -->
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הסבר מורחב על שגיאה ריבועית ממוצעת (MSE)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" integrity="sha384-pFrCySANfHJNsH/APIi1o+s2hYclb02I1XpBE4LpIAbE4gy+2H1DxI2hqo91b9xK" crossorigin="anonymous">
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.js" integrity="sha384-N3rEoLq36iO2K5n1P55r9gS7+B/Q8+pEg6y9BfVb22K/S+U9AW/qVv2kRnoS1Jpc" crossorigin="anonymous"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgUR4+Si2d4KIzPAwVW1SjTR6MrWMrH9Pj4IfteBTRp67x+w+qOK9EYT" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&display=swap');
+
+        :root {
+            --bg-color: #0f0c29;
+            --card-color: #1c1642;
+            --text-color: #e0e0e0;
+            --header-color: #c7a3f5;
+            --accent-color: #6a11cb;
+            --accent-glow: rgba(106, 17, 203, 0.5);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Assistant', sans-serif;
+            background-color: var(--bg-color);
+            background: linear-gradient(to right, #302b63, #24243e, #0f0c29);
+            color: var(--text-color);
+            line-height: 1.8;
+            margin: 0;
+            padding: 20px;
+            font-size: 18px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 1s ease-in-out;
+        }
+
+        header h1 {
+            font-size: 3.5em;
+            color: var(--header-color);
+            font-weight: 700;
+            text-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        header p {
+            font-size: 1.2em;
+            color: #b0b0b0;
+        }
+
+        .card {
+            background-color: var(--card-color);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 25px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px var(--accent-glow);
+        }
+        
+        h2 {
+            font-size: 2.2em;
+            color: var(--header-color);
+            font-weight: 600;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .math-container {
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 1.5em;
+            overflow-x: auto;
+        }
+
+        .katex-display {
+            color: #f5d7ff;
+        }
+        
+        .math-inline .katex {
+            font-size: 1.1em !important;
+            color: #e6c6ff;
+        }
+
+        strong {
+            color: #f0c674;
+            font-weight: 600;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .comparison-table th, .comparison-table td {
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            text-align: center;
+        }
+
+        .comparison-table th {
+            background-color: var(--accent-color);
+            color: white;
+            font-size: 1.2em;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background-color: rgba(0,0,0,0.1);
+        }
+
+        code {
+            background-color: #282c34;
+            color: #abb2bf;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        
+        pre {
+            background-color: #282c34;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            color: #abb2bf;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #aaa;
+            font-size: 0.9em;
+            animation: fadeInUp 1s 1s ease-out forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Animation delay for cards */
+        .card:nth-child(1) { animation-delay: 0.2s; }
+        .card:nth-child(2) { animation-delay: 0.4s; }
+        .card:nth-child(3) { animation-delay: 0.6s; }
+        .card:nth-child(4) { animation-delay: 0.8s; }
+        .card:nth-child(5) { animation-delay: 1.0s; }
+        .card:nth-child(6) { animation-delay: 1.2s; }
+        .card:nth-child(7) { animation-delay: 1.4s; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>כל מה שצריך לדעת על MSE</h1>
+            <p>מדריך מורחב על מדד השגיאה הריבועית הממוצעת (Mean Squared Error)</p>
+        </header>
+
+        <section class="card">
+            <h2>1. מהי שגיאה ריבועית ממוצעת (MSE)?</h2>
+            <p>
+                דמיינו שאתם בונים מודל חיזוי - למשל, מודל שמנסה לחזות את מחיר הדירה על סמך גודלה. אחרי שהמודל נותן את החיזויים שלו, אנחנו רוצים לדעת: "כמה המודל הזה טוב?". <strong>MSE הוא אחד המדדים הפופולריים ביותר לענות על השאלה הזו.</strong>
+            </p>
+            <p>
+                במילים פשוטות, MSE מודד את ה<strong>ממוצע של ריבועי ההפרשים</strong> בין הערכים שהמודל חזה לבין הערכים האמיתיים. ככל שה-MSE נמוך יותר, כך המודל מדויק יותר.
+            </p>
+        </section>
+
+        <section class="card">
+            <h2>2. הנוסחה המתמטית</h2>
+            <p>ההגדרה הפורמלית של MSE נראית כך:</p>
+            <div class="math-container">
+                <div class="math" dir="ltr">$$ \text{MSE} = \frac{1}{n} \sum_{i=1}^{n} (Y_i - \hat{Y}_i)^2 $$</div>
+            </div>
+            <ul>
+                <li><span class="math-inline" dir="ltr">\( n \)</span> - מספר התצפיות (למשל, מספר הדירות במדגם שלנו).</li>
+                <li><span class="math-inline" dir="ltr">\( Y_i \)</span> - הערך האמיתי של התצפית ה-i (מחיר הדירה האמיתי).</li>
+                <li><span class="math-inline" dir="ltr">\( \hat{Y}_i \)</span> - הערך שהמודל חזה עבור התצפית ה-i (מחיר הדירה החזוי).</li>
+            </ul>
+            <p>
+                הסימן <span class="math-inline" dir="ltr">\( \sum \)</span> (סיגמא) אומר שאנחנו סוכמים את כל ריבועי ההפרשים, מ-i=1 ועד n.
+            </p>
+        </section>
+
+        <section class="card">
+            <h2>3. תכונות עיקריות וחסרונות</h2>
+            <ul>
+                <li><strong>ערך אי-שלילי:</strong> מכיוון שאנו מעלים את השגיאות בריבוע, MSE תמיד יהיה גדול או שווה לאפס. MSE=0 פירושו מודל מושלם, ללא שגיאות כלל.</li>
+                <li><strong>רגישות לחריגים (Outliers):</strong> העלאת השגיאה בריבוע גורמת לכך ששגיאות גדולות "נענשות" בצורה חמורה הרבה יותר משגיאות קטנות. חיזוי שרחוק ב-10 יחידות מהמציאות יתרום <span class="math-inline" dir="ltr">\(10^2=100\)</span> ל-MSE, בעוד שחיזוי שרחוק ב-2 יחידות יתרום רק <span class="math-inline" dir="ltr">\(2^2=4\)</span>. זו תכונה חשובה שיכולה להיות יתרון (אם שגיאות גדולות הן קטסטרופליות) או חיסרון (אם חריגים במדגם מעוותים את הערכת המודל).</li>
+                <li><strong>יחידות ריבועיות:</strong> חיסרון משמעותי של MSE הוא שהיחידות שלו הן ריבוע היחידות המקוריות. אם אנו חוזים מחיר בשקלים (₪), ה-MSE יהיה ב-"שקלים בריבוע" (₪²), שזה מושג לא אינטואיטיבי.</li>
+            </ul>
+        </section>
+        
+        <section class="card">
+            <h2>4. הפתרון: שורש השגיאה הריבועית הממוצעת (RMSE)</h2>
+            <p>
+                בדיוק בגלל בעיית היחידות, נולד מדד ה-<strong>RMSE (Root Mean Squared Error)</strong>. הרעיון פשוט: פשוט לוקחים את השורש הריבועי של ה-MSE.
+            </p>
+            <div class="math-container">
+                 <div class="math" dir="ltr">$$ \text{RMSE} = \sqrt{\text{MSE}} = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (Y_i - \hat{Y}_i)^2} $$</div>
+            </div>
+            <p>
+                היתרון הגדול: ה-RMSE הוא באותן יחידות כמו המשתנה שאנו חוזים. אם המחירים ב-₪, גם ה-RMSE יהיה ב-₪, מה שמאפשר לנו לומר בקלות: "בממוצע, המודל שלנו טועה ב-X שקלים".
+            </p>
+        </section>
+
+        <section class="card">
+            <h2>5. MSE לעומת MAE (שגיאה מוחלטת ממוצעת)</h2>
+            <p>
+                מתחרה פופולרי נוסף של MSE הוא <strong>MAE (Mean Absolute Error)</strong>, שלוקח את הערך המוחלט של השגיאות במקום את הריבוע שלהן.
+            </p>
+             <div class="math-container">
+                 <div class="math" dir="ltr">$$ \text{MAE} = \frac{1}{n} \sum_{i=1}^{n} |Y_i - \hat{Y}_i| $$</div>
+            </div>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>תכונה</th>
+                        <th>MSE / RMSE</th>
+                        <th>MAE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>השפעת חריגים</strong></td>
+                        <td>רגיש מאוד. "מעניש" שגיאות גדולות בחומרה.</td>
+                        <td>פחות רגיש. מתייחס לכל השגיאות באופן לינארי.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>פרשנות</strong></td>
+                        <td>RMSE קל יותר לפירוש (אותן יחידות).</td>
+                        <td>קל מאוד לפירוש ("השגיאה הממוצעת היא...").</td>
+                    </tr>
+                    <tr>
+                        <td><strong>מורכבות מתמטית</strong></td>
+                        <td>קל יותר לגזירה ולעבודה באופטימיזציה (הפונקציה רציפה וגזירה בכל נקודה).</td>
+                        <td>הערך המוחלט אינו גזיר בנקודת האפס, מה שיכול להקשות על אלגוריתמים מסוימים.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p><strong>כלל אצבע:</strong> השתמשו ב-MSE/RMSE כאשר שגיאות גדולות הן בעייתיות במיוחד. השתמשו ב-MAE כאשר כל השגיאות, קטנות כגדולות, חשובות באותה מידה.
+            </p>
+        </section>
+        
+        <section class="card">
+            <h2>6. דוגמת חישוב</h2>
+            <p>
+                נחזור לדוגמת הדירות. נניח שיש לנו 4 דירות:
+            </p>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>מחיר אמיתי (Y)</th>
+                        <th>מחיר חזוי (Ŷ)</th>
+                        <th>שגיאה (Y - Ŷ)</th>
+                        <th>שגיאה בריבוע (Y - Ŷ)²</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1,500,000 ₪</td>
+                        <td>1,450,000 ₪</td>
+                        <td>50,000</td>
+                        <td>2,500,000,000</td>
+                    </tr>
+                     <tr>
+                        <td>2,100,000 ₪</td>
+                        <td>2,120,000 ₪</td>
+                        <td>-20,000</td>
+                        <td>400,000,000</td>
+                    </tr>
+                     <tr>
+                        <td>1,800,000 ₪</td>
+                        <td>1,900,000 ₪</td>
+                        <td>-100,000</td>
+                        <td>10,000,000,000</td>
+                    </tr>
+                     <tr>
+                        <td>3,200,000 ₪</td>
+                        <td>3,190,000 ₪</td>
+                        <td>10,000</td>
+                        <td>100,000,000</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                <strong>שלב 1: סכימת השגיאות בריבוע</strong><br>
+                <span class="math-inline" dir="ltr">\( 2.5 \times 10^9 + 0.4 \times 10^9 + 10 \times 10^9 + 0.1 \times 10^9 = 13 \times 10^9 \)</span>
+            </p>
+            <p>
+                <strong>שלב 2: חלוקה במספר התצפיות (n=4)</strong><br>
+                <span class="math-inline" dir="ltr">\( \text{MSE} = \frac{13,000,000,000}{4} = 3,250,000,000 \)</span> (₪²)
+            </p>
+             <p>
+                <strong>שלב 3: חישוב RMSE</strong><br>
+                <span class="math-inline" dir="ltr">\( \text{RMSE} = \sqrt{3,250,000,000} \approx 57,008 \)</span> ₪
+            </p>
+             <p><strong>מסקנה:</strong> המודל שלנו טועה בממוצע בכ-57,008 ש"ח.
+            </p>
+        </section>
+
+        <section class="card">
+            <h2>7. מימוש ב-Python</h2>
+            <p>
+                כמובן, אף אחד לא מחשב את זה ידנית. בספריות פופולריות כמו `numpy` או `scikit-learn` זה פשוט מאוד:
+            </p>
+            <pre><code>import numpy as np
+from sklearn.metrics import mean_squared_error
+
+# הנתונים שלנו מהדוגמה
+Y_true = np.array([1500000, 2100000, 1800000, 3200000])
+Y_pred = np.array([1450000, 2120000, 1900000, 3190000])
+
+# --- שיטת Numpy ---
+mse_numpy = np.square(np.subtract(Y_true, Y_pred)).mean()
+
+# --- שיטת Scikit-learn ---
+mse_sklearn = mean_squared_error(Y_true, Y_pred)
+
+print(f"MSE (Numpy): {mse_numpy}")
+print(f"MSE (Scikit-learn): {mse_sklearn}")
+
+# חישוב RMSE
+rmse = np.sqrt(mse_sklearn)
+print(f"RMSE: {rmse:.2f}")</code></pre>
+        </section>
+        
+        <footer>
+            <p>נוצר באהבה על ידי פיתי ❤️</p>
+        </footer>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '$', right: '$', display: false},
+                    {left: '\\(', right: '\\)', display: false},
+                    {left: '\\[', right: '\\]', display: true}
+                ]
+            });
+        });
+    </script>
+</body>
+</html>

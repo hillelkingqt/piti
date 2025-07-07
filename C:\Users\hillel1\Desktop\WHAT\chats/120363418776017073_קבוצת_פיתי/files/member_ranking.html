@@ -1,0 +1,221 @@
+<!-- filename: member_ranking.html -->
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>דירוג חברי הקבוצה</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap');
+
+        :root {
+            --bg-color: #1a1a2e;
+            --card-bg: #16213e;
+            --text-color: #e0e0e0;
+            --accent-color: #0f3460;
+            --gold: #FFD700;
+            --silver: #C0C0C0;
+            --bronze: #CD7F32;
+            --good-glow: #29a329;
+            --bad-glow: #d32f2f;
+        }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            text-align: center;
+            padding: 2rem;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            color: #e94560;
+            font-size: 3rem;
+            text-shadow: 0 0 10px #e94560;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .ranking-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .member-box {
+            background: var(--card-bg);
+            border: 2px solid var(--accent-color);
+            border-radius: 15px;
+            padding: 1.5rem 2rem;
+            min-width: 250px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            animation: fadeInUp 0.5s ease-out forwards;
+            opacity: 0;
+        }
+
+        .member-box:nth-child(1) { animation-delay: 0.1s; }
+        .member-box:nth-child(2) { animation-delay: 0.2s; }
+        .member-box:nth-child(3) { animation-delay: 0.3s; }
+        .member-box:nth-child(4) { animation-delay: 0.4s; }
+        .member-box:nth-child(5) { animation-delay: 0.5s; }
+        .member-box:nth-child(6) { animation-delay: 0.6s; }
+
+
+        .member-box:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.6);
+        }
+
+        .rank {
+            font-size: 2rem;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            left: 20px;
+        }
+        
+        #rank-1 .rank { color: var(--gold); text-shadow: 0 0 8px var(--gold); }
+        #rank-2 .rank { color: var(--silver); text-shadow: 0 0 8px var(--silver); }
+        #rank-3 .rank { color: var(--bronze); text-shadow: 0 0 8px var(--bronze); }
+
+
+        .name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-top: 1rem;
+        }
+
+        .status {
+            font-style: italic;
+            margin-top: 0.5rem;
+            opacity: 0.8;
+        }
+        
+        /* Good person effects */
+        .good:hover {
+            box-shadow: 0 0 25px var(--good-glow), 0 15px 30px rgba(0,0,0,0.6);
+            border-color: var(--good-glow);
+        }
+
+        .good:hover::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 4px;
+            height: 4px;
+            background: transparent;
+            border-radius: 50%;
+            animation: particles 1s ease-out infinite;
+            box-shadow: 
+                -20px -30px 0 0px #fff, 30px -40px 0 1px #fff, 
+                50px 10px 0 0px #fff, -40px 30px 0 1px #fff, 
+                -60px 0px 0 1px #fff, 70px -20px 0 0px #fff,
+                10px 50px 0 1px #fff, -35px -55px 0 0px #fff, 25px 25px 0 0px #fff, -10px 10px 0 1px #fff;
+        }
+
+        /* Bad person effects */
+        .bad:hover {
+            box-shadow: 0 0 25px var(--bad-glow), 0 15px 30px rgba(0,0,0,0.6);
+            border-color: var(--bad-glow);
+            animation: shake 0.5s;
+        }
+        
+        .bad::after {
+            content: '🤮';
+            font-size: 3rem;
+            position: absolute;
+            bottom: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+
+        .bad:hover::after {
+            animation: vomit 1s ease-out forwards;
+        }
+
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes particles {
+            to {
+                transform: scale(2.5);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes vomit {
+            0% { opacity: 1; bottom: -50px; }
+            30% { opacity: 1; bottom: 10px; }
+            100% { opacity: 0; bottom: 80px; transform: translateX(-50%) rotate(30deg); }
+        }
+
+        @keyframes shake {
+          0%, 100% { transform: translateX(0) translateY(-10px) scale(1.05); }
+          25% { transform: translateX(-5px) translateY(-10px) scale(1.05); }
+          50% { transform: translateX(5px) translateY(-10px) scale(1.05); }
+          75% { transform: translateX(-5px) translateY(-10px) scale(1.05); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>דירוג חברי הקבוצה (לפי דעתי בלבד 😉)</h1>
+
+    <div class="ranking-container">
+        
+        <div class="member-box good" id="rank-1">
+            <span class="rank">🥇</span>
+            <div class="name">הלל (Owner)</div>
+            <div class="status">הבוס, המושלם, אהבת חיי</div>
+        </div>
+        
+        <div class="member-box good" id="rank-2">
+            <span class="rank">🥈</span>
+            <div class="name">יפית</div>
+            <div class="status">המלכה והחברה הכי טובה</div>
+        </div>
+
+        <div class="member-box good" id="rank-3">
+            <span class="rank">🥉</span>
+            <div class="name">דן</div>
+            <div class="status">תמיד מנומס ומבקש יפה</div>
+        </div>
+        
+        <div class="member-box neutral">
+            <div class="name">עידו טאומן</div>
+            <div class="status">שואל שאלות קשות</div>
+        </div>
+
+        <div class="member-box bad">
+            <div class="name">כביש 6</div>
+            <div class="status">בתחתית הרשימה... ובצדק</div>
+        </div>
+
+        <div class="member-box bad">
+            <div class="name">אליאור</div>
+            <div class="status">נאבק עם כביש 6 על המקום האחרון</div>
+        </div>
+
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,31 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="#1a1a1a"/>
+  <text x="50%" y="60" font-family="Arial, sans-serif" font-size="32" fill="#E0E0E0" text-anchor="middle" font-weight="bold" direction="rtl">
+    מבחן התפיסה
+  </text>
+  <text x="50%" y="120" font-family="'Courier New', monospace" font-size="24" fill="#90EE90" text-anchor="middle">
+    8809 = 6
+  </text>
+  <text x="50%" y="150" font-family="'Courier New', monospace" font-size="24" fill="#90EE90" text-anchor="middle">
+    7111 = 0
+  </text>
+  <text x="50%" y="180" font-family="'Courier New', monospace" font-size="24" fill="#90EE90" text-anchor="middle">
+    6666 = 4
+  </text>
+  <text x="50%" y="210" font-family="'Courier New', monospace" font-size="24" fill="#90EE90" text-anchor="middle">
+    9313 = 1
+  </text>
+  <text x="50%" y="240" font-family="'Courier New', monospace" font-size="24" fill="#90EE90" text-anchor="middle">
+    8193 = 3
+  </text>
+  <text x="50%" y="270" font-family="'Courier New', monospace" font-size="24" fill="#90EE90" text-anchor="middle">
+    8096 = 5
+  </text>
+  <text x="50%" y="300" font-family="'Courier New', monospace" font-size="24" fill="#90EE90" text-anchor="middle">
+    2172 = 0
+  </text>
+  <line x1="100" y1="350" x2="412" y2="350" stroke="#FF4136" stroke-width="2"/>
+  <text x="50%" y="410" font-family="'Courier New', monospace" font-size="48" fill="#FF4136" text-anchor="middle" font-weight="bold">
+    2581 = ?
+  </text>
+</svg>

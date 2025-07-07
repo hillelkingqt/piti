@@ -1,0 +1,42 @@
+// נניח שהמודל User מיובא ומוגדר במקום אחר
+// const User = require('./models/user');
+
+async function processAllUsers() {
+  try {
+    // שליפת כל המשתמשים מהקולקציה 'users'
+    const users = await User.find({});
+
+    // בדיקה אם נמצאו משתמשים
+    if (users.length === 0) {
+      console.log('לא נמצאו משתמשים במסד הנתונים.');
+      return; // יציאה מהפונקציה אם אין משתמשים
+    }
+
+    console.log(`נמצאו ${users.length} משתמשים. מעבד...`);
+
+    // דרך 1: שימוש ב-forEach להפעלת showInfo על כל משתמש
+    console.log('\nמעבד משתמשים באמצעות forEach:');
+    users.forEach(user => {
+      // הפעלת פונקציית showInfo שהוגדרה על מודל המשתמש
+      const userInfo = user.showInfo();
+      console.log('מידע משתמש:', userInfo);
+      // כאן ניתן לבצע פעולות נוספות עם userInfo
+    });
+
+    // דרך 2 (חלופית): שימוש ב-map לאיסוף התוצאות לתוך מערך חדש
+    console.log('\nמעבד משתמשים באמצעות map (ואיסוף התוצאות):');
+    const processedUserInfo = users.map(user => {
+      // הפעלת showInfo והחזרת התוצאה
+      return user.showInfo();
+    });
+
+    console.log('תוצאות showInfo מכל המשתמשים (מערך):', processedUserInfo);
+
+  } catch (error) {
+    // טיפול בשגיאות שאירעו במהלך השליפה או העיבוד
+    console.error('שגיאה במהלך שליפת ועיבוד המשתמשים:', error);
+  }
+}
+
+// קריאה לפונקציה כדי להריץ אותה
+// processAllUsers();
