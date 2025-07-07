@@ -1110,6 +1110,11 @@ tgBot.onText(/\/revert/, async (msg) => {
     await sendRevertOptions(msg.chat.id);
 });
 
+tgBot.onText(/\/update/, async (msg) => {
+    tgStates.set(msg.chat.id, { action: 'update_prompt' });
+    tgBot.sendMessage(msg.chat.id, 'מה אתה רוצה לשנות בקוד?');
+});
+
 tgBot.onText(/\/restartbot/, async (msg) => {
     restartBotViaTG(msg.chat.id);
 });
@@ -1185,11 +1190,12 @@ tgBot.on('callback_query', async (query) => {
     if(data && data.startsWith('groups_')) { const page=parseInt(data.split('_')[1])||0; await sendChatList(chatId,true,page,query.message.message_id); return tgBot.answerCallbackQuery(query.id); }
     if(data && data.startsWith('privates_')) { const page=parseInt(data.split('_')[1])||0; await sendChatList(chatId,false,page,query.message.message_id); return tgBot.answerCallbackQuery(query.id); }
     if(data === 'refresh_privates') { await sendChatList(chatId,false,0,query.message.message_id); return tgBot.answerCallbackQuery(query.id); }
-    if(data === 'close_list') { const keyboard=[[{text:'/groups',callback_data:'cmd_groups'}],[{text:'/privates',callback_data:'cmd_privates'}],[{text:'/manage',callback_data:'cmd_manage'}],[{text:'/merge',callback_data:'cmd_merge'}],[{text:'/revert',callback_data:'cmd_revert'}],[{text:'/status',callback_data:'cmd_status'}]]; tgBot.editMessageText('בחר פקודה:',{chat_id:chatId,message_id:query.message.message_id,reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
-    if(data === 'merge_cancel' || data === 'revert_cancel') { const keyboard=[[{text:'/groups',callback_data:'cmd_groups'}],[{text:'/privates',callback_data:'cmd_privates'}],[{text:'/manage',callback_data:'cmd_manage'}],[{text:'/merge',callback_data:'cmd_merge'}],[{text:'/revert',callback_data:'cmd_revert'}],[{text:'/status',callback_data:'cmd_status'}]]; tgStates.delete(chatId); tgBot.editMessageText('בחר פקודה:',{chat_id:chatId,message_id:query.message.message_id,reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
+    if(data === 'close_list') { const keyboard=[[{text:'/groups',callback_data:'cmd_groups'}],[{text:'/privates',callback_data:'cmd_privates'}],[{text:'/manage',callback_data:'cmd_manage'}],[{text:'/merge',callback_data:'cmd_merge'}],[{text:'/revert',callback_data:'cmd_revert'}],[{text:'/status',callback_data:'cmd_status'}],[{text:'/update',callback_data:'cmd_update'}]]; tgBot.editMessageText('בחר פקודה:',{chat_id:chatId,message_id:query.message.message_id,reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
+    if(data === 'merge_cancel' || data === 'revert_cancel') { const keyboard=[[{text:'/groups',callback_data:'cmd_groups'}],[{text:'/privates',callback_data:'cmd_privates'}],[{text:'/manage',callback_data:'cmd_manage'}],[{text:'/merge',callback_data:'cmd_merge'}],[{text:'/revert',callback_data:'cmd_revert'}],[{text:'/status',callback_data:'cmd_status'}],[{text:'/update',callback_data:'cmd_update'}]]; tgStates.delete(chatId); tgBot.editMessageText('בחר פקודה:',{chat_id:chatId,message_id:query.message.message_id,reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
     if(data === 'cmd_manage') { const keyboard=[[{text:'קבוצות',callback_data:'manage_groups'}],[{text:"צ'אטים פרטיים",callback_data:'manage_privates'}]]; tgBot.sendMessage(chatId,'מה תרצה לנהל?',{reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
     if(data === 'cmd_merge') { await sendMergeOptions(chatId); return tgBot.answerCallbackQuery(query.id); }
     if(data === 'cmd_revert') { await sendRevertOptions(chatId); return tgBot.answerCallbackQuery(query.id); }
+    if(data === 'cmd_update') { tgStates.set(chatId, { action: 'update_prompt' }); tgBot.sendMessage(chatId, 'מה אתה רוצה לשנות בקוד?'); return tgBot.answerCallbackQuery(query.id); }
     if(data === 'cmd_status') { const load=os.loadavg()[0].toFixed(2); const mem=((os.totalmem()-os.freemem())/1024/1024).toFixed(0); exec('df -h /',(e,out)=>{const disk=e?'N/A':out.split('\n')[1]; tgBot.sendMessage(chatId,`CPU load: ${load}\nRAM used: ${mem}MB\nDisk: ${disk}`);}); return tgBot.answerCallbackQuery(query.id); }
 
     if (data.startsWith('chat_')) {
@@ -1500,6 +1506,43 @@ async function processSecretMessageToPiti(waId, text, file) {
     }
 }
 
+async function runGeminiUpdate(promptText, tgChatId) {
+    return new Promise((resolve, reject) => {
+        console.log(`[TG Update] Spawning gemini CLI for chat ${tgChatId}`);
+        const gemini = spawn('gemini', [], { cwd: __dirname, stdio: ['pipe', 'pipe', 'pipe'] });
+
+        let sentPrompt = false;
+
+        gemini.stdout.on('data', data => {
+            const chunk = data.toString();
+            console.log(`[Gemini CLI] ${chunk.trim()}`);
+            if (!sentPrompt && /Type your message|@path\/to\/file/.test(chunk)) {
+                gemini.stdin.write(promptText + '\n');
+                sentPrompt = true;
+            }
+            if (chunk.includes('Allow execution?')) {
+                gemini.stdin.write('\x1B[B\n');
+            }
+        });
+
+        gemini.stderr.on('data', data => {
+            console.error(`[Gemini CLI ERROR] ${data.toString().trim()}`);
+        });
+
+        gemini.on('close', code => {
+            console.log(`[Gemini CLI] exited with code ${code}`);
+            tgBot.sendMessage(tgChatId, `העדכון הסתיים (קוד יציאה ${code}).`);
+            resolve();
+        });
+
+        gemini.on('error', err => {
+            console.error('[Gemini CLI] spawn error:', err);
+            tgBot.sendMessage(tgChatId, 'שגיאה בהרצת gemini CLI.');
+            reject(err);
+        });
+    });
+}
+
 tgBot.on('message', async (msg) => {
     if (!msg.text && !msg.document && !msg.photo && !msg.video) return; // ignore commands only
     if (msg.text && msg.text.startsWith('/')) return; // handled elsewhere
@@ -1511,7 +1554,8 @@ tgBot.on('message', async (msg) => {
             [{text:'/manage',callback_data:'cmd_manage'}],
             [{text:'/merge',callback_data:'cmd_merge'}],
             [{text:'/revert',callback_data:'cmd_revert'}],
-            [{text:'/status',callback_data:'cmd_status'}]
+            [{text:'/status',callback_data:'cmd_status'}],
+            [{text:'/update',callback_data:'cmd_update'}]
         ];
         tgBot.sendMessage(msg.chat.id, 'בחר פקודה:', {reply_markup:{inline_keyboard:keyboard}});
         return;
@@ -1604,6 +1648,16 @@ tgBot.on('message', async (msg) => {
             tgBot.sendMessage(msg.chat.id, 'הטריגר עודכן.');
         } else {
             tgBot.sendMessage(msg.chat.id, 'טריגר לא נמצא.');
+        }
+        tgStates.delete(msg.chat.id);
+    } else if (action === 'update_prompt') {
+        const extra = ' ותיצור pull request על הקבצים ששינית. אל תיצור בראנצים חדשים ולא לשאול שאלות כי המשתמש לא יוכל לענות לו. הבקשה נשלחה דרך המערכת שישאר בבראץ piti-edit';
+        const fullText = (msg.text || '') + extra;
+        try {
+            await runGeminiUpdate(fullText, msg.chat.id);
+        } catch (err) {
+            console.error('[TG Update]', err);
+            tgBot.sendMessage(msg.chat.id, 'שגיאה בביצוע העדכון.');
         }
         tgStates.delete(msg.chat.id);
     } else if (action === 'restore_mems') {
