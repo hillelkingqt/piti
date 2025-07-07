@@ -11492,6 +11492,20 @@ async function compileLatexDocument({
 }) {
     const chatPaths = getChatPaths(triggeringMsg?.id?.remote, safeName);
     const generatedFilesIndex = chatPaths.generatedFilesIndex;
+
+    // Ensure xelatex is available before attempting compilation
+    const whichXelatex = spawnSync('which', ['xelatex'], { encoding: 'utf8' });
+    if (whichXelatex.status !== 0 || !whichXelatex.stdout.trim()) {
+        const msg = 'LaTeX compiler "xelatex" not found on this server. ' +
+                    'Please install texlive-xetex or ensure it is in the PATH.';
+        console.error(msg);
+        saveLatexError(chatPaths, msg);
+        if (triggeringMsg && typeof triggeringMsg.reply === 'function') {
+            await triggeringMsg.reply(`פיתי\n\n${msg}`);
+        }
+        return;
+    }
+    const xelatexCmd = whichXelatex.stdout.trim();
     // שם קובץ ה-tex בלבד, כי אנחנו נריץ את הפקודה מתוך התיקייה שלו
     const texBaseFilename = path.basename(texPath); // <--- הגדר את המשתנה כאן
     const pdfFilename = `${path.parse(texBaseFilename).name}.pdf`;
@@ -11503,7 +11517,7 @@ async function compileLatexDocument({
 
     const outputDirForLatex = chatPaths.chatDir;
     // הפקודה תרוץ עם CWD שמכוון ל-outputDirForLatex, לכן הנתיב לקובץ ה-tex יכול להיות יחסי
-    const command = `xelatex -interaction=nonstopmode "${texBaseFilename}" && xelatex -interaction=nonstopmode "${texBaseFilename}"`;
+    const command = `${xelatexCmd} -interaction=nonstopmode "${texBaseFilename}" && ${xelatexCmd} -interaction=nonstopmode "${texBaseFilename}"`;
 
     console.log(`📄 [Compile V3.1] Executing LaTeX command: ${command} in CWD: ${outputDirForLatex}`);
 
