@@ -1128,6 +1128,10 @@ tgBot.onText(null, async (msg) => {
     });
 });
 
+tgBot.onText(/\/hello/, async (msg) => {
+    tgBot.sendMessage(msg.chat.id, 'שלום מה נשמע');
+});
+
 tgBot.onText(null, async (msg) => {
     tgBot.sendMessage(msg.chat.id, 'שלום');
 });
