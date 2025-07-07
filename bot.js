@@ -1064,12 +1064,26 @@ function restartBotViaTG(chatId) {
     const pythonExecutable = 'python';
     const restartScriptPath = path.join(__dirname, 'restart_bot.py');
     const nodeScript = process.argv[1];
-    if (fs.existsSync(restartScriptPath)) {
-        spawn(pythonExecutable, [restartScriptPath, nodeScript], { detached: true, stdio: 'ignore' }).unref();
-        tgBot.sendMessage(chatId, 'מפעיל מחדש את הבוט...');
-    } else {
+
+    if (!fs.existsSync(restartScriptPath)) {
         tgBot.sendMessage(chatId, 'לא נמצא סקריפט הפעלה.');
+        return;
     }
+
+    if (!nodeScript) {
+        tgBot.sendMessage(chatId, 'שגיאה: לא ניתן לקבוע את נתיב סקריפט הבוט.');
+        return;
+    }
+
+    spawn(pythonExecutable, [restartScriptPath, nodeScript], {
+        detached: true,
+        stdio: 'ignore'
+    }).unref();
+    tgBot.sendMessage(chatId, 'מפעיל מחדש את הבוט...');
+
+    setTimeout(() => {
+        process.exit(1);
+    }, 2000);
 }
 
 tgBot.onText(/\/groups/, async (msg) => {
@@ -1097,15 +1111,7 @@ tgBot.onText(/\/revert/, async (msg) => {
 });
 
 tgBot.onText(/\/restartbot/, async (msg) => {
-    const pythonExecutable = 'python';
-    const restartScriptPath = path.join(__dirname, 'restart_bot.py');
-    const nodeScript = process.argv[1];
-    if (fs.existsSync(restartScriptPath)) {
-        spawn(pythonExecutable, [restartScriptPath, nodeScript], { detached: true, stdio: 'ignore' }).unref();
-        tgBot.sendMessage(msg.chat.id, 'מפעיל מחדש את הבוט...');
-    } else {
-        tgBot.sendMessage(msg.chat.id, 'לא נמצא סקריפט הפעלה.');
-    }
+    restartBotViaTG(msg.chat.id);
 });
 
 tgBot.onText(/\/status/, async (msg) => {
