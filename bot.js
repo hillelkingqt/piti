@@ -940,32 +940,79 @@ function sortByName(a, b) {
     return an.localeCompare(bn, 'he');
 }
 
+const PAGE_SIZE = 10;
+
+async function sendChatList(tgChatId, isGroup, page = 0, messageId = null) {
+    const list = await listChats(isGroup);
+    const emptyText = isGroup ? 'אין קבוצות זמינות.' : "אין צ'אטים פרטיים זמינים.";
+    if (list.length === 0) {
+        if (messageId) {
+            await tgBot.editMessageText(emptyText, { chat_id: tgChatId, message_id: messageId });
+        } else {
+            await tgBot.sendMessage(tgChatId, emptyText);
+        }
+        return;
+    }
+
+    const totalPages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+    if (page < 0) page = 0;
+    if (page >= totalPages) page = totalPages - 1;
+
+    const start = page * PAGE_SIZE;
+    const pageItems = list.slice(start, start + PAGE_SIZE);
+
+    const keyboard = pageItems.map(c => [{ text: c.name, callback_data: `chat_${c.id}` }]);
+
+    const navRow = [];
+    const prefix = isGroup ? 'groups' : 'privates';
+    if (page > 0) navRow.push({ text: '⬅️', callback_data: `${prefix}_${page - 1}` });
+    if (page < totalPages - 1) navRow.push({ text: '➡️', callback_data: `${prefix}_${page + 1}` });
+    if (navRow.length) keyboard.push(navRow);
+
+    const bottomRow = [];
+    if (!isGroup) bottomRow.push({ text: '🔄 רענן', callback_data: 'refresh_privates' });
+    bottomRow.push({ text: '❌ סגור', callback_data: 'close_list' });
+    keyboard.push(bottomRow);
+
+    const options = { reply_markup: { inline_keyboard: keyboard } };
+    const title = isGroup ? 'בחר קבוצה:' : "בחר צ'אט פרטי:";
+
+    if (messageId) {
+        await tgBot.editMessageText(title, { chat_id: tgChatId, message_id: messageId, reply_markup: options.reply_markup });
+    } else {
+        await tgBot.sendMessage(tgChatId, title, options);
+    }
+}
+
 async function listChats(isGroup) {
     const chats = await client.getChats();
-    return chats
-        .filter(c => Boolean(c.isGroup) === isGroup)
-        .sort(sortByName)
-        .map(c => ({ id: c.id._serialized, name: c.name || c.formattedTitle || c.id.user }));
+    const filtered = chats.filter(c => Boolean(c.isGroup) === isGroup).sort(sortByName);
+    const result = [];
+    for (const c of filtered) {
+        let name = c.name || c.formattedTitle || '';
+        if (!c.isGroup) {
+            const contact = await getCachedContact(c.id._serialized);
+            const display = contact?.pushname || contact?.name;
+            const number = phone(c.id._serialized);
+            if (display) {
+                name = `${display} (${number})`;
+            } else {
+                name = number;
+            }
+        } else if (!name) {
+            name = c.id.user;
+        }
+        result.push({ id: c.id._serialized, name });
+    }
+    return result;
 }
 
 tgBot.onText(/\/groups/, async (msg) => {
-    const list = await listChats(true);
-    if (list.length === 0) {
-        tgBot.sendMessage(msg.chat.id, 'אין קבוצות זמינות.');
-        return;
-    }
-    const keyboard = list.map(c => [{ text: c.name, callback_data: `chat_${c.id}` }]);
-    tgBot.sendMessage(msg.chat.id, 'בחר קבוצה:', { reply_markup: { inline_keyboard: keyboard } });
+    await sendChatList(msg.chat.id, true);
 });
 
 tgBot.onText(/\/privates/, async (msg) => {
-    const list = await listChats(false);
-    if (list.length === 0) {
-        tgBot.sendMessage(msg.chat.id, 'אין צ\'אטים פרטיים זמינים.');
-        return;
-    }
-    const keyboard = list.map(c => [{ text: c.name, callback_data: `chat_${c.id}` }]);
-    tgBot.sendMessage(msg.chat.id, 'בחר צ\'אט פרטי:', { reply_markup: { inline_keyboard: keyboard } });
+    await sendChatList(msg.chat.id, false);
 });
 
 tgBot.onText(/\/manage/, async (msg) => {
@@ -1054,8 +1101,12 @@ tgBot.on('callback_query', async (query) => {
     const data = query.data;
     const chatId = query.message.chat.id;
 
-    if(data === 'cmd_groups') { const list=await listChats(true); const keyboard=list.map(c=>[{text:c.name,callback_data:`chat_${c.id}`}]); tgBot.sendMessage(chatId,'בחר קבוצה:',{reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
-    if(data === 'cmd_privates') { const list=await listChats(false); const keyboard=list.map(c=>[{text:c.name,callback_data:`chat_${c.id}`}]); tgBot.sendMessage(chatId,'בחר צ\'אט פרטי:',{reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
+    if(data === 'cmd_groups') { await sendChatList(chatId, true, 0, null); return tgBot.answerCallbackQuery(query.id); }
+    if(data === 'cmd_privates') { await sendChatList(chatId, false, 0, null); return tgBot.answerCallbackQuery(query.id); }
+    if(data && data.startsWith('groups_')) { const page=parseInt(data.split('_')[1])||0; await sendChatList(chatId,true,page,query.message.message_id); return tgBot.answerCallbackQuery(query.id); }
+    if(data && data.startsWith('privates_')) { const page=parseInt(data.split('_')[1])||0; await sendChatList(chatId,false,page,query.message.message_id); return tgBot.answerCallbackQuery(query.id); }
+    if(data === 'refresh_privates') { await sendChatList(chatId,false,0,query.message.message_id); return tgBot.answerCallbackQuery(query.id); }
+    if(data === 'close_list') { const keyboard=[[{text:'/groups',callback_data:'cmd_groups'}],[{text:'/privates',callback_data:'cmd_privates'}],[{text:'/manage',callback_data:'cmd_manage'}],[{text:'/status',callback_data:'cmd_status'}]]; tgBot.editMessageText('בחר פקודה:',{chat_id:chatId,message_id:query.message.message_id,reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
     if(data === 'cmd_manage') { const keyboard=[[{text:'קבוצות',callback_data:'manage_groups'}],[{text:"צ'אטים פרטיים",callback_data:'manage_privates'}]]; tgBot.sendMessage(chatId,'מה תרצה לנהל?',{reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
     if(data === 'cmd_status') { const load=os.loadavg()[0].toFixed(2); const mem=((os.totalmem()-os.freemem())/1024/1024).toFixed(0); exec('df -h /',(e,out)=>{const disk=e?'N/A':out.split('\n')[1]; tgBot.sendMessage(chatId,`CPU load: ${load}\nRAM used: ${mem}MB\nDisk: ${disk}`);}); return tgBot.answerCallbackQuery(query.id); }
 
