@@ -1520,11 +1520,13 @@ async function runGeminiUpdate(promptText, tgChatId) {
         });
 
         let sentPrompt = false;
+        let output = '';
 
         gemini.stdout.on('data', data => {
             const chunk = data.toString();
+            output += chunk;
             console.log(`[Gemini CLI STDOUT] ${chunk.trim()}`);
-            if (!sentPrompt && /Type your message|@path\/to\/file/.test(chunk)) {
+            if (!sentPrompt && /Type your message|Enter your message|@path\/to\/file/.test(chunk)) {
                 gemini.stdin.write(promptText + '\n');
                 sentPrompt = true;
                 console.log('[Gemini CLI] prompt sent');
@@ -1536,18 +1538,25 @@ async function runGeminiUpdate(promptText, tgChatId) {
         });
 
         gemini.stderr.on('data', data => {
-            console.error(`[Gemini CLI STDERR] ${data.toString().trim()}`);
+            const errChunk = data.toString();
+            output += errChunk;
+            console.error(`[Gemini CLI STDERR] ${errChunk.trim()}`);
         });
 
         gemini.on('close', code => {
             console.log(`[Gemini CLI] exited with code ${code}`);
             tgBot.sendMessage(tgChatId, `העדכון הסתיים (קוד יציאה ${code}).`);
+            if (output.trim()) {
+                const msg = output.length > 3500 ? output.slice(-3500) : output;
+                tgBot.sendMessage(tgChatId, `פלט gemini:\n\n${msg}`);
+            }
             resolve();
         });
 
         gemini.on('error', err => {
             console.error('[Gemini CLI] spawn error:', err);
-            tgBot.sendMessage(tgChatId, 'שגיאה בהרצת gemini CLI.');
+            const errMsg = err.code === 'ENOENT' ? 'gemini CLI לא נמצא במערכת.' : 'שגיאה בהרצת gemini CLI.';
+            tgBot.sendMessage(tgChatId, errMsg);
             reject(err);
         });
     });
