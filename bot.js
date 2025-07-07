@@ -70,6 +70,10 @@ const timers = new Map();
 let timerCounter = 0;
 const { google } = require('googleapis');
 
+// Daily chat messages tracking
+const dailyChatMessages = new Map(); // { chatId -> [{phone,name,text}] }
+let currentStatsDate = formatDateKey(new Date());
+
 const PENDING_ACTIONS_PATH = path.join(__dirname, 'pending_actions.json');
 
 // Helper function to get base ID (e.g., 1234567890@c.us)
@@ -4183,6 +4187,8 @@ client.on('ready', () => {
     // Initial check shortly after start
     setTimeout(checkPendingActions, 5000); // Check 5 seconds after ready
     setInterval(checkTimers, 10000);
+    setInterval(checkDailyChatSummaries, 60 * 60 * 1000); // hourly check for daily summaries
+    setTimeout(checkDailyChatSummaries, 60000); // first check after 1 minute
 });
 // 14. Site Search Action
 async function handleSiteSearchAction(replyData, targetMsg) {
@@ -5197,7 +5203,7 @@ async function handleMessage(msg, incoming, quotedMedia = null, contextMediaArra
 `;
     }
     const chatMemories = loadMemories(chatPaths); // <-- שימוש בפונקציה החדשה
-    const recentMemories = chatMemories.slice(0, 20); // 20 אחרונים (החדשים ביותר)
+    const recentMemories = chatMemories.slice(0, 50); // 50 אחרונים (החדשים ביותר)
     let memoryTextForPrompt = "אין זיכרונות שמורים כרגע.";
     if (recentMemories.length > 0) {
         memoryTextForPrompt = recentMemories.map(mem =>
@@ -10686,13 +10692,13 @@ async function generateDocument({
     let contextText = "";
     if (fs.existsSync(chatPaths.historyFile)) {
         const lines = fs.readFileSync(chatPaths.historyFile, 'utf8').trim().split('\n');
-        contextText = lines.slice(-50).join('\n');
+        contextText = lines.slice(-100).join('\n');
     }
     let memoryText = "";
     if (fs.existsSync(chatPaths.memoryFile)) {
         try {
             const memories = JSON.parse(fs.readFileSync(chatPaths.memoryFile, 'utf8'));
-            memories.slice(0, 15).forEach(mem => {
+            memories.slice(0, 50).forEach(mem => {
                 memoryText += `(${mem.timestamp || 'unknown date'}) ${mem.person || 'unknown'}: ${mem.info || 'no info'}\n`;
             });
         } catch (err) {
@@ -11539,6 +11545,63 @@ function getWeeklyHabitStatus(habitData) {
     return days.reverse();
 }
 
+async function recordDailyMessage(msg, chatId, senderName) {
+    const msgDateKey = formatDateKey(new Date(msg.timestamp * 1000));
+    if (msgDateKey !== currentStatsDate) {
+        await processDailyChatSummaries(currentStatsDate);
+        dailyChatMessages.clear();
+        currentStatsDate = msgDateKey;
+    }
+    if (!dailyChatMessages.has(chatId)) {
+        dailyChatMessages.set(chatId, []);
+    }
+    const entry = {
+        phone: phone(msg.author || msg.from),
+        name: senderName || await getSenderName(msg),
+        text: msg.body || (msg.hasMedia ? '[media]' : '')
+    };
+    dailyChatMessages.get(chatId).push(entry);
+}
+
+async function processDailyChatSummaries(dateKey) {
+    for (const [chatId, messages] of dailyChatMessages.entries()) {
+        if (messages.length <= 100) continue;
+        try {
+            const chat = await client.getChatById(chatId);
+            const safeName = await getSafeNameForChat(chat);
+            const paths = getChatPaths(chatId, safeName);
+            const existing = loadMemories(paths);
+            const messagesText = messages.map(m => `${m.name} (${m.phone}): ${m.text}`).join('\n');
+            const memoryText = existing.map(mem => `${mem.person}: ${mem.info}`).join('\n');
+            const prompt = `הודעות היום:\n${messagesText}\n\nזכרונות קיימים:\n${memoryText}\n\nצור זכרונות חשובים בלבד בעברית בפורמט JSON. אם אין מה להוסיף החזר NONE.`;
+            const resp = await axios.post(getRandomGeminiEndpoint(false), { contents: [{ parts: [{ text: prompt }] }] });
+            let newMems;
+            try {
+                newMems = JSON.parse(resp.data?.candidates?.[0]?.content?.parts?.[0]?.text.trim());
+            } catch (e) { newMems = null; }
+            if (newMems && newMems !== 'NONE') {
+                const arr = Array.isArray(newMems.memories) ? newMems.memories : (Array.isArray(newMems) ? newMems : []);
+                if (arr.length > 0) {
+                    const ts = Date.now();
+                    const toSave = arr.map((m,i) => ({ id: ts + i, timestamp: ts + i, type: m.type || 'fact', person: m.person, info: m.info }));
+                    saveMemories(paths, [...toSave, ...existing]);
+                }
+            }
+        } catch (err) {
+            console.error('[DailySummary] Error processing chat', chatId, err);
+        }
+    }
+}
+
+async function checkDailyChatSummaries() {
+    const todayKey = formatDateKey(new Date());
+    if (todayKey !== currentStatsDate) {
+        await processDailyChatSummaries(currentStatsDate);
+        dailyChatMessages.clear();
+        currentStatsDate = todayKey;
+    }
+}
+
 
 function checkTimers() {
     const now = Date.now();
@@ -11813,6 +11876,8 @@ client.on('message_create', async (msg) => {
     } catch (logSetupError) {
         console.error(`❌ [message_create LOGGING ERROR] Failed during logging setup or execution for msg ${msg?.id?._serialized}. Error:`, logSetupError);
     }
+
+    await recordDailyMessage(msg, chatId, senderNameForLog);
 
     // ==============================================================
     // SECTION 5: Owner Command Handling
