@@ -986,10 +986,14 @@ async function sendChatList(tgChatId, isGroup, page = 0, messageId = null) {
 
 async function listChats(isGroup) {
     const chats = await client.getChats();
-    const filtered = chats.filter(c => Boolean(c.isGroup) === isGroup).sort(sortByName);
-    const result = [];
+    const filtered = chats.filter(c => Boolean(c.isGroup) === isGroup);
+
+    const contactList = [];
+    const otherList = [];
+
     for (const c of filtered) {
         let name = c.name || c.formattedTitle || '';
+
         if (!c.isGroup) {
             const contact = await getCachedContact(c.id._serialized);
             const display = contact?.pushname || contact?.name;
@@ -999,12 +1003,23 @@ async function listChats(isGroup) {
             } else {
                 name = number;
             }
-        } else if (!name) {
-            name = c.id.user;
+
+            if (contact?.isMyContact) {
+                contactList.push({ id: c.id._serialized, name });
+            } else {
+                otherList.push({ id: c.id._serialized, name });
+            }
+        } else {
+            if (!name) name = c.id.user;
+            contactList.push({ id: c.id._serialized, name });
         }
-        result.push({ id: c.id._serialized, name });
     }
-    return result;
+
+    const sortFn = sortByName;
+    if (isGroup) {
+        return contactList.sort(sortFn);
+    }
+    return [...contactList.sort(sortFn), ...otherList.sort(sortFn)];
 }
 
 tgBot.onText(/\/groups/, async (msg) => {
@@ -1394,15 +1409,15 @@ tgBot.on('message', async (msg) => {
         } else if (text) {
             await client.sendMessage(waId, text);
         }
-        tgBot.sendMessage(msg.chat.id, 'ההודעה נשלחה.');
-        tgStates.delete(msg.chat.id);
+        const back = { reply_markup: { inline_keyboard: [[{ text: '⬅️ חזרה לתפריט', callback_data: `chat_${waId}` }]] } };
+        tgBot.sendMessage(msg.chat.id, 'ההודעה נשלחה.', back);
     } else if (action === 'secret') {
         const file = await downloadTgFile();
         const textContent = msg.text || msg.caption || '';
         await processSecretMessageToPiti(waId, textContent, file).catch(err =>
             console.error('[Telegram Secret] Async error:', err));
-        tgBot.sendMessage(msg.chat.id, 'ההודעה נשלחה לפיתי.');
-        tgStates.delete(msg.chat.id);
+        const back = { reply_markup: { inline_keyboard: [[{ text: '⬅️ חזרה לתפריט', callback_data: `chat_${waId}` }]] } };
+        tgBot.sendMessage(msg.chat.id, 'ההודעה נשלחה לפיתי.', back);
     } else if (action === 'history') {
         const count = parseInt(msg.text, 10) || 0;
         if (count <= 0) {
