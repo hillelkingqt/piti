@@ -1140,7 +1140,7 @@ tgBot.onText(/\/update/, async (msg) => {
 });
 
 tgBot.onText(null, async (msg) => {
-tgBot.onText(\/info\/, (msg) => {
+tgBot.onText(/info/, (msg) => {
     const infoText = `שלום! אני בוט רב-תכליתי שנבנה כדי לסייע במגוון רחב של משימות, ישירות מהטלגרם והוואטסאפ.
 הנה סקירה של היכולות המרכזיות שלי:
 
