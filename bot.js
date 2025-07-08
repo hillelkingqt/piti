@@ -1139,8 +1139,8 @@ tgBot.onText(/\/update/, async (msg) => {
     tgBot.sendMessage(msg.chat.id, 'מה אתה רוצה לשנות בקוד?');
 });
 
-tgBot.onText(null, async (msg) => {
-tgBot.onText(\/info\/, (msg) => {
+// Show info menu
+tgBot.onText(/\/info/, (msg) => {
     const infoText = `שלום! אני בוט רב-תכליתי שנבנה כדי לסייע במגוון רחב של משימות, ישירות מהטלגרם והוואטסאפ.
 הנה סקירה של היכולות המרכזיות שלי:
 
