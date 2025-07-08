@@ -11509,13 +11509,16 @@ async function compileLatexDocument({
     // שם קובץ ה-tex בלבד, כי אנחנו נריץ את הפקודה מתוך התיקייה שלו
     const texBaseFilename = path.basename(texPath); // <--- הגדר את המשתנה כאן
     const pdfFilename = `${path.parse(texBaseFilename).name}.pdf`;
-    const pdfPath = path.join(chatPaths.chatDir, pdfFilename);
+    // Ensure PDF path is derived from the same directory as the .tex file
+    const pdfPath = path.join(path.dirname(texPath), pdfFilename);
     const finalOutputDocumentName = `${documentName}.pdf`;
 
     const currentRetry = (triggeringMsg.latexRetryCount || 0);
     const maxRetries = 1;
 
-    const outputDirForLatex = chatPaths.chatDir;
+    // Run LaTeX compilation inside the directory containing the .tex file so
+    // relative paths within the document work correctly
+    const outputDirForLatex = path.dirname(texPath);
     // הפקודה תרוץ עם CWD שמכוון ל-outputDirForLatex, לכן הנתיב לקובץ ה-tex יכול להיות יחסי
     const command = `${xelatexCmd} -interaction=nonstopmode "${texBaseFilename}" && ${xelatexCmd} -interaction=nonstopmode "${texBaseFilename}"`;
 
