@@ -125,11 +125,11 @@ function phone(id) {
 
 function parsePhoneNumbers(text) {
     if (!text) return [];
-    const matches = text.match(/\+?\d[\d\s-]*/g) || [];
-    return matches
+    const numbers = text
+        .split(/[^\d+]+/)
         .map(n => n.replace(/\D/g, ''))
-        .filter(n => n)
-        .map(n => `${n}@c.us`);
+        .filter(n => n.length >= 6);
+    return Array.from(new Set(numbers)).map(n => `${n}@c.us`);
 }
 
 function containsTriggerWord(text) {
@@ -1153,7 +1153,8 @@ function sendMainMenu(chatId) {
         [{ text: '/merge', callback_data: 'cmd_merge' }],
         [{ text: '/revert', callback_data: 'cmd_revert' }],
         [{ text: '/status', callback_data: 'cmd_status' }],
-        [{ text: '/update', callback_data: 'cmd_update' }]
+        [{ text: '/update', callback_data: 'cmd_update' }],
+        [{ text: '/fun', callback_data: 'cmd_fun' }]
     ];
     tgBot.sendMessage(chatId, 'בחר פקודה:', { reply_markup: { inline_keyboard: keyboard } });
 }
@@ -1326,6 +1327,66 @@ tgBot.onText(/\/schedule (\S+) (\S+) (.+)/, (msg, match) => {
     }
 });
 
+tgBot.onText(/\/fun/, (msg) => {
+    const list = ['/uptime', '/flip', '/roll', '/reverse <text>', '/echo <text>', '/timestamp', '/randomemoji', '/randomcolor', '/quote', '/calc <expr>'];
+    tgBot.sendMessage(msg.chat.id, 'Fun commands:\n' + list.join('\n'));
+});
+
+tgBot.onText(/\/uptime/, (msg) => {
+    const up = os.uptime();
+    tgBot.sendMessage(msg.chat.id, `Uptime: ${up} seconds`);
+});
+
+tgBot.onText(/\/flip/, (msg) => {
+    const result = Math.random() < 0.5 ? 'Heads' : 'Tails';
+    tgBot.sendMessage(msg.chat.id, result);
+});
+
+tgBot.onText(/\/roll(?:\s+(\d+))?/, (msg, match) => {
+    const max = parseInt(match[1], 10) || 100;
+    const n = Math.floor(Math.random() * max) + 1;
+    tgBot.sendMessage(msg.chat.id, `🎲 ${n}`);
+});
+
+tgBot.onText(/\/reverse (.+)/, (msg, match) => {
+    const text = (match[1] || '').split('').reverse().join('');
+    tgBot.sendMessage(msg.chat.id, text);
+});
+
+tgBot.onText(/\/echo (.+)/, (msg, match) => {
+    tgBot.sendMessage(msg.chat.id, match[1]);
+});
+
+tgBot.onText(/\/timestamp/, (msg) => {
+    tgBot.sendMessage(msg.chat.id, new Date().toISOString());
+});
+
+tgBot.onText(/\/randomemoji/, (msg) => {
+    const emojis = ['😎','🤖','🎉','🚀','🐱','🍀','🔥','✨'];
+    const e = emojis[Math.floor(Math.random()*emojis.length)];
+    tgBot.sendMessage(msg.chat.id, e);
+});
+
+tgBot.onText(/\/randomcolor/, (msg) => {
+    const color = '#' + Math.floor(Math.random()*0xffffff).toString(16).padStart(6, '0');
+    tgBot.sendMessage(msg.chat.id, color);
+});
+
+tgBot.onText(/\/quote/, (msg) => {
+    const quotes = ['Keep pushing forward!','Dream big and dare to fail.','Every day is a new adventure.','Believe you can and you are halfway there.'];
+    const q = quotes[Math.floor(Math.random()*quotes.length)];
+    tgBot.sendMessage(msg.chat.id, q);
+});
+
+tgBot.onText(/\/calc (.+)/, (msg, match) => {
+    try {
+        const result = eval(match[1].replace(/[^-()*/+0-9.]/g, ''));
+        tgBot.sendMessage(msg.chat.id, String(result));
+    } catch {
+        tgBot.sendMessage(msg.chat.id, 'Calculation error');
+    }
+});
+
 tgBot.on('callback_query', async (query) => {
     const data = query.data;
     const chatId = query.message.chat.id;
@@ -1335,13 +1396,14 @@ tgBot.on('callback_query', async (query) => {
     if(data && data.startsWith('groups_')) { const page=parseInt(data.split('_')[1])||0; await sendChatList(chatId,true,page,query.message.message_id); return tgBot.answerCallbackQuery(query.id); }
     if(data && data.startsWith('privates_')) { const page=parseInt(data.split('_')[1])||0; await sendChatList(chatId,false,page,query.message.message_id); return tgBot.answerCallbackQuery(query.id); }
     if(data === 'refresh_privates') { await sendChatList(chatId,false,0,query.message.message_id); return tgBot.answerCallbackQuery(query.id); }
-    if(data === 'close_list') { const keyboard=[[{text:'/groups',callback_data:'cmd_groups'}],[{text:'/privates',callback_data:'cmd_privates'}],[{text:'/manage',callback_data:'cmd_manage'}],[{text:'/merge',callback_data:'cmd_merge'}],[{text:'/revert',callback_data:'cmd_revert'}],[{text:'/status',callback_data:'cmd_status'}],[{text:'/update',callback_data:'cmd_update'}]]; tgBot.editMessageText('בחר פקודה:',{chat_id:chatId,message_id:query.message.message_id,reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
+    if(data === 'close_list') { const keyboard=[[{text:'/groups',callback_data:'cmd_groups'}],[{text:'/privates',callback_data:'cmd_privates'}],[{text:'/manage',callback_data:'cmd_manage'}],[{text:'/merge',callback_data:'cmd_merge'}],[{text:'/revert',callback_data:'cmd_revert'}],[{text:'/status',callback_data:'cmd_status'}],[{text:'/update',callback_data:'cmd_update'}],[{text:'/fun',callback_data:'cmd_fun'}]]; tgBot.editMessageText('בחר פקודה:',{chat_id:chatId,message_id:query.message.message_id,reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
     if(data === 'merge_cancel' || data === 'revert_cancel') { const keyboard=[[{text:'/groups',callback_data:'cmd_groups'}],[{text:'/privates',callback_data:'cmd_privates'}],[{text:'/manage',callback_data:'cmd_manage'}],[{text:'/merge',callback_data:'cmd_merge'}],[{text:'/revert',callback_data:'cmd_revert'}],[{text:'/status',callback_data:'cmd_status'}],[{text:'/update',callback_data:'cmd_update'}]]; tgStates.delete(chatId); tgBot.editMessageText('בחר פקודה:',{chat_id:chatId,message_id:query.message.message_id,reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
     if(data === 'cmd_manage') { const keyboard=[[{text:'קבוצות',callback_data:'manage_groups'}],[{text:"צ'אטים פרטיים",callback_data:'manage_privates'}]]; tgBot.sendMessage(chatId,'מה תרצה לנהל?',{reply_markup:{inline_keyboard:keyboard}}); return tgBot.answerCallbackQuery(query.id); }
     if(data === 'cmd_merge') { await sendMergeOptions(chatId); return tgBot.answerCallbackQuery(query.id); }
     if(data === 'cmd_revert') { await sendRevertOptions(chatId); return tgBot.answerCallbackQuery(query.id); }
     if(data === 'cmd_update') { tgStates.set(chatId, { action: 'update_prompt' }); tgBot.sendMessage(chatId, 'מה אתה רוצה לשנות בקוד?'); return tgBot.answerCallbackQuery(query.id); }
     if(data === 'cmd_status') { const load=os.loadavg()[0].toFixed(2); const mem=((os.totalmem()-os.freemem())/1024/1024).toFixed(0); exec('df -h /',(e,out)=>{const disk=e?'N/A':out.split('\n')[1]; tgBot.sendMessage(chatId,`CPU load: ${load}\nRAM used: ${mem}MB\nDisk: ${disk}`);}); return tgBot.answerCallbackQuery(query.id); }
+    if(data === 'cmd_fun') { tgBot.sendMessage(chatId, 'Fun commands:\n/uptime\n/flip\n/roll\n/reverse <text>\n/echo <text>\n/timestamp\n/randomemoji\n/randomcolor\n/quote\n/calc <expr>'); return tgBot.answerCallbackQuery(query.id); }
 
     if (data.startsWith('chat_')) {
         const waId = data.slice(5);
@@ -1717,7 +1779,7 @@ tgBot.on('callback_query', async (query) => {
     }
 
     if (data.startsWith('grprevinvite_')) {
-        const waId = data.slice(12);
+        const waId = data.slice(13);
         const chat = await client.getChatById(waId);
         try {
             const code = await chat.revokeInvite();
