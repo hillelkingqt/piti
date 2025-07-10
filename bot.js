@@ -123,6 +123,15 @@ function phone(id) {
     return raw;
 }
 
+function parsePhoneNumbers(text) {
+    if (!text) return [];
+    const matches = text.match(/\+?\d[\d\s-]*/g) || [];
+    return matches
+        .map(n => n.replace(/\D/g, ''))
+        .filter(n => n)
+        .map(n => `${n}@c.us`);
+}
+
 function containsTriggerWord(text) {
     if (!text) return false;
     const triggers = ["פיתי", "פיטי", "פיטע", "פיתיי", "piti", "פיטא", "פיםי", "פתי", "תיתי", "טיטי", "טיתי", "פיתוש", "פטי", "פטוש", "פיטו", "פיטוש", "פיתיא", "פטושקה", "פייטי", "פיתיא", "פיטיי", "פיתושקה"];
@@ -1059,6 +1068,18 @@ async function sendGroupControlMenu(tgChatId, waId) {
             [{ text: '➖ הסר משתמש', callback_data: `grprem_${waId}` }],
             [{ text: '⬆️ קדם לאדמין', callback_data: `grpprom_${waId}` }],
             [{ text: '⬇️ בטל אדמין', callback_data: `grpdem_${waId}` }],
+            [{ text: '🔗 לינק הזמנה', callback_data: `grpinvite_${waId}` }],
+            [{ text: '♻️ החלף לינק הזמנה', callback_data: `grprevinvite_${waId}` }],
+            [{ text: '🔒 עריכת פרטי קבוצה', callback_data: `grpinfoadm_${waId}` }],
+            [{ text: '🔒 שליחת הודעות', callback_data: `grpsendadm_${waId}` }],
+            [{ text: '🔕 השתק קבוצה', callback_data: `grpmute_${waId}` }],
+            [{ text: '🔔 בטל השתקה', callback_data: `grpunmute_${waId}` }],
+            [{ text: '📂 ארכיון', callback_data: `grparch_${waId}` }],
+            [{ text: '📂 הוצא מארכיון', callback_data: `grpunarch_${waId}` }],
+            [{ text: '✉️ סמן כלא נקרא', callback_data: `grpmarkunread_${waId}` }],
+            [{ text: '🗑️ נקה הודעות', callback_data: `grpclear_${waId}` }],
+            [{ text: '❌ מחק צ׳אט', callback_data: `grpdelete_${waId}` }],
+            [{ text: '📄 פרטי קבוצה', callback_data: `grpinfo_${waId}` }],
             [{ text: '📥 הורד זיכרונות', callback_data: `grpgetmem_${waId}` }],
             [{ text: '👥 רשימת משתתפים', callback_data: `grplist_${waId}` }],
             [{ text: '⬅️ חזרה', callback_data: `chat_${waId}` }]
@@ -1067,6 +1088,42 @@ async function sendGroupControlMenu(tgChatId, waId) {
     } catch (err) {
         console.error('[sendGroupControlMenu] failed:', err);
         await tgBot.sendMessage(tgChatId, 'שגיאה בפתיחת תפריט ניהול הקבוצה.');
+    }
+}
+
+async function sendParticipantList(tgChatId, waId, action, page = 0, messageId = null) {
+    const chat = await client.getChatById(waId);
+    const participants = chat.participants || [];
+    const PAGE_SIZE = 10;
+    const total = Math.max(1, Math.ceil(participants.length / PAGE_SIZE));
+    if (page < 0) page = 0;
+    if (page >= total) page = total - 1;
+    const start = page * PAGE_SIZE;
+    const items = participants.slice(start, start + PAGE_SIZE);
+    const rows = [];
+    for (const p of items) {
+        const contact = await getCachedContact(p.id._serialized);
+        const name = contact?.pushname || contact?.name || phone(p.id._serialized);
+        rows.push([{ text: name, callback_data: `${action}sel_${waId}_${p.id._serialized}` }]);
+    }
+    const nav = [];
+    if (page > 0) nav.push({ text: '⬅️', callback_data: `${action}page_${waId}_${page-1}` });
+    if (page < total - 1) nav.push({ text: '➡️', callback_data: `${action}page_${waId}_${page+1}` });
+    if (nav.length) rows.push(nav);
+    rows.push([{ text: '❌ ביטול', callback_data: `grpctl_${waId}` }]);
+
+    const titles = {
+        prom: 'בחר משתמש לקידום:',
+        dem: 'בחר משתמש להורדה:',
+        rem: 'בחר משתמש להסרה:'
+    };
+    const title = titles[action] || 'בחר משתמש:';
+
+    const opts = { reply_markup: { inline_keyboard: rows } };
+    if (messageId) {
+        await tgBot.editMessageText(title, { chat_id: tgChatId, message_id: messageId, reply_markup: opts.reply_markup });
+    } else {
+        await tgBot.sendMessage(tgChatId, title, opts);
     }
 }
 
@@ -1568,22 +1625,19 @@ tgBot.on('callback_query', async (query) => {
 
     if (data.startsWith('grprem_')) {
         const waId = data.slice(7);
-        tgStates.set(chatId, { waId, action: 'remove_participant' });
-        tgBot.sendMessage(chatId, 'כתוב מספרי טלפון להסרה (מופרדים ברווחים):');
+        await sendParticipantList(chatId, waId, 'rem');
         return tgBot.answerCallbackQuery(query.id);
     }
 
     if (data.startsWith('grpprom_')) {
         const waId = data.slice(8);
-        tgStates.set(chatId, { waId, action: 'promote_admin' });
-        tgBot.sendMessage(chatId, 'כתוב מספרי טלפון לקידום לאדמין:');
+        await sendParticipantList(chatId, waId, 'prom');
         return tgBot.answerCallbackQuery(query.id);
     }
 
     if (data.startsWith('grpdem_')) {
         const waId = data.slice(7);
-        tgStates.set(chatId, { waId, action: 'demote_admin' });
-        tgBot.sendMessage(chatId, 'כתוב מספרי טלפון להורדת אדמין:');
+        await sendParticipantList(chatId, waId, 'dem');
         return tgBot.answerCallbackQuery(query.id);
     }
 
@@ -1594,6 +1648,8 @@ tgBot.on('callback_query', async (query) => {
         const paths = getChatPaths(waId, safeName);
         if (fs.existsSync(paths.memoryFile)) {
             await tgBot.sendDocument(chatId, paths.memoryFile);
+        } else if (fs.existsSync(path.join(__dirname, 'memories.json'))) {
+            await tgBot.sendDocument(chatId, path.join(__dirname, 'memories.json'));
         } else {
             tgBot.sendMessage(chatId, 'לא קיים קובץ זיכרונות.');
         }
@@ -1605,6 +1661,134 @@ tgBot.on('callback_query', async (query) => {
         const chat = await client.getChatById(waId);
         const names = chat.participants.map(p => p.id.user).join(', ');
         tgBot.sendMessage(chatId, `משתתפים: ${names}`);
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    const selMatch = data.match(/^(prom|dem|rem)sel_(.+?)_(.+)$/);
+    if (selMatch) {
+        const [, act, waId, pid] = selMatch;
+        const chat = await client.getChatById(waId);
+        try {
+            if (act === 'prom') await chat.promoteParticipants([pid]);
+            else if (act === 'dem') await chat.demoteParticipants([pid]);
+            else if (act === 'rem') await chat.removeParticipants([pid]);
+            tgBot.sendMessage(chatId, 'בוצע בהצלחה.');
+        } catch (e) {
+            tgBot.sendMessage(chatId, 'פעולה נכשלה.');
+        }
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    const pageMatch = data.match(/^(prom|dem|rem)page_(.+?)_(\d+)$/);
+    if (pageMatch) {
+        const [, act, waId, pg] = pageMatch;
+        await sendParticipantList(chatId, waId, act, parseInt(pg, 10), query.message.message_id);
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    if (data.startsWith('grpinfoadm_')) {
+        const waId = data.slice(10);
+        const chat = await client.getChatById(waId);
+        const newVal = !chat.groupMetadata?.restrict;
+        await chat.setInfoAdminsOnly(newVal).catch(() => {});
+        tgBot.sendMessage(chatId, newVal ? 'רק אדמינים יכולים לערוך פרטי קבוצה.' : 'כל המשתתפים יכולים לערוך פרטים.');
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    if (data.startsWith('grpsendadm_')) {
+        const waId = data.slice(11);
+        const chat = await client.getChatById(waId);
+        const newVal = !chat.groupMetadata?.announce;
+        await chat.setMessagesAdminsOnly(newVal).catch(() => {});
+        tgBot.sendMessage(chatId, newVal ? 'רק אדמינים יכולים לשלוח הודעות.' : 'כל המשתתפים יכולים לשלוח הודעות.');
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    if (data.startsWith('grpinvite_')) {
+        const waId = data.slice(9);
+        const chat = await client.getChatById(waId);
+        try {
+            const code = await chat.getInviteCode();
+            tgBot.sendMessage(chatId, `https://chat.whatsapp.com/${code}`);
+        } catch {
+            tgBot.sendMessage(chatId, 'שגיאה בקבלת קוד הזמנה.');
+        }
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    if (data.startsWith('grprevinvite_')) {
+        const waId = data.slice(12);
+        const chat = await client.getChatById(waId);
+        try {
+            const code = await chat.revokeInvite();
+            tgBot.sendMessage(chatId, `קוד חדש: https://chat.whatsapp.com/${code}`);
+        } catch {
+            tgBot.sendMessage(chatId, 'שגיאה בביטול הקוד.');
+        }
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    if (data.startsWith('grpmute_')) {
+        const waId = data.slice(8);
+        const chat = await client.getChatById(waId);
+        await chat.mute();
+        tgBot.sendMessage(chatId, 'הקבוצה הושתקה.');
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    if (data.startsWith('grpunmute_')) {
+        const waId = data.slice(10);
+        const chat = await client.getChatById(waId);
+        await chat.unmute();
+        tgBot.sendMessage(chatId, 'השתקה בוטלה.');
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    if (data.startsWith('grparch_')) {
+        const waId = data.slice(8);
+        const chat = await client.getChatById(waId);
+        await chat.archive();
+        tgBot.sendMessage(chatId, 'הצ׳אט הועבר לארכיון.');
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    if (data.startsWith('grpunarch_')) {
+        const waId = data.slice(10);
+        const chat = await client.getChatById(waId);
+        await chat.unarchive();
+        tgBot.sendMessage(chatId, 'הצ׳אט הוחזר מהארכיון.');
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    if (data.startsWith('grpmarkunread_')) {
+        const waId = data.slice(13);
+        const chat = await client.getChatById(waId);
+        await chat.markUnread();
+        tgBot.sendMessage(chatId, 'סומן כלא נקרא.');
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    if (data.startsWith('grpclear_')) {
+        const waId = data.slice(9);
+        const chat = await client.getChatById(waId);
+        await chat.clearMessages();
+        tgBot.sendMessage(chatId, 'ההודעות נמחקו.');
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    if (data.startsWith('grpdelete_')) {
+        const waId = data.slice(10);
+        const chat = await client.getChatById(waId);
+        await chat.delete();
+        tgBot.sendMessage(chatId, 'הצ׳אט נמחק.');
+        return tgBot.answerCallbackQuery(query.id);
+    }
+
+    if (data.startsWith('grpinfo_')) {
+        const waId = data.slice(8);
+        const chat = await client.getChatById(waId);
+        const info = `שם: ${chat.name}\nתיאור: ${chat.description || ''}\nמשתתפים: ${chat.participants.length}`;
+        tgBot.sendMessage(chatId, info);
         return tgBot.answerCallbackQuery(query.id);
     }
 
@@ -1862,8 +2046,7 @@ tgBot.on('message', async (msg) => {
         }
         tgStates.delete(msg.chat.id);
     } else if (action === 'add_participant') {
-        const numbers = (msg.text || '').split(/\s+/).filter(Boolean);
-        const ids = numbers.map(n => `${n.replace(/\D/g,'')}@c.us`);
+        const ids = parsePhoneNumbers(msg.text);
         const chat = await client.getChatById(waId);
         try {
             await chat.addParticipants(ids, { autoSendInviteV4: true });
@@ -1873,8 +2056,7 @@ tgBot.on('message', async (msg) => {
         }
         tgStates.delete(msg.chat.id);
     } else if (action === 'remove_participant') {
-        const numbers = (msg.text || '').split(/\s+/).filter(Boolean);
-        const ids = numbers.map(n => `${n.replace(/\D/g,'')}@c.us`);
+        const ids = parsePhoneNumbers(msg.text);
         const chat = await client.getChatById(waId);
         try {
             await chat.removeParticipants(ids);
@@ -1884,8 +2066,7 @@ tgBot.on('message', async (msg) => {
         }
         tgStates.delete(msg.chat.id);
     } else if (action === 'promote_admin') {
-        const numbers = (msg.text || '').split(/\s+/).filter(Boolean);
-        const ids = numbers.map(n => `${n.replace(/\D/g,'')}@c.us`);
+        const ids = parsePhoneNumbers(msg.text);
         const chat = await client.getChatById(waId);
         try {
             await chat.promoteParticipants(ids);
@@ -1895,8 +2076,7 @@ tgBot.on('message', async (msg) => {
         }
         tgStates.delete(msg.chat.id);
     } else if (action === 'demote_admin') {
-        const numbers = (msg.text || '').split(/\s+/).filter(Boolean);
-        const ids = numbers.map(n => `${n.replace(/\D/g,'')}@c.us`);
+        const ids = parsePhoneNumbers(msg.text);
         const chat = await client.getChatById(waId);
         try {
             await chat.demoteParticipants(ids);
